@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS answer_revisions (
   FOREIGN KEY(profile_id,question_id) REFERENCES user_answers(profile_id,question_id)
 );
 INSERT INTO schema_version VALUES (1) ON CONFLICT DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS question_revisions (
+  question_id text NOT NULL REFERENCES questions(id), revision integer NOT NULL,
+  before_data jsonb NOT NULL, after_data jsonb NOT NULL,
+  reviewer text NOT NULL DEFAULT 'local', saved_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(question_id,revision)
+);
+INSERT INTO schema_version VALUES (2) ON CONFLICT DO NOTHING;

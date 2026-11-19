@@ -1,3 +1,4 @@
+import { setupQuestionReview } from "./review.js";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import mermaid from "mermaid";
@@ -366,7 +367,14 @@ async function selectQuestion(qid) {
   updateURL();
 }
 function displayQuestion() {
-  for (const id of ["answer", "completed", "history", "original", "reference"])
+  for (const id of [
+    "answer",
+    "completed",
+    "history",
+    "original",
+    "reference",
+    "edit-question",
+  ])
     $(id).disabled = !current;
   $("save-error").hidden = true;
   if (!current) {
@@ -391,9 +399,11 @@ function displayQuestion() {
   text("question-text", current.text);
   text(
     "verification",
-    current.data.verification_status === "verified"
-      ? "사용자가 원문과 대조한 문항입니다."
-      : "가져온 기출 자료입니다. 원문 대조 상태는 미확인입니다.",
+    {
+      verified: "사용자가 원문과 대조한 문항입니다.",
+      needs_review: "재검토가 필요한 문항입니다.",
+      unverified: "원문 대조 상태는 미확인입니다.",
+    }[current.data.verification_status] || "원문 대조 상태는 미확인입니다.",
   );
   $("answer").value = current.answer.body;
   $("completed").checked = current.answer.status === "completed";
@@ -794,3 +804,20 @@ async function start() {
   renderQuestionList();
 }
 start().catch(report);
+
+setupQuestionReview({
+  api,
+  beforeOpen: async () => ((await save()) ? current?.id : null),
+  refreshed: async (qid) => {
+    nav = await api("/navigation");
+    populateTopics();
+    renderNavigation();
+    rows = await api(
+      "/questions?" +
+        new URLSearchParams(
+          selectedTopic ? { topic: selectedTopic } : { exam: selectedExam },
+        ),
+    );
+    await selectQuestion(qid);
+  },
+});

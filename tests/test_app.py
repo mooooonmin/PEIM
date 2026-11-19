@@ -148,5 +148,98 @@ class AppTests(unittest.TestCase):
         self.assertEqual({a["variant"] for a in reference["answers"]}, {"short", "long"})
 
 
+    def review_fixture(self, number):
+        self.assertEqual(self.upload(number).status_code, 200)
+        topic = self.client.get(f"/api/questions/{self.qid}").json()["topics"][0]["id"]
+        payload = {"attachment_id": f"exam-{number}-pdf", "session": 1, "number": 1,
+                   "text": "수정 전 문항", "topic_id": topic, "page": 1, "reviewed": True}
+        qid = self.client.post(f"/api/exams/{number}/questions", headers=HEADERS, json=payload).json()["id"]
+        review = {"revision": 0, "text": "수정한 문항", "topic_ids": [topic],
+                  "verification_status": "verified", "confirmed": True,
+                  "sources": [{"attachment_id": payload["attachment_id"], "page_start": 1, "page_end": 1}]}
+        return qid, review
+
+    def test_review_preserves_identity_answers_history_and_restart(self):
+        qid, value = self.review_fixture(150)
+        answer = self.client.put(f"/api/questions/{qid}/answer", headers=HEADERS,
+                                json={"body": "보존할 내 답안", "revision": 0, "status": "completed"}).json()
+        original = (Path(self.folder.name) / "제150회_정보관리기술사.pdf").read_bytes()
+        topic = self.client.post("/api/topics", headers=HEADERS, json={"title": "검수 연결 주제", "domain": "DB"}).json()
+        value["topic_ids"].append(topic["id"])
+        result = self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json=value)
+        self.assertEqual(result.status_code, 200, result.text)
+        initialize()
+        q = self.client.get(f"/api/questions/{qid}").json()
+        self.assertEqual((q["id"], q["round"], q["session"], q["number"]), (qid, 150, 1, 1))
+        self.assertEqual(q["answer"], answer)
+        self.assertEqual(q["text"], value["text"])
+        self.assertEqual({t["id"] for t in q["topics"]}, set(value["topic_ids"]))
+        history = self.client.get(f"/api/questions/{qid}/reviews").json()
+        self.assertEqual(len(history), 1)
+        self.assertEqual(history[0]["before_data"]["text"], "수정 전 문항")
+        self.assertEqual(history[0]["after_data"]["text"], value["text"])
+        self.assertEqual(len(self.client.get(f"/api/questions/{qid}/history").json()), 1)
+        self.assertEqual((Path(self.folder.name) / "제150회_정보관리기술사.pdf").read_bytes(), original)
+        value.update(revision=1, verification_status="needs_review", confirmed=False)
+        self.assertEqual(self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json=value).status_code, 200)
+        value.update(revision=2, verification_status="unverified")
+        self.assertEqual(self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json=value).status_code, 200)
+        self.assertEqual(self.client.get(f"/api/questions/{qid}").json()["answer"], answer)
+
+    def test_review_rejects_invalid_input_atomically(self):
+        qid, value = self.review_fixture(151)
+        route = f"/api/questions/{qid}/review"
+        before = self.client.get(f"/api/questions/{qid}").json()
+        bad_values = [{"text": "   "}, {"topic_ids": []}, {"topic_ids": ["missing"]},
+                      {"topic_ids": value["topic_ids"] * 2}, {"confirmed": False},
+                      {"verification_status": "wrong"}, {"session": 2}, {"sources": []}]
+        for pages in [(2,2), (1,None), (None,1), (2,1), (0,1)]:
+            bad_values.append({"sources": [{"attachment_id": "exam-151-pdf", "page_start": pages[0], "page_end": pages[1]}]})
+        for change in bad_values:
+            with self.subTest(change=change):
+                self.assertEqual(self.client.put(route, headers=HEADERS, json={**value, **change}).status_code, 422)
+        self.assertEqual(self.client.get(f"/api/questions/{qid}").json(), before)
+        self.assertEqual(self.client.get(f"/api/questions/{qid}/reviews").json(), [])
+
+    def test_review_concurrent_edits_conflict(self):
+        qid, value = self.review_fixture(152)
+        def write(text):
+            return self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json={**value, "text": text}).status_code
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            self.assertEqual(sorted(pool.map(write, ["수정 A", "수정 B"])), [200,409])
+        self.assertEqual(len(self.client.get(f"/api/questions/{qid}/reviews").json()), 1)
+
+    def test_review_unknown_pdf_page_count_and_source_change(self):
+        qid, value = self.review_fixture(153)
+        with connect() as db:
+            db.execute("UPDATE attachments SET data=data - 'page_count' WHERE id='exam-153-pdf'")
+        route = f"/api/questions/{qid}/review"
+        self.assertEqual(self.client.put(route, headers=HEADERS, json=value).status_code, 200)
+        (Path(self.folder.name) / "제153회_정보관리기술사.pdf").write_bytes(pdf(300))
+        self.assertEqual(self.client.put(route, headers=HEADERS, json={**value, "revision": 1}).status_code, 409)
+
+    def test_review_existing_import_without_page_preserves_source_links(self):
+        q = self.client.get(f"/api/questions/{self.qid}").json()
+        value = {"revision": q["data"].get("review_revision", 0), "text": q["text"],
+                 "topic_ids": [t["id"] for t in q["topics"]], "verification_status": "needs_review",
+                 "sources": [{"attachment_id": a["id"], "page_start": None, "page_end": None} for a in q["sources"]]}
+        result = self.client.put(f"/api/questions/{self.qid}/review", headers=HEADERS, json=value)
+        self.assertEqual(result.status_code, 200, result.text)
+        updated = self.client.get(f"/api/questions/{self.qid}").json()
+        self.assertEqual({s["id"] for s in updated["sources"]}, {s["id"] for s in q["sources"]})
+        self.assertTrue(all(s["data"]["verification_status"] == "unverified" for s in updated["sources"]))
+
+    def test_review_schema_upgrade_preserves_existing_data(self):
+        qid, value = self.review_fixture(154)
+        self.client.put(f"/api/questions/{qid}/answer", headers=HEADERS, json={"body": "이행 보존", "revision": 0, "status": "draft"})
+        with connect() as db:
+            # Recreate the additive migration on this disposable database only.
+            db.execute("DROP TABLE question_revisions")
+            db.execute("DELETE FROM schema_version WHERE version=2")
+        initialize()
+        self.assertEqual(self.client.get(f"/api/questions/{qid}").json()["answer"]["body"], "이행 보존")
+        self.assertEqual(self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json=value).status_code, 200)
+
+
 if __name__ == "__main__":
     unittest.main()

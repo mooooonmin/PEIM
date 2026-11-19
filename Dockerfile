@@ -3,6 +3,7 @@ WORKDIR /frontend
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY app/frontend ./app/frontend
+COPY scripts/build_frontend.mjs ./scripts/build_frontend.mjs
 RUN npm run build
 
 FROM python:3.12-slim AS seed
