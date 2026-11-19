@@ -43,6 +43,7 @@ class AppTests(unittest.TestCase):
 
     def setUp(self):
         with connect() as db:
+            db.execute("DELETE FROM learning_notes")
             db.execute("DELETE FROM answer_revisions")
             db.execute("DELETE FROM user_answers")
 
@@ -80,6 +81,51 @@ class AppTests(unittest.TestCase):
         with ThreadPoolExecutor(max_workers=2) as pool:
             statuses = sorted(pool.map(write, ["첫 창", "다른 창"]))
         self.assertEqual(statuses, [200, 409])
+
+    def test_learning_preserves_answers_history_and_survives_upgrade(self):
+        answer_route = f"/api/questions/{self.qid}/answer"
+        self.client.put(answer_route, headers=HEADERS, json={"body": "기존 답안", "status": "completed", "revision": 0})
+        before = self.client.get(f"/api/questions/{self.qid}").json()["answer"]
+        history = self.client.get(f"/api/questions/{self.qid}/history").json()
+        with connect() as db:
+            db.execute("DROP TABLE learning_notes")
+            db.execute("DELETE FROM schema_version WHERE version=3")
+        initialize()
+        route = f"/api/questions/{self.qid}/learning"
+        self.assertEqual(self.client.get(route).json()["revision"], 0)
+        first = self.client.put(route, headers=HEADERS, json={"note": "정의와 도식 보완", "retry_requested": True, "revision": 0})
+        self.assertEqual(first.status_code, 200, first.text)
+        initialize()
+        self.assertEqual(self.client.get(route).json(), first.json())
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}").json()["answer"], before)
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), history)
+        marked = next(q for q in self.client.get("/api/questions").json() if q["id"] == self.qid)
+        self.assertTrue(marked["retry_requested"])
+        second = self.client.put(route, headers=HEADERS, json={"note": "복습 완료", "retry_requested": False, "revision": 1})
+        self.assertEqual(second.json()["revision"], 2)
+        self.assertFalse(next(q for q in self.client.get("/api/questions").json() if q["id"] == self.qid)["retry_requested"])
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), history)
+
+    def test_learning_conflicts_validation_and_local_guard(self):
+        route = f"/api/questions/{self.qid}/learning"
+        payload = {"note": "메모", "retry_requested": True, "revision": 0}
+        self.assertEqual(self.client.put(route, json=payload).status_code, 403)
+        self.assertEqual(self.client.put(route, headers={**HEADERS, "Origin": "https://outside.example"}, json=payload).status_code, 403)
+        self.assertEqual(self.client.get("/api/questions/missing/learning").status_code, 404)
+        self.assertEqual(self.client.put("/api/questions/missing/learning", headers=HEADERS, json=payload).status_code, 404)
+        for invalid in [{**payload, "note": "x" * 30001}, {**payload, "retry_requested": "true"}, {**payload, "revision": -1}]:
+            self.assertEqual(self.client.put(route, headers=HEADERS, json=invalid).status_code, 422)
+        def write(note):
+            return self.client.put(route, headers=HEADERS, json={**payload, "note": note}).status_code
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            self.assertEqual(sorted(pool.map(write, ["첫 창", "다른 창"])), [200, 409])
+        before = self.client.get(route).json()
+        self.assertEqual(self.client.put(route, headers=HEADERS, json=payload).status_code, 409)
+        self.assertEqual(self.client.get(route).json(), before)
+        other = self.client.get("/api/questions/r63-s1-q02/learning").json()
+        self.assertEqual(other["note"], "")
+        self.assertFalse(other["retry_requested"])
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), [])
 
     def test_local_write_guard(self):
         route = f"/api/questions/{self.qid}/answer"

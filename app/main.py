@@ -125,9 +125,11 @@ def questions(topic: str | None = None, exam: str | None = None, search: str = "
     with connect() as db:
         return db.execute("""SELECT q.id,q.session,q.number,q.text,e.round,
             coalesce(a.status,'empty') AS answer_status,
+            coalesce(n.retry_requested,false) AS retry_requested,
             coalesce(q.data->>'verification_status','unverified') AS verification_status
             FROM questions q JOIN exams e ON e.id=q.exam_id
             LEFT JOIN user_answers a ON a.question_id=q.id AND a.profile_id='local'
+            LEFT JOIN learning_notes n ON n.question_id=q.id AND n.profile_id='local'
             WHERE (%s::text IS NULL OR EXISTS(SELECT 1 FROM question_topics t WHERE t.question_id=q.id AND t.topic_id=%s))
             AND (%s::text IS NULL OR q.exam_id=%s) AND (%s='' OR q.text ILIKE %s)
             ORDER BY e.round DESC,q.session,q.number""",
@@ -148,6 +150,33 @@ class Answer(BaseModel):
     body: str = Field(max_length=200000)
     revision: int = Field(ge=0)
     status: str = Field(pattern="^(draft|completed)$")
+
+
+class LearningNote(BaseModel):
+    note: str = Field(max_length=30000)
+    retry_requested: bool = Field(strict=True)
+    revision: int = Field(ge=0, strict=True)
+
+
+@app.get("/api/questions/{qid}/learning")
+def learning_note(qid: str):
+    with connect() as db:
+        require_row(db.execute("SELECT id FROM questions WHERE id=%s", (qid,)).fetchone())
+        return db.execute("SELECT note,retry_requested,revision,updated_at FROM learning_notes WHERE question_id=%s AND profile_id='local'", (qid,)).fetchone() or {
+            "note": "", "retry_requested": False, "revision": 0, "updated_at": None}
+
+
+@app.put("/api/questions/{qid}/learning")
+def save_learning_note(qid: str, value: LearningNote):
+    with connect() as db:
+        require_row(db.execute("SELECT id FROM questions WHERE id=%s FOR UPDATE", (qid,)).fetchone())
+        current = db.execute("SELECT revision FROM learning_notes WHERE question_id=%s AND profile_id='local'", (qid,)).fetchone()
+        if (current["revision"] if current else 0) != value.revision:
+            raise HTTPException(409, "다른 창에서 복습 정보가 변경되었습니다. 메모를 보관한 뒤 최신 내용을 불러와 비교해 주세요.")
+        return db.execute("""INSERT INTO learning_notes(question_id,note,retry_requested,revision) VALUES (%s,%s,%s,1)
+            ON CONFLICT(profile_id,question_id) DO UPDATE SET note=excluded.note,retry_requested=excluded.retry_requested,
+            revision=learning_notes.revision+1,updated_at=now()
+            RETURNING note,retry_requested,revision,updated_at""", (qid, value.note, value.retry_requested)).fetchone()
 
 
 @app.put("/api/questions/{qid}/answer")

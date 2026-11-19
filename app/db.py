@@ -15,6 +15,8 @@ def initialize():
     with connect() as db:
         db.execute("SELECT pg_advisory_xact_lock(70319001)")
         db.execute(Path(__file__).with_name("schema.sql").read_text(encoding="utf-8"))
+        for migration in sorted(Path(__file__).with_name("migrations").glob("*.sql")):
+            db.execute(migration.read_text(encoding="utf-8"))
         if db.execute("SELECT 1 FROM imports WHERE version=1").fetchone():
             return
         seed = json.loads(Path(os.environ.get("SEED_PATH", "scripts/out/dataset-v1.json")).read_text(encoding="utf-8"))
