@@ -35,6 +35,7 @@ docker compose --profile test run --build --rm test
 
 별도 `peim_test` PostgreSQL과 임시 시험지 폴더를 사용합니다. 실제 답안 DB와 원본 폴더를
 사용하지 않습니다. API 저장·충돌·이력, PDF 등록·추출·문항 등록을 검사합니다.
+문항 검수의 ID·답안·이력 보존, 동시 수정 충돌, 페이지 검증과 DB 추가형 이행도 검사합니다.
 웹 실행 방법과 데이터 보존은 [운영 안내](local-storage.md)에서 확인합니다.
 
 ## 프런트엔드 빌드

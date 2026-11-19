@@ -77,7 +77,7 @@ async def response_headers(request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; frame-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' blob:; worker-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'"
     if request.url.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"
     return response
@@ -343,6 +343,92 @@ def register_question(round_number: int, value: NewQuestion):
                                                    "verification_status": "verified" if value.page else "unverified"})))
         db.execute("UPDATE exams SET status='published' WHERE id=%s AND status='draft'", (eid,))
     return {"id": qid}
+
+
+class SourceReview(BaseModel):
+    attachment_id: str
+    page_start: int | None = Field(default=None, ge=1)
+    page_end: int | None = Field(default=None, ge=1)
+
+
+class QuestionReview(BaseModel):
+    model_config = {"extra": "forbid"}
+    revision: int = Field(ge=0)
+    text: str = Field(min_length=1, max_length=30000)
+    topic_ids: list[str] = Field(min_length=1, max_length=100)
+    sources: list[SourceReview] = Field(max_length=100)
+    verification_status: str = Field(pattern="^(unverified|verified|needs_review)$")
+    confirmed: bool = False
+
+
+def review_snapshot(db, q):
+    return {"text": q["text"], "data": q["data"],
+            "topics": db.execute("SELECT t.id,t.title FROM topics t JOIN question_topics x ON x.topic_id=t.id WHERE x.question_id=%s ORDER BY t.id", (q["id"],)).fetchall(),
+            "sources": db.execute("SELECT attachment_id,data FROM question_sources WHERE question_id=%s ORDER BY attachment_id", (q["id"],)).fetchall()}
+
+
+@app.put("/api/questions/{qid}/review")
+def review_question(qid: str, value: QuestionReview):
+    if not value.text.strip() or len(set(value.topic_ids)) != len(value.topic_ids):
+        raise HTTPException(422, "문제 내용과 중복 없는 연결 주제를 입력해 주세요.")
+    if value.verification_status == "verified" and not value.confirmed:
+        raise HTTPException(422, "확인 완료로 저장하려면 원문 대조 확인을 선택해 주세요.")
+    with connect() as db:
+        q = require_row(db.execute("SELECT * FROM questions WHERE id=%s FOR UPDATE", (qid,)).fetchone())
+        revision = q["data"].get("review_revision", 0)
+        if value.revision != revision:
+            raise HTTPException(409, "다른 창에서 문항을 수정했습니다. 입력 내용을 복사한 뒤 닫고 다시 열어 비교해 주세요.")
+        before = review_snapshot(db, q)
+        topics = db.execute("SELECT id FROM topics WHERE id=ANY(%s)", (value.topic_ids,)).fetchall()
+        if len(topics) != len(value.topic_ids):
+            raise HTTPException(422, "존재하는 주제를 선택해 주세요.")
+        source_ids = [x.attachment_id for x in value.sources]
+        if len(set(source_ids)) != len(source_ids) or set(source_ids) != {x["attachment_id"] for x in before["sources"]}:
+            raise HTTPException(422, "기존 원본 연결을 모두 유지해야 합니다.")
+        if value.verification_status == "verified" and not source_ids:
+            raise HTTPException(422, "대조할 원본 연결이 없습니다.")
+        checked = []
+        for source in value.sources:
+            if (source.page_start is None) != (source.page_end is None) or (source.page_start and source.page_start > source.page_end):
+                raise HTTPException(422, "시작·끝 페이지를 함께 입력하고 순서를 확인해 주세요.")
+            attachment = require_row(db.execute("SELECT * FROM attachments WHERE id=%s", (source.attachment_id,)).fetchone())
+            if source.page_start is not None:
+                if attachment["format"] != "pdf":
+                    raise HTTPException(422, "페이지 연결은 PDF에서만 지원합니다.")
+                path = attachment_path(attachment)
+                if hashlib.sha256(path.read_bytes()).hexdigest() != attachment["sha256"]:
+                    raise HTTPException(409, "원본 파일이 등록 당시와 다릅니다. 원본을 확인해 주세요.")
+                try:
+                    count = len(PdfReader(path).pages)
+                except Exception as exc:
+                    raise HTTPException(422, "PDF 페이지를 읽을 수 없습니다.") from exc
+                if source.page_end > count:
+                    raise HTTPException(422, f"PDF는 {count}페이지입니다. 페이지 범위를 확인해 주세요.")
+            checked.append(source)
+        metadata = {"verification_status": value.verification_status, "reviewer": "local",
+                    "reviewed_at": datetime.now(timezone.utc).isoformat(), "review_revision": revision + 1}
+        q = db.execute("UPDATE questions SET text=%s,data=data || %s WHERE id=%s RETURNING *",
+                       (value.text.strip(), Jsonb(metadata), qid)).fetchone()
+        db.execute("DELETE FROM question_topics WHERE question_id=%s", (qid,))
+        for tid in value.topic_ids:
+            db.execute("INSERT INTO question_topics VALUES (%s,%s)", (qid, tid))
+        for source in checked:
+            state = value.verification_status if source.page_start else "unverified"
+            data = {**metadata, "verification_status": state, "page_start": source.page_start,
+                    "page_end": source.page_end, "association_basis": "manual_review"}
+            db.execute("UPDATE question_sources SET data=data || %s WHERE question_id=%s AND attachment_id=%s",
+                       (Jsonb(data), qid, source.attachment_id))
+        after = review_snapshot(db, q)
+        db.execute("INSERT INTO question_revisions(question_id,revision,before_data,after_data) VALUES (%s,%s,%s,%s)",
+                   (qid, revision + 1, Jsonb(before), Jsonb(after)))
+    return {"id": qid, "revision": revision + 1}
+
+
+@app.get("/api/questions/{qid}/reviews")
+def question_reviews(qid: str):
+    with connect() as db:
+        require_row(db.execute("SELECT id FROM questions WHERE id=%s", (qid,)).fetchone())
+        return db.execute("SELECT revision,before_data,after_data,reviewer,saved_at FROM question_revisions WHERE question_id=%s ORDER BY revision DESC LIMIT 50", (qid,)).fetchall()
 
 
 app.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="static")

@@ -53,6 +53,7 @@
               <span id="question-meta" class="muted"></span>
             </div>
             <div class="actions">
+              <button id="edit-question" disabled>문항 검수·수정</button>
               <button id="original" disabled>원본 시험지</button
               ><button id="reference" disabled>주제 참고 답안</button>
             </div>
@@ -231,6 +232,76 @@
       </div>
       <div id="reading-controls"></div>
       <div id="reading-body" class="reading-body"></div>
+    </dialog>
+    <dialog id="question-review-dialog" aria-labelledby="question-review-title">
+      <div class="section-head">
+        <h2 id="question-review-title">문항 검수·수정</h2>
+        <button id="close-question-review">닫기</button>
+      </div>
+      <p id="review-identity" class="quiet"></p>
+      <div class="question-review-grid">
+        <section aria-label="대조할 원본">
+          <label for="review-source-select">원본 시험지</label
+          ><select id="review-source-select"></select>
+          <a id="review-source-link" target="_blank" rel="noopener"
+            >원본 별도 창으로 열기</a
+          >
+          <p id="review-preview-note" class="quiet"></p>
+          <div id="review-pdf" hidden>
+            <div class="actions">
+              <button id="pdf-previous" type="button">이전 페이지</button
+              ><span id="pdf-page-state" role="status"></span
+              ><button id="pdf-next" type="button">다음 페이지</button>
+            </div>
+            <div class="pdf-canvas-wrap">
+              <canvas
+                id="review-pdf-canvas"
+                role="img"
+                aria-label="검수할 원본 PDF 페이지"
+              ></canvas>
+            </div>
+          </div>
+        </section>
+        <form id="edit-question-form">
+          <label for="edit-question-text">문제 내용</label
+          ><textarea
+            id="edit-question-text"
+            rows="8"
+            maxlength="30000"
+            required
+          ></textarea>
+          <label for="edit-topic-filter">연결 주제 검색</label
+          ><input
+            id="edit-topic-filter"
+            type="search"
+            placeholder="주제명 검색"
+          />
+          <div id="edit-topics" role="group" aria-label="연결 주제 선택"></div>
+          <p id="edit-topic-count" class="quiet"></p>
+          <fieldset>
+            <legend>원본 페이지 (모르면 비워 두세요)</legend>
+            <div id="edit-source-pages"></div>
+          </fieldset>
+          <label for="edit-verification">문항 검증 상태</label
+          ><select id="edit-verification">
+            <option value="unverified">미확인</option>
+            <option value="verified">확인 완료</option>
+            <option value="needs_review">재검토 필요</option>
+          </select>
+          <label class="check-label"
+            ><input id="edit-confirmed" type="checkbox" /> 문제 내용·주제·입력한
+            페이지를 원본과 대조했습니다.</label
+          >
+          <button id="save-question-review" type="submit" class="primary">
+            문항 수정 저장
+          </button>
+          <p id="edit-question-result" role="status"></p>
+        </form>
+      </div>
+      <details>
+        <summary>문항 수정 이력 (최근 50개)</summary>
+        <div id="question-review-history"></div>
+      </details>
     </dialog>
     <noscript>답안 작성과 저장에는 JavaScript가 필요합니다.</noscript>
   </body>

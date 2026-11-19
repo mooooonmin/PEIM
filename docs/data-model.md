@@ -1,6 +1,6 @@
-# 데이터 모델 v1
+# 데이터 모델과 DB 이행
 
-데이터 계약과 로컬 앱의 첫 DB 스키마입니다. 실제 테이블은 `app/schema.sql`,
+초기 콘텐츠 계약은 v1이며 로컬 DB 스키마에는 v2 문항 수정 이력이 추가됩니다. 실제 테이블은 `app/schema.sql`,
 트랜잭션 초기화·가져오기는 `app/db.py`에 있습니다. 참조 키·관계는 관계형 테이블에,
 출처와 검증 부가 정보는 각 테이블의 JSONB data에 저장합니다.
 
@@ -14,7 +14,7 @@
 | topic | `id`, `title`, `title_en`, `domain`, `aliases` | 현재 주 분야 하나. ID는 표시 제목과 별개로 보존 |
 | question | `id`, `exam_id`, `round`, `session`, `number`, `text`, `verification_status` | 회차·교시·문항번호 조합 유일. 교시는 1~4 |
 | question_source | `question_id`, `attachment_id`, `page_start`, `page_end`, `association_basis`, `verification_status` | 복합키 유일. 페이지는 확인 전 null, 확인 후 1부터 시작 |
-| question_topic | `question_id`, `topic_id`, `verification_status` | 복합키 유일. 여러 주제 연결을 허용 |
+| question_topic | `question_id`, `topic_id` | 복합키 유일. 여러 주제 연결을 허용 |
 | reference_answer | `id`, `topic_id`, `variant`, `body`, `revision`, `source_path`, `source_pointer`, `citations`, `verification_status` | 주제별 참고 답안. variant는 short/long. 공식 정답이 아님 |
 | keyword | `id`, `term`, `term_en`, `definition`, `features`, `related`, `visual`, `verification_status` | 관련 키워드와 도식 참조 보존 |
 | topic_keyword | `topic_id`, `keyword_id` | 복합키 유일 |
@@ -31,7 +31,8 @@
 - 기존 문항 ID `r{회차}-s{교시}-q{두 자리 문항번호}`를 유지합니다.
 - 기존 주제 ID `t-...`를 유지합니다. `merge_topics.py`는 기존 문항 연결로 ID를 먼저 찾으므로
   제목을 변경해도 기존 주제 ID를 다시 해시하지 않습니다.
-- 신규 주제만 기존 방식의 해시를 생성하며 기존 ID와 충돌하면 중단합니다.
+- 초기 콘텐츠 생성기는 신규 주제만 해시를 생성하며 기존 ID와 충돌하면 중단합니다.
+  앱에서 추가하는 주제는 `t-` 접두사와 UUID로 ID를 생성합니다.
 - 기존 주제끼리의 병합, 하나의 기존 주제 분할, 문항번호 정정은 명시적인 이전 계획이 필요합니다.
   생성기가 임의로 ID를 교체하지 않습니다. DB 도입 후에는 참조 이전과 이력 보존을 한 트랜잭션으로 처리합니다.
 - 기존 문항이 없는 완전히 새로운 주제는 새 객체입니다. 이름이 같다는 이유만으로 기존 ID를 재사용하지 않습니다.
@@ -42,10 +43,11 @@
 
 - `data/catalog.json`의 연결은 파일명 회차를 근거로 합니다. PDF/HWP 본문을 대조한 결과가 아닙니다.
 - export의 question_sources는 `association_basis: round_filename`과 `unverified`로 내보냅니다.
-- 시험일, 페이지 수, 문항별 페이지, 실제 업로드 원래 이름은 확인되지 않아 null입니다.
+- 초기 가져오기 자료의 시험일, 페이지 수, 문항별 페이지, 원래 업로드 이름은 확인되지 않아 null입니다.
+  앱 업로드·추출·검수에서 확인한 정보는 로컬 DB에 별도로 기록합니다.
 - 참고 답안의 source_path와 source_pointer는 기존 데이터 내 위치입니다. 학술적 근거는 아닙니다.
   citations는 확인한 출처가 없어 빈 배열로 시작합니다.
-- 향후 검증 상태는 `unverified`, `verified`, `needs_review`로 관리하고,
+- 문항 검증 상태는 `unverified`, `verified`, `needs_review`로 관리하고,
   verified로 바꿀 때 검토자·검토일·근거를 함께 저장합니다.
 - 원본 수집 날짜나 실제 업로드 날짜를 임의로 생성하지 않습니다.
 
@@ -53,7 +55,7 @@
 
 신규 업로드의 회차 상태는 `draft`로 시작합니다. 추출 성공은 검증 완료를 뜻하지 않습니다.
 검토 후 `published`로 전환하고, 추출 실패는 별도 처리 상태와 오류로 기록하여 파일을 보존합니다.
-기존 회차는 `imported_unverified`로 유지합니다. 향후 앱은 기존 자료임을 표시하여 학습에 사용할 수 있지만
+기존 회차는 `imported_unverified`로 유지합니다. 앱은 기존 자료임을 표시하여 학습에 사용할 수 있지만
 검증 완료 자료로 표시하지 않습니다. 새 회차는 문항 없이도 등록할 수 있습니다.
 
 현재 public/data 검사는 기존 학습 데이터에 답안·주제 연결이 모두 있다는 기준으로 엄격하게 검사합니다.
@@ -75,3 +77,24 @@ imports의 버전으로 최초 가져오기만 수행하며, 앱 재시작으로
 저장 실패 시 편집 내용을 유지하고 재시도하며, revision을 비교해 여러 창의 덮어쓰기를 감지합니다.
 브라우저 임시 보관은 보조 수단이며 DB 저장을 대신하지 않습니다. 충돌 시 내 글 다운로드와
 서버 답안 불러오기를 제공합니다. 최근 저장 이력을 선택해 복원하면 새로운 revision으로 저장합니다.
+
+## 문항 검수 이력 (DB v2)
+
+`question_revisions`는 `(question_id, revision)`을 기본키로 사용하고,
+`before_data`, `after_data`, `reviewer`, `saved_at`을 저장합니다. 전후 스냅샷에는
+문제 내용, 검증 메타데이터, 연결 주제 ID·제목, 원본별 페이지와 상태가 포함됩니다.
+최초 수정에도 기존 내용이 before_data로 남습니다. 답안 이력과 별개이며 목록은 최근 50개를 반환합니다.
+
+문항의 JSONB data에 `review_revision`을 저장하며 없는 기존 문항은 0으로 취급합니다.
+`PUT /api/questions/{qid}/review`는 문항 행을 잠그고 전달 revision을 비교합니다.
+충돌은 409로 거절합니다. 문항·주제 연결·출처 페이지·이력 저장은 한 트랜잭션이며,
+문항 ID·회차·교시·번호·user_answers·answer_revisions는 변경하지 않습니다.
+`GET /api/questions/{qid}/reviews`는 저장된 변경 이력을 반환합니다.
+
+검증 상태는 문항 내용의 사용자 확인과 출처 페이지의 확인을 구분합니다.
+페이지가 없는 출처는 unverified이며, 입력된 페이지는 실제 PDF 범위와 해시를 검사합니다.
+출처 연결을 추가·삭제하거나 문항 번호를 정정하는 기능은 이번 수정 API에 포함하지 않습니다.
+
+앱 시작 시 기존 초기화 잠금·트랜잭션 안에서 이력 테이블을 추가하고 schema_version에 2를 기록합니다.
+기존 테이블·문항·개인 답안을 지우거나 seed를 다시 가져오지 않는 추가형 이행입니다.
+DB 업데이트 전 백업은 [운영 안내](local-storage.md#백업과-복원)를 따릅니다.
