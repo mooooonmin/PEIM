@@ -1,3 +1,4 @@
+import { setupStudyLayout } from "./study-layout.js";
 import { setupManagement } from "./manage.js";
 import { setupQuestionReview } from "./review.js";
 import { setupLearning } from "./learning.js";
@@ -56,7 +57,7 @@ async function api(path, options = {}) {
   return response.json();
 }
 function text(id, value) {
-  $(id).textContent = value;
+  $(id).textContent = id === "save-state" ? `답안: ${value}` : value;
 }
 function element(tag, value, className) {
   const e = document.createElement(tag);
@@ -417,6 +418,7 @@ async function selectQuestion(qid) {
   updateURL();
 }
 function displayQuestion() {
+  studyLayout.question(current?.id);
   void openLearning(current);
   for (const id of [
     "answer",
@@ -509,17 +511,8 @@ const openLearning = setupLearning({
     renderQuestionList();
   },
 });
-function showReferencePanel(show) {
-  $("learning-reference-pane").hidden = !show;
-  $("compare").textContent = show ? "참고 답안 접기" : "참고 답안 펼치기";
-  $("compare").setAttribute("aria-expanded", String(show));
-}
-$("compare").onclick = () =>
-  showReferencePanel($("learning-reference-pane").hidden);
-$("reference").onclick = () => {
-  showReferencePanel(true);
-  $("learning-reference-pane").scrollIntoView({ block: "nearest" });
-};
+const studyLayout = setupStudyLayout();
+$("reference").onclick = () => studyLayout.mode("compare");
 $("retry-only").onchange = renderQuestionList;
 $("original").onclick = () => {
   if (current.sources.length === 1) {

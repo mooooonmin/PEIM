@@ -46,7 +46,40 @@
           학습 자료를 불러오는 중입니다.
         </div>
       </aside>
-      <section class="writing" aria-label="문제와 내 답안">
+      <section class="writing" aria-label="문제와 내 답안" data-mode="write">
+        <div class="study-toolbar">
+          <nav aria-label="학습 단계">
+            <button
+              id="study-write"
+              data-study-mode="write"
+              aria-pressed="true"
+              disabled
+            >
+              작성
+            </button>
+            <button
+              id="compare"
+              data-study-mode="compare"
+              aria-pressed="false"
+              disabled
+            >
+              비교
+            </button>
+            <button
+              id="study-review"
+              data-study-mode="review"
+              aria-pressed="false"
+              disabled
+            >
+              복습
+            </button>
+          </nav>
+          <button id="toggle-question" aria-expanded="true">문제 접기</button>
+          <div class="study-save-status">
+            <span id="save-state" role="status">문항 선택 전</span
+            ><span id="review-state" role="status">복습: 문항 선택 전</span>
+          </div>
+        </div>
         <section class="question-pane">
           <div class="section-head">
             <div>
@@ -69,10 +102,7 @@
             <div class="section-head">
               <h2>내 답안</h2>
               <div class="actions">
-                <span id="save-state" role="status">문항 선택 전</span
-                ><button id="compare" disabled aria-expanded="true">
-                  참고 답안 접기</button
-                ><button id="history" disabled>저장 이력</button
+                <button id="history" disabled>저장 이력</button
                 ><button id="focus" aria-pressed="false">집중 모드</button>
               </div>
             </div>
@@ -118,6 +148,10 @@
               <div id="learning-reference" class="reading-body"></div>
             </section>
             <form id="learning-form">
+              <h3>복습 기록</h3>
+              <p class="quiet">
+                보완 메모와 다시 풀기는 ‘복습 저장’을 눌러야 DB에 저장됩니다.
+              </p>
               <label for="learning-note">보완 메모</label>
               <textarea
                 id="learning-note"

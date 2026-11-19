@@ -204,3 +204,17 @@ test("switching questions keeps unsaved drafts isolated from saved notes", async
   assert.equal(f.notes.get("q2").note, "둘째 문항 메모");
   assert.equal(f.notes.has("q1"), false);
 });
+
+test("essay questions prefer long references and review status survives failure until saved", async () => {
+  const f = fixture();
+  await f.open({ ...q(), session: 4 });
+  assert.equal(f.$("learning-variant").value, "long");
+  f.edit("빠뜨린 개념");
+  assert.match(f.$("review-state").textContent, /미저장/);
+  f.state.failSave = true;
+  await f.save();
+  assert.match(f.$("review-state").textContent, /미저장/);
+  f.state.failSave = false;
+  await f.save();
+  assert.match(f.$("review-state").textContent, /저장됨/);
+});

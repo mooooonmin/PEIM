@@ -24,6 +24,17 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     $("learning-retry").disabled = busy || !loaded;
     $("save-learning").disabled = busy || !loaded || !dirty;
     $("reload-learning").disabled = busy;
+    $("review-state").textContent = !question
+      ? "복습: 문항 선택 전"
+      : busy
+        ? "복습: 저장 중"
+        : dirty
+          ? "복습: 미저장"
+          : !loaded
+            ? "복습: 불러오기 확인 필요"
+            : revision
+              ? "복습: 저장됨"
+              : "복습: 기록 없음";
   }
   function stash() {
     try {
@@ -81,6 +92,9 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
         option.textContent = answer.variant === "short" ? "1교시형" : "서술형";
         $("learning-variant").append(option);
       }
+      const preferred = question.session === 1 ? "short" : "long";
+      if (answers.some((item) => item.variant === preferred))
+        $("learning-variant").value = preferred;
       $("learning-variant").disabled = !answers.length;
       await showReference();
     } catch (error) {
@@ -229,6 +243,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     if (!q) {
       question = null;
       dirty = false;
+      controls();
       return true;
     }
     question = q;
