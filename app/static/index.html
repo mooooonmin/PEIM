@@ -12,7 +12,7 @@
     <script type="module" src="/assets/main.js"></script>
   </head>
   <body>
-    <a class="skip" href="#answer">답안 작성으로 이동</a>
+    <a class="skip" href="#study">주요 콘텐츠로 이동</a>
     <header class="topbar">
       <a class="brand" href="/" aria-label="정보관리기술사 학습 홈"
         ><svg viewBox="0 0 32 36" aria-hidden="true">
@@ -28,7 +28,7 @@
       <span class="local-label">내 학습 공간</span>
     </header>
     <div id="global-error" role="alert" hidden></div>
-    <main id="study" class="workbench">
+    <main id="study" class="workbench" tabindex="-1">
       <aside id="explorer" class="explorer" aria-label="학습 탐색">
         <div class="mode-tabs">
           <button id="by-topic" aria-pressed="true">주제</button
@@ -41,6 +41,7 @@
           placeholder="정규화, 트랜잭션…"
           autocomplete="off"
         />
+        <button id="clear-search" hidden>검색 해제</button>
         <div id="navigation" class="navigation" aria-live="polite">
           학습 자료를 불러오는 중입니다.
         </div>
@@ -99,12 +100,13 @@
           <h2 id="related-title">연결 기출</h2>
           <button id="toggle-related" aria-expanded="true">접기</button>
         </div>
+        <p id="search-context" class="search-context" role="status" hidden></p>
         <div id="question-list">
           <p class="empty">주제를 선택하면 연결된 기출문항을 볼 수 있습니다.</p>
         </div>
       </aside>
     </main>
-    <main id="manage" class="manage" hidden>
+    <main id="manage" class="manage" tabindex="-1" hidden>
       <div class="page-head">
         <div>
           <h1>문제 관리</h1>
@@ -151,6 +153,11 @@
         </div>
       </section>
       <section id="managed-upload" aria-label="PDF와 새 문항 등록" hidden>
+        <ol class="upload-steps" aria-label="새 문항 등록 순서">
+          <li>PDF 등록 또는 기존 시험지 선택</li>
+          <li>문항 추출 또는 직접 입력</li>
+          <li>원본 대조 후 문항 등록</li>
+        </ol>
         <div class="manager-grid">
           <section class="management-panel">
             <h2>PDF 첨부</h2>
@@ -202,7 +209,7 @@
               <summary>추출한 원문 텍스트 확인</summary>
               <pre id="raw-text">추출 전입니다.</pre>
             </details>
-            <form id="question-form">
+            <form id="question-form" hidden>
               <fieldset id="review-fields" disabled>
                 <legend class="sr-only">문항 등록</legend>
                 <div class="field-row">
@@ -277,8 +284,19 @@
         <button id="close-question-review">닫기</button>
       </div>
       <p id="review-identity" class="quiet"></p>
+      <nav class="review-tabs" aria-label="검수 화면 전환">
+        <button type="button" data-review-tab="source" aria-pressed="false">
+          원본
+        </button>
+        <button type="button" data-review-tab="edit" aria-pressed="true">
+          편집
+        </button>
+        <button type="button" data-review-tab="history" aria-pressed="false">
+          이력
+        </button>
+      </nav>
       <div class="question-review-grid">
-        <section aria-label="대조할 원본">
+        <section id="review-source-pane" aria-label="대조할 원본">
           <label for="review-source-select">원본 시험지</label
           ><select id="review-source-select"></select>
           <a id="review-source-link" target="_blank" rel="noopener"
@@ -330,16 +348,23 @@
             ><input id="edit-confirmed" type="checkbox" /> 문제 내용·주제·입력한
             페이지를 원본과 대조했습니다.</label
           >
-          <button id="save-question-review" type="submit" class="primary">
-            문항 수정 저장
-          </button>
-          <p id="edit-question-result" role="status"></p>
         </form>
       </div>
-      <details>
+      <details id="review-history-pane">
         <summary>문항 수정 이력 (최근 50개)</summary>
         <div id="question-review-history"></div>
       </details>
+      <footer class="review-footer">
+        <p id="edit-question-result" role="status"></p>
+        <button
+          id="save-question-review"
+          type="submit"
+          form="edit-question-form"
+          class="primary"
+        >
+          문항 수정 저장
+        </button>
+      </footer>
     </dialog>
     <noscript>답안 작성과 저장에는 JavaScript가 필요합니다.</noscript>
   </body>

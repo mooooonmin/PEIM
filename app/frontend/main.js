@@ -9,6 +9,7 @@ let nav,
   mode = "topic",
   selectedTopic = "",
   selectedExam = "",
+  resultQuery = "",
   current = null,
   rows = [];
 let timer,
@@ -258,7 +259,13 @@ function renderNavigation() {
     ?.scrollIntoView({ block: "nearest" });
 }
 function updateURL() {
-  const params = new URLSearchParams();
+  const params = new URLSearchParams(location.search);
+  params.delete("view");
+  params.delete("topic");
+  params.delete("exam");
+  params.delete("q");
+  params.delete("search");
+  if (resultQuery) params.set("search", resultQuery);
   params.set("mode", mode);
   if (currentView === "manage") {
     params.set("view", "manage");
@@ -275,6 +282,7 @@ function updateURL() {
   history.replaceState(null, "", "?" + params);
 }
 async function chooseFilter(topic, exam) {
+  clearTimeout(searchTimer);
   if (!(await save())) return;
   const sequence = ++loadSequence;
   const nextRows = await api(
@@ -283,6 +291,7 @@ async function chooseFilter(topic, exam) {
   if (sequence !== loadSequence) return;
   selectedTopic = topic;
   selectedExam = exam;
+  resultQuery = "";
   $("search").value = "";
   rows = nextRows;
   renderNavigation();
@@ -296,9 +305,30 @@ async function chooseFilter(topic, exam) {
 }
 function renderQuestionList() {
   $("question-list").replaceChildren();
-  text("related-title", selectedTopic ? "연결 기출" : "기출문항");
+  text(
+    "related-title",
+    resultQuery ? "검색 결과" : selectedTopic ? "연결 기출" : "기출문항",
+  );
+  $("related").setAttribute(
+    "aria-label",
+    resultQuery ? "검색 결과" : "기출문항",
+  );
+  text(
+    "search-context",
+    resultQuery ? `“${resultQuery}” 전체 문항 검색 / ${rows.length}개` : "",
+  );
+  $("search-context").hidden = !resultQuery;
+  $("clear-search").hidden = !$("search").value;
   if (!rows.length) {
-    $("question-list").append(element("p", "등록된 문항이 없습니다.", "empty"));
+    $("question-list").append(
+      element(
+        "p",
+        resultQuery
+          ? "검색 결과가 없습니다. 검색어를 바꾸거나 검색을 해제해 주세요."
+          : "등록된 문항이 없습니다.",
+        "empty",
+      ),
+    );
     return;
   }
   const table = element("table"),
@@ -566,20 +596,35 @@ let searchTimer;
 $("search").oninput = () => {
   renderNavigation();
   clearTimeout(searchTimer);
+  const sequence = ++loadSequence;
+  $("clear-search").hidden = !$("search").value;
   searchTimer = setTimeout(
     safe(async () => {
       if (!(await save())) return;
       const query = $("search").value.trim();
-      const sequence = ++loadSequence;
       const found = await api(
-        "/questions?" + new URLSearchParams({ search: query }),
+        "/questions?" +
+          new URLSearchParams(
+            query
+              ? { search: query }
+              : selectedTopic
+                ? { topic: selectedTopic }
+                : { exam: selectedExam },
+          ),
       );
       if (sequence !== loadSequence) return;
       rows = found;
+      resultQuery = query;
       renderQuestionList();
+      updateURL();
     }),
     300,
   );
+};
+$("clear-search").onclick = () => {
+  $("search").value = "";
+  $("search").oninput();
+  $("search").focus();
 };
 
 async function showView(manage) {
@@ -587,6 +632,8 @@ async function showView(manage) {
   currentView = manage ? "manage" : "study";
   $("study").hidden = manage;
   $("manage").hidden = !manage;
+  const skip = document.querySelector(".skip");
+  skip.href = manage ? "#manage" : "#study";
   $("study-tab").setAttribute("aria-current", manage ? "false" : "page");
   $("manage-tab").setAttribute("aria-current", manage ? "page" : "false");
   updateURL();
@@ -638,6 +685,7 @@ async function chooseExam(e) {
   $("review-original").disabled = false;
   $("extract").disabled = e.format !== "pdf";
   $("review-fields").disabled = e.format !== "pdf";
+  $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
   const result = await api(
@@ -794,6 +842,8 @@ async function start() {
   mode = params.get("mode") === "exam" ? "exam" : "topic";
   selectedTopic = params.get("topic") || "";
   selectedExam = params.get("exam") || "";
+  resultQuery = params.get("search") || "";
+  $("search").value = resultQuery;
   $("by-topic").setAttribute("aria-pressed", String(mode === "topic"));
   $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
   if (!selectedTopic && !selectedExam)
@@ -805,7 +855,11 @@ async function start() {
   rows = await api(
     "/questions?" +
       new URLSearchParams(
-        selectedTopic ? { topic: selectedTopic } : { exam: selectedExam },
+        resultQuery
+          ? { search: resultQuery }
+          : selectedTopic
+            ? { topic: selectedTopic }
+            : { exam: selectedExam },
       ),
   );
   const qid = params.get("q") || rows[0]?.id;
@@ -824,7 +878,11 @@ const openQuestionReview = setupQuestionReview({
     rows = await api(
       "/questions?" +
         new URLSearchParams(
-          selectedTopic ? { topic: selectedTopic } : { exam: selectedExam },
+          resultQuery
+            ? { search: resultQuery }
+            : selectedTopic
+              ? { topic: selectedTopic }
+              : { exam: selectedExam },
         ),
     );
     if (current?.id === qid) await selectQuestion(qid);
