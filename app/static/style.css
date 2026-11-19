@@ -1287,4 +1287,120 @@ body.focus-mode .workbench {
   }
 }
 
-.question-collapsed .question-pane .actions { display: none; }
+.question-collapsed .question-pane .actions {
+  display: none;
+}
+
+/* Study controls: grouped modes, one primary save, lightweight utilities. */
+.study-toolbar nav.study-segments {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.study-segments button {
+  min-width: 80px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+}
+.study-segments button:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--paper);
+}
+.study-segments button[aria-pressed="true"]:not(:disabled) {
+  background: var(--paper);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+.study-segments button:disabled {
+  background: transparent;
+  color: var(--muted);
+}
+#study .quiet-button {
+  background: transparent;
+  border-color: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 8px;
+}
+#study .quiet-button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--ink);
+}
+#study .quiet-button:active:not(:disabled) {
+  background: var(--surface-selected);
+}
+#study .quiet-button:disabled {
+  color: var(--muted);
+  background: var(--disabled-bg);
+}
+#study #focus[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--surface-selected);
+  border-color: var(--accent);
+}
+#study .disclosure-button {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.disclosure-button::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+.disclosure-button[aria-expanded="true"]::after {
+  transform: rotate(225deg);
+}
+#study .icon-button {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#save-learning {
+  min-width: 116px;
+  font-weight: 700;
+  padding: 10px 20px;
+}
+#save-learning:disabled {
+  font-weight: 400;
+}
+@media (max-width: 900px) {
+  .study-toolbar nav.study-segments {
+    width: 100%;
+    gap: 4px;
+  }
+  .study-segments button {
+    flex: 1;
+    min-width: 0;
+  }
+  .question-pane > .section-head {
+    gap: 4px;
+  }
+  .question-pane > .section-head > .actions {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+}
