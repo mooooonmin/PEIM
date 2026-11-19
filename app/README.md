@@ -6,7 +6,8 @@
 | --- | --- |
 | `main.py` | 문항·검수 이력·답안·시험지 API와 정적 파일 제공 |
 | `db.py`, `schema.sql` | DB 연결, 스키마와 최초 콘텐츠 가져오기 |
-| `frontend/` | 화면 동작과 참고 답안 렌더링 소스 |
+| `frontend/main.js` | 학습·답안 저장과 화면 전환 |
+| `frontend/manage.js`, `frontend/review.js` | 독립 문항 관리 목록과 원본 대조·수정 |
 | `static/` | HTML·CSS와 빌드된 assets(생성 파일) |
 
 [실행·저장 정책](../docs/local-storage.md), [데이터 모델](../docs/data-model.md)을 따릅니다.

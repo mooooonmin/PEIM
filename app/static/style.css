@@ -795,3 +795,59 @@ dialog::backdrop {
     max-height: 45vh;
   }
 }
+
+.management-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.management-tabs [aria-pressed="true"] {
+  background: var(--surface-selected);
+  color: var(--accent);
+  font-weight: 700;
+}
+.management-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+}
+.management-filters label {
+  display: grid;
+  gap: 6px;
+}
+.management-filters input {
+  min-width: 240px;
+}
+.managed-list {
+  margin: 16px 0;
+}
+.managed-question {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.managed-question > div {
+  flex: 1;
+  min-width: 0;
+}
+.managed-question p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 8px 0;
+}
+@media (max-width: 600px) {
+  .management-filters {
+    display: grid;
+  }
+  .management-filters input {
+    min-width: 0;
+    width: 100%;
+  }
+  .managed-question {
+    align-items: start;
+    gap: 8px;
+  }
+}

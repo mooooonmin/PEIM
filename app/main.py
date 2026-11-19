@@ -124,7 +124,8 @@ def navigation():
 def questions(topic: str | None = None, exam: str | None = None, search: str = ""):
     with connect() as db:
         return db.execute("""SELECT q.id,q.session,q.number,q.text,e.round,
-            coalesce(a.status,'empty') AS answer_status
+            coalesce(a.status,'empty') AS answer_status,
+            coalesce(q.data->>'verification_status','unverified') AS verification_status
             FROM questions q JOIN exams e ON e.id=q.exam_id
             LEFT JOIN user_answers a ON a.question_id=q.id AND a.profile_id='local'
             WHERE (%s::text IS NULL OR EXISTS(SELECT 1 FROM question_topics t WHERE t.question_id=q.id AND t.topic_id=%s))

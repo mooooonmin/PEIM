@@ -173,6 +173,8 @@ class AppTests(unittest.TestCase):
         self.assertEqual((q["id"], q["round"], q["session"], q["number"]), (qid, 150, 1, 1))
         self.assertEqual(q["answer"], answer)
         self.assertEqual(q["text"], value["text"])
+        listing = self.client.get("/api/questions", params={"exam": "exam-150"}).json()
+        self.assertEqual(listing[0]["verification_status"], "verified")
         self.assertEqual({t["id"] for t in q["topics"]}, set(value["topic_ids"]))
         history = self.client.get(f"/api/questions/{qid}/reviews").json()
         self.assertEqual(len(history), 1)
