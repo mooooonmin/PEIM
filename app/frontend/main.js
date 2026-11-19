@@ -1,3 +1,4 @@
+import { setupRetryList } from "./retry-list.js";
 import { setupStudyLayout } from "./study-layout.js";
 import { setupManagement } from "./manage.js";
 import { setupQuestionReview } from "./review.js";
@@ -23,7 +24,9 @@ let timer,
 let currentView =
   new URLSearchParams(location.search).get("view") === "manage"
     ? "manage"
-    : "study";
+    : new URLSearchParams(location.search).get("view") === "retry"
+      ? "retry"
+      : "study";
 let conflict = false,
   renderSequence = 0,
   reviewSequence = 0;
@@ -278,6 +281,7 @@ function updateURL() {
         : "questions",
     );
   }
+  if (currentView === "retry") params.set("view", "retry");
   if (selectedTopic) params.set("topic", selectedTopic);
   if (selectedExam) params.set("exam", selectedExam);
   if (current) params.set("q", current.id);
@@ -416,6 +420,7 @@ async function selectQuestion(qid) {
   } catch {}
   renderQuestionList();
   updateURL();
+  return true;
 }
 function displayQuestion() {
   studyLayout.question(current?.id);
@@ -623,6 +628,8 @@ $("clear-search").onclick = () => {
 async function showView(manage) {
   if (!openLearning.canLeave() || !(await save())) return;
   currentView = manage ? "manage" : "study";
+  $("retry-library").hidden = true;
+  $("retry-tab").setAttribute("aria-current", "false");
   $("study").hidden = manage;
   $("manage").hidden = !manage;
   const skip = document.querySelector(".skip");
@@ -631,7 +638,53 @@ async function showView(manage) {
   $("manage-tab").setAttribute("aria-current", manage ? "page" : "false");
   updateURL();
   if (manage) await management.load();
+  return true;
 }
+const retryLibrary = setupRetryList({
+  api,
+  openQuestion: async (qid) => {
+    if (!(await selectQuestion(qid))) return false;
+    if (currentView !== "retry") return false;
+    const topic = current.topics[0]?.id || "";
+    const exam = topic ? "" : current.exam_id;
+    const nextRows = await api(
+      "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
+    );
+    if (currentView !== "retry") return false;
+    selectedTopic = topic;
+    selectedExam = exam;
+    mode = topic ? "topic" : "exam";
+    $("by-topic").setAttribute("aria-pressed", String(mode === "topic"));
+    $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
+    resultQuery = "";
+    $("search").value = "";
+    rows = nextRows;
+    $("retry-only").checked = false;
+    renderNavigation();
+    renderQuestionList();
+    if (!(await showView(false))) return false;
+    $("back-to-retries").hidden = false;
+    $("study").focus({ preventScroll: true });
+    document.querySelector(".writing").scrollIntoView({ block: "start" });
+    return true;
+  },
+});
+async function showRetryLibrary() {
+  if (!openLearning.canLeave() || !(await save())) return;
+  currentView = "retry";
+  $("study").hidden = true;
+  $("manage").hidden = true;
+  $("retry-library").hidden = false;
+  $("study-tab").setAttribute("aria-current", "false");
+  $("manage-tab").setAttribute("aria-current", "false");
+  $("retry-tab").setAttribute("aria-current", "page");
+  document.querySelector(".skip").href = "#retry-library";
+  updateURL();
+  $("retry-library").focus({ preventScroll: true });
+  await retryLibrary.load();
+}
+$("retry-tab").onclick = safe(showRetryLibrary);
+$("back-to-retries").onclick = safe(showRetryLibrary);
 $("study-tab").onclick = safe(() => showView(false));
 $("manage-tab").onclick = safe(() => showView(true));
 function populateTopics() {
@@ -859,6 +912,7 @@ async function start() {
   if (qid) await selectQuestion(qid);
   renderQuestionList();
   if (currentView === "manage") await showView(true);
+  else if (currentView === "retry") await showRetryLibrary();
 }
 start().catch(report);
 
