@@ -1,4 +1,4 @@
-"""content/{DOMAIN}/{topic}.json + contentwork/keywords-*.json → public/data/topics.json(answers 병합), keywords.json.
+"""content/answers + content/work/keywords-*.json → public/data의 앱용 분할 데이터.
 읽는 순서: load_keywords(중복 병합) → attach_answers → backlinks → 검증 → 저장.
 """
 import json
@@ -6,6 +6,8 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+
+CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 ROOT = Path(__file__).parent
 DATA = ROOT.parent / "public" / "data"
@@ -16,7 +18,7 @@ by_id = {t["id"]: t for t in topics}
 
 # 1. 키워드 병합: 같은 id → 긴 definition 유지, features/related 합집합
 kw: dict[str, dict] = {}
-for f in sorted(list((ROOT / "contentwork").glob("keywords-*.json")) + list((ROOT / "contentwork" / "kw").glob("*.json"))):
+for f in sorted(list((CONTENT / "work").glob("keywords-*.json")) + list((CONTENT / "work" / "kw").glob("*.json"))):
     for k in json.loads(f.read_text(encoding="utf-8")):
         kid = k["id"].strip().lower()
         cur = kw.get(kid)
@@ -45,7 +47,7 @@ for k in kw.values():
     for key in (("en:" + norm(k["term_en"])) if norm(k["term_en"]) else None, "ko:" + norm(k["term"])):
         if key and len(key) > 4:
             groups[key].append(k["id"])
-rules = json.loads((ROOT / "keyword_rules.json").read_text(encoding="utf-8"))
+rules = json.loads((CONTENT / "rules" / "keyword_rules.json").read_text(encoding="utf-8"))
 NO_MERGE = {frozenset(p) for p in rules["no_merge"]}
 parent = {k: k for k in kw}
 def find(x):
@@ -93,7 +95,6 @@ for kid, term in rules["term_fix"].items():
     if kid in kw:
         kw[kid]["term"] = term
 print(f"keyword aliases merged: {len(alias)}")
-(ROOT / "contentwork" / "keyword_aliases.json").write_text(json.dumps(alias, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
 
 def rewrite_links(md: str) -> str:
     return re.sub(r"\[\[([^\]|]+)(\|[^\]]*)?\]\]",
@@ -103,15 +104,17 @@ def rewrite_links(md: str) -> str:
 missing_links = defaultdict(set)
 n_attached = 0
 contents: dict[str, dict] = {}
-for f in sorted((ROOT / "content").glob("*.json")):          # 도메인 묶음 파일
+for f in sorted((CONTENT / "answers").glob("*.json")):          # 도메인 묶음 파일
     for c in json.loads(f.read_text(encoding="utf-8")):
         contents[c["id"]] = c
-for f in sorted((ROOT / "content").glob("*/*.json")):        # 토픽별 파일이 있으면 우선
+for f in sorted((CONTENT / "answers").glob("*/*.json")):        # 토픽별 파일이 있으면 우선
     c = json.loads(f.read_text(encoding="utf-8"))
     contents[c["id"]] = c
 for c in contents.values():
     t = by_id.get(c["id"])
     if not t:
+        if "--strict" in sys.argv:
+            raise ValueError(f"unknown topic: {c['id']}")
         print("unknown topic", c["id"])
         continue
     t["answers"] = {k: rewrite_links(v) for k, v in c["answers"].items() if v}
@@ -132,10 +135,16 @@ for k in kw.values():
     k["related"] = [r for r in dict.fromkeys(k["related"]) if r in kw and r != k["id"]][:12]
     k["features"] = k["features"][:8]
 
-# 4. 저장
-(DATA / "topics.json").write_text(json.dumps(topics, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+# 4. 검증 후 저장. 배포본에만 남았던 수정을 명시적 override로 보존한다.
+override_path = CONTENT / "overrides" / "keywords.json"
+if override_path.exists():
+    for kid, fields in json.loads(override_path.read_text(encoding="utf-8")).items():
+        if kid not in kw or set(fields) - {"definition", "features", "related"}:
+            raise ValueError(f"invalid keyword override: {kid}")
+        if any(target not in kw for target in fields.get("related", [])):
+            raise ValueError(f"unknown related keyword in override: {kid}")
+        kw[kid].update(fields)
 keywords = sorted(kw.values(), key=lambda k: k["id"])
-(DATA / "keywords.json").write_text(json.dumps(keywords, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 print(f"topics with answers: {n_attached}, keywords: {len(keywords)}")
 if missing_links:
@@ -144,6 +153,12 @@ if missing_links:
         print("  ", kid, "<-", ", ".join(sorted(ts))[:80])
     if "--strict" in sys.argv:
         sys.exit(1)
+
+if "--strict" in sys.argv and set(by_id) - set(contents):
+    raise ValueError("topics without source answers")
+(CONTENT / "work" / "keyword_aliases.json").write_text(json.dumps(alias, ensure_ascii=False, indent=1, sort_keys=True), encoding="utf-8")
+(DATA / "topics.json").write_text(json.dumps(topics, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+(DATA / "keywords.json").write_text(json.dumps(keywords, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
 
 # 5. 지연 로딩용 분할: 목록·인덱스는 가볍게, 답안·위키 본문은 필요할 때만
@@ -184,7 +199,7 @@ def split_viz():
     import shutil
     viz_dir = DATA / "kwviz"
     shutil.rmtree(viz_dir, ignore_errors=True); viz_dir.mkdir()
-    src = ROOT / "contentwork" / "kwviz"
+    src = CONTENT / "work" / "kwviz"
     viz: dict[str, dict] = {}
     for sub in ("out", "fix"):
         for f in sorted((src / sub).glob("*.json")):

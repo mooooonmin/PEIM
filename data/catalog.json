@@ -1,0 +1,951 @@
+{
+  "schema_version": 1,
+  "exams": [
+    {
+      "id": "exam-63",
+      "round": 63,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-65",
+      "round": 65,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-66",
+      "round": 66,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-68",
+      "round": 68,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-69",
+      "round": 69,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-71",
+      "round": 71,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-72",
+      "round": 72,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-74",
+      "round": 74,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-75",
+      "round": 75,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-77",
+      "round": 77,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-78",
+      "round": 78,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-80",
+      "round": 80,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-81",
+      "round": 81,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-83",
+      "round": 83,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-84",
+      "round": 84,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-86",
+      "round": 86,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-87",
+      "round": 87,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-89",
+      "round": 89,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-90",
+      "round": 90,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-92",
+      "round": 92,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-93",
+      "round": 93,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-95",
+      "round": 95,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-96",
+      "round": 96,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-98",
+      "round": 98,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-99",
+      "round": 99,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-101",
+      "round": 101,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-102",
+      "round": 102,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-104",
+      "round": 104,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-105",
+      "round": 105,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-107",
+      "round": 107,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-108",
+      "round": 108,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-110",
+      "round": 110,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-111",
+      "round": 111,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-113",
+      "round": 113,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-114",
+      "round": 114,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-116",
+      "round": 116,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-117",
+      "round": 117,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-118",
+      "round": 118,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-119",
+      "round": 119,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-120",
+      "round": 120,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-121",
+      "round": 121,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-122",
+      "round": 122,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-123",
+      "round": 123,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-124",
+      "round": 124,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-125",
+      "round": 125,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-126",
+      "round": 126,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-127",
+      "round": 127,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-128",
+      "round": 128,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-129",
+      "round": 129,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-130",
+      "round": 130,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-131",
+      "round": 131,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-132",
+      "round": 132,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-133",
+      "round": 133,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-134",
+      "round": 134,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-135",
+      "round": 135,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-136",
+      "round": 136,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-137",
+      "round": 137,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-138",
+      "round": 138,
+      "exam_date": null,
+      "status": "imported_unverified"
+    },
+    {
+      "id": "exam-139",
+      "round": 139,
+      "exam_date": null,
+      "status": "imported_unverified"
+    }
+  ],
+  "attachments": [
+    {
+      "id": "exam-101-pdf",
+      "exam_id": "exam-101",
+      "path": "정보관리기술사_기출문제/제101회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "39faffe03f3ffdc51a055b97c0346c93c8775d508a6e73b490be62d4f8893ed1",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-102-pdf",
+      "exam_id": "exam-102",
+      "path": "정보관리기술사_기출문제/제102회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "adf447c21bc494ff310c23a283feb8bdca7cb5e5ea2ce0e21341330f3487de4a",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-104-pdf",
+      "exam_id": "exam-104",
+      "path": "정보관리기술사_기출문제/제104회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "ae9bf879324dc5c1962c01b8e6cacfa2a370f7e9388177bcaee2da6efaceb69b",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-105-pdf",
+      "exam_id": "exam-105",
+      "path": "정보관리기술사_기출문제/제105회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "a2dd65af6b91ac87c1c329818704092c328216fe4590bb6e848d6b7d59e15e20",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-107-pdf",
+      "exam_id": "exam-107",
+      "path": "정보관리기술사_기출문제/제107회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "bcfd77387c480a5c0a8df1d7fb6c23d5df62d08c9ab9153bf818d7cfbb301e73",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-108-pdf",
+      "exam_id": "exam-108",
+      "path": "정보관리기술사_기출문제/제108회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "753b9671aca19fd5c2482a8f785de27e8a538fcdb0f8d1b287e10f738d2629a6",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-110-pdf",
+      "exam_id": "exam-110",
+      "path": "정보관리기술사_기출문제/제110회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "a1678cec8c99678b62eff0b1d4be94792b2ae61c15c1943a1951c0191ab05c7e",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-111-pdf",
+      "exam_id": "exam-111",
+      "path": "정보관리기술사_기출문제/제111회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "2bad75b8859837e8d36a433f57690453764087db2c584d0dcbde9417d6fc2ac9",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-113-pdf",
+      "exam_id": "exam-113",
+      "path": "정보관리기술사_기출문제/제113회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "04d7a1206432aec881d5cab0bab05ceee6533b02d4a549022c70533563f2188d",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-114-pdf",
+      "exam_id": "exam-114",
+      "path": "정보관리기술사_기출문제/제114회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "3774577e2c9fb818d314f0702b1ddd108a252ab7535e823bcdd75bc6e218fea4",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-116-hwp",
+      "exam_id": "exam-116",
+      "path": "정보관리기술사_기출문제/제116회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "c6517ee420f6b87b907141710e86d4334cd80ad8b2bbcda983a6467245063c7f",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-117-pdf",
+      "exam_id": "exam-117",
+      "path": "정보관리기술사_기출문제/제117회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "7ae860933122fa15a931dae6d3c6de1f819651b46ca95c1d63701cfd134522f0",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-118-pdf",
+      "exam_id": "exam-118",
+      "path": "정보관리기술사_기출문제/제118회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "84622071ca0c86ae4cf7d16349dbbe4ba5ff0df99e613fbd7802f923702c07b6",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-119-pdf",
+      "exam_id": "exam-119",
+      "path": "정보관리기술사_기출문제/제119회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "2cdb270252259f28d83746f9e1aa3fae61a9d6e859fa4f4feb07fb6185a6c342",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-120-pdf",
+      "exam_id": "exam-120",
+      "path": "정보관리기술사_기출문제/제120회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "4995482a823b98aa4e10b184c2c93bef7d0d98abfa64b8cb109c7649180f22fd",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-121-pdf",
+      "exam_id": "exam-121",
+      "path": "정보관리기술사_기출문제/제121회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "4ebc831fbcbe8d73d3bc24af7ec329c63dcf06ecf3b4cf46486fad8a559dbcdc",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-122-pdf",
+      "exam_id": "exam-122",
+      "path": "정보관리기술사_기출문제/제122회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "dc7350b5f5a11e4c03ab3cae35e64832c487403a05d7afe2fc1245803a79bad1",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-123-pdf",
+      "exam_id": "exam-123",
+      "path": "정보관리기술사_기출문제/제123회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "3fd380602954a0539bf68503765298c0d3f56a976c8c2e7ad966dc9afcc83173",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-124-pdf",
+      "exam_id": "exam-124",
+      "path": "정보관리기술사_기출문제/제124회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "30838ec778dbb4f3b338f8a367b598d9af4f960fc1b6fdfeee80a027bbdf7e20",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-125-pdf",
+      "exam_id": "exam-125",
+      "path": "정보관리기술사_기출문제/제125회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "e7615b5b59f203fdd65dfee4cf59299884b3db7d5374e863e75623402f6f2269",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-126-pdf",
+      "exam_id": "exam-126",
+      "path": "정보관리기술사_기출문제/제126회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "8e0071f77fb1f7dde172eea073fc0fea4f102e27baeb748b3f7d1960e49121a0",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-127-pdf",
+      "exam_id": "exam-127",
+      "path": "정보관리기술사_기출문제/제127회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "9983d6efc01fe74da03e5ca9a50ca4581e7bcc5e30b7a6b119c0a296258995b0",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-128-pdf",
+      "exam_id": "exam-128",
+      "path": "정보관리기술사_기출문제/제128회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "e5b67734cf3a8def747bfaa3607a238fb52721677b2eb750e1dd611f00920ed0",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-129-pdf",
+      "exam_id": "exam-129",
+      "path": "정보관리기술사_기출문제/제129회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "ee3bfb6703cd4b286c0b20d453aba1c1a45f903ec8d8c0f157ee1f9e58f079fc",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-130-pdf",
+      "exam_id": "exam-130",
+      "path": "정보관리기술사_기출문제/제130회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "ee7a6cf75d1a9725fa3a63cdff4bd81a5d211aaa88d111518469b2fab83dd56e",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-131-pdf",
+      "exam_id": "exam-131",
+      "path": "정보관리기술사_기출문제/제131회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "37f3ee5d93befdaa9105f752480ddaa231d3a5a84b3cf7d6d5b01fa5a2bc68ab",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-132-pdf",
+      "exam_id": "exam-132",
+      "path": "정보관리기술사_기출문제/제132회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "58ef2bdd81d3bdee8b723069ef9bd1c6e55652f1fddba60a50e50b194ad730ba",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-133-pdf",
+      "exam_id": "exam-133",
+      "path": "정보관리기술사_기출문제/제133회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "bbd9510fb7c9f089db1140267c1dc3118ffb669b8ee0bf0a373315b323e8d5b4",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-134-pdf",
+      "exam_id": "exam-134",
+      "path": "정보관리기술사_기출문제/제134회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "8eba26d1161366fdf29a495abc2904b9833480ddf586065daeeaa43b4769c256",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-135-pdf",
+      "exam_id": "exam-135",
+      "path": "정보관리기술사_기출문제/제135회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "e9e1c42ba4d3ef7897a1b1439763d97b42f4cbd99cd7397b3d0aaa42081048aa",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-136-pdf",
+      "exam_id": "exam-136",
+      "path": "정보관리기술사_기출문제/제136회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "e55e0982db616c427db043ffdf9d591e0fe61297db6792815676cfa73f3d61d2",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-137-pdf",
+      "exam_id": "exam-137",
+      "path": "정보관리기술사_기출문제/제137회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "a93cca98131f0ae7d302b868643ab9275e2afda0576817a5e97ae3814e39678f",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-138-pdf",
+      "exam_id": "exam-138",
+      "path": "정보관리기술사_기출문제/제138회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "08d4d9576d99ef53e0dced810625068a6ab90048b3f14f84d3b2d078a67f1b93",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-139-pdf",
+      "exam_id": "exam-139",
+      "path": "정보관리기술사_기출문제/제139회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "9d0d716ccd848f1a2784fb4250120ff88523d4c65bcc18eaa24c07afca02f368",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-63-hwp",
+      "exam_id": "exam-63",
+      "path": "정보관리기술사_기출문제/제63회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "0817e96428abc8a20aea1b29e417fbf94bf06c255db37ccf5bba777f40339cce",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-65-hwp",
+      "exam_id": "exam-65",
+      "path": "정보관리기술사_기출문제/제65회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "db9381867ceffbf3ae66a539f7151a8b9d247a05cc8afb9c9fd086ee97f90f34",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-66-hwp",
+      "exam_id": "exam-66",
+      "path": "정보관리기술사_기출문제/제66회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "8236ac0f54910afd22cc5f0e63630fabe0b26d6a7b454bfbd1f1d24611e7bd63",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-68-hwp",
+      "exam_id": "exam-68",
+      "path": "정보관리기술사_기출문제/제68회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "3b60e18e93c951306b641d19565c709bda9d9611c5ca14740fd5527b17b46ae8",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-69-hwp",
+      "exam_id": "exam-69",
+      "path": "정보관리기술사_기출문제/제69회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "a242accc16cce92b159f504b424c3ba3fa98881da804aab7039ac4daf517c424",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-71-hwp",
+      "exam_id": "exam-71",
+      "path": "정보관리기술사_기출문제/제71회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "359827b39023bc12f1681346ce7bfb95babf89e32d574a59866e3735b978ec79",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-72-hwp",
+      "exam_id": "exam-72",
+      "path": "정보관리기술사_기출문제/제72회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "234fe14ebdb4d16ade8c08a6d3a273a8efe98e70715a62eafc6f586a8c7db8d2",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-74-hwp",
+      "exam_id": "exam-74",
+      "path": "정보관리기술사_기출문제/제74회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "759fcd99e175b360e10bffb4829c10b6ad90d799e3fe790cbb799c4d37e94f7c",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-75-hwp",
+      "exam_id": "exam-75",
+      "path": "정보관리기술사_기출문제/제75회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "984bb1459cfcd12235efd483f79b650480709fc315f5e8b9f6148f7ab7b02093",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-77-hwp",
+      "exam_id": "exam-77",
+      "path": "정보관리기술사_기출문제/제77회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "0097eb9b0a1741a642c2134ba99350fcc4916d3b2d558e8804e5bcadddfdfd0d",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-78-hwp",
+      "exam_id": "exam-78",
+      "path": "정보관리기술사_기출문제/제78회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "dde24ea670d06983289adb2272694e265c36d154f1568aa255934b42feb12f41",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-80-hwp",
+      "exam_id": "exam-80",
+      "path": "정보관리기술사_기출문제/제80회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "d4e6e2e64f38327fd1aa83908f2e1800292756ece6b2c9d4d9dc1b5c07628c9d",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-81-hwp",
+      "exam_id": "exam-81",
+      "path": "정보관리기술사_기출문제/제81회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "d9ee8a28c59a6564113ee96188f9f5c7606845ede024ad61fa073dc69aaa25af",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-83-hwp",
+      "exam_id": "exam-83",
+      "path": "정보관리기술사_기출문제/제83회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "f7a4f165e97460ecab75b5755f7930921820b2b1711d44f1110d999db62c9c0a",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-84-hwp",
+      "exam_id": "exam-84",
+      "path": "정보관리기술사_기출문제/제84회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "97bf68c2963401add6e5ab7be90e1a63f51b36338adc05ce665a21553a1c3e88",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-86-hwp",
+      "exam_id": "exam-86",
+      "path": "정보관리기술사_기출문제/제86회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "0ef8c4bc6225a5dd702a0a3ff2ac4b5e589013278da916533701d22b54ad00e6",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-87-hwp",
+      "exam_id": "exam-87",
+      "path": "정보관리기술사_기출문제/제87회_정보관리기술사.hwp",
+      "format": "hwp",
+      "sha256": "5029c83de29217ada5c6bc281ca34c41b9e0e8f8a8b51496e7fa6743784792db",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-89-pdf",
+      "exam_id": "exam-89",
+      "path": "정보관리기술사_기출문제/제89회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "65616db3612d463bba74fdc88f755d995193b9c86c0b87119c40f7e3fdb6f6fa",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-90-pdf",
+      "exam_id": "exam-90",
+      "path": "정보관리기술사_기출문제/제90회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "83fa7392a2a147bdb8eab603e47c415ed15fa4fb2f4720725e275911a4ea3a49",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-92-pdf",
+      "exam_id": "exam-92",
+      "path": "정보관리기술사_기출문제/제92회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "ac19a3522906ed67e0deb74d180a520f8408f651f8441108505422650247fd08",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-93-pdf",
+      "exam_id": "exam-93",
+      "path": "정보관리기술사_기출문제/제93회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "f81b1ae5095d5d767d5bb59e6053f410aa34db5bcfc3feefdc77d37a0699f472",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-95-pdf",
+      "exam_id": "exam-95",
+      "path": "정보관리기술사_기출문제/제95회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "6a09aea77111705e64e958b4aff3fa970ee2735eca2d87294ba5c247fabb840a",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-96-pdf",
+      "exam_id": "exam-96",
+      "path": "정보관리기술사_기출문제/제96회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "3cedbd4335208b48fd425049c362ef29efd0b7975105170099d68ecf5741a843",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-98-pdf",
+      "exam_id": "exam-98",
+      "path": "정보관리기술사_기출문제/제98회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "05e3468789b97d12f6375534bb0670a33fe2f2bea1ca9513253ee6dbe88dd8fe",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    },
+    {
+      "id": "exam-99-pdf",
+      "exam_id": "exam-99",
+      "path": "정보관리기술사_기출문제/제99회_정보관리기술사.pdf",
+      "format": "pdf",
+      "sha256": "3183594548ba7f7bbaf8d81c75b4d2e94aba1eac5f4d66b4947ec2b9381fa76a",
+      "original_filename": null,
+      "page_count": null,
+      "verification_status": "unverified"
+    }
+  ]
+}

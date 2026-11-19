@@ -1,0 +1,27 @@
+{
+  "separation-of-duty": {
+    "definition": "하나의 거래에 대한 승인·기록·자산 보관 등 상충되는 권한을 서로 다른 사람에게 분리하여 오류와 부정을 예방하는 내부통제 원칙.",
+    "features": [
+      "정적(역할 동시 보유 금지)·동적(세션 내 금지) SoD",
+      "Clark-Wilson 모델 핵심 규칙",
+      "RBAC 제약으로 구현",
+      "IGA가 SoD 위반 탐지",
+      "권한 분산",
+      "내부통제",
+      "부정 방지",
+      "개발·운영, 요청·승인, 키 생성·사용 분리"
+    ],
+    "related": [
+      "clark-wilson-model",
+      "role-based-access-control",
+      "least-privilege",
+      "identity-governance-and-administration",
+      "access-control",
+      "need-to-know",
+      "role-hierarchy",
+      "application-controls",
+      "it-general-controls",
+      "identity-and-access-management"
+    ]
+  }
+}

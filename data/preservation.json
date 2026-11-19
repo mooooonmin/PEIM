@@ -1,0 +1,3606 @@
+{
+  "version": 1,
+  "baseline_commit": "5fc8d196d22f01cc0dca7572084ecb225d04135f",
+  "files": [
+    {
+      "original_path": "public/data/answers/CA.json",
+      "path": "public/data/answers/CA.json",
+      "sha256": "401e2fd090e5a508a9e4fffa9481d95b0d2df605e955528625703a0a96bed6b0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/DB.json",
+      "path": "public/data/answers/DB.json",
+      "sha256": "d795210892d994494845df3e68ffb1fbd5bd0eec677697e0bd9cd646b8cadedc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/DS.json",
+      "path": "public/data/answers/DS.json",
+      "sha256": "14e0a8244d28b7c3119a5d5ad93312ea0c5cc9ebc61cb00e40d915155568c60c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/MGT.json",
+      "path": "public/data/answers/MGT.json",
+      "sha256": "93097c0b24caaee9e560b5e7c5158f59cfbec850a0c775b183af28348e5fbb14",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/NEW.json",
+      "path": "public/data/answers/NEW.json",
+      "sha256": "f3969a4d6970541c64a27b54fbc01f5ed6d7cee324d8c42cc832d5a37d5dd5f5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/NW.json",
+      "path": "public/data/answers/NW.json",
+      "sha256": "4eb13dc7c87955833ecfe84ca005827dd810a06b626367e0e23a3fb351f056b0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/SE.json",
+      "path": "public/data/answers/SE.json",
+      "sha256": "70f5532a7c0aa60bc62edc44cb668e42b8c411761cfb1b20a2b1debc5eb6b9cb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/answers/SEC.json",
+      "path": "public/data/answers/SEC.json",
+      "sha256": "de192199460e68ed7454416623bb8a9874c888f78434f2e5ab7718a640b49975",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/domains.json",
+      "path": "public/data/domains.json",
+      "sha256": "4fc731656f6b592f298d9bda7c7d1f3bc9151346c3502ab114d92f400939f0cb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/keywords.json",
+      "path": "public/data/keywords.json",
+      "sha256": "02a9fd56b62a6c83b4ecc65e2007d9a3ec4596f41bdef882f99dbe9bfe18e24b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/0.json",
+      "path": "public/data/kw/0.json",
+      "sha256": "d6c539f89450fdbd1925f253e203c26dd469b3439dcd9a06ffb74a4fd804c7ac",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/a.json",
+      "path": "public/data/kw/a.json",
+      "sha256": "41457d8e8111ad46af4f1d24910b7bb395f0bff8e28dd4e120fae1851d53ad6a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/b.json",
+      "path": "public/data/kw/b.json",
+      "sha256": "83e57d0e99c859b4eb7bee7f3e1207f906105a822f9d23b2d9d0e0da47ad34e7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/c.json",
+      "path": "public/data/kw/c.json",
+      "sha256": "a1083eb8b384cfb1f113751514bcac237754623f57ae0714522a6e0e98c75f10",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/d.json",
+      "path": "public/data/kw/d.json",
+      "sha256": "03ff2122c14ed9e0428b92824e9a4d921a47ad403917a355562163d4e8ed3e6b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/e.json",
+      "path": "public/data/kw/e.json",
+      "sha256": "394ac59ff24a5bed386da81c6417ef5bd55c2c8d78b74c9ea053960e27b884e2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/f.json",
+      "path": "public/data/kw/f.json",
+      "sha256": "cd56b097fefa6de01fb1f8534236ab77193f13bfa001edada4fbca072fdbb268",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/g.json",
+      "path": "public/data/kw/g.json",
+      "sha256": "06100e40b4925dc0bd0ad158d4b5a8beef381f19ffa25c94adf795857852a467",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/h.json",
+      "path": "public/data/kw/h.json",
+      "sha256": "88d03ce62b38ee1f1265139e6cca9d444d670669ace78711bf7549c3df934ece",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/i.json",
+      "path": "public/data/kw/i.json",
+      "sha256": "d5f8f809859df08b14568b7426db51d48c7fbed6b4224e094095f441c3d67671",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/j.json",
+      "path": "public/data/kw/j.json",
+      "sha256": "ac7f92883d69a14ec6ccfa9cd2999cbea7383da072e7877567d2a84b878210ca",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/k.json",
+      "path": "public/data/kw/k.json",
+      "sha256": "1572ca7f93e238f205ee4668cb64b3b068db9ae04a257c77fefda105634eac8d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/l.json",
+      "path": "public/data/kw/l.json",
+      "sha256": "5ca71f9b0f07ca82409a8a0438885b95e577d7fe780b18e07b73a8e0632757e3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/m.json",
+      "path": "public/data/kw/m.json",
+      "sha256": "50c1ab43440b20ddce86e86b3e359f82077c7086bac3a76bcbfbe9fee16f3e7f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/n.json",
+      "path": "public/data/kw/n.json",
+      "sha256": "c28b27cf48dbf1d74ec6d4eff207eefe9640640b9833d8b116491f7862387f09",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/o.json",
+      "path": "public/data/kw/o.json",
+      "sha256": "fefad1e11589743624f74112512a3c35ef730b45a81db79996ff2a2cec828171",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/p.json",
+      "path": "public/data/kw/p.json",
+      "sha256": "7c4fcf5c97b96b53c4d68cbc2977ff1604f095c53729cdc60c77e65e31944fac",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/q.json",
+      "path": "public/data/kw/q.json",
+      "sha256": "9a18961b3889e52d8691b9af543910e53b277b1b8d3d743926f732946378615e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/r.json",
+      "path": "public/data/kw/r.json",
+      "sha256": "b9ed9ebb08be146cc62e18c40c12d919e989400d11b11df6883807ecf6bc82fc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/s.json",
+      "path": "public/data/kw/s.json",
+      "sha256": "a21dc50db9ecdf79d8b917f98218e8d2b774b7b732e6079ea518b4221133c2b8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/t.json",
+      "path": "public/data/kw/t.json",
+      "sha256": "38a8ba6553c03f5a92746d2a48187c7060b051409f135a85b9a2feb94e371c48",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/u.json",
+      "path": "public/data/kw/u.json",
+      "sha256": "c1b3afd589e9dfa425ced8ad0f7de58ef9228078287b2dd0faec2c59130c6493",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/v.json",
+      "path": "public/data/kw/v.json",
+      "sha256": "79ee0e0e923e48dc26124c936905e57835ddfc938936ec92e3c60f3c1a81e71e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/w.json",
+      "path": "public/data/kw/w.json",
+      "sha256": "a95a5bea5833034b343b8588c9c0907cc49d57a9dd41fe8b62e1c146636f33fd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/x.json",
+      "path": "public/data/kw/x.json",
+      "sha256": "d876b5f8066538129ead7c6fd545b1d738803141cc5fad992c68cdc36ad3361f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/y.json",
+      "path": "public/data/kw/y.json",
+      "sha256": "c8baa9e72b266c85883ad71fbcdee72d334045a4e4099dfa766f4387ec9be3ce",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kw/z.json",
+      "path": "public/data/kw/z.json",
+      "sha256": "1bf21b5baacb9243dd1da7b347c793d2e69919d65686148d674b2fc801b2732c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/2_.json",
+      "path": "public/data/kwviz/2_.json",
+      "sha256": "cd7857d4620325193b1bef672fe07762ec9e5444930c0ab330089195ad9e0a36",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/3c.json",
+      "path": "public/data/kwviz/3c.json",
+      "sha256": "0726f7444a824767bb3949b8bb41103e20e7f349ebedc81d4138914dafba04ad",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/3d.json",
+      "path": "public/data/kwviz/3d.json",
+      "sha256": "bb07414378ed3a58df110117480f131b81ccda8057e04d5a31e1d4322d638126",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/3g.json",
+      "path": "public/data/kwviz/3g.json",
+      "sha256": "a1af0617369b7c35cd0386e5dab3fd70298b1b3648b701e923eb413f02f1134a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/4c.json",
+      "path": "public/data/kwviz/4c.json",
+      "sha256": "41d8cdb31e5c0c8bdac0c6a50109d9d142ba7ca0a7881bd240e1d1424b71991c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/4d.json",
+      "path": "public/data/kwviz/4d.json",
+      "sha256": "3ccddb41bda3eb114893c07c4b2798c2c3bed91d76a226c43ab2c115c512a171",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/51.json",
+      "path": "public/data/kwviz/51.json",
+      "sha256": "5ea594bf32a1e2cb56c27f2d16c90248f165e83490137e1f27d1c6f03d2c8472",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/5g.json",
+      "path": "public/data/kwviz/5g.json",
+      "sha256": "596fa8112f8d9ac979c402304a9f7e3c1dd57bc2095b105b47265419ccb827b9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/6g.json",
+      "path": "public/data/kwviz/6g.json",
+      "sha256": "70902dc37ee9f5588c8e450fbcb570cf6b466e616f4924763ea618268843dec7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/6l.json",
+      "path": "public/data/kwviz/6l.json",
+      "sha256": "445f100a80a734e45633848bb462123ec2756ba44fc35b03778636bc052df155",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/6r.json",
+      "path": "public/data/kwviz/6r.json",
+      "sha256": "f7e29392980af89667da7857726c3de47192a799cdbdbc593f6c8542b350cc46",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/8b.json",
+      "path": "public/data/kwviz/8b.json",
+      "sha256": "c784af3c8f4cdb1e31db6c019daba0a690ffa8d47a16bc20bf1f4601e93f3155",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/a_.json",
+      "path": "public/data/kwviz/a_.json",
+      "sha256": "a5c90cd538fd399ad39362bd3ed1136472596f9440d872107b2320f87b7bdffe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/aa.json",
+      "path": "public/data/kwviz/aa.json",
+      "sha256": "3ad87077f82b812a607b8f2768c136aabf21e1230b5d3a8d2ada857266196140",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ab.json",
+      "path": "public/data/kwviz/ab.json",
+      "sha256": "e77c53d0f74cec865b7ae7e3eea6df206b981eb63d5dbc81fc3ba3341a8182e4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ac.json",
+      "path": "public/data/kwviz/ac.json",
+      "sha256": "b994a9aeb804fb369be2c8e490e86a66a87b021e0da9247d1647930d72e4000c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ad.json",
+      "path": "public/data/kwviz/ad.json",
+      "sha256": "fbd22d46a609c1215bffbd34d92e78f9a5081d3bfb05f724239b87f9db561e80",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ae.json",
+      "path": "public/data/kwviz/ae.json",
+      "sha256": "fb62f7eae906df81e30b9fe14944013ee20318ba27839282d4e351ae618d6780",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/af.json",
+      "path": "public/data/kwviz/af.json",
+      "sha256": "4e8529e0d74ca05891d5927a5e379f622604549d358fec5e9fdca3a48830c7dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ag.json",
+      "path": "public/data/kwviz/ag.json",
+      "sha256": "07ff3175f8fce65ba32b267eb09dd6b10cbe67821684d58d45d199ba897b07ea",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ah.json",
+      "path": "public/data/kwviz/ah.json",
+      "sha256": "df55d6b223140e1b69b149939f4695dc978991929e3c560223560e2f7bef11dd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ai.json",
+      "path": "public/data/kwviz/ai.json",
+      "sha256": "5012652472896d90826330f9929ccfbf652c9ea1c5370c2f3f0186fa9d38c88f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/aj.json",
+      "path": "public/data/kwviz/aj.json",
+      "sha256": "757927114a601433e8af41358cebeb79b8aa367687221b97b52a0401810e9a61",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/al.json",
+      "path": "public/data/kwviz/al.json",
+      "sha256": "ecb6b7117caef1a4d7d8bbdf2c0e6a4b145496b20a8726806e0d53a85c7545b2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/am.json",
+      "path": "public/data/kwviz/am.json",
+      "sha256": "d4b9abb7ebbba26fd092e1c6e63b0042366865cdfd3f763cd67129265507f8c8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/an.json",
+      "path": "public/data/kwviz/an.json",
+      "sha256": "c957bfea491e70152e20de5719e83fcb6e52c54c81c0811e3778a1952a4acbdc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ap.json",
+      "path": "public/data/kwviz/ap.json",
+      "sha256": "6b99f0901148f57d266bac0bc7897624c510d025051e8f96e2082929d86127fb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ar.json",
+      "path": "public/data/kwviz/ar.json",
+      "sha256": "77cd90d0e2228216a00ba0b94703658bbaa797b12335b61dad27b46e0e7b7552",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/as.json",
+      "path": "public/data/kwviz/as.json",
+      "sha256": "b31ac1df9e193893d95f5e0b84b0a7b1f5b7bedf056b501e1832e72533591860",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/at.json",
+      "path": "public/data/kwviz/at.json",
+      "sha256": "c8e28a93eab8da23a247b08e9d063f92656d1c2ef240070d4ac3f3655106429a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/au.json",
+      "path": "public/data/kwviz/au.json",
+      "sha256": "77853846d82f5d0cdbdcf1d69d94162d663cd528d83ce822996a193ca27c6ca0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/av.json",
+      "path": "public/data/kwviz/av.json",
+      "sha256": "a1e522ea4ee0dd78e3953e3436051d15785b4b361cf1ae01646227989e4b019c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/aw.json",
+      "path": "public/data/kwviz/aw.json",
+      "sha256": "bfdc8e408d4117fb8e5a8f8ae8f099b9ea12ac8e42e2d757cbdb9a9fbc8cb245",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/az.json",
+      "path": "public/data/kwviz/az.json",
+      "sha256": "b955a360c9e217d3559decdb91f3b9171db21d671b1a032414bcd647fc20e499",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/b2.json",
+      "path": "public/data/kwviz/b2.json",
+      "sha256": "bf0d27b19a19fa231eed68ac38c2b5c7f2de95ca855c37e4bbe11056b4f600ef",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/b_.json",
+      "path": "public/data/kwviz/b_.json",
+      "sha256": "c3bb33a0fde555d0e5d0ad1659d9d6c17adca2ebabb97acb551a9eee5c64e04f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ba.json",
+      "path": "public/data/kwviz/ba.json",
+      "sha256": "1474ecee448c59444b9a45c59b434c7219603b5a60d747852a981b5cd819902d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bb.json",
+      "path": "public/data/kwviz/bb.json",
+      "sha256": "f8f2ba064ae12b1621052c9e014c45470839ed35dd7d62d9db49b521a394c5cf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bc.json",
+      "path": "public/data/kwviz/bc.json",
+      "sha256": "bd084002aaa3cc9cf5a2e5707dcef2ed0eaa84a5b7f589fbaa076fb9d765b1bf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/be.json",
+      "path": "public/data/kwviz/be.json",
+      "sha256": "68a67f6ffcc16daf70a7debe09eb7d7de63dcbb195ff5b324217e888d3279777",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bf.json",
+      "path": "public/data/kwviz/bf.json",
+      "sha256": "7626a1933ac324e0e35de92916c5d993a908b8245c6a7daae08919153472ae3d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bg.json",
+      "path": "public/data/kwviz/bg.json",
+      "sha256": "77747edf0d0513cb0c74a19fcfd17a848e3176f5de5173afad443efc1a908ed0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bi.json",
+      "path": "public/data/kwviz/bi.json",
+      "sha256": "26b25af8332b7074194114aafb79cbb53cf0e213c69cee8039c570bfd7d0e795",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bl.json",
+      "path": "public/data/kwviz/bl.json",
+      "sha256": "6a7b36f01b5df980e023e82572812f2765534772ad9dfad073a71f917cc9334e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bm.json",
+      "path": "public/data/kwviz/bm.json",
+      "sha256": "fb69447d2be16ff9d1ec1d32befd2938b38f4f834d4db092b670b9be618e8100",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bo.json",
+      "path": "public/data/kwviz/bo.json",
+      "sha256": "7daf2ea7ac87a7ba91afd4ba8e4ee1fd310028c275d247f22cf74c71f85606dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bp.json",
+      "path": "public/data/kwviz/bp.json",
+      "sha256": "8cb79852ae585664057f5eacd6a6e68e08fb4ff08dbb65ff6b8312528f23d982",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/br.json",
+      "path": "public/data/kwviz/br.json",
+      "sha256": "36f53d5e5edc4ee92e72b51b700de6b37ab1fc1d720d8435f0057281e88f60a8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bs.json",
+      "path": "public/data/kwviz/bs.json",
+      "sha256": "dfffbab8f9ed10a188a038d2f47a95b32a8b6cf8e9c53453b11d5756feac7e91",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/bu.json",
+      "path": "public/data/kwviz/bu.json",
+      "sha256": "4ee242799603e8281d4778bcc342cf96bfb441ce6727ad0891239693a035835f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/by.json",
+      "path": "public/data/kwviz/by.json",
+      "sha256": "e01e57e30f9590543d82957ba0a572d9aeb760c98a8357cc711749dd274e80bd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/c1.json",
+      "path": "public/data/kwviz/c1.json",
+      "sha256": "555074e55ae588a4f4c5af984f801bbc47d681520df73d4d9f4b0901a19930b6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/c2.json",
+      "path": "public/data/kwviz/c2.json",
+      "sha256": "4506b5419fb6a7219c9c8c1a31287af88fa2e9b2b27f62b8b20dcc267b424cb5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/c_.json",
+      "path": "public/data/kwviz/c_.json",
+      "sha256": "840ebb8b866b64c04b33750941706eded8b990f94d3a296f6793e42fadbc511f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ca.json",
+      "path": "public/data/kwviz/ca.json",
+      "sha256": "315fb026f306ef8ddcc24cdac1de31f44fcc1d5cb89766b663505c80e75dc503",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cb.json",
+      "path": "public/data/kwviz/cb.json",
+      "sha256": "e799d3894f0ae74c4fc2fd4d0d0a8577bb40639b7913d5b011974f7d34c6550d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cc.json",
+      "path": "public/data/kwviz/cc.json",
+      "sha256": "4acf78b210e29d287747330fba4ebb324057ef7c98c8f735301f3507a58cacb2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ce.json",
+      "path": "public/data/kwviz/ce.json",
+      "sha256": "ea3f4364f2d04b9769311023ef1e9f63913d5a50a989129d0a8e0bfb74413b31",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cg.json",
+      "path": "public/data/kwviz/cg.json",
+      "sha256": "0f4d34c48fd01956619f7df2c0253ab6eac4b5d116cb1dd1e6cf0888844705c6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ch.json",
+      "path": "public/data/kwviz/ch.json",
+      "sha256": "71ab7111600a605314cb85118558f31a2a6b6af75178003a5bb892d37eb39f16",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ci.json",
+      "path": "public/data/kwviz/ci.json",
+      "sha256": "f8b3faefee66a4279c22761b0ac5d4e71f3ad0911afe657ed319bf1cd826aa9c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ck.json",
+      "path": "public/data/kwviz/ck.json",
+      "sha256": "20c940fc85828341fb32cf12a0a0562a52d139f8372ddaed5bdd3cb62ca48025",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cl.json",
+      "path": "public/data/kwviz/cl.json",
+      "sha256": "112a14d720ad3c278d68e9009239ffaaf8feee993155394210f35e0992ea1646",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cm.json",
+      "path": "public/data/kwviz/cm.json",
+      "sha256": "6648ff1d900b13bb74a927bfe72a3e1dedf3f6c9e85a4f9193f55b79db80c438",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cn.json",
+      "path": "public/data/kwviz/cn.json",
+      "sha256": "474e572ff861f4f4c208d03690ea1fc48f4e0941711b197688325ec0929c4668",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/co.json",
+      "path": "public/data/kwviz/co.json",
+      "sha256": "35885b5b32de6dbb4fece177dedc353a9d9e9385f71e232f96f3e5b5e44dc182",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cp.json",
+      "path": "public/data/kwviz/cp.json",
+      "sha256": "b886368b9da5d6ecd0fefc8734bf92efe2f7b9561c28c10fc9e1ff7d445c05a3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cq.json",
+      "path": "public/data/kwviz/cq.json",
+      "sha256": "6cd2997f0492c9c9998b579cb6c301e48a56c34627ae7fc01ea7dbf43ae9b709",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cr.json",
+      "path": "public/data/kwviz/cr.json",
+      "sha256": "d9b3492d1bb7c334ef06b15856e7edda75e07ff669eead60013255084ed87983",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cs.json",
+      "path": "public/data/kwviz/cs.json",
+      "sha256": "a811889253f0e483f2c094f1e96c07d5f0a827bdaa3df7f62a0642f93524be02",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ct.json",
+      "path": "public/data/kwviz/ct.json",
+      "sha256": "aee8aa7affeaf4a410cd3fa5482435d97977b843f2c6ed185e80223aff399d02",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cu.json",
+      "path": "public/data/kwviz/cu.json",
+      "sha256": "0441546d1ccd80accc8cd30ca43563769edb03a480af2c3519021eb6a070a7e4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cv.json",
+      "path": "public/data/kwviz/cv.json",
+      "sha256": "5e88740a76c2b3caddd9ea2c09edee4c3b6e8b79911ca0c8c221d527ff207224",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cw.json",
+      "path": "public/data/kwviz/cw.json",
+      "sha256": "f1bab4293b3a88a8ca002fe5f3cd0fdf6c7fbb39b5fb7320433c7425bc709217",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/cy.json",
+      "path": "public/data/kwviz/cy.json",
+      "sha256": "3788f35bdc3efa5921312f389f9950382f28a766f5ffb1d374559a65227e239f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/d3.json",
+      "path": "public/data/kwviz/d3.json",
+      "sha256": "8cf92c50ac178474e164454785c6c1eb3afdd096b706015882af8ac576b695d5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/da.json",
+      "path": "public/data/kwviz/da.json",
+      "sha256": "24e9841c83127fce5cebde9d53195c4e2a45bc60534f38029be785b69186a7bc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/db.json",
+      "path": "public/data/kwviz/db.json",
+      "sha256": "de386269c491e231937cd6c8b32e2c5b11235ce74512c0623a195c3d5de77d09",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dc.json",
+      "path": "public/data/kwviz/dc.json",
+      "sha256": "2c55a7aa3aa3754518295aba99c5cabae3da7a19ce185b065c1879c44499eb9e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dd.json",
+      "path": "public/data/kwviz/dd.json",
+      "sha256": "d2bd46a9ece7b81fac514ddf59511a6fe6a0d7d55ca9ca1cb9acb903b9ac650f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/de.json",
+      "path": "public/data/kwviz/de.json",
+      "sha256": "17a4f5e1c61f3451ae4563714da8050e4dfb9fb05a3d9713e603ce21e0891324",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/df.json",
+      "path": "public/data/kwviz/df.json",
+      "sha256": "de55023efcba79499354d3a865588fd23ed875ec83c26dc6dda4b8734581d814",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dh.json",
+      "path": "public/data/kwviz/dh.json",
+      "sha256": "25493f6e478350d78c50c6ab085e5634902d7c66079b84041667e71a42bb7d37",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/di.json",
+      "path": "public/data/kwviz/di.json",
+      "sha256": "9ae56c6ad6cef887c0191ee2f2049a7a559d671089e321751622516d6dc29e8d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dk.json",
+      "path": "public/data/kwviz/dk.json",
+      "sha256": "180edb6dd98320df77acb33b90b8eeee223961a44220e134d17b63805c7114c5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dl.json",
+      "path": "public/data/kwviz/dl.json",
+      "sha256": "1b9df753203a27ef948dba6d827aea3bd0f7a547b4a5bcba74bece9b62fc70f7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dm.json",
+      "path": "public/data/kwviz/dm.json",
+      "sha256": "11a9e060ab3ae89a2d2d85c292d5f1a632cf43ccc1a5fd44b3a794df252f9090",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dn.json",
+      "path": "public/data/kwviz/dn.json",
+      "sha256": "9b4e761aa9c2091bccca6fa0217037db5ae3fb0d34cabb290e2b5d0aa09ca98c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/do.json",
+      "path": "public/data/kwviz/do.json",
+      "sha256": "a96b7443c29b1ff5b74b0d3f1dfd05c97b9f9c82edb1c5bfbbf903b9645f65df",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dr.json",
+      "path": "public/data/kwviz/dr.json",
+      "sha256": "3867fbf02966dd3d0df12b44c7033a81b81c472965bb89963135256c0ef367e7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ds.json",
+      "path": "public/data/kwviz/ds.json",
+      "sha256": "18de24d22fe3086c165b8dc4c68a592cee84415e989ec23e30d4388b84ac393f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dt.json",
+      "path": "public/data/kwviz/dt.json",
+      "sha256": "dd84e75f23f629065d825809cf742f8dd662a3b029396f2ae839e6ca67255a64",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/du.json",
+      "path": "public/data/kwviz/du.json",
+      "sha256": "3c96836eaef37035f2aa912a9b42758ab48793a62c28342a3f35a2a5aba1a4b9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dw.json",
+      "path": "public/data/kwviz/dw.json",
+      "sha256": "40912332ad98fd7a4ade618b8c1c4eb2367b59119258c8bcecffc8ddd31f2c05",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/dy.json",
+      "path": "public/data/kwviz/dy.json",
+      "sha256": "76391be1958b812b1fd471f8204561b294e83a6c92ab046f6450d0cff2c7a98b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/e9.json",
+      "path": "public/data/kwviz/e9.json",
+      "sha256": "31a6a0e38d162033846f5c69fb7da5818b69aa900ece18b4ee8e82c8b1096aa8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/e_.json",
+      "path": "public/data/kwviz/e_.json",
+      "sha256": "84e59617315af611e69de679ea5ba72d7cd94d8b1a5199dc8016c5e4559a3ee4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ea.json",
+      "path": "public/data/kwviz/ea.json",
+      "sha256": "7d02b9b682ac1e88585d1042967751740fc5fc6125612a2d2ada20237ac1a643",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/eb.json",
+      "path": "public/data/kwviz/eb.json",
+      "sha256": "3f19511874e8f91fda2eab9ad4710cab17b20a2e5d441c10b205dfc027f9b24d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ec.json",
+      "path": "public/data/kwviz/ec.json",
+      "sha256": "76c958421f5737fca76cf32dbd4d9591bc2bda6967b35a8de451c7c4cb663201",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ed.json",
+      "path": "public/data/kwviz/ed.json",
+      "sha256": "6ce885dc19d9aa63230c4e6d795c637ded10faeca5ee7b8d6b1980f2ac48d4f1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ee.json",
+      "path": "public/data/kwviz/ee.json",
+      "sha256": "ff3f2484a3f5d82215e88b49df5aeaec7509f1c3857bea48d23a56eb6d5f9143",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ef.json",
+      "path": "public/data/kwviz/ef.json",
+      "sha256": "862bd9d7c71991cc5be800ee7a71872d70bf258aa7c303a5c5b43554c5f80d80",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/eg.json",
+      "path": "public/data/kwviz/eg.json",
+      "sha256": "d2981e5a473a6a89e11ff4d4b5af90d3a0e4ddfd059e315ef276e4498cc89cb6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ei.json",
+      "path": "public/data/kwviz/ei.json",
+      "sha256": "11f00292107431460f0e212f21ec08ce1431d2e284bb257f138381376af00f09",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ej.json",
+      "path": "public/data/kwviz/ej.json",
+      "sha256": "51fdbc84aa286232e9402b29a0ccb2a1ee09b07f2b01c5daf9d8bc70648b6bfe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/el.json",
+      "path": "public/data/kwviz/el.json",
+      "sha256": "0f23c50a85699b97bd8891c9f928c005e2382ad02bc3e198ea439eb664b99a90",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/em.json",
+      "path": "public/data/kwviz/em.json",
+      "sha256": "472943a434899e580c80ae6bde2426dc36fbb298c78658b0d981d0b2764cf4bb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/en.json",
+      "path": "public/data/kwviz/en.json",
+      "sha256": "9c97285bdc836111a9d920074da97acaa41ad70a20aa43d70f8d530041cb1da8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ep.json",
+      "path": "public/data/kwviz/ep.json",
+      "sha256": "d0b2a42b781a3860da6c5ebd614638b2082f461d644baae6d44490be3e460f04",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/eq.json",
+      "path": "public/data/kwviz/eq.json",
+      "sha256": "dd3a9719a20c0a66d96191a12cd0bddfacf56c1bf648193114022467a5d0a59f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/er.json",
+      "path": "public/data/kwviz/er.json",
+      "sha256": "863cbe1613482789e89ab65ae5e176b7fd096491966e404d2d2eec5b0a380f65",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/es.json",
+      "path": "public/data/kwviz/es.json",
+      "sha256": "0bc0dcaf78c27b58113104fe518c8f0223c0d6e440566eebe096808744d7f613",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/et.json",
+      "path": "public/data/kwviz/et.json",
+      "sha256": "6c4b39c4ff7af3c5f5fc1c6b030a8e25c498758631eb0f1004207e3f3b26f35a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/eu.json",
+      "path": "public/data/kwviz/eu.json",
+      "sha256": "d16882e4d6a13ddc2735a9491618180e5c408467edd03b2d2c7674c8a0d500de",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ev.json",
+      "path": "public/data/kwviz/ev.json",
+      "sha256": "dfa7a7b5f14f90cbd530410b29a285074da10e6f8e64d4d1e691cad8894f269b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ex.json",
+      "path": "public/data/kwviz/ex.json",
+      "sha256": "dfdb46d3628ea1f6024cbbc651748dd24cdf9d384483d1b7ef1c490e7513aa4e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ey.json",
+      "path": "public/data/kwviz/ey.json",
+      "sha256": "4817236dbaf51b5f6ab1bc9b4f154999ffa27dc9b2e60dabc501b9cf0df7ec92",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/f1.json",
+      "path": "public/data/kwviz/f1.json",
+      "sha256": "90b84a3fa22b50007523e57dbd89509cbb40f75c61a576cb30ea8ccb25eb161f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/f_.json",
+      "path": "public/data/kwviz/f_.json",
+      "sha256": "84c64021afcf25c2949fd809403da29c37e3b08380f3022c037e0a835f277f1a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fa.json",
+      "path": "public/data/kwviz/fa.json",
+      "sha256": "b20c42cad9db530126b1e576aabc3efe9532fa59ac73b237d8df9e56493b9613",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fc.json",
+      "path": "public/data/kwviz/fc.json",
+      "sha256": "774340ab0b234eaacd24749640ff5338d69e3aec236b65d120dc41878b7a8b1f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fe.json",
+      "path": "public/data/kwviz/fe.json",
+      "sha256": "6f2a14f987ab85073df4bc277e2d05e4ade1ef11b78598f6182fbdf25325e4fa",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fi.json",
+      "path": "public/data/kwviz/fi.json",
+      "sha256": "271a1b66f52e1c3ccf4b0b0ad3991f7d10af0cc59a550ce16f9054d21250dcb1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fl.json",
+      "path": "public/data/kwviz/fl.json",
+      "sha256": "494ba4b2b0a22562adebca9b9ece20ab3256d644ec08ca31c2a0a6b12d7d7861",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fm.json",
+      "path": "public/data/kwviz/fm.json",
+      "sha256": "0f3c75072a57bf1199d796a55e5d64944f5c0f8bf9373cd01ce1816af6e00b92",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fo.json",
+      "path": "public/data/kwviz/fo.json",
+      "sha256": "9077f903f22e6df8d063813f3d46882975b619c8a9fcdf7eea0cb71adb6098c7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fp.json",
+      "path": "public/data/kwviz/fp.json",
+      "sha256": "32f394ccaf2efafcb80fab8cbe5fbf685c34ed989e617b3c3bb0b944185a4f30",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fr.json",
+      "path": "public/data/kwviz/fr.json",
+      "sha256": "f6ea758727f1818a6e02204f37e789a7d3737b62370a7d00bce3ac38bc278bce",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ft.json",
+      "path": "public/data/kwviz/ft.json",
+      "sha256": "351498b5d9c387377fd410340c0e6ea5d9edf3079e37a4e2cc6a1527ba3d660e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/fu.json",
+      "path": "public/data/kwviz/fu.json",
+      "sha256": "8ab5e89c9f515681f56c692d95115afa66fa0f8dba962716ce9c3c4997189b49",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/g_.json",
+      "path": "public/data/kwviz/g_.json",
+      "sha256": "352268593ab4412e3235eaaeb99cd9efe0a928ee9a02b507af15034f9466b37c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ga.json",
+      "path": "public/data/kwviz/ga.json",
+      "sha256": "7e64a00b3116b4276b29b694d71b04a491c37d85277600e1e5b2d81ff97e1c3a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gd.json",
+      "path": "public/data/kwviz/gd.json",
+      "sha256": "01cc7345a0e0e1ce5aad4e15f43decc67b94b38662156cbebcd3e3d05d09319d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ge.json",
+      "path": "public/data/kwviz/ge.json",
+      "sha256": "5d19e86ddad63b4942491b50af50bfb1f05a9e83bbb1780e3e8ed7e221d7a398",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gg.json",
+      "path": "public/data/kwviz/gg.json",
+      "sha256": "6e17abc6ce8397afd51480c710035da853be828f0d273033e01ee3e8e05ee6f1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gi.json",
+      "path": "public/data/kwviz/gi.json",
+      "sha256": "13d284ed8609923fa413771eacf398a7be70324daec35ddd347fa2d29b348749",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gl.json",
+      "path": "public/data/kwviz/gl.json",
+      "sha256": "ca965900f6d7d844d8b00053d6e98a9cfab47df9df50cf6487a77aef1ece594a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gm.json",
+      "path": "public/data/kwviz/gm.json",
+      "sha256": "85b58f901d453738c5b29931f3a76f467f08c35b0d7c927d7fb3a4cab3b38378",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gn.json",
+      "path": "public/data/kwviz/gn.json",
+      "sha256": "3aae94b82d0d82e3c1c38ff6b155ed033675f698fa3b78a135f90cc8c164593d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/go.json",
+      "path": "public/data/kwviz/go.json",
+      "sha256": "c778ed3d417696840f600bf688a96e369676560aa885f445089da7cb07b95d0b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gp.json",
+      "path": "public/data/kwviz/gp.json",
+      "sha256": "26fb347b8dd9a76e6d67a1f538ba3cd13c785967ec08454f1c9fdbf37538276b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gq.json",
+      "path": "public/data/kwviz/gq.json",
+      "sha256": "6da3bea4251e86f043af17eaaa1718bbb082ec43a3bcb7e0c86fb61425f682f2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gr.json",
+      "path": "public/data/kwviz/gr.json",
+      "sha256": "3f4dc05cdf1f2254c80695dd9b021a31bab97801f202a650e434d7b64d790873",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gs.json",
+      "path": "public/data/kwviz/gs.json",
+      "sha256": "d25df09cd7c8ed92f34d4bf1e39980051b05bfb24fdf005868cd9f1960cc53da",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gu.json",
+      "path": "public/data/kwviz/gu.json",
+      "sha256": "39de34e482ca2051d7ac59a89f5b4d3bfffcb907a97afe85a0b79d7062267a82",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gv.json",
+      "path": "public/data/kwviz/gv.json",
+      "sha256": "7f269d9198c8216b852ff3e8b5c58b74ab0d6ea1c611de5c439646d9a536ae5d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/gy.json",
+      "path": "public/data/kwviz/gy.json",
+      "sha256": "5604817c9a4e9ed43784ce405b3b467a1773377baee12de413572880f9e04585",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/h_.json",
+      "path": "public/data/kwviz/h_.json",
+      "sha256": "26e5d2dbf3f58cabb2d9bd430806d152872a6374c074c109ca59b4facea65341",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ha.json",
+      "path": "public/data/kwviz/ha.json",
+      "sha256": "f1ceeaaa274cc73002f69a409da0318eec7d4a760f5a480cf3147006531e58dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hb.json",
+      "path": "public/data/kwviz/hb.json",
+      "sha256": "9ceb118b01d0ef03e2c716ac52057938912c366f79209c7a5638f5264972b33c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hd.json",
+      "path": "public/data/kwviz/hd.json",
+      "sha256": "6bbe0be6be614ac9ca9b685c31f16d10bdc9241c0f18842f0bbb38bb4440784a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/he.json",
+      "path": "public/data/kwviz/he.json",
+      "sha256": "eb936ea208060fb705cfb0a6800451d56f8e788aed79e03c6e0e5751a9a36e02",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hh.json",
+      "path": "public/data/kwviz/hh.json",
+      "sha256": "d26b9dc1b2795138ff07e6118a9a54262aeaab8188e42de833e04a452247c6d5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hi.json",
+      "path": "public/data/kwviz/hi.json",
+      "sha256": "cf6d06be0d6245861d2090ca04c0f6b95757bcd2a1fb18fc0e95d7d15ef8b5cc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hk.json",
+      "path": "public/data/kwviz/hk.json",
+      "sha256": "591718b40bfb7bfef6e102b338b0084fb986dece8edc3d61c9c0488e7ff322b5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hl.json",
+      "path": "public/data/kwviz/hl.json",
+      "sha256": "a3eca8a45995152eb0ca8e7d8e5cdebaf164151c2fab72261268b7b0fd3b1bf0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hm.json",
+      "path": "public/data/kwviz/hm.json",
+      "sha256": "dc02dab3eb11bcefca8fb854a8de6cacfd9cc71982bf4d6d434fae10c14e6d52",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ho.json",
+      "path": "public/data/kwviz/ho.json",
+      "sha256": "4ad0903e10b3486cac664d4ff11dbe160f74d359cde4c776f3184628688445bb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hs.json",
+      "path": "public/data/kwviz/hs.json",
+      "sha256": "552e9f68f6cdedb462d8f10ae60581a4870aeb8bf0f0b638c42c4d55ffd064d6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ht.json",
+      "path": "public/data/kwviz/ht.json",
+      "sha256": "c7ad5fc35b388a50d894b53ec3fada7082d7abd1cc93f568e45880e0a32d49ce",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hu.json",
+      "path": "public/data/kwviz/hu.json",
+      "sha256": "309c642bb5ad09111088c8195926c601d358ed6a62db22accbb2441c13d72299",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/hy.json",
+      "path": "public/data/kwviz/hy.json",
+      "sha256": "68a02d6a125de1448066cfc79dff66e43f9165b3e8b3a32af0d49903c60a2e6e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/i2.json",
+      "path": "public/data/kwviz/i2.json",
+      "sha256": "0f54b56e4d42e2bbbc3da495f47bad60160b8f02f2c1eecb94f7e682a26a3d9d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/i_.json",
+      "path": "public/data/kwviz/i_.json",
+      "sha256": "6a5f5f0121ecc0174d0cf5cb0504fc22c8bde85184cfb6b70e2bb1c5b7ca9578",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ia.json",
+      "path": "public/data/kwviz/ia.json",
+      "sha256": "42196f836847671656f207ff63e704b041c01e01b63c477764323b9cc1782399",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ib.json",
+      "path": "public/data/kwviz/ib.json",
+      "sha256": "a5855411b0b816a9837b470aef0c2d4f412f9fffd93ec04047667b03876bc782",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ic.json",
+      "path": "public/data/kwviz/ic.json",
+      "sha256": "5438671436056617f389e247db28d2b205a4e3e4ef083d5b06eea39383b524d5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/id.json",
+      "path": "public/data/kwviz/id.json",
+      "sha256": "31435c6980022e7af59bd9c42309338567d5baae0b386f437413757d834443fd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ie.json",
+      "path": "public/data/kwviz/ie.json",
+      "sha256": "9ec40030058ed3cd3f727435b9ca010ede783893f14c7f1b79e475a8272ed654",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/if.json",
+      "path": "public/data/kwviz/if.json",
+      "sha256": "8a71d04b99dd0fba3c3fedc5b543ecdd598d1a1f3c489bce3bcb9771b825121a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ii.json",
+      "path": "public/data/kwviz/ii.json",
+      "sha256": "e2c8fa730fd5175676d73c0c7953423148bf40d63c4d9fd2e2ae3b6b06f5e7a6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ik.json",
+      "path": "public/data/kwviz/ik.json",
+      "sha256": "e1c7f11145e20a65e9373f2528ac1c66bde7a974bef936710a267995c7940ea6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/im.json",
+      "path": "public/data/kwviz/im.json",
+      "sha256": "9ddfae50660d6a3297bca67e6a250ad3d9567689f7cd3dd50535000d87c4a83c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/in.json",
+      "path": "public/data/kwviz/in.json",
+      "sha256": "027b7f397c6e4f88382b43c09d17110dcbf80d2fa3ea3050193846400c6a5a14",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/io.json",
+      "path": "public/data/kwviz/io.json",
+      "sha256": "beb4940f1497ff1063176a9876ef369702db9abc54fb8b5bda31245e61284a40",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ip.json",
+      "path": "public/data/kwviz/ip.json",
+      "sha256": "c6dcefe8e707c09af5c5fb62e4a0aeeed22daf2861e201a1f60b4bf3a027015f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/is.json",
+      "path": "public/data/kwviz/is.json",
+      "sha256": "0a3798d113289b156ac26213ee4e5e8c2e7d5e0d501fff204c0c37e6ec2d8a53",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/it.json",
+      "path": "public/data/kwviz/it.json",
+      "sha256": "da883b99ac4998898fb8a3d133fe5241f50fc54015a383aae3fae83f8468ee09",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ja.json",
+      "path": "public/data/kwviz/ja.json",
+      "sha256": "f31670113ea5281747afdda9fec1b13e721095924327eee4997a1d81e5e6a721",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jd.json",
+      "path": "public/data/kwviz/jd.json",
+      "sha256": "83613d8a91593b7d149fd9aa0882cfeca7586056e1488f819eb5ab8bf2a70a11",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/je.json",
+      "path": "public/data/kwviz/je.json",
+      "sha256": "5cdbb8773d20381307a4756f1e6fa69b0861980a1e8d475a313788c0cf5a661a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ji.json",
+      "path": "public/data/kwviz/ji.json",
+      "sha256": "f26340bb5ce582b01dd35e6a8f518414f361c8ece885f754ef05e97603630554",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jn.json",
+      "path": "public/data/kwviz/jn.json",
+      "sha256": "c4ee8794720723fe016fb6980cba9fc1c83124c99956bfa9deac022776e53320",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jo.json",
+      "path": "public/data/kwviz/jo.json",
+      "sha256": "8be77881fcbc4860fb93f9bc96553b0633626f1c48017de6e637c573cfe2e8df",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jp.json",
+      "path": "public/data/kwviz/jp.json",
+      "sha256": "620f5e04da3c072f675b29d4d4587e3a32956f30463b2f9c93e7c3580f1aeab4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jr.json",
+      "path": "public/data/kwviz/jr.json",
+      "sha256": "21163721f5d610bd9fe7ceeaab67b47e9f014e6e2a395e9928ed2e1d7b6614e3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/js.json",
+      "path": "public/data/kwviz/js.json",
+      "sha256": "8e63b4719647fa627910cee222b60bc44d14ce1bbe20c614fb7eee954cb12311",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jt.json",
+      "path": "public/data/kwviz/jt.json",
+      "sha256": "119359e782e4804cc4ccaa47b9afc69e7aceb0698b824c294d335c4127622fe9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ju.json",
+      "path": "public/data/kwviz/ju.json",
+      "sha256": "21a424ce71b1900004850367a7da1afc4a2fef565d28d302182b572bda736b00",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jv.json",
+      "path": "public/data/kwviz/jv.json",
+      "sha256": "45579809e6bd59f6ff519a2aa9d347eeaa436cb772690861f50097076a2c4dfa",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/jw.json",
+      "path": "public/data/kwviz/jw.json",
+      "sha256": "f81f59043ad86c0baeac33c8747df67ae814f9af02d262eaaa25b66e782cfc99",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/k_.json",
+      "path": "public/data/kwviz/k_.json",
+      "sha256": "9ec6617adeeec4a9e7f27ed9a35fec890cad0f4c4810c345375b7cae46645a36",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ka.json",
+      "path": "public/data/kwviz/ka.json",
+      "sha256": "d0b719fab805030b2b44dd21dc586f253591323a8f837db7f4490972329e4e82",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kc.json",
+      "path": "public/data/kwviz/kc.json",
+      "sha256": "3a863d67b5354db1de468235ca12149bd678bcafba891297708d67a5714011f1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kd.json",
+      "path": "public/data/kwviz/kd.json",
+      "sha256": "a06167038c32ad97d4ce5660ab2bfae8fbfcee659484665327985659dc938077",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ke.json",
+      "path": "public/data/kwviz/ke.json",
+      "sha256": "e57d0207efb08607631c926b6189efab4e53bbbe222fc06906d702875760919b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ki.json",
+      "path": "public/data/kwviz/ki.json",
+      "sha256": "773bc5a6cf9fd1f29deadfa2ae4d525a1a6d93854f05ebbc69f2c16ead2d19ec",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kl.json",
+      "path": "public/data/kwviz/kl.json",
+      "sha256": "4156a81a79aa8f9b481ed631d7fecd0c552e3ab2886c2769fc86e96d504361cc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/km.json",
+      "path": "public/data/kwviz/km.json",
+      "sha256": "dd4dda7647c620e961b4c29744b918eeb75614420e2bf203c4af58ec50a52d22",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kn.json",
+      "path": "public/data/kwviz/kn.json",
+      "sha256": "a30b287e9613862e0115b9b2ac8b383b8e7521e84d3425838f29b97ac125470d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ko.json",
+      "path": "public/data/kwviz/ko.json",
+      "sha256": "31034f41baee6337bf4725bff722c9ce15c224abbadc792de7d590a636770300",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kp.json",
+      "path": "public/data/kwviz/kp.json",
+      "sha256": "68f828f9ac9d51531ccc8278b86bf99532bd6b190454423bdcfb4917be0301cf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kr.json",
+      "path": "public/data/kwviz/kr.json",
+      "sha256": "9dee3579fbe1db1d50c639487f9ccdbdfa0fc68a47d5b9fb61eb762266e59bb2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ku.json",
+      "path": "public/data/kwviz/ku.json",
+      "sha256": "34e3ebe31a8a57f1a60eed492020151d5cace624ec3a93aba0b125a8d3955007",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kv.json",
+      "path": "public/data/kwviz/kv.json",
+      "sha256": "737382c86c14623d725b0f127342537cd8fdd74ce0d9c32d64184de97f030613",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/kw.json",
+      "path": "public/data/kwviz/kw.json",
+      "sha256": "4e2d03445e8442a847a847c8f5e7467db92f9fb951aa2bdad4a14bb0f7b38e4c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ky.json",
+      "path": "public/data/kwviz/ky.json",
+      "sha256": "2957351feb937bf166f59f13607bac63a2507529e21a62ac8106ff254191d9d3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/l2.json",
+      "path": "public/data/kwviz/l2.json",
+      "sha256": "4d54f6ccfd5df4a9efded3f42ad9444858e3af1e6efb0852ee62fc2c4c5f04b1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/l3.json",
+      "path": "public/data/kwviz/l3.json",
+      "sha256": "3db058b6c19502ecc2fbdb6022c260f099df2f2f3c26648d51ca8652031d76a1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/l4.json",
+      "path": "public/data/kwviz/l4.json",
+      "sha256": "437ea31506b1e745836d173b5d2cede08d494b8b8dd4e8a0ef47dbcf280b1eac",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/l7.json",
+      "path": "public/data/kwviz/l7.json",
+      "sha256": "f8b708ab6c928f9a24ea3d6b89631d7bcd82ec8bec71b717e9b3657e97f20bd7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/l_.json",
+      "path": "public/data/kwviz/l_.json",
+      "sha256": "dc9e3634b1708b502cf0f75f05acd6caa0899ab7377ada839820efe0b1f83408",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/la.json",
+      "path": "public/data/kwviz/la.json",
+      "sha256": "74ba3357418292c923735c60d3e7f3f87322dfe40d7ec3f7c4c0fb2a26bc6e00",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ld.json",
+      "path": "public/data/kwviz/ld.json",
+      "sha256": "20da6522726f0fd5f691ff3514cd514b7f716b6e1f78da0def1523fd086df87b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/le.json",
+      "path": "public/data/kwviz/le.json",
+      "sha256": "6a2c136313e640a0dc5ec90f019549409789e9ea276e3870a967bfded0b6efbd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lf.json",
+      "path": "public/data/kwviz/lf.json",
+      "sha256": "b5b00a0c76469b3f4563e5ee6c6ff77e5d6a39cf7aa05fc2acbd355e1e2b9db9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lg.json",
+      "path": "public/data/kwviz/lg.json",
+      "sha256": "3f29c051fcec3422af2a9a30ff6c3afef25586a3c811182cb314efe85c44e3b4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/li.json",
+      "path": "public/data/kwviz/li.json",
+      "sha256": "40d8821e42028048166821cf3559a229b23f8e2f2307f28b51d39227266a0f98",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ll.json",
+      "path": "public/data/kwviz/ll.json",
+      "sha256": "865ad317ea519497d5abfd43a6df2f3fd3a632922bed05f302a81f1b25dbb832",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ln.json",
+      "path": "public/data/kwviz/ln.json",
+      "sha256": "4e54abb4be87f7b3863796989dff02aca95a2d3227f7bbf5de011e140138a565",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lo.json",
+      "path": "public/data/kwviz/lo.json",
+      "sha256": "0a3b9a7d1c39e9e0c0212816ccd5bf179ac0785d811c0b44f9c6137381780702",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lp.json",
+      "path": "public/data/kwviz/lp.json",
+      "sha256": "fa66a4712370304929b97c86d28ba1d1f0aa3c4eec2fa2f5342774789afc6964",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lr.json",
+      "path": "public/data/kwviz/lr.json",
+      "sha256": "012acf243b1f2c7539984a2c4a3d529465189a6580b6b0bafa145b1c4c032f80",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ls.json",
+      "path": "public/data/kwviz/ls.json",
+      "sha256": "8cbff967ff7a65a625994219d637910b2c21cb5e43c8538a971b386cbcc950bd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lt.json",
+      "path": "public/data/kwviz/lt.json",
+      "sha256": "790623def55272ce09fa02499b9be26e1e14be7ba1319b29084691aa332a17d8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lu.json",
+      "path": "public/data/kwviz/lu.json",
+      "sha256": "c835670e1509a712bad84cd3b108d2baaf007fefdf062a4969d662337e0233c7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lw.json",
+      "path": "public/data/kwviz/lw.json",
+      "sha256": "ab8bbd06d861831fe710438294b32d1f91a75f94ce83d54e372f563fde246518",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/lz.json",
+      "path": "public/data/kwviz/lz.json",
+      "sha256": "35ffa6e5cf398218da9903c8c02b457d99615f00358a42e4016971d42a156740",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/m2.json",
+      "path": "public/data/kwviz/m2.json",
+      "sha256": "d68071935b0df1d29c98ee935ac2bbecba6b6801aea12b514cf51a09dbd4fec8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/m_.json",
+      "path": "public/data/kwviz/m_.json",
+      "sha256": "e63d61fd5f2ee5462c545151ba15443fb26100e2490963a0704f8b2ae6cb016c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ma.json",
+      "path": "public/data/kwviz/ma.json",
+      "sha256": "24bf0cbbe56c6e90c902c2d8a911a74f6c9fa43bd49a412f2d98385448eebcfd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mc.json",
+      "path": "public/data/kwviz/mc.json",
+      "sha256": "6f845d4e55d2329778c377fcf735c0e49e9ac9a35ac8cd2da8ada60bed240bf6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/md.json",
+      "path": "public/data/kwviz/md.json",
+      "sha256": "41be38d032a0c4cd214409f19143f5427381454c9ee6141b74072759767c244a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/me.json",
+      "path": "public/data/kwviz/me.json",
+      "sha256": "7043cfdc5923cee03ec2e36d0716eff987af4887730f94aeeae2fd7b643fe91f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mf.json",
+      "path": "public/data/kwviz/mf.json",
+      "sha256": "ea95906a0a81acde2276806f6c740da4502adc629d1f7fb09c208e3a64159972",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mi.json",
+      "path": "public/data/kwviz/mi.json",
+      "sha256": "8e937b386230e98164bcd236d68ac20f6e825af4fa90b31b91b4046c6e05f098",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ml.json",
+      "path": "public/data/kwviz/ml.json",
+      "sha256": "8e79a494173f8a2aca8d3c40e21355b3be6c09c4b0ad9059fc889d2c6d247859",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mo.json",
+      "path": "public/data/kwviz/mo.json",
+      "sha256": "be294db1ab448da06edc9c73afaaed65cdd2f718ffc2d547bd3bbebf194b9bf8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mp.json",
+      "path": "public/data/kwviz/mp.json",
+      "sha256": "61f3280438f0f874b5c4eca7447c08e133bdaf2e676cad33302a4ebc4b95eb96",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mq.json",
+      "path": "public/data/kwviz/mq.json",
+      "sha256": "ce2586c88d5121a55c042a2633c2fdf12068aa6ab64f863dab96975253cbc7b0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mr.json",
+      "path": "public/data/kwviz/mr.json",
+      "sha256": "abdf9abfb5768df888dd9160fb7140686a6974e4057071476d6e9be4b5d13be9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/mu.json",
+      "path": "public/data/kwviz/mu.json",
+      "sha256": "86e0966bc68cacdf4232d78be5d0d088985ea485b269dd188cc8dbfe53ee5cab",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/my.json",
+      "path": "public/data/kwviz/my.json",
+      "sha256": "890daf43877d827ae764e251595aacaf2e5450e2d221d8d951f5421c764594e8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/n_.json",
+      "path": "public/data/kwviz/n_.json",
+      "sha256": "c4aff511fccbc11decb927e3d14aa500cac8d2482273bf5af039e17fe56fe65a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/na.json",
+      "path": "public/data/kwviz/na.json",
+      "sha256": "93e8bbfd7dc827c3c5889133e98266a34f35a07ddea090af5c07246055c5372c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nb.json",
+      "path": "public/data/kwviz/nb.json",
+      "sha256": "a51a2939129e577e35d8dda4f767e7e1635f33e28b8896e61172e809c92814ad",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nc.json",
+      "path": "public/data/kwviz/nc.json",
+      "sha256": "568622a45261fcec0badf2fb8048491130a4cead9c89078a22f47f86d83c3042",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nd.json",
+      "path": "public/data/kwviz/nd.json",
+      "sha256": "8e0b46e11b6890f6b4a742584925b6f9e550b6e4aa3f84d5fd557745dc881db4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ne.json",
+      "path": "public/data/kwviz/ne.json",
+      "sha256": "71e041ae82c45fa4b93e0cb483b1376f3d1760dd977ea0f85b63790eb3fd1717",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nf.json",
+      "path": "public/data/kwviz/nf.json",
+      "sha256": "19425874381ded66ccfbf740c1169912bac4743a75dbc519c9128535baeaed83",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ni.json",
+      "path": "public/data/kwviz/ni.json",
+      "sha256": "5bbe4179127098c4e22fbdffc863b051063c9633b94313e67cb9c88ab198f2e7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/no.json",
+      "path": "public/data/kwviz/no.json",
+      "sha256": "e7416498eab8a028030f5d8c5a7e2ffe3edce111a9260ed56d50ec757a571ba3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/np.json",
+      "path": "public/data/kwviz/np.json",
+      "sha256": "191a1b4882f6710e442f52cc8262632f69ef1da50007013e2c1b7089c290d70a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nr.json",
+      "path": "public/data/kwviz/nr.json",
+      "sha256": "824271cfdb40ba74b973c30161f37e63c14c868daa66a1f18cfde4dd3cf1d70b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nt.json",
+      "path": "public/data/kwviz/nt.json",
+      "sha256": "9719ee404a8a6ca328bf1a9418b995f5cdfca7335f507f12a3e96f36fe655bbb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nu.json",
+      "path": "public/data/kwviz/nu.json",
+      "sha256": "40dc4a966d7ee32e314dbc0966376f2723f309c98b034db8be165c0964bb6255",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/nv.json",
+      "path": "public/data/kwviz/nv.json",
+      "sha256": "e38c4319b241084c42f90d3dbffdb111b9e2665ec7617b15261d7f214ea4e8e8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ny.json",
+      "path": "public/data/kwviz/ny.json",
+      "sha256": "8f5b93cd535d2414dad4928136f2da6c354f07cab524fdf3bb405bb65d479511",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/oa.json",
+      "path": "public/data/kwviz/oa.json",
+      "sha256": "4ebb2202e68550e5dc0acc226b925ad9e10fb7939a001d575d226ab2047f8a85",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ob.json",
+      "path": "public/data/kwviz/ob.json",
+      "sha256": "5e103c586c07fff67a634aaa875adc3ccb3607cca965148c0e08539e3e92871e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/oc.json",
+      "path": "public/data/kwviz/oc.json",
+      "sha256": "127d4ea4e5f24c380101d6ce6b21790e361342b6c597e24eaf1ab11f51e3c657",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/od.json",
+      "path": "public/data/kwviz/od.json",
+      "sha256": "bd03b5100898f7cca2cb0ec108ab104e3c67c316e57f226d9eaf373ecc986737",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/oe.json",
+      "path": "public/data/kwviz/oe.json",
+      "sha256": "2096577e246aa80007779f034634b2a407750824c7b7b643535e96032b72d536",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/of.json",
+      "path": "public/data/kwviz/of.json",
+      "sha256": "e66f56d7f75005bcdb26572a29694335f5d18162f8cc74ac3ae3485b05b29767",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/og.json",
+      "path": "public/data/kwviz/og.json",
+      "sha256": "ed288e87d8de5dcc64541752cec5bbab11a75784dddb8609b79873dd4a9f6b0c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/oi.json",
+      "path": "public/data/kwviz/oi.json",
+      "sha256": "9f1c1543068c00b931ccc9ce255e352d7e53fce91de480b81b67b08017c9a36b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ol.json",
+      "path": "public/data/kwviz/ol.json",
+      "sha256": "ce8bf6690d0e755c04a0a3c8e5dc65ea238c81a2348466d23e45ce791dbaefb4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/om.json",
+      "path": "public/data/kwviz/om.json",
+      "sha256": "d2f041fc92ad980566ec9e873c3d84ba33a1948ff9857b8b964818712a574a25",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/on.json",
+      "path": "public/data/kwviz/on.json",
+      "sha256": "f2d22c08a22e6f05eebc1a76281fa6b39ea0f13401d2149f6c8aa588b3e4cb6d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/op.json",
+      "path": "public/data/kwviz/op.json",
+      "sha256": "b06617e64d9b67ec37623371bd2e30ae2383997f397014d04130fd51a912fc4b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/or.json",
+      "path": "public/data/kwviz/or.json",
+      "sha256": "feb91d53778143ef5e1e45f1acb373cc1cb38864da002ad1447de7911dd85ce2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/os.json",
+      "path": "public/data/kwviz/os.json",
+      "sha256": "efe93ea9ae5b95a442187c863b5f99b47ccb46c2c1a40abb5beff939ad5e31d1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ot.json",
+      "path": "public/data/kwviz/ot.json",
+      "sha256": "17d694e56b3a2e4f96dad3a0f4b8f0e7b2bd7533d58058bff27baa49c1030637",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ou.json",
+      "path": "public/data/kwviz/ou.json",
+      "sha256": "3ab1d7927d0f6b33f351ff67499945e1ebb6d04ebff63602191eb49dd3837264",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ov.json",
+      "path": "public/data/kwviz/ov.json",
+      "sha256": "45735d03f75dcdd32fbc68b824d868325b726f46da1024af6ea83f710b26b900",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ow.json",
+      "path": "public/data/kwviz/ow.json",
+      "sha256": "2fc57ad1a4e387f7890918a6a869fc9cc59b46609651c02a4ae46249d811442e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/p3.json",
+      "path": "public/data/kwviz/p3.json",
+      "sha256": "a18ed3f78651da0c7abef907ef2c2a010526a7268e1d4d709fd9f5046eb9ce0e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/p_.json",
+      "path": "public/data/kwviz/p_.json",
+      "sha256": "91aa648fbfebe834832193fd099364239240beff4ace009ce7c3e2201b9c4418",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pa.json",
+      "path": "public/data/kwviz/pa.json",
+      "sha256": "b57ff5cc841df49293540b23ba2545a893d9ab9a1085d7da865314e15243f155",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pb.json",
+      "path": "public/data/kwviz/pb.json",
+      "sha256": "9f132d2c776605a5dc65a7a05954f4a57567f3e831d63a72edbaef660c13eb9f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pc.json",
+      "path": "public/data/kwviz/pc.json",
+      "sha256": "be016f64ea301c81c745877da3245c1882c3721edaa571d39bf5c54ac62819c6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pd.json",
+      "path": "public/data/kwviz/pd.json",
+      "sha256": "596ed8f3b03927e507503e10205e25aed613b0841797e4b719cc9b8677ca1974",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pe.json",
+      "path": "public/data/kwviz/pe.json",
+      "sha256": "26d8945ae771ee9b52c049408c6b74bb38e8485470dbe971c9a738aa0dad7598",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ph.json",
+      "path": "public/data/kwviz/ph.json",
+      "sha256": "1b5fc16f461afe4a199284037ed00c13faec44d006757a34b35765753b01a518",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pi.json",
+      "path": "public/data/kwviz/pi.json",
+      "sha256": "5f7349ec2979f62a7686ce8a6d30962f7a39c82dfefc8c2958367c0a95e4ed99",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pk.json",
+      "path": "public/data/kwviz/pk.json",
+      "sha256": "10eace40d2d8eccbf8c075aaca91805b4ae1f8d47a8842cdf6202a54b86ba49e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pl.json",
+      "path": "public/data/kwviz/pl.json",
+      "sha256": "888e568e565162ec1f5653da3fea21e4a9d4da5e5f2a38ddfb6e8eea3d0a7b74",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pm.json",
+      "path": "public/data/kwviz/pm.json",
+      "sha256": "33fd6aa033af2be35a546ef7b4d1bf93638718a3b506edf90ae5f058363bd49d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/po.json",
+      "path": "public/data/kwviz/po.json",
+      "sha256": "50a8a8de58abc4e35c91bc6846b95dbd8c2f65c5c92f8956e6acf809931e0c49",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pp.json",
+      "path": "public/data/kwviz/pp.json",
+      "sha256": "06ea56479f786327e72b8884e8e222efb642634cea2dec02b7e30cbc27be83de",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pr.json",
+      "path": "public/data/kwviz/pr.json",
+      "sha256": "91fc7d3188f67d8bd063f5cbea0ac8232c80209b23ce6af0170e40bdc2475782",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ps.json",
+      "path": "public/data/kwviz/ps.json",
+      "sha256": "0731e6f9c9450716ee6fcd6dd1e29949f61a41630e59eb45a14ef9e757b542ee",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/pu.json",
+      "path": "public/data/kwviz/pu.json",
+      "sha256": "490a65ae8de7cecb8dea644bf1f07cab49938fa464785d3e27a9951588dd098b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/py.json",
+      "path": "public/data/kwviz/py.json",
+      "sha256": "2f1d9f8fd3e8458fb663d58bc384b9491fc5d67d44ff8cc5cc3d4e7c2b4d398a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/q_.json",
+      "path": "public/data/kwviz/q_.json",
+      "sha256": "eb5e6f35ea7d00fbd5fa06f3134583cd5b5b2d707abd437e7b8a110bc394eace",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/qo.json",
+      "path": "public/data/kwviz/qo.json",
+      "sha256": "1686d3d0e84ced636db828799eda5bf4dabf77ecc3fdcbb07676da29eb2092fe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/qr.json",
+      "path": "public/data/kwviz/qr.json",
+      "sha256": "56fec444aaa293e738e393d1b08415c0d93402b98731dce2e31188ec3f0d9723",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/qu.json",
+      "path": "public/data/kwviz/qu.json",
+      "sha256": "0d951b19bfecbe4bf13bcfab4bf02fa790ae55ebbc64cd7bb941e3500290cf1c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/r2.json",
+      "path": "public/data/kwviz/r2.json",
+      "sha256": "faf52cf392b5b22ffc0664672777d18f024e0edfe142ae3e7b10f353bd068337",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/r_.json",
+      "path": "public/data/kwviz/r_.json",
+      "sha256": "3f887a4a4061e8e814ebec8a26c50ea7e664deb5c969cd9064007f1e841e63dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ra.json",
+      "path": "public/data/kwviz/ra.json",
+      "sha256": "fef545fa9384f995d267977bad23e1ffa1989fc67d386bf88d7e68f1aa0af43f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rb.json",
+      "path": "public/data/kwviz/rb.json",
+      "sha256": "17edde7616f02043ff56703af92d311b10ce0749e7e2a9c40f61983b153965e5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rc.json",
+      "path": "public/data/kwviz/rc.json",
+      "sha256": "834a2deaae5b9f15681edb5025a48f4d026af80e9a8dc0e8020a426a0fbd52db",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rd.json",
+      "path": "public/data/kwviz/rd.json",
+      "sha256": "41f7196c005a32bf8ec21c94660534a1874c156b17a8fcd809e6f95d3ee70c83",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/re.json",
+      "path": "public/data/kwviz/re.json",
+      "sha256": "73ac1d078b9874b3e6e84d25e027745c050a331724d332c9f5a7f8d83af10c00",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rf.json",
+      "path": "public/data/kwviz/rf.json",
+      "sha256": "416890a9674a0eb2d79683fc591d450d19576100b0282e0ce300d601d1fc0c27",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ri.json",
+      "path": "public/data/kwviz/ri.json",
+      "sha256": "de481d4c3ca5e9f18706ccbe12d1c40107ad799f77ba84518aad32e35d268b11",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rm.json",
+      "path": "public/data/kwviz/rm.json",
+      "sha256": "5100e0807a47a4c486ba7aeafe89b12c53a9f6241f43583cd9ca3855ea9379a7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ro.json",
+      "path": "public/data/kwviz/ro.json",
+      "sha256": "04f35473e5be9c2777651830b08c43fc287fb7360073d5bb6d9a52e84ab77c95",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rp.json",
+      "path": "public/data/kwviz/rp.json",
+      "sha256": "aace7d72b66045f64590d2e8e99a04841604ab4d8d64d3f651fe6a59751e7e65",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rs.json",
+      "path": "public/data/kwviz/rs.json",
+      "sha256": "6c05eb23b0768850d0bc718fabf7b4c894e9533ec3fb1548fe599e6975bbfee1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/rt.json",
+      "path": "public/data/kwviz/rt.json",
+      "sha256": "4ea6261b78d6c5cfec2f82be2513e667299a41b73ba3e9a3de2eee3669b6e496",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ru.json",
+      "path": "public/data/kwviz/ru.json",
+      "sha256": "fc977f0c9eefaff5a4e8a19236e5ead6caaa769b06ed265c1be7bc6a682ea7bf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/s_.json",
+      "path": "public/data/kwviz/s_.json",
+      "sha256": "5cb7091c6a22e31e887f86aac46f843b37b833d0dd99dc1e86aeadb845eaf81b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sa.json",
+      "path": "public/data/kwviz/sa.json",
+      "sha256": "d7d49907255d1c6fb48cb87f7b3794619d413d23506950189d8ba0a5499b6c1f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sb.json",
+      "path": "public/data/kwviz/sb.json",
+      "sha256": "39d0feae2af1ba3f84285b3a8f6cf638f4f9d05827d76080171142bc4f84296c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sc.json",
+      "path": "public/data/kwviz/sc.json",
+      "sha256": "04888a59fc517412a5c6f669b065a6fe92eed13a93f5591e824dbbfc956f64e2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sd.json",
+      "path": "public/data/kwviz/sd.json",
+      "sha256": "109a189e6696bf83520e3f3db04d76f65a18b75d068d645047b20c46fad6b263",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/se.json",
+      "path": "public/data/kwviz/se.json",
+      "sha256": "2e957826c4679d7dbe6a2a09342b237efe7f0b78d84962023941f5ec3cbde5ea",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sf.json",
+      "path": "public/data/kwviz/sf.json",
+      "sha256": "7efdbdc7b88e52c58e021493adeabe5ea4562995022f9d763d14835a0772c878",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sg.json",
+      "path": "public/data/kwviz/sg.json",
+      "sha256": "87bebfc25bd1a32c7e8de1088b6b8b102e8b0375c977e1a0e15dca4bb18aebbb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sh.json",
+      "path": "public/data/kwviz/sh.json",
+      "sha256": "287bf9852c82dea7edcde77c7cfada8ea61d9dd1f8597fd13331eedc29b12668",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/si.json",
+      "path": "public/data/kwviz/si.json",
+      "sha256": "1a1c85fb22059da4753ac3043e31c34e9b59b541be35df5e35e26342d896339b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sk.json",
+      "path": "public/data/kwviz/sk.json",
+      "sha256": "e6b24224979abfae2ed09621a881d8d24c789a3f5a267de0e6bf58fd517efbbd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sl.json",
+      "path": "public/data/kwviz/sl.json",
+      "sha256": "2682bd3350015ac36e215d2c8d70fd0cf5b2d8281d97fef6f41912d6f745a316",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sm.json",
+      "path": "public/data/kwviz/sm.json",
+      "sha256": "fc0f63488f7214b76911b278d816f97c0f522c503e23aa29446eff3c06ae77ee",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sn.json",
+      "path": "public/data/kwviz/sn.json",
+      "sha256": "6bb6c68544413beba0235eeb2bbc45c29ab9071ad7b71cd2dc8652653b1f8f8b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/so.json",
+      "path": "public/data/kwviz/so.json",
+      "sha256": "fb5089b6bdb9cdba63f80d2a51cdef66429112288786a6312f9053c72eacd9c7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sp.json",
+      "path": "public/data/kwviz/sp.json",
+      "sha256": "41622445503ab7ebf204bbb2d188c39bbb1dd3847a9d2b306af125e4e174a29b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sq.json",
+      "path": "public/data/kwviz/sq.json",
+      "sha256": "c8124843f394516ef69201ef73fa4296f7a09152eab62c8b7813f79ffb866ad9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sr.json",
+      "path": "public/data/kwviz/sr.json",
+      "sha256": "66ecabbbe60bc60e6f458b2907794fd707a47f75e3e9e8567ee32010f00147f6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ss.json",
+      "path": "public/data/kwviz/ss.json",
+      "sha256": "f6dc7c81e6ec861a4419b37733dd0d7d37464cf9c234dd51a2df63b07a56ae1e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/st.json",
+      "path": "public/data/kwviz/st.json",
+      "sha256": "6b62e00d0dd2f67d23f1214f28f09bacb171536fdad93c7a771f418d7a2190fa",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/su.json",
+      "path": "public/data/kwviz/su.json",
+      "sha256": "cb9196f9728fb544f0c7ad6d31fe7f29b2b39d4020052337731c68492e969f6d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sw.json",
+      "path": "public/data/kwviz/sw.json",
+      "sha256": "d3dd1b3d6230823e4a180862b62197e3add06a417407d03a4d9648e58785bcc2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/sy.json",
+      "path": "public/data/kwviz/sy.json",
+      "sha256": "1c722ac348e8d11a112cfcb7c145a9d5baa57ed7e8601253933895e36cfc844c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/t_.json",
+      "path": "public/data/kwviz/t_.json",
+      "sha256": "126637cecfde46a7bc226b3f85c399afb4b6cf731a491a45ab7a4323ef60d336",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ta.json",
+      "path": "public/data/kwviz/ta.json",
+      "sha256": "46406dee2a425ba5f04c7e9f1ea00a97a4c64cbc3fbccae9c46457f413d39448",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tc.json",
+      "path": "public/data/kwviz/tc.json",
+      "sha256": "ff15b6ab8931a37d74b70d336b5b3624ed105c97572dd04c84d888249c750a5c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/td.json",
+      "path": "public/data/kwviz/td.json",
+      "sha256": "d430de0ca49f5f94d9390bd209ba43e3bc462774325cad2d4a0cceec03ce15c7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/te.json",
+      "path": "public/data/kwviz/te.json",
+      "sha256": "820be1eed077f8b15866af6a228f969c29eb3438af6a7836b532b9bb15df2381",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tf.json",
+      "path": "public/data/kwviz/tf.json",
+      "sha256": "d57c1d06bc8dbba5780e52c50d7b387c23249df58934dfe5b424bee3a8a4ab0a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/th.json",
+      "path": "public/data/kwviz/th.json",
+      "sha256": "4be7834bdbcbd1d04629d64a533519963ec35244ada30403ea136b10228fd4d5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ti.json",
+      "path": "public/data/kwviz/ti.json",
+      "sha256": "e4d69ecba7b53ce1c4793e1490ae1d259f33774c5070c51bb28efe9b6f9a52a7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tl.json",
+      "path": "public/data/kwviz/tl.json",
+      "sha256": "d4c9545b89b95c281d540b3a724274a6aaca1192ad4ae5b0c727f868336076ac",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/to.json",
+      "path": "public/data/kwviz/to.json",
+      "sha256": "56cb9f5ff578abe699144033307e8629b05cb0e7977cb4cbb490df050d87a7f0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tp.json",
+      "path": "public/data/kwviz/tp.json",
+      "sha256": "2bc187eab848f48f56cfd535204d917c7c3eafd6d4729efd1f6f4448a4b9f01a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tr.json",
+      "path": "public/data/kwviz/tr.json",
+      "sha256": "68674acca7c055b3ad18daa777180781e744661dfb9a6a51f426de1e12ac823d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tt.json",
+      "path": "public/data/kwviz/tt.json",
+      "sha256": "cbb269b1275137c03a13621f780f3f527ace7ad7efbae22e61e4e3a7d6dcab0b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tu.json",
+      "path": "public/data/kwviz/tu.json",
+      "sha256": "2d0da8aa8364e7d1a25c000784d167b7e51baffd27d2d47c92345fad0d4c2331",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/tw.json",
+      "path": "public/data/kwviz/tw.json",
+      "sha256": "2211c3c5c808e1f40d850958122735a23c3a875acbf79baff0fca6d2de1359ea",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ty.json",
+      "path": "public/data/kwviz/ty.json",
+      "sha256": "f794ebd41b13fde64b0ed304d0c09ce952c668c9de3a24324fbea80ec9a78db4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/u_.json",
+      "path": "public/data/kwviz/u_.json",
+      "sha256": "3d5f9cbaae8d0fd6895bf2158105205642180a8e02a5ad25e8bc306484a96faf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ua.json",
+      "path": "public/data/kwviz/ua.json",
+      "sha256": "96272b57dcc876f00019094b1dba2964a80dda5aeec11ae243823ad0856b18b1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ub.json",
+      "path": "public/data/kwviz/ub.json",
+      "sha256": "85fd7dece76514b166ebf5aa5a5e673a4801aa715b168332b0f16d36f824b13a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ud.json",
+      "path": "public/data/kwviz/ud.json",
+      "sha256": "e6b8ac1be8f8cbb83ee3ee6ce7c63d24a92acfbd7e1d017786b374000eebb1fa",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ue.json",
+      "path": "public/data/kwviz/ue.json",
+      "sha256": "7c00c2ae6c8548c058775891c0bf3bebad956c44307bc21ef5273301d640cf3f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ul.json",
+      "path": "public/data/kwviz/ul.json",
+      "sha256": "182d0f58b712be0ea75f6dddf0d25b3573d158fd0ddc5423a962feccbf24abec",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/um.json",
+      "path": "public/data/kwviz/um.json",
+      "sha256": "9a0a1e00ecc589b1aa28e0ad2329f8eda709c0d442656533e4c734c037eae86a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/un.json",
+      "path": "public/data/kwviz/un.json",
+      "sha256": "42657cec118d8d4b8422d4406c3f9ee2780589bc01f754d6d9f1484b799448a7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/up.json",
+      "path": "public/data/kwviz/up.json",
+      "sha256": "6f4f810234bdcd69c6e4a430a6b5f0757084e773b237f6afe81e0b9f3e828f77",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ur.json",
+      "path": "public/data/kwviz/ur.json",
+      "sha256": "a55d546ff9de5a4b7b5dcbe9ec169770372d3df444d06286aa23c6dddc7040ef",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/us.json",
+      "path": "public/data/kwviz/us.json",
+      "sha256": "e8cec83e2a2d3c00f5709421a00be06ba4956a30f55907367b2b79f246ed1b8c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ut.json",
+      "path": "public/data/kwviz/ut.json",
+      "sha256": "d5c3f7adee228a2b4ba667b995d203abaf39a41de135d5aa23271ec0ab726861",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/v2.json",
+      "path": "public/data/kwviz/v2.json",
+      "sha256": "c1c1ed889f93abd7e2b46676cb9f7513174078fcdee44b4e98c90cb2a0436063",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/v_.json",
+      "path": "public/data/kwviz/v_.json",
+      "sha256": "90e4a3b83aa7809a576b4cf0e716fbecea343b4f4ebb8b29cc7ab901e08dde92",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/va.json",
+      "path": "public/data/kwviz/va.json",
+      "sha256": "b701a9d5bfc7a068f031aa6a8ce0fe8b6633be962935555588bac9014dd66f0c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vd.json",
+      "path": "public/data/kwviz/vd.json",
+      "sha256": "7e18c8ef53156e97b1fa244bee0d6a4e261b3c546c605026f2ebe59a68f05e22",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ve.json",
+      "path": "public/data/kwviz/ve.json",
+      "sha256": "6ce6ad31bc413176b540089bd0c788d6d9c2fd5e6b8c2d85b58ed1ec3bf8d924",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vi.json",
+      "path": "public/data/kwviz/vi.json",
+      "sha256": "399cbd6d6d6a1beef88ebda14cfde11a202cb6913497d7746a1612cd880439de",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vl.json",
+      "path": "public/data/kwviz/vl.json",
+      "sha256": "e3afaf98c702a6db9146f0ea96b0223fd9efedc15d3bb1e14e942605f68bfabc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vm.json",
+      "path": "public/data/kwviz/vm.json",
+      "sha256": "f53d6c932066ac2e55be9e8d3f42e725064128d24e08c749a821247eaa8037ad",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vo.json",
+      "path": "public/data/kwviz/vo.json",
+      "sha256": "dc3e02053633879ab1f3eaeea796f906e446f0817c59d49a46b29d8c7b3f1bef",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vp.json",
+      "path": "public/data/kwviz/vp.json",
+      "sha256": "004030557e40a8d65e3550239558eb36d1c832217b554e4dff616b501f99bbdb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vr.json",
+      "path": "public/data/kwviz/vr.json",
+      "sha256": "d6ea5f3a00e48ecd53ecc95e018726aa9b948dd4fbe8d46e571b85320a04fb4e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vu.json",
+      "path": "public/data/kwviz/vu.json",
+      "sha256": "75ca2721e4295fb4b6b2438d2a76386794311183c247dbbd6fac9bbb87ba44cb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/vx.json",
+      "path": "public/data/kwviz/vx.json",
+      "sha256": "cf593e910cf32ad0806f6faeef1c24483c875e13abe9831961247fc5a0968d21",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/w3.json",
+      "path": "public/data/kwviz/w3.json",
+      "sha256": "aa54b5cbecf61930148c32949402f481820fd2ae5050b14d935d38c4c0ac77ed",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/w_.json",
+      "path": "public/data/kwviz/w_.json",
+      "sha256": "9a636e43a87e02eed91c6de844b7db6ec31b759881ffda92abe33adc3951d2c9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wa.json",
+      "path": "public/data/kwviz/wa.json",
+      "sha256": "d613cdc3c43dfd0b63233316d08a6033b9319a97b927a47524e844669e2c9796",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wb.json",
+      "path": "public/data/kwviz/wb.json",
+      "sha256": "657d0a441fdfc1f2deba25c6353ce90edf9d3806f84a01de1429df1432b2157e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wc.json",
+      "path": "public/data/kwviz/wc.json",
+      "sha256": "9915f18db823ea390dcc95616385dada0bc3b63003f1ac619aee3e15afc6c81b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/we.json",
+      "path": "public/data/kwviz/we.json",
+      "sha256": "858f0fa460ae07cb0c5302cd085dbeac45d501fe9e7266148902667869d75fea",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wf.json",
+      "path": "public/data/kwviz/wf.json",
+      "sha256": "db4dc345ba39ed15d1170894bdc50e8c350fc206a9daa470d872df6d1aedee1a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wh.json",
+      "path": "public/data/kwviz/wh.json",
+      "sha256": "ce81499d9766449cd905659ab732d5b651b226caf7b4cca6ee76361c71fb191d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wi.json",
+      "path": "public/data/kwviz/wi.json",
+      "sha256": "7a8087103e37f802ae982c22116898e0afc55ce4cdf4f3bda41e59e77f3c0247",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wm.json",
+      "path": "public/data/kwviz/wm.json",
+      "sha256": "435505576dab125ff5d7190442e5946c98244a855c07cae8d505d041bfbfad03",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wo.json",
+      "path": "public/data/kwviz/wo.json",
+      "sha256": "a25cd1510319710f254c060c0060812bbf75497fd6f51f10f735b5d079e01c93",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wp.json",
+      "path": "public/data/kwviz/wp.json",
+      "sha256": "2e47ef11e86f6356a78044e172d88da07d3d231dc46dba92b36441020407a4c7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/wr.json",
+      "path": "public/data/kwviz/wr.json",
+      "sha256": "909639913f4ea380f025f2a6db27af84d8a52e8333673965054ff772b80490dd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ws.json",
+      "path": "public/data/kwviz/ws.json",
+      "sha256": "b32d0741b1b5b8e91619b5d05d1f1e659a5834018608ab7a4e3f794f199fa460",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/x8.json",
+      "path": "public/data/kwviz/x8.json",
+      "sha256": "bea62a9cde3ad164ab1576d9d8661ac512145112c4a16d551ae8a7376a88eb6e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/x_.json",
+      "path": "public/data/kwviz/x_.json",
+      "sha256": "ddfd264e61560a405bb99846537f2f05a59f75bea8698e6dfe20bd21c34851eb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xa.json",
+      "path": "public/data/kwviz/xa.json",
+      "sha256": "44d8996d2cc68b1c427a859b902e18d67384694c1e097fcb1ab4cdcd96a6fe9a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xb.json",
+      "path": "public/data/kwviz/xb.json",
+      "sha256": "e875e94ee8d5aae977b005770f04d7fd819ab48cfc92f30bec738f45f9a3a3fe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xd.json",
+      "path": "public/data/kwviz/xd.json",
+      "sha256": "c1ac6f8d0af5b6be95101899ae89de284bc7f0da8b86f90675de924c91567968",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xe.json",
+      "path": "public/data/kwviz/xe.json",
+      "sha256": "2e5b75ec2d83ca62bdf6f7705140435f61bc929d69ce323a2113bd46087882ee",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xg.json",
+      "path": "public/data/kwviz/xg.json",
+      "sha256": "4ba04bb65e8295a704a7f11cbe93e56e888b5b14aa9ea6f05e185a89c09e151b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xh.json",
+      "path": "public/data/kwviz/xh.json",
+      "sha256": "a260ff561ffcbf44547ae59c004cdd1c80fb601680b067c627693c6e85381f4e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xl.json",
+      "path": "public/data/kwviz/xl.json",
+      "sha256": "bdfc92114f6127d73ed250c94c34484435b1dce8a538a83ec5e5e41f3eba4b41",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xm.json",
+      "path": "public/data/kwviz/xm.json",
+      "sha256": "4d78d504699508e0cacf31f8047417b1aa4a9478260f7b25116d2c6c5036dedc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xn.json",
+      "path": "public/data/kwviz/xn.json",
+      "sha256": "17654e92afbede79e733abdf3fc1d5f5d6c2e07fe019122fc81bd000c0792983",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xo.json",
+      "path": "public/data/kwviz/xo.json",
+      "sha256": "13d566d6908b62069ac1b3d2d8b170f64eccabd6c4e8de20370d763dfd5d7dff",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xp.json",
+      "path": "public/data/kwviz/xp.json",
+      "sha256": "dc8704a4abe12033148d370123ca54ea68d2890a93fa142565efe9e1be89d124",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xs.json",
+      "path": "public/data/kwviz/xs.json",
+      "sha256": "163f63e0b32267d3373979df849d58ab3d3d589a55a23269571de10eb21087f0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/xu.json",
+      "path": "public/data/kwviz/xu.json",
+      "sha256": "580237bd5b0bc0720043830c025a261c178d6c9d8c46c2b6c81e3101ff62ad18",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ya.json",
+      "path": "public/data/kwviz/ya.json",
+      "sha256": "2ab9ca5fc690adfc58fe97c1ebc1583f2cfe9a557158bd53bdb2514ed7417e18",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/yc.json",
+      "path": "public/data/kwviz/yc.json",
+      "sha256": "8ee15d84b136a257ead7cd954f0acc07432f06e77697401d021db2b11c7a2414",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/yi.json",
+      "path": "public/data/kwviz/yi.json",
+      "sha256": "64fd1748265b3a13281923bdfdfdd5adfe2ff6c6e73e78d399e57c06025aebd5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/yo.json",
+      "path": "public/data/kwviz/yo.json",
+      "sha256": "cbc5f0b9d979808047d948144c335008ebbbd3d433aa62dbdc1153062994487c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/z_.json",
+      "path": "public/data/kwviz/z_.json",
+      "sha256": "e4dddb51a95d0a89cba11d6812f40757801fb70d76864f0e535bf2df201ec61e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/za.json",
+      "path": "public/data/kwviz/za.json",
+      "sha256": "c981d16043f226de93c6818310c8d8570879666ce160d301a921004ce829eef6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/ze.json",
+      "path": "public/data/kwviz/ze.json",
+      "sha256": "d1f38dce2838df584316f23536b8a4292c74df50170ea712d55e37c7ed2bf429",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/zi.json",
+      "path": "public/data/kwviz/zi.json",
+      "sha256": "2756d676c5eaf64c52e36510842e4ea40b3cab0831a408c6179ea20ea4a63baf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/zo.json",
+      "path": "public/data/kwviz/zo.json",
+      "sha256": "68fe76d40548a5bfadf73b3beb5df5dbcff2b4679c3309ae42fcb344f1157357",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/zr.json",
+      "path": "public/data/kwviz/zr.json",
+      "sha256": "43105fc470d76f5ce76cd1b423c79c0bd06c367e0b547c391363c239cb67ca5f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/zs.json",
+      "path": "public/data/kwviz/zs.json",
+      "sha256": "5f7832b4c3eec79fa4d7ebd862cd0a852d76d1c9e7aa825e70270473b838be94",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/kwviz/zy.json",
+      "path": "public/data/kwviz/zy.json",
+      "sha256": "6364781bcd28937124d3ae08e4dfc7cc1aa7adaac68229c87f68d1d72417c326",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/priority.json",
+      "path": "public/data/priority.json",
+      "sha256": "ea0ff44460c762c51308cfa89243fba0ed076fb8539f67da67eeeaa4a9206499",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/questions.json",
+      "path": "public/data/questions.json",
+      "sha256": "31af25f0c9bd04bf1019b876e53deb31c53738df25ab47e8c4d1805d8067a8d8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "public/data/topics.json",
+      "path": "public/data/topics.json",
+      "sha256": "d847a5cb0a57e207114352f07013c2e9c5a250715268703f2e7d3b9ee73821c2",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/CA.json",
+      "path": "content/answers/CA.json",
+      "sha256": "805978f79b5216e819fb1c8a55c21dffd6d2a62f9d273e36a572e42f6f9edfca",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/DB.json",
+      "path": "content/answers/DB.json",
+      "sha256": "d755bada184909ff92cac989b4ff63df7de8f06ff4322f318029e6b76a474a00",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/DS.json",
+      "path": "content/answers/DS.json",
+      "sha256": "8ef0d51de1ab3a7e79cfd74d7469f8b9078452b1cb0b2783bfb18deeaa0a9f15",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/MGT.json",
+      "path": "content/answers/MGT.json",
+      "sha256": "14e2281e3aa6c6122918dc89923f52439614a24720cdc6fbbaf245d9807915fd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/NEW.json",
+      "path": "content/answers/NEW.json",
+      "sha256": "5e83897b173a2118d327c0aff222c7e4d484848178697f19cfeb33b4c304c77d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/NW.json",
+      "path": "content/answers/NW.json",
+      "sha256": "da1dea281d7e24aa88b0e188232126ee4018f6b70c59f4026707f51a3218b8be",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SE.json",
+      "path": "content/answers/SE.json",
+      "sha256": "823f07ff90b04fa59763d29c87535eb7f16fe0a66a2671e6303ecef558ec224d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-00ff785d.json",
+      "path": "content/answers/SEC/t-00ff785d.json",
+      "sha256": "67c0292c3edb854f3f5ceb96b055b2baff65fb6cce3ce12fac033bea22195fb9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-02db08b4.json",
+      "path": "content/answers/SEC/t-02db08b4.json",
+      "sha256": "ab549614821e37caa03c2803fa57a4ad8da4d297ae80fa84a6c5292c41b4e93e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-02e4cce3.json",
+      "path": "content/answers/SEC/t-02e4cce3.json",
+      "sha256": "fecd1f7ef5b8f212bc48059367b8c5e2c269a27376c88ca711191b79b20f9efd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-03c5ae8d.json",
+      "path": "content/answers/SEC/t-03c5ae8d.json",
+      "sha256": "da4fd9dcb3a4b852ec081b3913abba85deeaa7691edeed747d553672cbcf58e8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-05da02aa.json",
+      "path": "content/answers/SEC/t-05da02aa.json",
+      "sha256": "f55463669bf6b7b15acff9c96140bb53f555bff7ae3c5897de716a4bea588baf",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-07f807c3.json",
+      "path": "content/answers/SEC/t-07f807c3.json",
+      "sha256": "b94f6406c3ac2e96c1772ef9e87cbc8c226def3ff47f07fd4abbdc35461558ba",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-09a83ca7.json",
+      "path": "content/answers/SEC/t-09a83ca7.json",
+      "sha256": "ed35ea039000422ff959e3d34e9edac1be86aba00bea6003e34a4fe89d651cef",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-0b5c7d80.json",
+      "path": "content/answers/SEC/t-0b5c7d80.json",
+      "sha256": "6cd6cd3cf6c2ef44081f84505646a258067f77a6674b47dcceb8f1387640a152",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-0b781d48.json",
+      "path": "content/answers/SEC/t-0b781d48.json",
+      "sha256": "36bbdde917a0f40a6c267b6dc22a953dbdbf9bff031fb2b38488c83163786377",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-0bba4365.json",
+      "path": "content/answers/SEC/t-0bba4365.json",
+      "sha256": "e221b293ec60385d686f34c70bc13976570e86ac2a6c0b60eb5282d1f22e6df6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-0f5dbce6.json",
+      "path": "content/answers/SEC/t-0f5dbce6.json",
+      "sha256": "51451b75381d999c22045fcd630ddb3f9c494d76dc85c667335ee93a2628cb68",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-12abe3cc.json",
+      "path": "content/answers/SEC/t-12abe3cc.json",
+      "sha256": "14dd96cb3e31521374ba997ca70f9b38c9e6b8dccabde48a7bb9aca9809c0d6f",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-147dbc3f.json",
+      "path": "content/answers/SEC/t-147dbc3f.json",
+      "sha256": "7b68b5f5c329ed67997377156943a0b95e5ea52da716d223cb884368683ce19c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-15959f1e.json",
+      "path": "content/answers/SEC/t-15959f1e.json",
+      "sha256": "e2c297f2fcc34ccf0b83feb043c09ed4601e2b97f58ab9b4cdfc37522db8596a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-1729657d.json",
+      "path": "content/answers/SEC/t-1729657d.json",
+      "sha256": "9e82a5ea27f9addbd6cd2e80a9cb2b358f9e8906674900652af47f09d30fa5fc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-175fd923.json",
+      "path": "content/answers/SEC/t-175fd923.json",
+      "sha256": "303d1ef4956fa949b531161cbb76893d1f5c7f09890e9e7696f7498cbf52aa05",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC/t-17ea0ace.json",
+      "path": "content/answers/SEC/t-17ea0ace.json",
+      "sha256": "7c10dbc00e3804975e5e31c29c5f6d21e8da3fce79b62a63cda7b65106ad3d9b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/content/SEC.json",
+      "path": "content/answers/SEC.json",
+      "sha256": "71f1d0bf4181e2188dee8792cb706e69f581a7a19286f745888d93249ac4898b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/ANSWER_GUIDE.md",
+      "path": "content/work/ANSWER_GUIDE.md",
+      "sha256": "3acfb8b4b0560ced05fc5df96f2b2fa362013c7907f2763a3067654e5c6abf27",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keyword_aliases.json",
+      "path": "content/work/keyword_aliases.json",
+      "sha256": "2d6f1e18b07282c7138998839eaddff47a90c0e10fb6f540f41b915e16affd3c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-kw.json",
+      "path": "content/work/keywords-kw.json",
+      "sha256": "af998c237104a157a469b6547c46f8bad47b211843e02212d8a751329692fc85",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-new12.json",
+      "path": "content/work/keywords-new12.json",
+      "sha256": "44cae3c781695e27d521e40de830180ba93ac5286bf36eb4d9ab33a1dd8a09b4",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se10.json",
+      "path": "content/work/keywords-se10.json",
+      "sha256": "82c77a64251e9e169d32f0a21eda4d434e8b3100b7b4558670c22a33bb610cfb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se11.json",
+      "path": "content/work/keywords-se11.json",
+      "sha256": "e086c1813a6307ecb42ba9357ba6181fd5ce69237544884a800423f6b5537675",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se12.json",
+      "path": "content/work/keywords-se12.json",
+      "sha256": "f46a1fc6470b9f11b47164054ad1d7635c9230564d5e5209d6becf1c34ce19b9",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se13.json",
+      "path": "content/work/keywords-se13.json",
+      "sha256": "b7d231a98a715cb8529dee2cfd83be1d61db4fac90c988c7c5646f304a87a485",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se6.json",
+      "path": "content/work/keywords-se6.json",
+      "sha256": "202d8bdf65c247d972db556db5e2c517e6b4d04a3123006a32754f24dbfc0c43",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se7.json",
+      "path": "content/work/keywords-se7.json",
+      "sha256": "75986f6c0369aabc3eb139cce9e760c3d293ee1648f5c18982e7c67ff12ab236",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se8.json",
+      "path": "content/work/keywords-se8.json",
+      "sha256": "b18b3da2f5b456dd986d3eee36d6c027fcc83eed2a170e6ffd946e8ad98d56d6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-se9.json",
+      "path": "content/work/keywords-se9.json",
+      "sha256": "0b3f92fe289ea63a4400da83993001558e291bddcb43d1e029a54e6c85bd7dfe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec1.json",
+      "path": "content/work/keywords-sec1.json",
+      "sha256": "3fbef1fe38260b2c8466532bd07fdb70c52c99827a1d4be9c657d59264d870dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec10.json",
+      "path": "content/work/keywords-sec10.json",
+      "sha256": "1b551860a743f87e818a2c00c84519c2f52ad48a6dc59ab966755c10e200fbeb",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec11.json",
+      "path": "content/work/keywords-sec11.json",
+      "sha256": "1b07c89bafc1a5906728bc19a64e008183e26fc2aec1e98307829c895c7af144",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec12.json",
+      "path": "content/work/keywords-sec12.json",
+      "sha256": "d217686c3be6ac3b6fc76d897ec7144db4a6b7f20ad418aac49c2c248baaf5e7",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec2.json",
+      "path": "content/work/keywords-sec2.json",
+      "sha256": "36e2153de4219564565c5b899c95837d7cf9e46adfe823cd131f16fab12acb27",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec3.json",
+      "path": "content/work/keywords-sec3.json",
+      "sha256": "d2ca9bc38042a399fbb1715e3df69e79d4a8ebbfd84dfa9e4b8ac645b8e5bb0b",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec4.json",
+      "path": "content/work/keywords-sec4.json",
+      "sha256": "412b57c259b9fcb4108c9cb3bf55835afbf0e69f00cf0e0be6685bc15bf1d3d0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec5.json",
+      "path": "content/work/keywords-sec5.json",
+      "sha256": "133a09bc2f132a6967e90c857bbbe95245cfd4c5452db0b89e6e018abbfafb3c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec6.json",
+      "path": "content/work/keywords-sec6.json",
+      "sha256": "f69541876bd80ae85e005f6ad0a21edd21d8d3c2e42343358785380281915f80",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec7.json",
+      "path": "content/work/keywords-sec7.json",
+      "sha256": "b9dc2a12ea39f18a623d4664bd1c9b18bf65b7ab1ffb16f342dab2e9987d8087",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec8.json",
+      "path": "content/work/keywords-sec8.json",
+      "sha256": "44438886d1dea488405f7cea6bbb4bf8e1d19d3fafad5ddad50183f4efe660a8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/keywords-sec9.json",
+      "path": "content/work/keywords-sec9.json",
+      "sha256": "581ab78a6dbe78ce6d138fe8f2cf255ee137c15f565b9bc51e10ecabfe7695b5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/kwviz/fix/security-review.json",
+      "path": "content/work/kwviz/fix/security-review.json",
+      "sha256": "7fff7357286001264ea6634485f84b337e3b2ced3d0349d15d75163c41e01fd8",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/kwviz/out/all.json",
+      "path": "content/work/kwviz/out/all.json",
+      "sha256": "d75cbec3d14aba793b799cd531b892ebef60f011adb6a47f1ad94e532d98488a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/KWVIZ_GUIDE.md",
+      "path": "content/work/KWVIZ_GUIDE.md",
+      "sha256": "f7ffea9a5e8f88518dca0ced6a239034b93af35495c1ea4de5aac419d2019165",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/ORPHAN_GUIDE.md",
+      "path": "content/work/ORPHAN_GUIDE.md",
+      "sha256": "fb7e8ecf26ae1c4806e42f7e51e6b01cf892d7990d423aab434a8f7606be5be5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec1.json",
+      "path": "content/work/sec1.json",
+      "sha256": "94df981b13e479890d3875f112a22613196fe3ad463a6ad440354c4659cc6812",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec10.json",
+      "path": "content/work/sec10.json",
+      "sha256": "7e532c0d972949889c2ec19227209c52dddf18fc82566f1e05a2654c5b7b5369",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec11.json",
+      "path": "content/work/sec11.json",
+      "sha256": "1ce06420b0a9c60cbc8bdccb87d0338d62da173f07d5985e5eaf029b5f79c6e5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec12.json",
+      "path": "content/work/sec12.json",
+      "sha256": "10ad38b1d4ba9cf3ba152a688794598838253f3013e187e00dc696e480f6d9f1",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec2.json",
+      "path": "content/work/sec2.json",
+      "sha256": "509c42e4217a03831891f2bbf8a877ed8e27837e10fb46255fc1821b6e2981f5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec3.json",
+      "path": "content/work/sec3.json",
+      "sha256": "2299c61ce95ce7db85b623d2f33a29da845f3178192ef69e387bb09191b1eb34",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec4.json",
+      "path": "content/work/sec4.json",
+      "sha256": "7d8f3893c49c487048f93d1b5e7d649e4c969ed7337caf512db5d332c585cbed",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec5.json",
+      "path": "content/work/sec5.json",
+      "sha256": "dd687fa7617881089a02bee66c73fc45373f9e38b730877060e8fb4eec721aab",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec6.json",
+      "path": "content/work/sec6.json",
+      "sha256": "77fde7f56ccb6a0e868bd709a9a96741829b6dbb3186b9090f3f7329b4070ffd",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec7.json",
+      "path": "content/work/sec7.json",
+      "sha256": "586c2ceea5767395fa6042b9c6c2d2516cc8caca987a61f065cf09a30a648a47",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec8.json",
+      "path": "content/work/sec8.json",
+      "sha256": "b8a4bdba2501a0e4fd45d236537505b21d612fcc1261b2552112946cea8cb715",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/contentwork/sec9.json",
+      "path": "content/work/sec9.json",
+      "sha256": "b569d017536ebd2127ab7ec35e3a92e10f1723d28a7e2d029b99898cdc29b7c6",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/fixes.json",
+      "path": "content/rules/fixes.json",
+      "sha256": "56e8c543c7da6b6737e4785635b5f75cabaa9c311574adffaf77d918c65e5282",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/keyword_rules.json",
+      "path": "content/rules/keyword_rules.json",
+      "sha256": "5db7285e9bf4020a8e2ac5ddf4d183f44c0b62230622a22a69a0553d7573a238",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/manual/r101.txt",
+      "path": "content/manual/r101.txt",
+      "sha256": "9912c5af28f40410242feb19199f503486c6b01c117a242fe23a9bc396df613d",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/manual/r102.txt",
+      "path": "content/manual/r102.txt",
+      "sha256": "d0ee3983b2af725951334436cfce1820f47789a18205f3fef6f88188570a66ad",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/manual/r105.txt",
+      "path": "content/manual/r105.txt",
+      "sha256": "bfe72363aa7e9173317d10539f9606f0c5e39c74a50ab76ffc026faba01c4bc5",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/manual/r107.txt",
+      "path": "content/manual/r107.txt",
+      "sha256": "632e7c22c77e3f651a83ad4b0a0e2688530afa3a1d5205f4c7caff50c39a4393",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/manual/r99.txt",
+      "path": "content/manual/r99.txt",
+      "sha256": "5be7f65bcab9f467b2053fe6e4c82d05b0255d0d0b4d6d2772b472a628a315dc",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/merge_rules.json",
+      "path": "content/rules/merge_rules.json",
+      "sha256": "53ad6601128f5dd6aecea09afbeb9f23e43dbf36d0b5b1f3cdf734368cc9e8f3",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/GUIDE.md",
+      "path": "content/topics/GUIDE.md",
+      "sha256": "381c5b00160f1a2a0af28c616b2a59b827e45e085df33e4596a886f9313b3cbe",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics1.json",
+      "path": "content/topics/topics1.json",
+      "sha256": "181b5412b2a2ef3213a4d0de99c871d361fb0d41506da4aa8be072084ed1106e",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics2.json",
+      "path": "content/topics/topics2.json",
+      "sha256": "d3646a2b30ee456965920a410aaca2943df1ae5446f5cf9d7b23e145009e41d0",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics3.json",
+      "path": "content/topics/topics3.json",
+      "sha256": "140ea28692e60e9e6895038f62961b7a571485dfd4216d0f5b958c611da504db",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics4.json",
+      "path": "content/topics/topics4.json",
+      "sha256": "1d38da59caf8e68afa77e14456dfead43b3f69e679758e035d342c628588fe84",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics5.json",
+      "path": "content/topics/topics5.json",
+      "sha256": "8f0cc6d90b05a3ac8790ddcee6f08b4d4ab5e5ef21a99466a776652bf44d1c65",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "scripts/topicwork/topics6.json",
+      "path": "content/topics/topics6.json",
+      "sha256": "ca43530cc3865b9dadb49076f745b6c32332976014f11af8c937a7b36ba4a76c",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/download_list.txt",
+      "path": "정보관리기술사_기출문제/download_list.txt",
+      "sha256": "71e18cdc1bf9545f187145284688edef0ba4bcb2b6d73f26b64afa1a3a5e5c3a",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/progress.json",
+      "path": "정보관리기술사_기출문제/progress.json",
+      "sha256": "789775ca0ca3111b6e58c68ed81b28e2941dffff7359518cfa397dfb14f296aa",
+      "hash_mode": "lf-text"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제101회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제101회_정보관리기술사.pdf",
+      "sha256": "39faffe03f3ffdc51a055b97c0346c93c8775d508a6e73b490be62d4f8893ed1",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제102회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제102회_정보관리기술사.pdf",
+      "sha256": "adf447c21bc494ff310c23a283feb8bdca7cb5e5ea2ce0e21341330f3487de4a",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제104회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제104회_정보관리기술사.pdf",
+      "sha256": "ae9bf879324dc5c1962c01b8e6cacfa2a370f7e9388177bcaee2da6efaceb69b",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제105회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제105회_정보관리기술사.pdf",
+      "sha256": "a2dd65af6b91ac87c1c329818704092c328216fe4590bb6e848d6b7d59e15e20",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제107회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제107회_정보관리기술사.pdf",
+      "sha256": "bcfd77387c480a5c0a8df1d7fb6c23d5df62d08c9ab9153bf818d7cfbb301e73",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제108회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제108회_정보관리기술사.pdf",
+      "sha256": "753b9671aca19fd5c2482a8f785de27e8a538fcdb0f8d1b287e10f738d2629a6",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제110회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제110회_정보관리기술사.pdf",
+      "sha256": "a1678cec8c99678b62eff0b1d4be94792b2ae61c15c1943a1951c0191ab05c7e",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제111회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제111회_정보관리기술사.pdf",
+      "sha256": "2bad75b8859837e8d36a433f57690453764087db2c584d0dcbde9417d6fc2ac9",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제113회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제113회_정보관리기술사.pdf",
+      "sha256": "04d7a1206432aec881d5cab0bab05ceee6533b02d4a549022c70533563f2188d",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제114회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제114회_정보관리기술사.pdf",
+      "sha256": "3774577e2c9fb818d314f0702b1ddd108a252ab7535e823bcdd75bc6e218fea4",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제116회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제116회_정보관리기술사.hwp",
+      "sha256": "c6517ee420f6b87b907141710e86d4334cd80ad8b2bbcda983a6467245063c7f",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제117회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제117회_정보관리기술사.pdf",
+      "sha256": "7ae860933122fa15a931dae6d3c6de1f819651b46ca95c1d63701cfd134522f0",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제118회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제118회_정보관리기술사.pdf",
+      "sha256": "84622071ca0c86ae4cf7d16349dbbe4ba5ff0df99e613fbd7802f923702c07b6",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제119회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제119회_정보관리기술사.pdf",
+      "sha256": "2cdb270252259f28d83746f9e1aa3fae61a9d6e859fa4f4feb07fb6185a6c342",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제120회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제120회_정보관리기술사.pdf",
+      "sha256": "4995482a823b98aa4e10b184c2c93bef7d0d98abfa64b8cb109c7649180f22fd",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제121회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제121회_정보관리기술사.pdf",
+      "sha256": "4ebc831fbcbe8d73d3bc24af7ec329c63dcf06ecf3b4cf46486fad8a559dbcdc",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제122회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제122회_정보관리기술사.pdf",
+      "sha256": "dc7350b5f5a11e4c03ab3cae35e64832c487403a05d7afe2fc1245803a79bad1",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제123회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제123회_정보관리기술사.pdf",
+      "sha256": "3fd380602954a0539bf68503765298c0d3f56a976c8c2e7ad966dc9afcc83173",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제124회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제124회_정보관리기술사.pdf",
+      "sha256": "30838ec778dbb4f3b338f8a367b598d9af4f960fc1b6fdfeee80a027bbdf7e20",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제125회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제125회_정보관리기술사.pdf",
+      "sha256": "e7615b5b59f203fdd65dfee4cf59299884b3db7d5374e863e75623402f6f2269",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제126회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제126회_정보관리기술사.pdf",
+      "sha256": "8e0071f77fb1f7dde172eea073fc0fea4f102e27baeb748b3f7d1960e49121a0",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제127회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제127회_정보관리기술사.pdf",
+      "sha256": "9983d6efc01fe74da03e5ca9a50ca4581e7bcc5e30b7a6b119c0a296258995b0",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제128회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제128회_정보관리기술사.pdf",
+      "sha256": "e5b67734cf3a8def747bfaa3607a238fb52721677b2eb750e1dd611f00920ed0",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제129회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제129회_정보관리기술사.pdf",
+      "sha256": "ee3bfb6703cd4b286c0b20d453aba1c1a45f903ec8d8c0f157ee1f9e58f079fc",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제130회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제130회_정보관리기술사.pdf",
+      "sha256": "ee7a6cf75d1a9725fa3a63cdff4bd81a5d211aaa88d111518469b2fab83dd56e",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제131회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제131회_정보관리기술사.pdf",
+      "sha256": "37f3ee5d93befdaa9105f752480ddaa231d3a5a84b3cf7d6d5b01fa5a2bc68ab",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제132회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제132회_정보관리기술사.pdf",
+      "sha256": "58ef2bdd81d3bdee8b723069ef9bd1c6e55652f1fddba60a50e50b194ad730ba",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제133회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제133회_정보관리기술사.pdf",
+      "sha256": "bbd9510fb7c9f089db1140267c1dc3118ffb669b8ee0bf0a373315b323e8d5b4",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제134회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제134회_정보관리기술사.pdf",
+      "sha256": "8eba26d1161366fdf29a495abc2904b9833480ddf586065daeeaa43b4769c256",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제135회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제135회_정보관리기술사.pdf",
+      "sha256": "e9e1c42ba4d3ef7897a1b1439763d97b42f4cbd99cd7397b3d0aaa42081048aa",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제136회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제136회_정보관리기술사.pdf",
+      "sha256": "e55e0982db616c427db043ffdf9d591e0fe61297db6792815676cfa73f3d61d2",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제137회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제137회_정보관리기술사.pdf",
+      "sha256": "a93cca98131f0ae7d302b868643ab9275e2afda0576817a5e97ae3814e39678f",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제138회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제138회_정보관리기술사.pdf",
+      "sha256": "08d4d9576d99ef53e0dced810625068a6ab90048b3f14f84d3b2d078a67f1b93",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제139회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제139회_정보관리기술사.pdf",
+      "sha256": "9d0d716ccd848f1a2784fb4250120ff88523d4c65bcc18eaa24c07afca02f368",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제63회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제63회_정보관리기술사.hwp",
+      "sha256": "0817e96428abc8a20aea1b29e417fbf94bf06c255db37ccf5bba777f40339cce",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제65회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제65회_정보관리기술사.hwp",
+      "sha256": "db9381867ceffbf3ae66a539f7151a8b9d247a05cc8afb9c9fd086ee97f90f34",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제66회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제66회_정보관리기술사.hwp",
+      "sha256": "8236ac0f54910afd22cc5f0e63630fabe0b26d6a7b454bfbd1f1d24611e7bd63",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제68회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제68회_정보관리기술사.hwp",
+      "sha256": "3b60e18e93c951306b641d19565c709bda9d9611c5ca14740fd5527b17b46ae8",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제69회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제69회_정보관리기술사.hwp",
+      "sha256": "a242accc16cce92b159f504b424c3ba3fa98881da804aab7039ac4daf517c424",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제71회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제71회_정보관리기술사.hwp",
+      "sha256": "359827b39023bc12f1681346ce7bfb95babf89e32d574a59866e3735b978ec79",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제72회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제72회_정보관리기술사.hwp",
+      "sha256": "234fe14ebdb4d16ade8c08a6d3a273a8efe98e70715a62eafc6f586a8c7db8d2",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제74회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제74회_정보관리기술사.hwp",
+      "sha256": "759fcd99e175b360e10bffb4829c10b6ad90d799e3fe790cbb799c4d37e94f7c",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제75회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제75회_정보관리기술사.hwp",
+      "sha256": "984bb1459cfcd12235efd483f79b650480709fc315f5e8b9f6148f7ab7b02093",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제77회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제77회_정보관리기술사.hwp",
+      "sha256": "0097eb9b0a1741a642c2134ba99350fcc4916d3b2d558e8804e5bcadddfdfd0d",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제78회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제78회_정보관리기술사.hwp",
+      "sha256": "dde24ea670d06983289adb2272694e265c36d154f1568aa255934b42feb12f41",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제80회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제80회_정보관리기술사.hwp",
+      "sha256": "d4e6e2e64f38327fd1aa83908f2e1800292756ece6b2c9d4d9dc1b5c07628c9d",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제81회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제81회_정보관리기술사.hwp",
+      "sha256": "d9ee8a28c59a6564113ee96188f9f5c7606845ede024ad61fa073dc69aaa25af",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제83회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제83회_정보관리기술사.hwp",
+      "sha256": "f7a4f165e97460ecab75b5755f7930921820b2b1711d44f1110d999db62c9c0a",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제84회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제84회_정보관리기술사.hwp",
+      "sha256": "97bf68c2963401add6e5ab7be90e1a63f51b36338adc05ce665a21553a1c3e88",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제86회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제86회_정보관리기술사.hwp",
+      "sha256": "0ef8c4bc6225a5dd702a0a3ff2ac4b5e589013278da916533701d22b54ad00e6",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제87회_정보관리기술사.hwp",
+      "path": "정보관리기술사_기출문제/제87회_정보관리기술사.hwp",
+      "sha256": "5029c83de29217ada5c6bc281ca34c41b9e0e8f8a8b51496e7fa6743784792db",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제89회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제89회_정보관리기술사.pdf",
+      "sha256": "65616db3612d463bba74fdc88f755d995193b9c86c0b87119c40f7e3fdb6f6fa",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제90회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제90회_정보관리기술사.pdf",
+      "sha256": "83fa7392a2a147bdb8eab603e47c415ed15fa4fb2f4720725e275911a4ea3a49",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제92회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제92회_정보관리기술사.pdf",
+      "sha256": "ac19a3522906ed67e0deb74d180a520f8408f651f8441108505422650247fd08",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제93회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제93회_정보관리기술사.pdf",
+      "sha256": "f81b1ae5095d5d767d5bb59e6053f410aa34db5bcfc3feefdc77d37a0699f472",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제95회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제95회_정보관리기술사.pdf",
+      "sha256": "6a09aea77111705e64e958b4aff3fa970ee2735eca2d87294ba5c247fabb840a",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제96회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제96회_정보관리기술사.pdf",
+      "sha256": "3cedbd4335208b48fd425049c362ef29efd0b7975105170099d68ecf5741a843",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제98회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제98회_정보관리기술사.pdf",
+      "sha256": "05e3468789b97d12f6375534bb0670a33fe2f2bea1ca9513253ee6dbe88dd8fe",
+      "hash_mode": "binary"
+    },
+    {
+      "original_path": "정보관리기술사_기출문제/제99회_정보관리기술사.pdf",
+      "path": "정보관리기술사_기출문제/제99회_정보관리기술사.pdf",
+      "sha256": "3183594548ba7f7bbaf8d81c75b4d2e94aba1eac5f4d66b4947ec2b9381fa76a",
+      "hash_mode": "binary"
+    }
+  ]
+}

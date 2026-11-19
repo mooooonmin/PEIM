@@ -9,10 +9,12 @@
 - 최근성: 0.5 ** ((마지막 회차 - 출제 회차) / 20)  → 20회차(약 7년) 전 출제는 절반
 - 교시: 1교시 1.0, 2~4교시(서술형) 1.3
 
-수동 조정: scripts/priority_rules.json  {"S": [토픽id], "A": [...], "T": [...], "exclude": [...]}
+수동 조정: content/rules/priority_rules.json  {"S": [토픽id], "A": [...], "T": [...], "exclude": [...]}
 """
 import json
 from pathlib import Path
+
+CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT.parent / "public" / "data"
@@ -27,7 +29,7 @@ topics = json.loads((DATA / "topics.json").read_text(encoding="utf-8"))
 last_round = max(q["round"] for q in questions.values())
 rounds = sorted({q["round"] for q in questions.values()})
 
-rules_path = ROOT / "priority_rules.json"
+rules_path = CONTENT / "rules" / "priority_rules.json"
 rules = json.loads(rules_path.read_text(encoding="utf-8")) if rules_path.exists() else {}
 forced = {tid: tier for tier in ("S", "A", "T") for tid in rules.get(tier, [])}
 excluded = set(rules.get("exclude", []))

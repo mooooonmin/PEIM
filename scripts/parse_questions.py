@@ -8,8 +8,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+CONTENT = Path(__file__).resolve().parent.parent / "content"
+
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(
-    "/mnt/user-data/uploads/정보관리기술사/정보관리기술사_기출문제")
+    Path(__file__).resolve().parent.parent / "정보관리기술사_기출문제")
 OUT = Path(__file__).parent / "out"
 OUT.mkdir(exist_ok=True)
 
@@ -133,7 +135,7 @@ def main():
                    key=lambda p: int(re.search(r"제(\d+)회", p.name).group(1)))
     for f in files:
         rnd = int(re.search(r"제(\d+)회", f.name).group(1))
-        manual = Path(__file__).parent / "manual" / f"r{rnd}.txt"   # 수기 전사 우선
+        manual = CONTENT / "manual" / f"r{rnd}.txt"   # 수기 전사 우선
         text = manual.read_text(encoding="utf-8") if manual.exists() else extract_text(f)
         if len(text.strip()) < 100:
             report.append((rnd, "NO_TEXT", {}))
@@ -145,7 +147,7 @@ def main():
         ok = counts.get(1) == 13 and all(counts.get(s) == 6 for s in (2, 3, 4))
         report.append((rnd, "OK" if ok else "CHECK", counts))
         all_q.extend(qs)
-    fixes = json.loads((Path(__file__).parent / "fixes.json").read_text(encoding="utf-8"))
+    fixes = json.loads((CONTENT / "rules" / "fixes.json").read_text(encoding="utf-8"))
     all_q.extend(fixes.get("add", []))
     all_q.sort(key=lambda q: (q["round"], q["session"], q["number"]))
     for q in all_q:

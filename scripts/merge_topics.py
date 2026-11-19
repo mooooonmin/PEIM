@@ -1,4 +1,4 @@
-"""topics1~6.json(문항별 토픽 추출) → public/data/topics.json.
+"""content/topics/topics*.json(문항별 토픽 추출) → public/data/topics.json.
 읽는 순서: norm → union-find 병합 → canonical 선택 → 출력.
 같은 한글명 또는 같은 영문명이면 동일 토픽. 도메인은 다수결, 제목은 최빈값.
 """
@@ -7,14 +7,19 @@ import json
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
+from data_contract import existing_topic_id, read_json
+
+CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 ROOT = Path(__file__).parent
 rows = []
-for i in range(1, 7):
-    rows += json.loads((ROOT / "topicwork" / f"topics{i}.json").read_text(encoding="utf-8"))
+for source in sorted((CONTENT / "topics").glob("topics*.json"),
+                     key=lambda p: int(re.fullmatch(r"topics(\d+)\.json", p.name)[1])):
+    rows += json.loads(source.read_text(encoding="utf-8"))
 questions = json.loads((ROOT.parent / "public/data/questions.json").read_text(encoding="utf-8"))
 qids = {q["id"] for q in questions}
-assert len(rows) == len(questions), (len(rows), len(questions))
+if len(rows) != len(questions) or {r["id"] for r in rows} != qids:
+    raise ValueError("주제 추출 입력은 각 문항 ID를 정확히 한 번 포함해야 합니다.")
 
 GENERIC_EN = {"", "n/a", "none", "-", "etc"}
 
@@ -48,7 +53,7 @@ def union(a, b):
         parent[rb] = ra
 
 
-rules = json.loads((ROOT / "merge_rules.json").read_text(encoding="utf-8"))
+rules = json.loads((CONTENT / "rules" / "merge_rules.json").read_text(encoding="utf-8"))
 NO_KO = set(rules["no_merge_ko"])
 by_ko, by_en = {}, {}
 for i, r in enumerate(rows):
@@ -79,6 +84,8 @@ groups = defaultdict(list)
 for i in range(len(rows)):
     groups[find(i)].append(i)
 
+existing_path = ROOT.parent / "public/data/topics.json"
+existing = read_json(existing_path) if existing_path.exists() else []
 topics = []
 for members in groups.values():
     rs = [rows[i] for i in members]
@@ -87,7 +94,11 @@ for members in groups.values():
     title_en = Counter(ens).most_common(1)[0][0] if ens else ""
     domain = Counter(r["domain"] for r in rs).most_common(1)[0][0]
     aliases = sorted({r["title"] for r in rs} - {title})
-    tid = "t-" + hashlib.sha1((norm_ko(title) + "|" + norm_en(title_en)).encode()).hexdigest()[:8]
+    tid = existing_topic_id([r["id"] for r in rs], existing)
+    if tid is None:
+        tid = "t-" + hashlib.sha1((norm_ko(title) + "|" + norm_en(title_en)).encode()).hexdigest()[:8]
+        if any(t["id"] == tid for t in existing):
+            raise ValueError(f"새 주제가 기존 ID와 충돌합니다: {tid}")
     topics.append({
         "id": tid, "title": title, "title_en": title_en, "domain": domain,
         "aliases": aliases,
@@ -97,12 +108,14 @@ for members in groups.values():
 
 # id 충돌 검사
 ids = Counter(t["id"] for t in topics)
-assert max(ids.values()) == 1, [k for k, v in ids.items() if v > 1]
+if max(ids.values()) != 1:
+    raise ValueError(f"주제 분할 또는 ID 충돌: {[k for k, v in ids.items() if v > 1]}")
 assert all(q in qids for t in topics for q in t["question_ids"])
 
 topics.sort(key=lambda t: (-len(t["question_ids"]), t["title"]))
 out = ROOT.parent / "public/data/topics.json"
 out.write_text(json.dumps(topics, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+(ROOT / "out").mkdir(exist_ok=True)
 (ROOT / "out" / "topics.pretty.json").write_text(json.dumps(topics, ensure_ascii=False, indent=1), encoding="utf-8")
 
 print("topics", len(topics), "questions", sum(len(t["question_ids"]) for t in topics))
