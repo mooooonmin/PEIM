@@ -284,12 +284,12 @@ function updateURL() {
 }
 async function chooseFilter(topic, exam) {
   clearTimeout(searchTimer);
-  if (!(await save())) return;
+  if (!openLearning.canLeave() || !(await save())) return;
   const sequence = ++loadSequence;
   const nextRows = await api(
     "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
   );
-  if (sequence !== loadSequence) return;
+  if (sequence !== loadSequence || !openLearning.canLeave()) return;
   selectedTopic = topic;
   selectedExam = exam;
   resultQuery = "";
@@ -379,10 +379,10 @@ function renderQuestionList() {
   $("question-list").append(table);
 }
 async function selectQuestion(qid) {
-  if (!(await save())) return;
+  if (!openLearning.canLeave() || !(await save())) return;
   const sequence = ++loadSequence;
   const q = await api(`/questions/${encodeURIComponent(qid)}`);
-  if (sequence !== loadSequence) return;
+  if (sequence !== loadSequence || !openLearning.canLeave()) return;
   current = q;
   conflict = false;
   dirty = false;
@@ -417,6 +417,7 @@ async function selectQuestion(qid) {
   updateURL();
 }
 function displayQuestion() {
+  void openLearning(current);
   for (const id of [
     "answer",
     "completed",
@@ -508,47 +509,18 @@ const openLearning = setupLearning({
     renderQuestionList();
   },
 });
-$("compare").onclick = safe(async () => {
-  if (!current || !(await save())) return;
-  await openLearning(current);
-});
+function showReferencePanel(show) {
+  $("learning-reference-pane").hidden = !show;
+  $("compare").textContent = show ? "참고 답안 접기" : "참고 답안 펼치기";
+  $("compare").setAttribute("aria-expanded", String(show));
+}
+$("compare").onclick = () =>
+  showReferencePanel($("learning-reference-pane").hidden);
+$("reference").onclick = () => {
+  showReferencePanel(true);
+  $("learning-reference-pane").scrollIntoView({ block: "nearest" });
+};
 $("retry-only").onchange = renderQuestionList;
-$("reference").onclick = safe(async () => {
-  openReading("주제 참고 답안");
-  const topicSelect = element("select");
-  topicSelect.setAttribute("aria-label", "참고 답안 주제");
-  for (const topic of current.topics) {
-    const o = element("option", topic.title);
-    o.value = topic.id;
-    topicSelect.append(o);
-  }
-  $("reading-controls").append(topicSelect);
-  const variants = element("span");
-  $("reading-controls").append(variants);
-  const load = async () => {
-    const data = await api(
-      `/topics/${encodeURIComponent(topicSelect.value)}/reference`,
-    );
-    text("reading-title", data.title + " 참고 답안");
-    variants.replaceChildren();
-    const display = (answer) =>
-      renderMarkdown(
-        "> 주제별 학습 자료입니다. 선택한 문항의 공식 정답이나 검증된 정답이 아닙니다.\n\n" +
-          answer.body,
-      );
-    for (const answer of data.answers)
-      variants.append(
-        button(
-          answer.variant === "short" ? "1교시형" : "서술형",
-          safe(() => display(answer)),
-        ),
-      );
-    if (data.answers.length) await display(data.answers[0]);
-    else text("reading-body", "아직 등록된 주제 참고 답안이 없습니다.");
-  };
-  topicSelect.onchange = safe(load);
-  await load();
-});
 $("original").onclick = () => {
   if (current.sources.length === 1) {
     const s = current.sources[0];
@@ -569,7 +541,7 @@ $("original").onclick = () => {
   }
 };
 $("history").onclick = safe(async () => {
-  if (!(await save())) return;
+  if (!openLearning.canLeave() || !(await save())) return;
   const qid = current.id,
     list = await api(`/questions/${encodeURIComponent(qid)}/history`);
   openReading("답안 저장 이력");
@@ -628,7 +600,7 @@ $("search").oninput = () => {
   $("clear-search").hidden = !$("search").value;
   searchTimer = setTimeout(
     safe(async () => {
-      if (!(await save())) return;
+      if (!openLearning.canLeave() || !(await save())) return;
       const query = $("search").value.trim();
       const found = await api(
         "/questions?" +
@@ -640,7 +612,7 @@ $("search").oninput = () => {
                 : { exam: selectedExam },
           ),
       );
-      if (sequence !== loadSequence) return;
+      if (sequence !== loadSequence || !openLearning.canLeave()) return;
       rows = found;
       resultQuery = query;
       renderQuestionList();
@@ -656,7 +628,7 @@ $("clear-search").onclick = () => {
 };
 
 async function showView(manage) {
-  if (!(await save())) return;
+  if (!openLearning.canLeave() || !(await save())) return;
   currentView = manage ? "manage" : "study";
   $("study").hidden = manage;
   $("manage").hidden = !manage;
