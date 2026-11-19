@@ -73,12 +73,16 @@ function fixture() {
   const save = () => $("learning-form").onsubmit({ preventDefault() {} });
   return { $, state, notes, calls, updates, open, edit, save };
 }
-test("comparison shows the existing answer as literal text and saves only learning metadata", async () => {
+test("inline learning panel shares the main workspace and saves only learning metadata", async () => {
   const f = fixture(),
     question = q();
   await f.open(question);
-  assert.equal(f.$("learning-answer").textContent, question.answer.body);
-  assert.equal(f.$("learning-answer").querySelector("script"), null);
+  assert.equal(f.$("learning-panel").closest("main").id, "study");
+  assert.equal(f.$("learning-panel").closest("dialog"), null);
+  assert.equal(
+    f.$("answer").closest(".study-columns"),
+    f.$("learning-panel").parentElement,
+  );
   f.edit("보완할 정의");
   f.$("learning-retry").checked = true;
   f.$("learning-retry").onchange();
@@ -93,7 +97,7 @@ test("comparison shows the existing answer as literal text and saves only learni
     ["/questions/q1/learning"],
   );
   assert.equal(f.$("save-learning").disabled, true);
-  f.$("close-learning").onclick();
+  await f.open(null);
   await f.open(q());
   assert.equal(f.$("learning-note").value, "보완할 정의");
   f.$("learning-retry").checked = false;
@@ -109,14 +113,11 @@ test("conflict retains the draft and revision; reopening another question cannot
   await f.save();
   assert.match(f.$("learning-result").textContent, /409/);
   assert.equal(f.$("learning-note").value, "내 메모");
-  globalThis.confirm = () => false;
-  f.$("close-learning").onclick();
-  assert.equal(f.$("learning-dialog").open, true);
-  globalThis.confirm = () => true;
-  f.$("close-learning").onclick();
+  assert.equal(f.open.canLeave(), true);
+  await f.open(null);
   await f.open(q("q2"));
   assert.equal(f.$("learning-note").value, "");
-  f.$("close-learning").onclick();
+  await f.open(null);
   await f.open(q());
   assert.equal(f.$("learning-note").value, "내 메모");
   assert.match(f.$("learning-result").textContent, /復|복구/);
@@ -139,7 +140,7 @@ test("server reload is deliberate and preserves draft on a failed request", asyn
   assert.equal(f.$("learning-note").value, "최신 서버 메모");
   assert.equal(localStorage.getItem("peim:learning:q1"), null);
 });
-test("pending save freezes fields and blocks duplicate writes and close", async () => {
+test("pending save freezes fields and blocks duplicate writes and question changes", async () => {
   const f = fixture();
   await f.open(q());
   f.edit("저장 중 메모");
@@ -150,8 +151,10 @@ test("pending save freezes fields and blocks duplicate writes and close", async 
   const saving = f.save();
   assert.equal(f.$("learning-note").disabled, true);
   await f.save();
-  f.$("close-learning").onclick();
-  assert.equal(f.$("learning-dialog").open, true);
+  await f.open(null);
+  assert.equal(f.$("learning-panel").hidden, false);
+  assert.equal(f.open.canLeave(), false);
+  assert.equal(await f.open(q("q2")), false);
   assert.equal(f.calls.filter((c) => c.options).length, 1);
   release();
   await saving;
@@ -177,7 +180,7 @@ test("no topic or answer still permits notes; initial read failure prevents blin
   const f = fixture();
   f.state.failLoad = true;
   await f.open({ ...q(), topics: [], answer: { body: "" } });
-  assert.match(f.$("learning-answer").textContent, /아직 작성/);
+  assert.equal(f.$("learning-panel").hidden, false);
   assert.match(f.$("learning-reference").textContent, /연결된 주제/);
   assert.equal(f.$("learning-topic").disabled, true);
   assert.equal(f.$("save-learning").disabled, true);
@@ -186,4 +189,18 @@ test("no topic or answer still permits notes; initial read failure prevents blin
   f.edit("메모만 작성");
   await f.save();
   assert.equal(f.notes.get("q1").note, "메모만 작성");
+});
+
+test("switching questions keeps unsaved drafts isolated from saved notes", async () => {
+  const f = fixture();
+  await f.open(q());
+  f.edit("첫 문항의 미저장 메모");
+  await f.open(q("q2"));
+  assert.equal(f.$("learning-note").value, "");
+  f.edit("둘째 문항 메모");
+  await f.save();
+  await f.open(q());
+  assert.equal(f.$("learning-note").value, "첫 문항의 미저장 메모");
+  assert.equal(f.notes.get("q2").note, "둘째 문항 메모");
+  assert.equal(f.notes.has("q1"), false);
 });

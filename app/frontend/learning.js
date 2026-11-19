@@ -1,7 +1,7 @@
 const $ = (id) => document.getElementById(id);
 
 export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
-  const dialog = $("learning-dialog");
+  const panel = $("learning-panel");
   let question,
     revision = 0,
     dirty = false,
@@ -24,7 +24,6 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     $("learning-retry").disabled = busy || !loaded;
     $("save-learning").disabled = busy || !loaded || !dirty;
     $("reload-learning").disabled = busy;
-    $("close-learning").disabled = busy;
   }
   function stash() {
     try {
@@ -44,18 +43,6 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
   }
   $("learning-note").oninput = edited;
   $("learning-retry").onchange = edited;
-  function selectPane(pane) {
-    dialog.dataset.pane = pane;
-    dialog.querySelectorAll("[data-learning-pane]").forEach((button) => {
-      button.setAttribute(
-        "aria-pressed",
-        String(button.dataset.learningPane === pane),
-      );
-    });
-  }
-  dialog.querySelectorAll("[data-learning-pane]").forEach((button) => {
-    button.onclick = () => selectPane(button.dataset.learningPane);
-  });
   async function showReference() {
     const answer = answers.find(
       (item) => item.variant === $("learning-variant").value,
@@ -86,7 +73,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     $("learning-reference").textContent = "참고 답안을 불러오는 중입니다.";
     try {
       const data = await api(`/topics/${encodeURIComponent(tid)}/reference`);
-      if (seq !== referenceSequence || !dialog.open) return;
+      if (seq !== referenceSequence || panel.hidden) return;
       answers = data.answers;
       for (const answer of answers) {
         const option = document.createElement("option");
@@ -97,7 +84,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       $("learning-variant").disabled = !answers.length;
       await showReference();
     } catch (error) {
-      if (seq === referenceSequence && dialog.open)
+      if (seq === referenceSequence && !panel.hidden)
         $("learning-reference").textContent =
           `참고 답안을 불러오지 못했습니다. ${error.message}`;
     }
@@ -114,7 +101,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       const data = await api(
         `/questions/${encodeURIComponent(question.id)}/learning`,
       );
-      if (seq !== generation || !dialog.open) return;
+      if (seq !== generation || panel.hidden) return;
       revision = data.revision;
       $("learning-note").value = data.note;
       $("learning-retry").checked = data.retry_requested;
@@ -159,7 +146,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       loaded = true;
       return true;
     } catch (error) {
-      if (seq === generation && dialog.open)
+      if (seq === generation && !panel.hidden)
         message(
           `복습 정보를 불러오지 못했습니다. 서버 내용 다시 불러오기로 재시도하세요. ${error.message}`,
         );
@@ -226,38 +213,28 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       controls();
     }
   };
-  function close() {
-    if (busy) return;
-    if (dirty && !confirm("저장하지 않은 복습 내용이 있습니다. 닫을까요?"))
-      return;
-    generation++;
-    referenceSequence++;
-    cancelRender();
-    dialog.close();
-  }
-  $("close-learning").onclick = close;
-  dialog.addEventListener("cancel", (event) => {
-    event.preventDefault();
-    close();
-  });
   window.addEventListener("beforeunload", (event) => {
-    if (dialog.open && (dirty || busy)) {
+    if (!panel.hidden && (dirty || busy)) {
       event.preventDefault();
       event.returnValue = "";
     }
   });
-  return async (q) => {
-    if (dialog.open) return;
+  const open = async (q) => {
+    if (!open.canLeave()) return false;
+    if (question?.id === q?.id && !panel.hidden) return true;
+    generation++;
+    referenceSequence++;
+    cancelRender();
+    panel.hidden = !q;
+    if (!q) {
+      question = null;
+      dirty = false;
+      return true;
+    }
     question = q;
     dirty = false;
     loaded = false;
     revision = 0;
-    $("learning-identity").textContent =
-      `${q.round}회 / ${q.session}교시 / ${q.number}번`;
-    $("learning-question").textContent = q.text;
-    $("learning-answer").textContent =
-      q.answer.body ||
-      "아직 작성한 답안이 없습니다. 비교 창을 닫고 내 답안부터 작성해 보세요.";
     $("learning-note").value = "";
     $("learning-retry").checked = false;
     $("learning-topic").replaceChildren();
@@ -268,8 +245,16 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       $("learning-topic").append(option);
     }
     $("learning-topic").disabled = !q.topics.length;
-    selectPane("answer");
-    dialog.showModal();
     await Promise.all([loadNote(true), loadReference()]);
+    return true;
   };
+  open.canLeave = () => {
+    if (busy) {
+      message("복습 저장이 끝난 뒤 이동해 주세요.");
+      return false;
+    }
+    if (dirty && !stash()) return false;
+    return true;
+  };
+  return open;
 }

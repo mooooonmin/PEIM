@@ -64,37 +64,94 @@
           </div>
           <p id="verification" class="quiet"></p>
         </section>
-        <section class="answer-pane">
-          <div class="section-head">
-            <h2>내 답안</h2>
-            <div class="actions">
-              <span id="save-state" role="status">문항 선택 전</span
-              ><button id="compare" disabled>비교·복습</button
-              ><button id="history" disabled>저장 이력</button
-              ><button id="focus" aria-pressed="false">집중 모드</button>
+        <div class="study-columns">
+          <section class="answer-pane">
+            <div class="section-head">
+              <h2>내 답안</h2>
+              <div class="actions">
+                <span id="save-state" role="status">문항 선택 전</span
+                ><button id="compare" disabled aria-expanded="true">
+                  참고 답안 접기</button
+                ><button id="history" disabled>저장 이력</button
+                ><button id="focus" aria-pressed="false">집중 모드</button>
+              </div>
             </div>
-          </div>
-          <div id="save-error" role="alert" hidden>
-            <span id="save-error-text"></span
-            ><button id="retry">다시 저장</button
-            ><button id="download-draft">내 글 내려받기</button
-            ><button id="load-server">서버 답안 불러오기</button>
-          </div>
-          <label class="sr-only" for="answer">선택한 기출문항의 내 답안</label>
-          <textarea
-            id="answer"
-            placeholder="문제를 읽고, 내 언어로 답안을 작성해 보세요."
-            disabled
-            spellcheck="false"
-          ></textarea>
-          <footer class="editor-footer">
-            <span id="character-count">0자</span
-            ><label
-              ><input type="checkbox" id="completed" disabled /> 작성
-              완료</label
-            ><span class="quiet">입력 후 자동 저장</span>
-          </footer>
-        </section>
+            <div id="save-error" role="alert" hidden>
+              <span id="save-error-text"></span
+              ><button id="retry">다시 저장</button
+              ><button id="download-draft">내 글 내려받기</button
+              ><button id="load-server">서버 답안 불러오기</button>
+            </div>
+            <label class="sr-only" for="answer"
+              >선택한 기출문항의 내 답안</label
+            >
+            <textarea
+              id="answer"
+              placeholder="문제를 읽고, 내 언어로 답안을 작성해 보세요."
+              disabled
+              spellcheck="false"
+            ></textarea>
+            <footer class="editor-footer">
+              <span id="character-count">0자</span
+              ><label
+                ><input type="checkbox" id="completed" disabled /> 작성
+                완료</label
+              ><span class="quiet">입력 후 자동 저장</span>
+            </footer>
+          </section>
+          <section id="learning-panel" aria-label="참고 답안과 복습" hidden>
+            <section
+              id="learning-reference-pane"
+              aria-label="비교할 주제 참고 답안"
+            >
+              <h3>주제 참고 답안</h3>
+              <p class="learning-notice">
+                주제별 학습 자료이며 이 문항의 공식 정답은 아닙니다.
+              </p>
+              <div class="learning-selectors">
+                <label>주제<select id="learning-topic"></select></label>
+                <label>답안 유형<select id="learning-variant"></select></label>
+                <button id="reload-reference" type="button">
+                  주제 다시 불러오기
+                </button>
+              </div>
+              <div id="learning-reference" class="reading-body"></div>
+            </section>
+            <form id="learning-form">
+              <label for="learning-note">보완 메모</label>
+              <textarea
+                id="learning-note"
+                rows="3"
+                maxlength="30000"
+                placeholder="빠뜨린 핵심 개념, 보완할 도식, 다시 쓸 내용을 정리하세요."
+                disabled
+              ></textarea>
+              <div class="learning-actions">
+                <label
+                  ><input id="learning-retry" type="checkbox" disabled /> 다시
+                  풀기</label
+                >
+                <button
+                  id="save-learning"
+                  type="submit"
+                  class="primary"
+                  disabled
+                >
+                  복습 저장
+                </button>
+                <details>
+                  <summary>저장 문제 해결</summary>
+                  <button id="download-learning" type="button">
+                    메모 내려받기</button
+                  ><button id="reload-learning" type="button">
+                    서버 내용 다시 불러오기
+                  </button>
+                </details>
+              </div>
+              <p id="learning-result" role="status"></p>
+            </form>
+          </section>
+        </div>
       </section>
       <aside id="related" class="related" aria-label="연결 기출">
         <div class="section-head">
@@ -275,83 +332,6 @@
         </div>
       </section>
     </main>
-    <dialog id="learning-dialog" aria-labelledby="learning-title">
-      <div class="section-head">
-        <div>
-          <h2 id="learning-title">답안 비교·복습</h2>
-          <span id="learning-identity" class="muted"></span>
-        </div>
-        <button id="close-learning" type="button">닫고 답안 작성</button>
-      </div>
-      <details class="learning-prompt">
-        <summary>문제 다시 보기</summary>
-        <p id="learning-question"></p>
-      </details>
-      <p class="learning-notice">
-        참고 답안은 주제별 학습 자료입니다. 이 문항의 공식 정답이나 자동 채점
-        기준이 아닙니다.
-      </p>
-      <nav class="learning-tabs" aria-label="비교 화면 전환">
-        <button type="button" data-learning-pane="answer" aria-pressed="true">
-          내 답안
-        </button>
-        <button
-          type="button"
-          data-learning-pane="reference"
-          aria-pressed="false"
-        >
-          주제 참고 답안
-        </button>
-      </nav>
-      <div class="learning-columns">
-        <section id="learning-answer-pane" aria-label="비교할 내 답안">
-          <h3>내 답안</h3>
-          <p class="quiet">비교를 시작할 때 저장한 답안입니다.</p>
-          <div id="learning-answer"></div>
-        </section>
-        <section
-          id="learning-reference-pane"
-          aria-label="비교할 주제 참고 답안"
-        >
-          <h3>주제 참고 답안</h3>
-          <div class="learning-selectors">
-            <label>주제<select id="learning-topic"></select></label>
-            <label>답안 유형<select id="learning-variant"></select></label>
-            <button id="reload-reference" type="button">
-              주제 다시 불러오기
-            </button>
-          </div>
-          <div id="learning-reference" class="reading-body"></div>
-        </section>
-      </div>
-      <form id="learning-form">
-        <label for="learning-note">보완 메모</label>
-        <textarea
-          id="learning-note"
-          rows="3"
-          maxlength="30000"
-          placeholder="빠뜨린 핵심 개념, 보완할 도식, 다시 쓸 내용을 정리하세요."
-          disabled
-        ></textarea>
-        <div class="learning-actions">
-          <label
-            ><input id="learning-retry" type="checkbox" disabled /> 다시
-            풀기</label
-          >
-          <button id="save-learning" type="submit" class="primary" disabled>
-            복습 저장
-          </button>
-          <details>
-            <summary>저장 문제 해결</summary>
-            <button id="download-learning" type="button">메모 내려받기</button
-            ><button id="reload-learning" type="button">
-              서버 내용 다시 불러오기
-            </button>
-          </details>
-        </div>
-        <p id="learning-result" role="status"></p>
-      </form>
-    </dialog>
     <dialog id="reading-dialog">
       <div class="section-head">
         <h2 id="reading-title"></h2>
