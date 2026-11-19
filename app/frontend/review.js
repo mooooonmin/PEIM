@@ -18,7 +18,29 @@ export function setupQuestionReview({ api, refreshed }) {
     changed = false,
     busy = false,
     opening = false;
+  let queue = [];
   const dialog = $("question-review-dialog");
+  function navigationState() {
+    const index = queue.indexOf(question?.id);
+    const locked = busy || opening;
+    $("review-previous").disabled = locked || index <= 0;
+    $("review-next").disabled =
+      locked || index < 0 || index >= queue.length - 1;
+    $("save-review-next").disabled = $("review-next").disabled;
+    $("save-question-review").disabled = locked;
+    $("close-question-review").disabled = locked;
+    $("review-position").textContent =
+      index < 0
+        ? "문항을 불러오는 중입니다."
+        : `선택 목록 ${index + 1} / ${queue.length}문항 — ${states[question.data.verification_status] || "미확인"}`;
+  }
+  function freezeFields() {
+    const controls = [
+      ...dialog.querySelectorAll("input,textarea,select"),
+    ].filter((el) => !el.disabled);
+    controls.forEach((el) => (el.disabled = true));
+    return () => controls.forEach((el) => (el.disabled = false));
+  }
   function selectPane(name) {
     dialog.dataset.pane = name;
     dialog.querySelectorAll("[data-review-tab]").forEach((button) => {
@@ -66,7 +88,18 @@ export function setupQuestionReview({ api, refreshed }) {
     pdfDocument = null,
     pdfRender = null,
     previewSequence = 0,
-    pdfPage = 1;
+    pdfPage = 1,
+    zoom = 100;
+  function setZoom(value) {
+    zoom = Math.max(50, Math.min(250, value));
+    $("review-pdf-canvas").style.width = `${zoom}%`;
+    $("pdf-zoom-state").textContent = zoom === 100 ? "너비 맞춤" : `${zoom}%`;
+    $("pdf-zoom-out").disabled = zoom === 50;
+    $("pdf-zoom-in").disabled = zoom === 250;
+  }
+  $("pdf-zoom-out").onclick = () => setZoom(zoom - 25);
+  $("pdf-zoom-in").onclick = () => setZoom(zoom + 25);
+  $("pdf-fit").onclick = () => setZoom(100);
   function clearPreview() {
     previewSequence++;
     if (pdfRender) pdfRender.cancel();
@@ -88,7 +121,7 @@ export function setupQuestionReview({ api, refreshed }) {
     const page = await pdfDocument.getPage(pdfPage);
     if (sequence !== previewSequence) return;
     const canvas = $("review-pdf-canvas"),
-      view = page.getViewport({ scale: 1.5 });
+      view = page.getViewport({ scale: 2 });
     canvas.width = view.width;
     canvas.height = view.height;
     pdfRender = page.render({
@@ -173,9 +206,9 @@ export function setupQuestionReview({ api, refreshed }) {
       }
     };
   async function history() {
-    const list = await api(
-      `/questions/${encodeURIComponent(question.id)}/reviews`,
-    );
+    const id = question.id;
+    const list = await api(`/questions/${encodeURIComponent(id)}/reviews`);
+    if (!dialog.open || question.id !== id) return;
     $("question-review-history").replaceChildren();
     if (!list.length)
       $("question-review-history").textContent = "아직 수정 이력이 없습니다.";
@@ -237,27 +270,68 @@ export function setupQuestionReview({ api, refreshed }) {
     preview();
     changed = false;
   }
-  const open = async (id) => {
-    if (opening || dialog.open) return;
+  async function loadQuestion(id) {
     opening = true;
+    navigationState();
+    const restore = freezeFields();
     try {
-      [question, { topics }] = await Promise.all([
+      const [nextQuestion, navigation] = await Promise.all([
         api(`/questions/${encodeURIComponent(id)}`),
         api("/navigation"),
       ]);
+      question = nextQuestion;
+      topics = navigation.topics;
+      restore();
+      setZoom(100);
       fill();
       selectPane("edit");
       $("review-history-pane").open = false;
       $("edit-question-result").textContent = "";
-      dialog.showModal();
-      await history();
+      $("edit-question-form").scrollTop = 0;
+      $("review-source-pane").scrollTop = 0;
+      $("question-review-history").textContent = "이력을 불러오는 중입니다.";
+      if (!dialog.open) dialog.showModal();
+      try {
+        await history();
+      } catch {
+        $("question-review-history").textContent =
+          "이력을 불러오지 못했습니다. 문항을 다시 열어 확인해 주세요.";
+      }
+      return true;
     } catch (e) {
-      $("global-error").hidden = false;
-      $("global-error").textContent = e.message;
+      if (dialog.open)
+        $("edit-question-result").textContent =
+          `문항 이동 실패: ${e.message} 현재 입력은 유지됩니다.`;
+      else {
+        $("global-error").hidden = false;
+        $("global-error").textContent = e.message;
+      }
+      return false;
     } finally {
+      restore();
       opening = false;
+      navigationState();
     }
+  }
+  const open = async (id, ids = [id]) => {
+    if (opening || dialog.open) return;
+    queue = [...new Set(ids)];
+    if (!queue.includes(id)) queue = [id];
+    await loadQuestion(id);
   };
+  async function move(step) {
+    if (busy || opening) return;
+    const id = queue[queue.indexOf(question.id) + step];
+    if (!id) return;
+    if (
+      changed &&
+      !confirm("저장하지 않은 수정 내용을 버리고 다른 문항으로 이동할까요?")
+    )
+      return;
+    await loadQuestion(id);
+  }
+  $("review-previous").onclick = () => move(-1);
+  $("review-next").onclick = () => move(1);
   $("edit-topic-filter").oninput = topicList;
   $("review-source-select").onchange = preview;
   $("edit-question-form").oninput = (e) => {
@@ -267,7 +341,7 @@ export function setupQuestionReview({ api, refreshed }) {
     }
   };
   function close() {
-    if (busy) return;
+    if (busy || opening) return;
     if (changed && !confirm("저장하지 않은 문항 수정 내용을 버리고 닫을까요?"))
       return;
     dialog.close();
@@ -286,7 +360,12 @@ export function setupQuestionReview({ api, refreshed }) {
   });
   $("edit-question-form").onsubmit = async (e) => {
     e.preventDefault();
-    if (busy) return;
+    if (busy || opening) return;
+    const nextId =
+      e.submitter?.id === "save-review-next"
+        ? queue[queue.indexOf(question.id) + 1]
+        : null;
+    let advance = false;
     const payload = {
       revision: question.data.review_revision || 0,
       text: $("edit-question-text").value,
@@ -304,13 +383,9 @@ export function setupQuestionReview({ api, refreshed }) {
       })),
     };
     busy = true;
-    $("save-question-review").disabled = true;
-    $("close-question-review").disabled = true;
+    navigationState();
     // Freeze fields so a successful response cannot replace input typed while saving.
-    const controls = [
-      ...$("edit-question-form").querySelectorAll("input,textarea,select"),
-    ].filter((e) => !e.disabled);
-    controls.forEach((e) => (e.disabled = true));
+    const restore = freezeFields();
     $("edit-question-result").textContent = "저장 중…";
     try {
       const result = await api(
@@ -318,12 +393,14 @@ export function setupQuestionReview({ api, refreshed }) {
         { method: "PUT", body: JSON.stringify(payload) },
       );
       question.data.review_revision = result.revision;
+      question.data.verification_status = payload.verification_status;
       changed = false;
       $("edit-question-result").textContent =
         "저장했습니다. 문항 ID와 내 답안은 유지됩니다.";
       try {
         await refreshed(question.id);
         await history();
+        advance = Boolean(nextId);
       } catch {
         $("edit-question-result").textContent =
           "저장했습니다. 화면 갱신에 실패했으므로 닫고 다시 열어 확인해 주세요.";
@@ -332,9 +409,17 @@ export function setupQuestionReview({ api, refreshed }) {
       $("edit-question-result").textContent = error.message;
     } finally {
       busy = false;
-      controls.forEach((e) => (e.disabled = false));
-      $("save-question-review").disabled = false;
-      $("close-question-review").disabled = false;
+      restore();
+      navigationState();
+    }
+    if (advance) {
+      const moved = await loadQuestion(nextId);
+      if (moved)
+        $("edit-question-result").textContent =
+          "이전 문항을 저장하고 다음 문항으로 이동했습니다.";
+      else
+        $("edit-question-result").textContent =
+          "저장은 완료했지만 다음 문항을 불러오지 못했습니다. 다음 문항 버튼으로 다시 시도하세요.";
     }
   };
   return open;

@@ -835,6 +835,51 @@ dialog::backdrop {
   margin: 0;
   font-size: 14px;
 }
+.review-footer {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.review-footer p {
+  flex: 1 1 240px;
+}
+.review-navigation,
+.pdf-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+.review-navigation {
+  justify-content: space-between;
+}
+#review-position {
+  font-size: 14px;
+}
+.pdf-zoom {
+  padding: 8px;
+  border-top: 1px solid var(--line);
+}
+#pdf-zoom-state {
+  min-width: 72px;
+  text-align: center;
+  font-size: 14px;
+}
+.pdf-canvas-wrap {
+  max-width: 100%;
+}
+#review-pdf-canvas {
+  max-width: none;
+}
+@media (max-width: 600px) {
+  #review-position {
+    order: -1;
+    flex-basis: 100%;
+  }
+  .review-footer > button {
+    flex: 1;
+  }
+}
 @media (max-width: 800px) {
   #question-review-dialog {
     padding: 16px;
