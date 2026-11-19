@@ -1404,3 +1404,66 @@ body.focus-mode .workbench {
     justify-content: flex-start;
   }
 }
+
+.retry-library {
+  max-width: 1000px;
+  margin: auto;
+  padding: 24px;
+}
+.retry-library > label {
+  margin-top: 24px;
+}
+#retry-search {
+  width: 100%;
+  max-width: 560px;
+  margin: 8px 0;
+}
+#retry-result {
+  min-height: 24px;
+  color: var(--muted);
+  margin: 8px 0 16px;
+}
+.retry-item {
+  border-top: 1px solid var(--line);
+  padding: 20px 0;
+}
+.retry-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.retry-item h2 {
+  font-size: 18px;
+}
+.retry-item h3 {
+  margin: 16px 0 8px;
+  font-size: 15px;
+}
+.retry-question,
+.retry-note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+  margin: 12px 0;
+  max-height: 200px;
+  overflow: auto;
+}
+.retry-note {
+  background: var(--surface);
+  padding: 12px;
+  border-radius: var(--radius);
+}
+#back-to-retries {
+  flex: none;
+  align-self: flex-start;
+}
+@media (max-width: 700px) {
+  .retry-library {
+    padding: 16px;
+  }
+  .topbar nav {
+    flex-wrap: wrap;
+  }
+}

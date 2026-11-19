@@ -136,6 +136,19 @@ def questions(topic: str | None = None, exam: str | None = None, search: str = "
             (topic, topic, exam, exam, search, "%" + search + "%")).fetchall()
 
 
+@app.get("/api/retry-questions")
+def retry_questions():
+    with connect() as db:
+        return db.execute("""SELECT q.id,q.text,q.session,q.number,e.round,n.note,n.updated_at,
+            coalesce(a.status,'empty') AS answer_status,
+            coalesce((SELECT string_agg(t.title, ', ' ORDER BY t.title)
+                FROM question_topics x JOIN topics t ON t.id=x.topic_id WHERE x.question_id=q.id),'') AS topics
+            FROM learning_notes n JOIN questions q ON q.id=n.question_id JOIN exams e ON e.id=q.exam_id
+            LEFT JOIN user_answers a ON a.question_id=q.id AND a.profile_id=n.profile_id
+            WHERE n.profile_id='local' AND n.retry_requested=true
+            ORDER BY n.updated_at DESC,q.id""").fetchall()
+
+
 @app.get("/api/questions/{qid}")
 def question(qid: str):
     with connect() as db:

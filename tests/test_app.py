@@ -106,6 +106,30 @@ class AppTests(unittest.TestCase):
         self.assertFalse(next(q for q in self.client.get("/api/questions").json() if q["id"] == self.qid)["retry_requested"])
         self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), history)
 
+    def test_retry_library_spans_rounds_and_preserves_answer_history(self):
+        self.assertEqual(self.client.get("/api/retry-questions").json(), [])
+        self.client.put(f"/api/questions/{self.qid}/answer", headers=HEADERS,
+                        json={"body": "기존 답안 유지", "status": "completed", "revision": 0})
+        before = self.client.get(f"/api/questions/{self.qid}").json()["answer"]
+        history = self.client.get(f"/api/questions/{self.qid}/history").json()
+        for qid, note in [(self.qid, "첫 회차 보완 메모"), ("r129-s4-q02", "다른 회차 보완 메모")]:
+            self.assertEqual(self.client.put(f"/api/questions/{qid}/learning", headers=HEADERS,
+                json={"note": note, "retry_requested": True, "revision": 0}).status_code, 200)
+        with connect() as db:
+            db.execute("INSERT INTO learning_notes(profile_id,question_id,note,retry_requested,revision) VALUES ('other','r63-s1-q02','다른 프로필',true,1)")
+        listed = self.client.get("/api/retry-questions").json()
+        self.assertEqual({q["id"] for q in listed}, {self.qid, "r129-s4-q02"})
+        self.assertEqual({q["round"] for q in listed}, {63, 129})
+        self.assertEqual(listed[0]["id"], "r129-s4-q02")
+        self.assertEqual(next(q for q in listed if q["id"] == self.qid)["note"], "첫 회차 보완 메모")
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}").json()["answer"], before)
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), history)
+        self.assertTrue(self.client.get(f"/api/questions/{self.qid}/learning").json()["retry_requested"])
+        self.client.put(f"/api/questions/{self.qid}/learning", headers=HEADERS,
+            json={"note": "보완 메모 유지", "retry_requested": False, "revision": 1})
+        self.assertEqual([q["id"] for q in self.client.get("/api/retry-questions").json()], ["r129-s4-q02"])
+        self.assertEqual(self.client.get(f"/api/questions/{self.qid}/history").json(), history)
+
     def test_learning_conflicts_validation_and_local_guard(self):
         route = f"/api/questions/{self.qid}/learning"
         payload = {"note": "메모", "retry_requested": True, "revision": 0}
