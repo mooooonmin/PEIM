@@ -10,8 +10,15 @@ function node(tag, text) {
   return el;
 }
 export function setupManagement({ api, openReview, loadUploads }) {
+  const initial = new URLSearchParams(location.search);
+  $("managed-search").value = initial.get("manageSearch") || "";
+  $("managed-status").value = initial.get("manageStatus") || "";
+  let initialExam = initial.get("manageExam") || "";
   let questions = [],
-    page = 0,
+    page = Math.max(
+      0,
+      Math.min(1000000, Math.floor(Number(initial.get("managePage")) || 1) - 1),
+    ),
     sequence = 0;
   let section =
     new URLSearchParams(location.search).get("section") === "upload"
@@ -30,12 +37,38 @@ export function setupManagement({ api, openReview, loadUploads }) {
     );
     const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
     page = Math.min(page, pages - 1);
+    const url = new URL(location.href);
+    for (const [key, value] of Object.entries({
+      manageSearch: $("managed-search").value.trim(),
+      manageExam: exam,
+      manageStatus: status,
+      managePage: page ? String(page + 1) : "",
+    })) {
+      if (value) url.searchParams.set(key, value);
+      else url.searchParams.delete(key);
+    }
+    history.replaceState(null, "", url);
     $("managed-count").textContent =
       `${filtered.length.toLocaleString()}개 문항`;
     $("managed-page").textContent = `${page + 1} / ${pages}`;
     $("managed-previous").disabled = page === 0;
     $("managed-next").disabled = page >= pages - 1;
     $("managed-list").replaceChildren();
+    const table = node("table"),
+      head = node("thead"),
+      header = node("tr"),
+      body = node("tbody");
+    table.className = "managed-table";
+    const caption = node("caption", "기출문항 검수 목록");
+    caption.className = "sr-only";
+    for (const label of ["회차", "교시", "번호", "문제", "상태", "작업"]) {
+      const cell = node("th", label);
+      cell.scope = "col";
+      header.append(cell);
+    }
+    head.append(header);
+    table.append(caption, head, body);
+    if (filtered.length) $("managed-list").append(table);
     if (!filtered.length)
       $("managed-list").append(
         node(
@@ -44,16 +77,23 @@ export function setupManagement({ api, openReview, loadUploads }) {
         ),
       );
     for (const q of filtered.slice(page * pageSize, (page + 1) * pageSize)) {
-      const row = node("article"),
-        details = node("div");
+      const row = node("tr");
       row.className = "managed-question";
-      details.append(
-        node("strong", `${q.round}회 · ${q.session}교시 · ${q.number}번`),
-        node("p", q.text.length > 260 ? q.text.slice(0, 260) + "…" : q.text),
-      );
-      const state = node("span", statuses[q.verification_status] || "미확인");
-      state.className = "quiet";
-      details.append(state);
+      const values = [
+        `${q.round}회`,
+        `${q.session}교시`,
+        `${q.number}번`,
+        q.text,
+        statuses[q.verification_status] || "미확인",
+      ];
+      values.forEach((value, index) => {
+        const cell = node("td");
+        cell.dataset.label = ["회차", "교시", "번호", "문제", "상태"][index];
+        const content = node("span", value);
+        if (index === 3) content.className = "question-preview";
+        cell.append(content);
+        row.append(cell);
+      });
       const button = node("button", "검수·수정");
       button.type = "button";
       button.setAttribute(
@@ -61,8 +101,10 @@ export function setupManagement({ api, openReview, loadUploads }) {
         `${q.round}회 ${q.session}교시 ${q.number}번 검수·수정`,
       );
       button.onclick = () => openReview(q.id);
-      row.append(details, button);
-      $("managed-list").append(row);
+      const action = node("td");
+      action.append(button);
+      row.append(action);
+      body.append(row);
     }
   }
   async function refreshQuestions() {
@@ -75,7 +117,8 @@ export function setupManagement({ api, openReview, loadUploads }) {
       ]);
       if (seq !== sequence) return;
       questions = data;
-      const selected = $("managed-exam").value;
+      const selected = initialExam || $("managed-exam").value;
+      initialExam = "";
       $("managed-exam").replaceChildren(new Option("전체 회차", ""));
       for (const exam of nav.exams)
         $("managed-exam").append(new Option(`${exam.round}회`, exam.id));

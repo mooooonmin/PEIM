@@ -19,6 +19,25 @@ export function setupQuestionReview({ api, refreshed }) {
     busy = false,
     opening = false;
   const dialog = $("question-review-dialog");
+  function selectPane(name) {
+    dialog.dataset.pane = name;
+    dialog.querySelectorAll("[data-review-tab]").forEach((button) => {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset.reviewTab === name),
+      );
+    });
+    if (name === "history") $("review-history-pane").open = true;
+  }
+  dialog.querySelectorAll("[data-review-tab]").forEach((button) => {
+    button.onclick = () => selectPane(button.dataset.reviewTab);
+  });
+  // Reveal invalid fields before native form validation attempts to focus them.
+  $("edit-question-form").addEventListener(
+    "invalid",
+    () => selectPane("edit"),
+    true,
+  );
   function topicList() {
     const query = $("edit-topic-filter").value.trim().toLowerCase();
     $("edit-topics").replaceChildren();
@@ -227,6 +246,8 @@ export function setupQuestionReview({ api, refreshed }) {
         api("/navigation"),
       ]);
       fill();
+      selectPane("edit");
+      $("review-history-pane").open = false;
       $("edit-question-result").textContent = "";
       dialog.showModal();
       await history();
