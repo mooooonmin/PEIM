@@ -100,14 +100,18 @@ export function setupManagement({ api, openReview, loadUploads }) {
         "aria-label",
         `${q.round}회 ${q.session}교시 ${q.number}번 검수·수정`,
       );
-      button.onclick = () => openReview(q.id);
+      button.onclick = () =>
+        openReview(
+          q.id,
+          filtered.map((item) => item.id),
+        );
       const action = node("td");
       action.append(button);
       row.append(action);
       body.append(row);
     }
   }
-  async function refreshQuestions() {
+  async function refreshQuestions({ throwOnError = false } = {}) {
     const seq = ++sequence;
     $("managed-count").textContent = "문항을 불러오는 중입니다.";
     try {
@@ -129,6 +133,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
       if (seq === sequence)
         $("managed-count").textContent =
           `불러오지 못했습니다. 새로고침으로 다시 시도하세요. ${error.message}`;
+      if (throwOnError) throw error;
     }
   }
   async function selectSection(value) {

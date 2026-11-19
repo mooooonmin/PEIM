@@ -887,7 +887,7 @@ const openQuestionReview = setupQuestionReview({
     );
     if (current?.id === qid) await selectQuestion(qid);
     else renderQuestionList();
-    await management.refreshQuestions();
+    await management.refreshQuestions({ throwOnError: true });
   },
 });
 const management = setupManagement({

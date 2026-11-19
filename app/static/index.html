@@ -284,6 +284,11 @@
         <button id="close-question-review">닫기</button>
       </div>
       <p id="review-identity" class="quiet"></p>
+      <nav class="review-navigation" aria-label="검수 문항 이동">
+        <button id="review-previous" type="button">이전 문항</button>
+        <span id="review-position" role="status"></span>
+        <button id="review-next" type="button">다음 문항</button>
+      </nav>
       <nav class="review-tabs" aria-label="검수 화면 전환">
         <button type="button" data-review-tab="source" aria-pressed="false">
           원본
@@ -308,6 +313,16 @@
               <button id="pdf-previous" type="button">이전 페이지</button
               ><span id="pdf-page-state" role="status"></span
               ><button id="pdf-next" type="button">다음 페이지</button>
+            </div>
+            <div class="pdf-zoom" aria-label="PDF 배율">
+              <button id="pdf-zoom-out" type="button" aria-label="PDF 축소">
+                −
+              </button>
+              <span id="pdf-zoom-state" role="status">너비 맞춤</span>
+              <button id="pdf-zoom-in" type="button" aria-label="PDF 확대">
+                +
+              </button>
+              <button id="pdf-fit" type="button">너비 맞춤</button>
             </div>
             <div class="pdf-canvas-wrap">
               <canvas
@@ -363,6 +378,14 @@
           class="primary"
         >
           문항 수정 저장
+        </button>
+        <button
+          id="save-review-next"
+          type="submit"
+          form="edit-question-form"
+          class="primary"
+        >
+          저장 후 다음
         </button>
       </footer>
     </dialog>
