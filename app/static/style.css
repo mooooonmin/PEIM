@@ -1105,47 +1105,60 @@ dialog::backdrop {
   }
 }
 
-@media (max-width: 1200px) {
-  .study-columns {
-    display: flex;
-    flex-direction: column;
-    overflow: visible;
-  }
-  .writing:has(.study-columns) {
-    overflow-y: auto;
-  }
-  .study-columns > .answer-pane {
-    flex: none;
-    min-height: 360px;
-  }
-  #learning-panel {
-    border-left: 0;
-    border-top: 1px solid var(--line);
-    padding: 16px 0;
-  }
-  #learning-reference-pane {
-    max-height: 60dvh;
-  }
-  #learning-form {
-    max-height: none;
-  }
-}
-
-#learning-panel {
+/* Study workspace: writing first, comparison and review share the same editor. */
+.study-toolbar {
+  flex: none;
+  padding: 12px 0;
   display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: auto;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--paper);
 }
-#learning-reference-pane {
+.study-toolbar nav {
+  display: flex;
+  gap: 8px;
+}
+.study-save-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex-basis: 100%;
+  font-size: 13px;
+  color: var(--muted);
+  min-height: 20px;
+}
+#review-state {
+  color: var(--ink);
+}
+.writing:has(.study-toolbar) {
+  overflow: hidden;
+}
+.writing .question-pane {
+  flex: none;
+  max-height: 28dvh;
+  min-height: 120px;
+  padding: 8px 0;
+  resize: vertical;
+}
+.writing.question-collapsed .question-pane {
+  min-height: 52px;
+  max-height: 52px;
+  resize: none;
+  overflow: hidden;
+}
+.question-collapsed .question-pane > :not(.section-head) {
+  display: none;
+}
+.study-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   flex: 1;
-  min-height: 160px;
+  min-height: 0;
+  overflow: hidden;
 }
-#learning-form {
-  flex-shrink: 0;
-}
-.learning-selectors label {
-  flex: 1 1 110px;
+.study-columns > .answer-pane {
+  min-height: 0;
 }
 .study-columns .answer-pane > .section-head {
   flex-wrap: wrap;
@@ -1153,11 +1166,125 @@ dialog::backdrop {
 .study-columns .answer-pane h2 {
   white-space: nowrap;
 }
-@media (max-width: 1200px) {
-  #learning-panel {
-    overflow: visible;
+.writing[data-mode="write"] #learning-panel {
+  display: none;
+}
+.writing[data-mode="compare"] .study-columns,
+.writing[data-mode="review"] .study-columns {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+body[data-study-mode="compare"] .workbench,
+body[data-study-mode="review"] .workbench {
+  grid-template-columns: 210px minmax(0, 1fr);
+}
+body[data-study-mode="compare"] #related,
+body[data-study-mode="review"] #related {
+  display: none;
+}
+body.focus-mode .workbench {
+  grid-template-columns: minmax(0, 1000px);
+  justify-content: center;
+}
+#learning-panel {
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  flex-direction: column;
+}
+#learning-reference-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+#learning-reference {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  margin-top: 12px;
+}
+.learning-selectors label {
+  flex: 1 1 120px;
+}
+.learning-selectors button {
+  font-size: 13px;
+}
+.writing[data-mode="compare"] #learning-form,
+.writing[data-mode="review"] #learning-reference-pane {
+  display: none;
+}
+#learning-form {
+  max-height: none;
+  overflow: auto;
+  border-top: 0;
+}
+#learning-note {
+  min-height: 160px;
+  max-height: 40dvh;
+}
+@media (max-width: 900px) {
+  body[data-study-mode] .workbench {
+    display: flex;
+    flex-direction: column;
+    height: auto;
   }
-  #learning-reference-pane {
+  .writing:has(.study-toolbar) {
+    min-height: 0;
+    overflow: visible;
+    padding: 0 16px;
+  }
+  .study-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    border-bottom: 1px solid var(--line);
+  }
+  .study-toolbar button {
+    white-space: nowrap;
+    padding: 8px 12px;
+  }
+  .study-toolbar nav {
+    gap: 4px;
+  }
+  .study-toolbar {
+    gap: 8px;
+  }
+  .writing .question-pane {
+    max-height: 30dvh;
+    min-height: 140px;
+  }
+  .writing[data-mode] .study-columns {
+    display: flex;
+    flex-direction: column;
+    height: 65dvh;
+    min-height: 400px;
     flex: none;
   }
+  .writing[data-mode="compare"] .answer-pane,
+  .writing[data-mode="review"] .answer-pane {
+    display: none;
+  }
+  .study-columns > .answer-pane {
+    flex: 1;
+    min-height: 0;
+  }
+  #learning-panel {
+    flex: 1;
+    border-left: 0;
+    padding: 16px 0;
+  }
+  #learning-form {
+    height: 100%;
+  }
+  #learning-note {
+    min-height: 180px;
+  }
+  .study-save-status {
+    gap: 8px;
+    font-size: 12px;
+  }
 }
+
+.question-collapsed .question-pane .actions { display: none; }
