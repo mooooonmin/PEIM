@@ -85,20 +85,9 @@ DB 복원은 트랜잭션으로 수행하며 실패하면 웹을 정지한 상�
 다른 Compose 프로젝트는 `--project 이름`으로 지정합니다.
 `PEIM_EXAM_DIR` 등 실행 때 사용한 환경 설정을 백업·복원에도 동일하게 적용해야 합니다.
 
-## 검증
+## 개발 검사
 
-```powershell
-python -m unittest discover -s tests -v
-python scripts/validate_data.py
-python scripts/check_rebuild.py
-npm ci
-npm run build
-docker compose --profile test run --build --rm test
-```
-
-호스트 unittest에서는 앱 통합 검사를 건너뜁니다. 마지막 명령이 별도의 `peim_test` DB와
-임시 시험지 폴더에서 실제 PostgreSQL 통합 검사를 실행합니다. 실제 답안 DB나 원본 폴더를 사용하지 않습니다.
-PR에서는 데이터 검사와 Docker 앱 검사를 실행합니다.
+검사 범위, 준비 조건과 명령은 [검증 안내](testing.md)에서 관리합니다.
 
 구현 참고: [FastAPI 파일 업로드](https://fastapi.tiangolo.com/tutorial/request-files/),
 [Psycopg 트랜잭션](https://www.psycopg.org/psycopg3/docs/basic/transactions.html),
