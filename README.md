@@ -28,7 +28,7 @@ Docker Desktop의 Linux 컨테이너 엔진이 필요합니다.
 | [data/](data/README.md) | 원본 목록, 보존 해시, 기존 ID 목록 |
 | [scripts/](scripts/README.md) | 변환·검사·내보내기 도구 |
 | [tests/](tests/README.md) | 데이터·백업 검사와 PostgreSQL 앱 통합 검사 |
-| [app/](app/README.md) | API, DB 스키마·가져오기, 학습·시험지 관리 화면 |
+| [app/](app/README.md) | API, DB 스키마·가져오기, 학습·문제 관리 화면 |
 
 - [데이터 모델과 식별자](docs/data-model.md)
 - [콘텐츠 원본·수정본·생성 과정](docs/content-pipeline.md)

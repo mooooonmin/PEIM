@@ -11,12 +11,13 @@ function node(tag, text) {
   if (text !== undefined) n.textContent = text;
   return n;
 }
-export function setupQuestionReview({ api, beforeOpen, refreshed }) {
+export function setupQuestionReview({ api, refreshed }) {
   let question,
     topics = [],
     selected = new Set(),
     changed = false,
-    busy = false;
+    busy = false,
+    opening = false;
   const dialog = $("question-review-dialog");
   function topicList() {
     const query = $("edit-topic-filter").value.trim().toLowerCase();
@@ -217,10 +218,10 @@ export function setupQuestionReview({ api, beforeOpen, refreshed }) {
     preview();
     changed = false;
   }
-  $("edit-question").onclick = async () => {
+  const open = async (id) => {
+    if (opening || dialog.open) return;
+    opening = true;
     try {
-      const id = await beforeOpen();
-      if (!id) return;
       [question, { topics }] = await Promise.all([
         api(`/questions/${encodeURIComponent(id)}`),
         api("/navigation"),
@@ -232,6 +233,8 @@ export function setupQuestionReview({ api, beforeOpen, refreshed }) {
     } catch (e) {
       $("global-error").hidden = false;
       $("global-error").textContent = e.message;
+    } finally {
+      opening = false;
     }
   };
   $("edit-topic-filter").oninput = topicList;
@@ -313,4 +316,5 @@ export function setupQuestionReview({ api, beforeOpen, refreshed }) {
       $("close-question-review").disabled = false;
     }
   };
+  return open;
 }

@@ -1,3 +1,4 @@
+import { setupManagement } from "./manage.js";
 import { setupQuestionReview } from "./review.js";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -16,6 +17,10 @@ let timer,
   loadSequence = 0,
   chosenExam = null,
   extraction = null;
+let currentView =
+  new URLSearchParams(location.search).get("view") === "manage"
+    ? "manage"
+    : "study";
 let conflict = false,
   renderSequence = 0,
   reviewSequence = 0;
@@ -255,6 +260,15 @@ function renderNavigation() {
 function updateURL() {
   const params = new URLSearchParams();
   params.set("mode", mode);
+  if (currentView === "manage") {
+    params.set("view", "manage");
+    params.set(
+      "section",
+      new URLSearchParams(location.search).get("section") === "upload"
+        ? "upload"
+        : "questions",
+    );
+  }
   if (selectedTopic) params.set("topic", selectedTopic);
   if (selectedExam) params.set("exam", selectedExam);
   if (current) params.set("q", current.id);
@@ -367,14 +381,7 @@ async function selectQuestion(qid) {
   updateURL();
 }
 function displayQuestion() {
-  for (const id of [
-    "answer",
-    "completed",
-    "history",
-    "original",
-    "reference",
-    "edit-question",
-  ])
+  for (const id of ["answer", "completed", "history", "original", "reference"])
     $(id).disabled = !current;
   $("save-error").hidden = true;
   if (!current) {
@@ -382,7 +389,7 @@ function displayQuestion() {
     text("question-title", "");
     text(
       "question-text",
-      "등록된 문항이 없습니다. 시험지 관리에서 문항을 추가해 주세요.",
+      "등록된 문항이 없습니다. 문제 관리에서 문항을 추가해 주세요.",
     );
     text("verification", "");
     $("answer").value = "";
@@ -577,11 +584,13 @@ $("search").oninput = () => {
 
 async function showView(manage) {
   if (!(await save())) return;
+  currentView = manage ? "manage" : "study";
   $("study").hidden = manage;
   $("manage").hidden = !manage;
   $("study-tab").setAttribute("aria-current", manage ? "false" : "page");
   $("manage-tab").setAttribute("aria-current", manage ? "page" : "false");
-  if (manage) await loadExams();
+  updateURL();
+  if (manage) await management.load();
 }
 $("study-tab").onclick = safe(() => showView(false));
 $("manage-tab").onclick = safe(() => showView(true));
@@ -802,12 +811,12 @@ async function start() {
   const qid = params.get("q") || rows[0]?.id;
   if (qid) await selectQuestion(qid);
   renderQuestionList();
+  if (currentView === "manage") await showView(true);
 }
 start().catch(report);
 
-setupQuestionReview({
+const openQuestionReview = setupQuestionReview({
   api,
-  beforeOpen: async () => ((await save()) ? current?.id : null),
   refreshed: async (qid) => {
     nav = await api("/navigation");
     populateTopics();
@@ -818,6 +827,13 @@ setupQuestionReview({
           selectedTopic ? { topic: selectedTopic } : { exam: selectedExam },
         ),
     );
-    await selectQuestion(qid);
+    if (current?.id === qid) await selectQuestion(qid);
+    else renderQuestionList();
+    await management.refreshQuestions();
   },
+});
+const management = setupManagement({
+  api,
+  openReview: openQuestionReview,
+  loadUploads: loadExams,
 });
