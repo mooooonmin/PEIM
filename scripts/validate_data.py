@@ -3,7 +3,7 @@ import argparse
 import re
 from pathlib import Path
 from data_contract import ROOT, read_json, preservation_hash, load_shards
-from build_catalog import build
+from build_catalog import matches_registered
 
 
 def validate(root: Path) -> list[str]:
@@ -30,7 +30,7 @@ def validate(root: Path) -> list[str]:
     bodies = load_shards(data / "kw")
     diagrams = load_shards(data / "kwviz")
     catalog = read_json(root / "data/catalog.json")
-    require(catalog == build(root), "catalog: source paths/hashes/rounds differ")
+    require(matches_registered(root, catalog), "catalog: source paths/hashes/rounds differ")
     exams = index(catalog["exams"], "id", "exam")
     for qid, q in questions.items():
         require(type(q["round"]) is int and q["round"] > 0, f"{qid}: invalid round")

@@ -1,0 +1,73 @@
+name: peim
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: peim
+      POSTGRES_USER: peim
+      POSTGRES_PASSWORD: ${PEIM_DB_PASSWORD:-peim-local-only}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U peim -d peim"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:${PEIM_PORT:-8000}:8000"
+    environment:
+      PGHOST: db
+      PGDATABASE: peim
+      PGUSER: peim
+      PGPASSWORD: ${PEIM_DB_PASSWORD:-peim-local-only}
+      EXAM_DIR: /exams
+      SEED_PATH: /app/seed.json
+    volumes:
+      - ${PEIM_EXAM_DIR:-./정보관리기술사_기출문제}:/exams
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          CMD,
+          python,
+          -c,
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+    restart: unless-stopped
+  test-db:
+    profiles: [test]
+    image: postgres:17
+    environment:
+      POSTGRES_DB: peim_test
+      POSTGRES_USER: peim
+      POSTGRES_PASSWORD: test-only
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U peim -d peim_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+  test:
+    profiles: [test]
+    build:
+      context: .
+      target: test
+    environment:
+      PGHOST: test-db
+      PGDATABASE: peim_test
+      PGUSER: peim
+      PGPASSWORD: test-only
+      SEED_PATH: /app/seed.json
+    depends_on:
+      test-db:
+        condition: service_healthy
+volumes:
+  database:

@@ -73,6 +73,7 @@ class DataTests(unittest.TestCase):
         attachment = next(a for a in catalog["attachments"] if a["exam_id"] == "exam-140")
         self.assertEqual(attachment["verification_status"], "unverified")
         self.assertIsNone(attachment["page_count"])
+        self.assertEqual(validate(self.root), [])  # Runtime uploads are not versioned seed data.
 
     def test_catalog_rejects_inconsistent_filename(self):
         path = self.root / EXAM_DIRECTORY / "140.pdf"
