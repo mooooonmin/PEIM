@@ -13,7 +13,6 @@ CONTENT = Path(__file__).resolve().parent.parent / "content"
 SRC = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(
     Path(__file__).resolve().parent.parent / "정보관리기술사_기출문제")
 OUT = Path(__file__).parent / "out"
-OUT.mkdir(exist_ok=True)
 
 # 머리말·꼬리말 제거 패턴
 NOISE = [
@@ -129,6 +128,7 @@ def clean_text(t: str) -> str:
 
 
 def main():
+    OUT.mkdir(exist_ok=True)
     all_q = []
     report = []
     files = sorted(SRC.glob("제*회_정보관리기술사.*"),

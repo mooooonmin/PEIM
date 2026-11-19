@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
+    />
+    <title>PEIM · 정보관리기술사</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="module" src="/assets/main.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#answer">답안 작성으로 이동</a>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="정보관리기술사 학습 홈"
+        ><svg viewBox="0 0 32 36" aria-hidden="true">
+          <path
+            d="M16 2 30 10v16L16 34 2 26V10Z M2 10l14 8 14-8 M16 18v16"
+          /></svg
+        ><strong>정보관리기술사</strong></a
+      >
+      <nav aria-label="주 메뉴">
+        <button id="study-tab" aria-current="page">학습</button
+        ><button id="manage-tab">시험지 관리</button>
+      </nav>
+      <span class="local-label">내 학습 공간</span>
+    </header>
+    <div id="global-error" role="alert" hidden></div>
+    <main id="study" class="workbench">
+      <aside id="explorer" class="explorer" aria-label="학습 탐색">
+        <div class="mode-tabs">
+          <button id="by-topic" aria-pressed="true">주제</button
+          ><button id="by-exam" aria-pressed="false">회차</button>
+        </div>
+        <label class="search-label" for="search">주제·문제 검색</label
+        ><input
+          id="search"
+          type="search"
+          placeholder="정규화, 트랜잭션…"
+          autocomplete="off"
+        />
+        <div id="navigation" class="navigation" aria-live="polite">
+          학습 자료를 불러오는 중입니다.
+        </div>
+      </aside>
+      <section class="writing" aria-label="문제와 내 답안">
+        <section class="question-pane">
+          <div class="section-head">
+            <div>
+              <h1>문제</h1>
+              <span id="question-meta" class="muted"></span>
+            </div>
+            <div class="actions">
+              <button id="original" disabled>원본 시험지</button
+              ><button id="reference" disabled>주제 참고 답안</button>
+            </div>
+          </div>
+          <p id="question-title" class="topic-caption"></p>
+          <div id="question-text" class="question-text">
+            왼쪽에서 주제나 회차를 선택해 주세요.
+          </div>
+          <p id="verification" class="quiet"></p>
+        </section>
+        <section class="answer-pane">
+          <div class="section-head">
+            <h2>내 답안</h2>
+            <div class="actions">
+              <span id="save-state" role="status">문항 선택 전</span
+              ><button id="history" disabled>저장 이력</button
+              ><button id="focus" aria-pressed="false">집중 모드</button>
+            </div>
+          </div>
+          <div id="save-error" role="alert" hidden>
+            <span id="save-error-text"></span
+            ><button id="retry">다시 저장</button
+            ><button id="download-draft">내 글 내려받기</button
+            ><button id="load-server">서버 답안 불러오기</button>
+          </div>
+          <label class="sr-only" for="answer">선택한 기출문항의 내 답안</label>
+          <textarea
+            id="answer"
+            placeholder="문제를 읽고, 내 언어로 답안을 작성해 보세요."
+            disabled
+            spellcheck="false"
+          ></textarea>
+          <footer class="editor-footer">
+            <span id="character-count">0자</span
+            ><label
+              ><input type="checkbox" id="completed" disabled /> 작성
+              완료</label
+            ><span class="quiet">입력 후 자동 저장</span>
+          </footer>
+        </section>
+      </section>
+      <aside id="related" class="related" aria-label="연결 기출">
+        <div class="section-head">
+          <h2 id="related-title">연결 기출</h2>
+          <button id="toggle-related" aria-expanded="true">접기</button>
+        </div>
+        <div id="question-list">
+          <p class="empty">주제를 선택하면 연결된 기출문항을 볼 수 있습니다.</p>
+        </div>
+      </aside>
+    </main>
+    <main id="manage" class="manage" hidden>
+      <div class="page-head">
+        <div>
+          <h1>시험지 관리</h1>
+          <p class="muted">
+            원본을 보관하고, 확인한 문항을 학습 목록에 추가합니다.
+          </p>
+        </div>
+      </div>
+      <div class="manager-grid">
+        <section class="management-panel">
+          <h2>PDF 첨부</h2>
+          <form id="upload-form">
+            <label for="round">시험 회차</label
+            ><input
+              id="round"
+              name="round_number"
+              type="number"
+              min="1"
+              max="2147483647"
+              required
+              placeholder="예: 140"
+            />
+            <label for="pdf">시험지 PDF</label
+            ><input
+              id="pdf"
+              name="file"
+              type="file"
+              accept=".pdf,application/pdf"
+              required
+            />
+            <p class="quiet">
+              32 MB 이하. 기존 시험지 폴더에 규칙에 맞는 이름으로 저장하며, 같은
+              이름의 파일을 덮어쓰지 않습니다.
+            </p>
+            <button type="submit" class="primary">원본 등록</button>
+            <p id="upload-result" role="status"></p>
+          </form>
+          <h2 class="list-heading">등록된 시험지</h2>
+          <div id="exam-list" class="exam-list">불러오는 중입니다.</div>
+        </section>
+        <section class="management-panel review-panel">
+          <div class="section-head">
+            <h2 id="review-title">문항 확인</h2>
+            <div class="actions">
+              <button id="review-original" disabled>원본 열기</button
+              ><button id="extract" disabled>문항 추출</button>
+            </div>
+          </div>
+          <p id="extraction-state" role="status">
+            왼쪽에서 PDF 시험지를 선택해 주세요.
+          </p>
+          <label for="candidates">추출된 문항 초안</label
+          ><select id="candidates" disabled>
+            <option value="">직접 입력</option>
+          </select>
+          <details id="raw-pages">
+            <summary>추출한 원문 텍스트 확인</summary>
+            <pre id="raw-text">추출 전입니다.</pre>
+          </details>
+          <form id="question-form">
+            <fieldset id="review-fields" disabled>
+              <legend class="sr-only">문항 등록</legend>
+              <div class="field-row">
+                <label
+                  >교시<select id="session">
+                    <option value="1">1교시</option>
+                    <option value="2">2교시</option>
+                    <option value="3">3교시</option>
+                    <option value="4">4교시</option>
+                  </select></label
+                ><label
+                  >문항 번호<input
+                    id="number"
+                    type="number"
+                    min="1"
+                    max="999"
+                    required /></label
+                ><label
+                  >PDF 페이지<input
+                    id="page"
+                    type="number"
+                    min="1"
+                    placeholder="확인한 경우"
+                /></label>
+              </div>
+              <label for="new-question">문제 원문</label
+              ><textarea
+                id="new-question"
+                rows="7"
+                required
+                maxlength="30000"
+              ></textarea>
+              <label for="topic-search">연결할 주제</label
+              ><input
+                id="topic-search"
+                list="topic-options"
+                placeholder="주제명을 검색하고 목록에서 선택"
+                required
+              /><datalist id="topic-options"></datalist>
+              <details class="new-topic">
+                <summary>목록에 없는 새 주제 만들기</summary>
+                <label for="new-topic-title">새 주제명</label
+                ><input id="new-topic-title" maxlength="200" /><label
+                  for="new-domain"
+                  >분야</label
+                ><select id="new-domain"></select
+                ><button id="create-topic" type="button">주제 추가</button>
+              </details>
+              <label class="check-label"
+                ><input id="reviewed" type="checkbox" required /> 원본과
+                문항·교시·번호를 대조했습니다.</label
+              >
+              <button type="submit" class="primary">확인한 문항 등록</button>
+              <p id="question-result" role="status"></p>
+            </fieldset>
+          </form>
+        </section>
+      </div>
+    </main>
+    <dialog id="reading-dialog">
+      <div class="section-head">
+        <h2 id="reading-title"></h2>
+        <button id="close-reading">닫기</button>
+      </div>
+      <div id="reading-controls"></div>
+      <div id="reading-body" class="reading-body"></div>
+    </dialog>
+    <noscript>답안 작성과 저장에는 JavaScript가 필요합니다.</noscript>
+  </body>
+</html>

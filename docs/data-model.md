@@ -1,7 +1,8 @@
 # 데이터 모델 v1
 
-이 문서는 다음 웹·DB 구현의 데이터 계약입니다. 현재 구현은 원본 목록 생성,
-읽기 전용 검사, 정규화 JSON 내보내기까지입니다. DB 테이블·마이그레이션·가져오기 API는 아직 없습니다.
+데이터 계약과 로컬 앱의 첫 DB 스키마입니다. 실제 테이블은 `app/schema.sql`,
+트랜잭션 초기화·가져오기는 `app/db.py`에 있습니다. 참조 키·관계는 관계형 테이블에,
+출처와 검증 부가 정보는 각 테이블의 JSONB data에 저장합니다.
 
 ## 객체와 관계
 
@@ -17,8 +18,8 @@
 | reference_answer | `id`, `topic_id`, `variant`, `body`, `revision`, `source_path`, `source_pointer`, `citations`, `verification_status` | 주제별 참고 답안. variant는 short/long. 공식 정답이 아님 |
 | keyword | `id`, `term`, `term_en`, `definition`, `features`, `related`, `visual`, `verification_status` | 관련 키워드와 도식 참조 보존 |
 | topic_keyword | `topic_id`, `keyword_id` | 복합키 유일 |
-| user_answer (향후 DB) | `id`, `profile_id`, `question_id`, `body`, `status`, `revision`, `created_at`, `updated_at` | 프로필·문항 조합 유일. 상태는 draft/completed |
-| user_answer_revision (향후 DB) | `answer_id`, `revision`, `body`, `saved_at` | 답안·리비전 조합 유일. 복원용 이력 |
+| user_answers | `profile_id`, `question_id`, `body`, `status`, `revision`, `created_at`, `updated_at` | 프로필·문항 복합 기본키. 상태는 draft/completed |
+| answer_revisions | `profile_id`, `question_id`, `revision`, `body`, `status`, `saved_at` | 프로필·문항·리비전 복합 기본키. 복원용 이력 |
 
 단일 사용자 초기 버전은 로컬 기본 프로필 하나를 사용하며 로그인은 구현 범위에서 제외합니다.
 이는 접근 인증을 제공한다는 뜻이 아닙니다. 다중 사용자 확장 시 인증·권한은 별도 구현합니다.
@@ -64,9 +65,13 @@ DB의 업로드 초안에는 이 완성도 규칙을 적용하지 않고, 공개
 같은 입력에서는 날짜나 난수를 넣지 않아 같은 결과가 나옵니다.
 본문·키워드·도식·우선 학습 목록을 보존하면서 관계 목록을 분리합니다.
 
-향후 importer는 schema_version을 검사하고, 외래키 대상부터 트랜잭션 안에서 등록합니다.
-같은 ID를 재등록해도 중복 생성하지 않는 방식으로 구현하며, 개인 답안과 검토 상태는 seed로 초기화하지 않습니다.
+가져오기는 schema_version을 검사하고, 외래키 대상부터 트랜잭션 안에서 등록합니다.
+imports의 버전으로 최초 가져오기만 수행하며, 앱 재시작으로 개인 답안과 검토 상태를 초기화하지 않습니다.
+동일한 버전의 seed를 수정해도 이미 가져온 DB는 자동 갱신되지 않습니다. 이후 배포 데이터 갱신은
+새 가져오기 버전과 명시적 마이그레이션으로 구현해야 합니다. 런타임 PDF·문항 추가는 API와 DB로 관리합니다.
 원본 PDF·HWP는 JSON에 복사하지 않고 상대 경로와 해시로 연결합니다.
 
 문항별 자동 저장은 DB 성공 응답 뒤에만 ‘저장됨’을 표시합니다.
-저장 실패 시 편집 내용을 유지하고 재시도하며, revision을 비교해 여러 창의 덮어쓰기를 감지하도록 구현합니다.
+저장 실패 시 편집 내용을 유지하고 재시도하며, revision을 비교해 여러 창의 덮어쓰기를 감지합니다.
+브라우저 임시 보관은 보조 수단이며 DB 저장을 대신하지 않습니다. 충돌 시 내 글 다운로드와
+서버 답안 불러오기를 제공합니다. 최근 저장 이력을 선택해 복원하면 새로운 revision으로 저장합니다.

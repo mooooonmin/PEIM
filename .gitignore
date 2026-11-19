@@ -8,3 +8,10 @@ scripts/chunks
 .DS_Store
 __pycache__/
 *.pyc
+.venv/
+app/static/assets/
+artifacts/
+backups/
+# Newly uploaded personal files stay local; existing tracked originals remain tracked.
+정보관리기술사_기출문제/*.pdf
+정보관리기술사_기출문제/.peim-upload-*

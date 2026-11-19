@@ -15,6 +15,20 @@ def build(root):
     }
 
 
+def matches_registered(root, catalog):
+    """Runtime uploads can coexist without becoming part of the versioned seed."""
+    actual = build(root)
+    registered = {a["id"] for a in catalog["attachments"]}
+    exam_ids = {e["id"] for e in catalog["exams"]}
+    if exam_ids != {a["exam_id"] for a in catalog["attachments"]}:
+        return False
+    return catalog == {
+        "schema_version": actual["schema_version"],
+        "exams": [e for e in actual["exams"] if e["id"] in exam_ids],
+        "attachments": [a for a in actual["attachments"] if a["id"] in registered],
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="목록 차이만 검사; 파일 수정 없음")
@@ -22,7 +36,7 @@ def main():
     output = ROOT / "data/catalog.json"
     catalog = build(ROOT)
     if args.check:
-        if read_json(output) != catalog:
+        if not matches_registered(ROOT, read_json(output)):
             raise SystemExit("catalog is stale; review source changes before refreshing")
         print("catalog matches source files")
     else:
