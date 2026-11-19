@@ -1,6 +1,6 @@
 # 데이터 모델과 DB 이행
 
-초기 콘텐츠 계약은 v1이며 로컬 DB 스키마에는 v2 문항 수정 이력이 추가됩니다. 실제 테이블은 `app/schema.sql`,
+초기 콘텐츠 계약은 v1이며 로컬 DB 스키마에는 v2 문항 수정 이력과 v3 복습 정보가 추가됩니다. 기본 테이블은 `app/schema.sql`, 추가 이행은 `app/migrations/`,
 트랜잭션 초기화·가져오기는 `app/db.py`에 있습니다. 참조 키·관계는 관계형 테이블에,
 출처와 검증 부가 정보는 각 테이블의 JSONB data에 저장합니다.
 
@@ -20,6 +20,7 @@
 | topic_keyword | `topic_id`, `keyword_id` | 복합키 유일 |
 | user_answers | `profile_id`, `question_id`, `body`, `status`, `revision`, `created_at`, `updated_at` | 프로필·문항 복합 기본키. 상태는 draft/completed |
 | answer_revisions | `profile_id`, `question_id`, `revision`, `body`, `status`, `saved_at` | 프로필·문항·리비전 복합 기본키. 복원용 이력 |
+| learning_notes | `profile_id`, `question_id`, `note`, `retry_requested`, `revision`, `updated_at` | 프로필·문항별 보완 메모와 다시 풀기. 답안·검수 상태와 독립 |
 
 단일 사용자 초기 버전은 로컬 기본 프로필 하나를 사용하며 로그인은 구현 범위에서 제외합니다.
 이는 접근 인증을 제공한다는 뜻이 아닙니다. 다중 사용자 확장 시 인증·권한은 별도 구현합니다.
@@ -98,3 +99,15 @@ imports의 버전으로 최초 가져오기만 수행하며, 앱 재시작으로
 앱 시작 시 기존 초기화 잠금·트랜잭션 안에서 이력 테이블을 추가하고 schema_version에 2를 기록합니다.
 기존 테이블·문항·개인 답안을 지우거나 seed를 다시 가져오지 않는 추가형 이행입니다.
 DB 업데이트 전 백업은 [운영 안내](local-storage.md#백업과-복원)를 따릅니다.
+
+## 복습 정보 추가형 이행 (v3)
+
+`app/migrations/003_learning.sql`은 기존 답안·답안 이력·문항을 변경하지 않고 `learning_notes`를 추가합니다.
+앱 초기화가 기본 스키마 다음에 정렬된 이행 파일을 실행하며 반복 실행해도 개인 데이터를 초기화하지 않습니다.
+이행 파일은 배포 후 수정하지 않고 후속 파일로 확장합니다. 이전 앱으로 되돌릴 때도 이 테이블과 메모는 보존하며
+자동 역이행·테이블 삭제는 제공하지 않습니다. 필요하면 백업을 확인한 후 별도 복구 작업으로 처리합니다.
+
+`GET/PUT /api/questions/{qid}/learning`은 로컬 프로필의 복습 정보만 조회·변경합니다. 최초 revision은 0이고,
+저장마다 증가합니다. 문항 행 잠금과 revision 대조로 다른 창의 수정을 덮어쓰지 않습니다(불일치 409).
+메모는 30,000자 이하이며 다시 풀기는 boolean입니다. 메모 저장은 답안 버전과 `answer_revisions`에 영향을 주지 않습니다.
+`GET /api/questions`의 `retry_requested`는 저장된 표시만 반환합니다. 복습 정보는 초기 콘텐츠 내보내기에 포함하지 않습니다.

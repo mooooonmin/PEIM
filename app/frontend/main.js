@@ -1,5 +1,6 @@
 import { setupManagement } from "./manage.js";
 import { setupQuestionReview } from "./review.js";
+import { setupLearning } from "./learning.js";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 import mermaid from "mermaid";
@@ -319,13 +320,18 @@ function renderQuestionList() {
   );
   $("search-context").hidden = !resultQuery;
   $("clear-search").hidden = !$("search").value;
-  if (!rows.length) {
+  const visibleRows = $("retry-only").checked
+    ? rows.filter((q) => q.retry_requested)
+    : rows;
+  if (!visibleRows.length) {
     $("question-list").append(
       element(
         "p",
-        resultQuery
-          ? "검색 결과가 없습니다. 검색어를 바꾸거나 검색을 해제해 주세요."
-          : "등록된 문항이 없습니다.",
+        $("retry-only").checked
+          ? "이 목록에 다시 풀기로 표시한 문항이 없습니다."
+          : resultQuery
+            ? "검색 결과가 없습니다. 검색어를 바꾸거나 검색을 해제해 주세요."
+            : "등록된 문항이 없습니다.",
         "empty",
       ),
     );
@@ -339,7 +345,7 @@ function renderQuestionList() {
   head.append(hr);
   table.append(head);
   const body = element("tbody");
-  for (const q of rows) {
+  for (const q of visibleRows) {
     const tr = element("tr");
     if (current?.id === q.id) {
       tr.className = "active";
@@ -361,9 +367,9 @@ function renderQuestionList() {
       element("td", `${q.number}번`),
       element(
         "td",
-        { empty: "미작성", draft: "작성 중", completed: "완료" }[
+        ({ empty: "미작성", draft: "작성 중", completed: "완료" }[
           q.answer_status
-        ],
+        ] || "미작성") + (q.retry_requested ? " / 다시 풀기" : ""),
         "state-label",
       ),
     );
@@ -411,7 +417,14 @@ async function selectQuestion(qid) {
   updateURL();
 }
 function displayQuestion() {
-  for (const id of ["answer", "completed", "history", "original", "reference"])
+  for (const id of [
+    "answer",
+    "completed",
+    "history",
+    "original",
+    "reference",
+    "compare",
+  ])
     $(id).disabled = !current;
   $("save-error").hidden = true;
   if (!current) {
@@ -459,16 +472,14 @@ $("close-reading").onclick = () => {
   renderSequence++;
   $("reading-dialog").close();
 };
-async function renderMarkdown(body) {
+async function renderMarkdown(body, target = $("reading-body")) {
   const sequence = ++renderSequence;
   body = body.replace(
     /\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
     (_, id, label) => label || id,
   );
-  $("reading-body").innerHTML = DOMPurify.sanitize(marked.parse(body));
-  for (const code of $("reading-body").querySelectorAll(
-    "code.language-mermaid",
-  )) {
+  target.innerHTML = DOMPurify.sanitize(marked.parse(body));
+  for (const code of target.querySelectorAll("code.language-mermaid")) {
     try {
       const { svg } = await mermaid.render(
         `diagram-${sequence}-${crypto.randomUUID().replaceAll("-", "")}`,
@@ -485,6 +496,23 @@ async function renderMarkdown(body) {
     }
   }
 }
+const openLearning = setupLearning({
+  api,
+  renderMarkdown,
+  cancelRender: () => {
+    renderSequence++;
+  },
+  saved: (qid, value) => {
+    const row = rows.find((q) => q.id === qid);
+    if (row) row.retry_requested = value.retry_requested;
+    renderQuestionList();
+  },
+});
+$("compare").onclick = safe(async () => {
+  if (!current || !(await save())) return;
+  await openLearning(current);
+});
+$("retry-only").onchange = renderQuestionList;
 $("reference").onclick = safe(async () => {
   openReading("주제 참고 답안");
   const topicSelect = element("select");

@@ -17,6 +17,127 @@
   --radius: 7px;
   --space: 16px;
 }
+.retry-filter {
+  display: block;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+#learning-dialog {
+  width: min(1440px, 96vw);
+  max-width: 96vw;
+  height: 94dvh;
+  max-height: 94dvh;
+  overflow: hidden;
+  gap: 8px;
+}
+#learning-dialog > .section-head,
+.learning-notice,
+.learning-prompt,
+#learning-form,
+.learning-tabs {
+  flex-shrink: 0;
+}
+.learning-notice {
+  margin: 0;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+}
+.learning-prompt {
+  max-height: 18dvh;
+  overflow: auto;
+}
+#learning-question,
+#learning-answer {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.learning-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  min-height: 0;
+  flex: 1;
+}
+.learning-columns > section {
+  overflow: auto;
+  min-width: 0;
+  padding: 4px;
+}
+.learning-columns h3 {
+  margin: 8px 0;
+}
+#learning-answer {
+  font-size: 17px;
+}
+.learning-selectors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+.learning-selectors label {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.learning-selectors select {
+  width: 100%;
+  min-width: 0;
+}
+.learning-tabs {
+  display: none;
+  gap: 8px;
+}
+#learning-form {
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+  max-height: 42dvh;
+  overflow: auto;
+}
+#learning-note {
+  display: block;
+  width: 100%;
+  resize: vertical;
+  min-height: 64px;
+  max-height: 20dvh;
+  margin: 4px 0 8px;
+}
+.learning-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.learning-actions details {
+  margin-left: auto;
+  font-size: 14px;
+}
+#learning-result {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+@media (max-width: 800px) {
+  #learning-dialog {
+    padding: 12px;
+  }
+  .learning-tabs {
+    display: flex;
+  }
+  .learning-tabs button {
+    flex: 1;
+  }
+  .learning-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #learning-dialog[data-pane="answer"] #learning-reference-pane,
+  #learning-dialog[data-pane="reference"] #learning-answer-pane {
+    display: none;
+  }
+}
 * {
   box-sizing: border-box;
 }
