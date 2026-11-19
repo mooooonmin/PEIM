@@ -44,13 +44,7 @@ content/work/kwviz/out은 이름이 out이어도 보존 대상인 도식 원본�
 
 ## 검사와 재현
 
-```powershell
-python scripts/validate_data.py
-python scripts/build_catalog.py --check
-python scripts/check_rebuild.py
-python -m unittest discover -s tests -v
-python scripts/export_dataset.py
-```
+명령과 준비 조건은 [데이터 검사·내보내기](testing.md#데이터-검사와-내보내기)를 따릅니다.
 
 - validate_data: 중복 ID/JSON 키, 연결, 답안 누락, 키워드 링크, 분할 파일, 우선 학습 메타데이터,
   고정 ID, 원본 보존 해시 검사. 읽기 전용입니다.
