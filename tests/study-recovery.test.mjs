@@ -107,3 +107,24 @@ test("PDF 전환 중 이전 후보를 제거하고 새 시험지 후보만 등�
   assert.equal(f.state.registration.attachment_id, "a141");
   assert.equal(f.state.registration.text, "Round 141 source");
 });
+
+test("답안 저장 재시도 대기 중 새 입력은 서버 재불러오기가 덮지 않는다", async t => {
+  const f = await fixture(t);
+  f.state.fail = true; f.edit();
+  await untilSlow(() => !f.$("save-error").hidden);
+  f.state.fail = false;
+  const fetch = f.w.fetch; let release, pending = false;
+  const gate = new Promise(r => release = r);
+  f.w.fetch = async (url, options = {}) => {
+    if (String(url).endsWith('/answer') && !pending) { pending = true; await gate; }
+    return fetch(url, options);
+  };
+  f.$("retry").onclick();
+  await until(() => pending);
+  const reload = f.$("load-server").onclick();
+  f.$("answer").value = '저장 대기 중 최신 입력';
+  f.$("answer").dispatchEvent(new f.w.Event('input'));
+  release(); await reload;
+  await until(() => f.answers.get('q1').body === '저장 대기 중 최신 입력');
+  assert.equal(f.$("answer").value, '저장 대기 중 최신 입력');
+});

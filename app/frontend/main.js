@@ -204,13 +204,15 @@ $("load-server").onclick = safe(async () => {
     )
   )
     return;
-  if (saving) await saving;
   const q = current, sequence = ++loadSequence, view = currentView;
   const value = snapshot();
+  const unchanged = () => current === q && sequence === loadSequence && currentView === view &&
+    JSON.stringify(snapshot()) === JSON.stringify(value);
   clearTimeout(timer);
+  if (saving) await saving;
+  if (saving || !unchanged()) return;
   const updated = await api(`/questions/${encodeURIComponent(q.id)}`);
-  if (current !== q || sequence !== loadSequence || currentView !== view ||
-      JSON.stringify(snapshot()) !== JSON.stringify(value)) return;
+  if (saving || !unchanged()) return;
   try {
     localStorage.setItem(
       draftKey(q.id) + ":before-reload",
