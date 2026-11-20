@@ -318,6 +318,7 @@ async function chooseFilter(topic, exam) {
   resultQuery = "";
   $("search").value = "";
   rows = nextRows;
+  pendingStudyQuestion = null;
   renderNavigation();
   renderQuestionList();
   if (rows.length) await selectQuestion(rows[0].id);
@@ -629,11 +630,11 @@ for (const [id, value] of [
     renderNavigation();
     updateURL();
   };
-let searchTimer;
+let searchTimer, searchSequence = 0;
 $("search").oninput = () => {
   renderNavigation();
   clearTimeout(searchTimer);
-  const sequence = ++loadSequence;
+  const sequence = loadSequence, search = ++searchSequence;
   $("clear-search").hidden = !$("search").value;
   searchTimer = setTimeout(
     safe(async () => {
@@ -649,7 +650,7 @@ $("search").oninput = () => {
                 : { exam: selectedExam },
           ),
       );
-      if (sequence !== loadSequence || !openLearning.canLeave()) return;
+      if (search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave()) return;
       rows = found;
       resultQuery = query;
       renderQuestionList();

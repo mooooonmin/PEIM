@@ -1,6 +1,32 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("학습 초기 조회 중 검색해도 선택 문항의 답안을 표시한다", async t => {
+  const f = await fixture(t, {url:"http://localhost:8000/?view=manage&mode=exam&exam=exam-140&q=q1", readyView:"manage"});
+  let release;
+  f.state.gateId = "q1"; f.state.gate = new Promise(r => release = r);
+  const opening = f.$("study-tab").onclick();
+  await until(() => f.state.requested);
+  f.$("search").value = "검색"; f.$("search").oninput();
+  await untilSlow(() => new URL(f.w.location.href).searchParams.get("search") === "검색");
+  release(); await opening;
+  assert.equal(f.$("answer").value, "q1 기존 답안");
+  assert.equal(f.$("answer").disabled, false);
+});
+test("학습 초기 조회 중 빈 회차를 선택하면 대기 문항도 해제한다", async t => {
+  const f = await fixture(t, {url:"http://localhost:8000/?view=manage&mode=exam&exam=exam-140&q=q1", readyView:"manage"});
+  let release;
+  f.state.gateId = "q1"; f.state.gate = new Promise(r => release = r);
+  const opening = f.$("study-tab").onclick();
+  await until(() => f.state.requested);
+  [...f.$("navigation").querySelectorAll("button")].find(b => b.textContent.includes("141회")).click();
+  await new Promise(r => setImmediate(r));
+  release(); await opening;
+  await until(() => new URL(f.w.location.href).searchParams.get("exam") === "exam-141");
+  assert.equal(new URL(f.w.location.href).searchParams.has("q"), false);
+  await f.$("manage-tab").onclick(); await f.$("study-tab").onclick();
+  assert.equal(f.$("answer").disabled, true);
+});
 for (const view of ["manage", "retry"]) test(`${view} 직접 접근은 충돌 초안에 막히지 않고 학습 진입 시 복구한다`, async t => {
   const draft = {body:"충돌한 기존 초안",status:"draft",revision:0};
   const f = await fixture(t, {
