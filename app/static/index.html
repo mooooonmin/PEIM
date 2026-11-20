@@ -8,8 +8,8 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script type="module" src="/assets/main.js"></script>
+    <link rel="stylesheet" href="/style.css?v=workspace-2" />
+    <script type="module" src="/assets/main.js?v=workspace-2"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -51,6 +51,30 @@
         <button id="back-to-retries" class="quiet-button" hidden>
           전체 다시 풀기 목록으로
         </button>
+        <section class="question-pane">
+          <div class="section-head">
+            <div>
+              <h1>문제</h1>
+              <span id="question-meta" class="muted"></span>
+            </div>
+            <div class="actions">
+              <button id="original" class="quiet-button" disabled>
+                원본 시험지</button>
+            </div>
+            <button
+              id="toggle-question"
+              class="quiet-button disclosure-button"
+              aria-expanded="true"
+            >
+              문제 접기
+            </button>
+          </div>
+          <p id="question-title" class="topic-caption"></p>
+          <div id="question-text" class="question-text">
+            왼쪽에서 주제나 회차를 선택해 주세요.
+          </div>
+          <p id="verification" class="quiet"></p>
+        </section>
         <div class="study-toolbar">
           <nav class="study-segments" aria-label="학습 단계">
             <button
@@ -78,50 +102,21 @@
               복습
             </button>
           </nav>
+          <div class="actions">
+            <button id="history" class="quiet-button" disabled>
+              저장 이력</button
+            ><button id="focus" class="quiet-button" aria-pressed="false">
+              집중 모드
+            </button>
+          </div>
           <div class="study-save-status">
             <span id="save-state" role="status">문항 선택 전</span
             ><span id="review-state" role="status">복습: 문항 선택 전</span>
           </div>
         </div>
-        <section class="question-pane">
-          <div class="section-head">
-            <div>
-              <h1>문제</h1>
-              <span id="question-meta" class="muted"></span>
-            </div>
-            <div class="actions">
-              <button id="original" class="quiet-button" disabled>
-                원본 시험지</button
-              ><button id="reference" class="quiet-button" disabled>
-                주제 참고 답안
-              </button>
-            </div>
-            <button
-              id="toggle-question"
-              class="quiet-button disclosure-button"
-              aria-expanded="true"
-            >
-              문제 접기
-            </button>
-          </div>
-          <p id="question-title" class="topic-caption"></p>
-          <div id="question-text" class="question-text">
-            왼쪽에서 주제나 회차를 선택해 주세요.
-          </div>
-          <p id="verification" class="quiet"></p>
-        </section>
         <div class="study-columns">
           <section class="answer-pane">
-            <div class="section-head">
-              <h2>내 답안</h2>
-              <div class="actions">
-                <button id="history" class="quiet-button" disabled>
-                  저장 이력</button
-                ><button id="focus" class="quiet-button" aria-pressed="false">
-                  집중 모드
-                </button>
-              </div>
-            </div>
+            <h2 class="answer-heading">내 답안</h2>
             <div id="save-error" role="alert" hidden>
               <span id="save-error-text"></span
               ><button id="retry">다시 저장</button

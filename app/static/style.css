@@ -1123,7 +1123,7 @@ dialog::backdrop {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  flex-basis: 100%;
+  margin-left: auto;
   font-size: 13px;
   color: var(--muted);
   min-height: 20px;
@@ -1137,8 +1137,8 @@ dialog::backdrop {
 .writing .question-pane {
   flex: none;
   max-height: 28dvh;
-  min-height: 120px;
-  padding: 8px 0;
+  min-height: 0;
+  padding: 12px 0;
   resize: vertical;
 }
 .writing.question-collapsed .question-pane {
@@ -1253,7 +1253,7 @@ body.focus-mode .workbench {
   }
   .writing .question-pane {
     max-height: 30dvh;
-    min-height: 140px;
+    min-height: 0;
   }
   .writing[data-mode] .study-columns {
     display: flex;
@@ -1466,4 +1466,38 @@ body.focus-mode .workbench {
   .topbar nav {
     flex-wrap: wrap;
   }
+}
+
+/* Question context, shared answer controls, then the live editor. */
+.writing .question-pane .section-head { margin-bottom: 8px; }
+.writing .question-pane .topic-caption { margin: 0 0 4px; }
+.writing .question-pane .quiet { margin: 8px 0 0; }
+.study-toolbar { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.study-toolbar > .actions { margin-left: auto; }
+.study-save-status { gap: 8px; }
+.answer-heading { font-size: 14px; margin: 0 8px; color: var(--muted); }
+.answer-pane { padding-top: 8px; }
+.answer-pane textarea { padding-top: 12px; }
+.writing.question-collapsed .question-pane {
+  min-height: 0;
+  max-height: none;
+  padding: 4px 0;
+}
+.writing.question-collapsed .question-pane .section-head { margin: 0; }
+@media (max-width: 900px) {
+  .study-toolbar > .actions { gap: 4px; }
+  .study-save-status { margin-left: 0; flex-basis: 100%; }
+}
+.study-toolbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 0;
+}
+.study-toolbar nav.study-segments { grid-row: 1 / 3; }
+.study-toolbar > .actions { grid-column: 2; }
+.study-toolbar .study-save-status { grid-column: 2; justify-content: flex-end; }
+@media (max-width: 900px) {
+  .study-toolbar { display: flex; gap: 4px 8px; }
+  .study-toolbar .study-save-status { justify-content: flex-start; }
 }
