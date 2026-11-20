@@ -76,6 +76,9 @@ class AppTests(unittest.TestCase):
         self.assertGreaterEqual(len(navigation["topics"]), 1238)
         self.assertEqual(sum(q["round"] <= 139 for q in self.client.get("/api/questions").json()), 1829)
         self.assertTrue(self.client.get(f"/api/questions/{self.qid}").json()["topics"])
+        summary = next(q for q in self.client.get('/api/questions').json() if q['id'] == self.qid)
+        titles = [t['title'] for t in self.client.get(f'/api/questions/{self.qid}').json()['topics']]
+        self.assertEqual(summary['topics'], ', '.join(titles))
 
     def test_save_history_conflict_and_reimport(self):
         route = f"/api/questions/{self.qid}/answer"

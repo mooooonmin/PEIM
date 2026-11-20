@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=collection-retry-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=collection-retry-1" />
-    <script type="module" src="/assets/main.js?v=collection-retry-1"></script>
+    <link rel="stylesheet" href="/style.css?v=collection-manage-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=collection-manage-1" />
+    <script type="module" src="/assets/main.js?v=collection-manage-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -287,8 +287,8 @@
       <p id="retry-result" role="status"></p>
       <div id="retry-items"></div>
     </main>
-    <main id="manage" class="manage" tabindex="-1" hidden>
-      <div class="page-head">
+    <main id="manage" class="manage collection-page" tabindex="-1" hidden>
+      <div class="collection-head">
         <div>
           <h1>문제 관리</h1>
           <p class="muted">
@@ -303,29 +303,24 @@
         </button>
       </nav>
       <section id="managed-questions" aria-label="기존 문항 검수">
-        <div class="management-filters">
-          <label
-            >회차<select id="managed-exam">
-              <option value="">전체 회차</option>
-            </select></label
-          >
-          <label
-            >문제 검색<input
-              id="managed-search"
-              type="search"
-              placeholder="문제 내용 검색"
-          /></label>
-          <label
-            >검증 상태<select id="managed-status">
-              <option value="">전체 상태</option>
-              <option value="unverified">미확인</option>
-              <option value="verified">확인 완료</option>
-              <option value="needs_review">재검토 필요</option>
-            </select></label
-          >
-          <button id="managed-refresh">새로고침</button>
+        <div class="management-filters collection-tools">
+          <label class="management-search">문제·주제 검색<input id="managed-search" type="search" placeholder="문제 내용이나 연결 주제 찾기" /></label>
+          <button id="managed-filter-toggle" class="mobile-filter-toggle" aria-expanded="false" aria-controls="managed-filter-controls">필터 보기</button>
+          <div id="managed-filter-controls" class="managed-filter-controls" data-expanded="false">
+          <label>회차<select id="managed-exam"><option value="">전체 회차</option></select></label>
+          <label>원문 확인 상태<select id="managed-status"><option value="">전체 상태</option><option value="unverified">미확인</option><option value="verified">확인 완료</option><option value="needs_review">재검토 필요</option></select></label>
+          <button id="managed-reset" class="utility-button">필터 초기화</button>
+          </div>
         </div>
-        <p id="managed-count" role="status"></p>
+        <div class="collection-results">
+          <div><p id="managed-count" role="status"></p><span id="managed-range" class="quiet"></span></div>
+          <div class="actions">
+            <button id="managed-refresh" class="utility-button">새로고침</button>
+            <button id="managed-previous-top" aria-label="이전 목록 (상단)">이전</button>
+            <span id="managed-page-top" class="quiet"></span>
+            <button id="managed-next-top" aria-label="다음 목록 (상단)">다음</button>
+          </div>
+        </div>
         <div id="managed-list" class="managed-list"></div>
         <div class="actions">
           <button id="managed-previous">이전 목록</button

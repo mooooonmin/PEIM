@@ -33,7 +33,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
       (q) =>
         (!exam || `exam-${q.round}` === exam) &&
         (!status || q.verification_status === status) &&
-        (!query || q.text.toLowerCase().includes(query)),
+        (!query || `${q.text} ${q.topics || ""}`.toLowerCase().includes(query)),
     );
     const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
     page = Math.min(page, pages - 1);
@@ -53,6 +53,10 @@ export function setupManagement({ api, openReview, loadUploads }) {
     $("managed-page").textContent = `${page + 1} / ${pages}`;
     $("managed-previous").disabled = page === 0;
     $("managed-next").disabled = page >= pages - 1;
+    $("managed-previous-top").disabled = page === 0;
+    $("managed-next-top").disabled = page >= pages - 1;
+    $("managed-page-top").textContent = `${page + 1} / ${pages}`;
+    $("managed-range").textContent = filtered.length ? `${page * pageSize + 1}–${Math.min((page + 1) * pageSize, filtered.length)}번째 표시` : "";
     $("managed-list").replaceChildren();
     const table = node("table"),
       head = node("thead"),
@@ -61,7 +65,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
     table.className = "managed-table";
     const caption = node("caption", "기출문항 검수 목록");
     caption.className = "sr-only";
-    for (const label of ["회차", "교시", "번호", "문제", "상태", "작업"]) {
+    for (const label of ["문항", "문제·연결 주제", "원문 확인", "작업"]) {
       const cell = node("th", label);
       cell.scope = "col";
       header.append(cell);
@@ -73,29 +77,29 @@ export function setupManagement({ api, openReview, loadUploads }) {
       $("managed-list").append(
         node(
           "p",
-          "조건에 맞는 문항이 없습니다. 검색어나 필터를 바꾸거나 PDF·새 문항 등록에서 추가해 주세요.",
+          "조건에 맞는 문항이 없습니다. 필터 초기화로 전체 목록을 보거나 PDF·새 문항 등록에서 추가해 주세요.",
         ),
       );
     for (const q of filtered.slice(page * pageSize, (page + 1) * pageSize)) {
       const row = node("tr");
       row.className = "managed-question";
-      const values = [
-        `${q.round}회`,
-        `${q.session}교시`,
-        `${q.number}번`,
-        q.text,
-        statuses[q.verification_status] || "미확인",
-      ];
-      values.forEach((value, index) => {
-        const cell = node("td");
-        cell.dataset.label = ["회차", "교시", "번호", "문제", "상태"][index];
-        const content = node("span", value);
-        if (index === 3) content.className = "question-preview";
-        cell.append(content);
-        row.append(cell);
-      });
+      const identity = node("td");
+      identity.className = "managed-identity";
+      identity.append(node("strong", `${q.round}회`), node("span", `${q.session}교시 / ${q.number}번`));
+      const content = node("td"); content.className = "managed-content";
+      const title = node("button", q.text);
+      title.type = "button"; title.className = "question-title-button";
+      title.setAttribute("aria-label", `${q.round}회 ${q.session}교시 ${q.number}번 문제 상세: ${q.text}`);
+      title.onclick = () => openReview(q.id, filtered.map(item => item.id));
+      const topics = node("p", q.topics || "연결 주제 없음"); topics.className = "quiet";
+      content.append(title, topics);
+      const status = node("td"); status.className = "managed-status";
+      const badge = node("span", statuses[q.verification_status] || "미확인");
+      badge.className = `status-badge status-${Object.hasOwn(statuses, q.verification_status) ? q.verification_status : "unverified"}`;
+      status.append(badge); row.append(identity, content, status);
       const button = node("button", "검수·수정");
       button.type = "button";
+      button.className = "utility-button";
       button.setAttribute(
         "aria-label",
         `${q.round}회 ${q.session}교시 ${q.number}번 검수·수정`,
@@ -160,18 +164,28 @@ export function setupManagement({ api, openReview, loadUploads }) {
   }
   $("manage-existing").onclick = () => selectSection("questions");
   $("manage-upload").onclick = () => selectSection("upload");
+  $("managed-filter-toggle").onclick = () => {
+    const expanded = $("managed-filter-toggle").getAttribute("aria-expanded") !== "true";
+    $("managed-filter-toggle").setAttribute("aria-expanded", String(expanded));
+    $("managed-filter-toggle").textContent = expanded ? "필터 접기" : "필터 보기";
+    $("managed-filter-controls").dataset.expanded = String(expanded);
+  };
   $("managed-refresh").onclick = refreshQuestions;
+  $("managed-reset").onclick = () => {
+    for (const id of ["managed-search", "managed-exam", "managed-status"]) $(id).value = "";
+    page = 0; render(); $("managed-search").focus();
+  };
   for (const id of ["managed-search", "managed-exam", "managed-status"])
     $(id).addEventListener(id === "managed-search" ? "input" : "change", () => {
       page = 0;
       render();
     });
-  $("managed-previous").onclick = () => {
+  $("managed-previous-top").onclick = $("managed-previous").onclick = () => {
     page--;
     render();
     $("managed-count").scrollIntoView({ block: "start" });
   };
-  $("managed-next").onclick = () => {
+  $("managed-next-top").onclick = $("managed-next").onclick = () => {
     page++;
     render();
     $("managed-count").scrollIntoView({ block: "start" });

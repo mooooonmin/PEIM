@@ -257,6 +257,11 @@ test("management passes every filtered ID across pagination in displayed order",
   f.$("managed-status").dispatchEvent(new f.window.Event("change"));
   const rows = f.$("managed-list").querySelectorAll("tbody tr");
   assert.equal(rows.length, 50);
+  f.$("managed-next-top").onclick();
+  assert.equal(f.$("managed-list").querySelectorAll("tbody tr").length, 5);
+  assert.match(f.$("managed-range").textContent, /51–55/);
+  assert.equal(f.$("managed-next").disabled, true);
+  f.$("managed-previous-top").onclick();
   rows[49].querySelector("button").onclick();
   assert.equal(opened.id, "q50");
   assert.deepEqual(
@@ -266,6 +271,9 @@ test("management passes every filtered ID across pagination in displayed order",
   f.$("managed-search").value = "없는 문항";
   f.$("managed-search").dispatchEvent(new f.window.Event("input"));
   assert.equal(f.$("managed-list").querySelectorAll("button").length, 0);
+  f.$("managed-reset").onclick();
+  assert.equal(f.$("managed-status").value, "");
+  assert.equal(f.$("managed-list").querySelectorAll("tbody tr").length, 50);
 });
 
 test("management refresh failure propagates to the save-and-next caller only when requested", async () => {
