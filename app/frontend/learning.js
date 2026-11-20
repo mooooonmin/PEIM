@@ -1,8 +1,12 @@
+import { createDraftStore, renderDraftCopies } from "./draft-store.js";
 import { setupWritingGuide } from "./writing-guide.js";
 const $ = (id) => document.getElementById(id);
 
 export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
   const panel = $("learning-panel");
+  const drafts = createDraftStore();
+  const showDrafts = () => renderDraftCopies($("learning-drafts"), drafts, question ? draftKey() : null);
+  window.addEventListener("storage", showDrafts);
   const guide = setupWritingGuide({ api });
   let question,
     revision = 0,
@@ -40,7 +44,8 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
   }
   function stash() {
     try {
-      localStorage.setItem(draftKey(), JSON.stringify(payload()));
+      drafts.write(draftKey(), payload());
+      showDrafts();
       return true;
     } catch {
       message(
@@ -129,7 +134,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       );
       if (restoreDraft) {
         try {
-          const draft = JSON.parse(localStorage.getItem(draftKey()) || "null");
+          const draft = drafts.read(draftKey());
           if (
             draft &&
             typeof draft.note === "string" &&
@@ -153,13 +158,14 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
             draft.note === data.note &&
             draft.retry_requested === data.retry_requested
           ) {
-            localStorage.removeItem(draftKey());
+            drafts.clear(draftKey(), draft);
           }
         } catch {
           /* Storage access is optional; server data stays available. */
         }
       }
       loaded = true;
+      showDrafts();
       return true;
     } catch (error) {
       if (seq === generation && !panel.hidden)
@@ -180,11 +186,13 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     )
       return;
     const key = draftKey();
+    const previous = payload();
     const restoreDraft = !loaded && !dirty;
     const restored = await loadNote(restoreDraft);
     if (restored && !restoreDraft) {
       try {
-        localStorage.removeItem(key);
+        drafts.archive(key, previous);
+        showDrafts();
       } catch {}
     }
   };
@@ -219,7 +227,8 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       revision = result.revision;
       dirty = false;
       try {
-        localStorage.removeItem(draftKey());
+        drafts.clear(draftKey(), value);
+        showDrafts();
       } catch {}
       message("복습 정보를 저장했습니다. 내 답안과 저장 이력은 유지됩니다.");
       saved(question.id, result);
