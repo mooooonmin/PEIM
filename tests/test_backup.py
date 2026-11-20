@@ -5,9 +5,11 @@ import sys
 import tempfile
 import unittest
 import zipfile
+from unittest.mock import patch
+import subprocess
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from backup import checked_archive
+from backup import checked_archive, main
 
 
 class BackupTests(unittest.TestCase):
@@ -38,3 +40,22 @@ class BackupTests(unittest.TestCase):
     def test_missing_database_is_rejected(self):
         with self.assertRaises(ValueError):
             checked_archive(self.archive({"exams/test.pdf": b"fixture"}))
+
+    def test_restore_resets_public_schema_in_the_restore_transaction(self):
+        sql = b'SELECT 1;'
+        archive = self.archive({'database.sql': sql})
+        with tempfile.TemporaryDirectory() as folder:
+            calls = []
+            def docker(args, **kwargs):
+                calls.append((args, kwargs))
+                output = json.dumps({'services': {'web': {'volumes': [
+                    {'target': '/exams', 'type': 'bind', 'source': folder}]}}}).encode() if 'config' in args else b''
+                return subprocess.CompletedProcess(args, 0, stdout=output)
+            with patch('backup.subprocess.run', side_effect=docker), patch.object(sys, 'argv', [
+                'backup.py', 'restore', str(archive), '--confirm-replace-database']):
+                main()
+            command, options = next((args, kw) for args, kw in calls if 'psql' in args)
+            self.assertIn('--single-transaction', command)
+            self.assertIn('ON_ERROR_STOP=1', command)
+            self.assertTrue(options['input'].startswith(b'DROP SCHEMA public CASCADE;'))
+            self.assertTrue(options['input'].endswith(sql))

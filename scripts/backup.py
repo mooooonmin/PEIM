@@ -96,7 +96,9 @@ def main():
                 if not target.exists():
                     with target.open("xb") as stream:
                         stream.write(content)
-            run("exec", "-T", "db", "psql", "-U", "peim", "-d", "peim", "-v", "ON_ERROR_STOP=1", "--single-transaction", input=files["database.sql"], stdout=subprocess.DEVNULL)
+            # Replace the app schema and restore together; any SQL failure rolls both back.
+            sql = b"DROP SCHEMA public CASCADE;\nCREATE SCHEMA public;\n" + files["database.sql"]
+            run("exec", "-T", "db", "psql", "-U", "peim", "-d", "peim", "-v", "ON_ERROR_STOP=1", "--single-transaction", input=sql, stdout=subprocess.DEVNULL)
         success = True
         print(f"{args.action} completed: {args.archive}")
     finally:
