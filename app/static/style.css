@@ -1501,3 +1501,43 @@ body.focus-mode .workbench {
   .study-toolbar { display: flex; gap: 4px 8px; }
   .study-toolbar .study-save-status { justify-content: flex-start; }
 }
+
+/* Compare uses the existing review form: no duplicate memo or save state. */
+.compare-switch, #toggle-compare-note { display: none; }
+.writing[data-mode="compare"] #toggle-compare-note {
+  display: block; flex: none; text-align: left; margin-top: 8px;
+}
+.writing[data-mode="compare"][data-compare-notes="true"] #learning-form {
+  display: block; flex: none; max-height: 45%; overflow: auto;
+  border-top: 1px solid var(--line); padding-top: 8px;
+}
+.writing[data-mode="compare"] #learning-note { min-height: 88px; max-height: 160px; }
+@media (max-width: 900px) {
+  .writing[data-mode="compare"] .compare-switch { display: flex; gap: 8px; padding: 8px 0; }
+  .compare-switch button { flex: 1; }
+  .writing[data-mode="compare"] .study-columns { display: grid; grid-template-rows: minmax(0, 1fr); }
+  .writing[data-mode="compare"][data-compare-side="mine"] .study-columns {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .writing[data-mode="compare"][data-compare-side="mine"] .answer-pane { display: flex; }
+  .writing[data-mode="compare"][data-compare-side="mine"] #learning-reference-pane { display: none; }
+  .writing[data-mode="compare"][data-compare-side="mine"] #learning-panel { max-height: 32dvh; padding-top: 0; }
+  .writing[data-mode="compare"][data-compare-side="mine"][data-compare-notes="true"] #learning-form {
+    flex: 1; max-height: none;
+  }
+}
+.writing[data-mode="compare"] #learning-form > h3,
+.writing[data-mode="compare"] #learning-form > .quiet { display: none; }
+.writing[data-mode="compare"] #learning-note { min-height: 64px; margin-bottom: 4px; }
+.writing[data-mode="compare"] #learning-form { padding-top: 4px; }
+@media (max-width: 900px) {
+  .writing[data-mode="compare"] .study-columns { grid-template-columns: minmax(0, 1fr); }
+}
+/* Keep actual reference text readable when the memo is open on short screens. */
+.writing[data-mode="compare"][data-compare-notes="true"] #learning-panel { overflow: auto; }
+.writing[data-mode="compare"][data-compare-notes="true"] #learning-reference-pane { flex: 1 0 280px; }
+.writing[data-mode="compare"][data-compare-notes="true"] #learning-reference { min-height: 120px; }
+.writing[data-mode="compare"][data-compare-notes="true"] #learning-form { flex: none; max-height: none; }
+@media (max-width: 900px) {
+  .writing[data-mode="compare"][data-compare-side="mine"] #learning-panel { overflow: auto; }
+}
