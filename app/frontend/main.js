@@ -553,8 +553,9 @@ $("original").onclick = () => {
   }
 };
 $("history").onclick = safe(async () => {
-  if (!openLearning.canLeave() || !(await save())) return;
   const q = current, view = currentView, sequence = loadSequence;
+  if (!q || !openLearning.canLeave() || !(await save())) return;
+  if (current !== q || currentView !== view || sequence !== loadSequence) return;
   const qid = q.id,
     list = await api(`/questions/${encodeURIComponent(qid)}/history`);
   if (current !== q || currentView !== view || sequence !== loadSequence) return;

@@ -1,6 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("화면 이동을 위한 저장 대기 중 클릭한 이력이 관리 화면에 열리지 않는다", async t => {
+  const f = await fixture(t); const fetch = f.w.fetch;
+  let release, pending = false;
+  const gate = new Promise(r => release = r);
+  f.w.fetch = async (url, options) => {
+    if (String(url).endsWith('/answer')) { pending = true; await gate; }
+    return fetch(url, options);
+  };
+  f.edit();
+  const manage = f.$("manage-tab").onclick();
+  await until(() => pending);
+  const history = f.$("history").onclick();
+  release(); await Promise.all([manage, history]);
+  assert.equal(f.$("manage").hidden, false);
+  assert.equal(f.$("reading-dialog").open, false);
+});
 test("PDF 조회 실패 후 이전 후보 없이 추출 재시도 경로를 제공한다", async t => {
   const f = await fixture(t);
   await f.$("manage-tab").onclick(); await f.$("manage-upload").onclick();
