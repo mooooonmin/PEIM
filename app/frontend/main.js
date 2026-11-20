@@ -16,6 +16,7 @@ let nav,
   selectedExam = "",
   resultQuery = "",
   current = null,
+  pendingStudyQuestion = null,
   rows = [];
 let timer,
   saving = null,
@@ -299,24 +300,25 @@ function updateURL() {
   if (currentView === "retry") params.set("view", "retry");
   if (selectedTopic) params.set("topic", selectedTopic);
   if (selectedExam) params.set("exam", selectedExam);
-  if (current) params.set("q", current.id);
+  if (current || pendingStudyQuestion) params.set("q", current?.id || pendingStudyQuestion);
   history.replaceState(null, "", "?" + params);
 }
 async function chooseFilter(topic, exam) {
   clearTimeout(searchTimer);
   if (!openLearning.canLeave() || !(await save())) return;
-  const sequence = ++loadSequence;
+  const sequence = ++loadSequence, search = searchSequence;
   const nextRows = await api(
     "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
   );
-  if (sequence !== loadSequence || !openLearning.canLeave()) return;
-  if (!(await save()) || sequence !== loadSequence || !openLearning.canLeave())
+  if (search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave()) return;
+  if (!(await save()) || search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave())
     return;
   selectedTopic = topic;
   selectedExam = exam;
   resultQuery = "";
   $("search").value = "";
   rows = nextRows;
+  pendingStudyQuestion = null;
   renderNavigation();
   renderQuestionList();
   if (rows.length) await selectQuestion(rows[0].id);
@@ -419,6 +421,7 @@ async function selectQuestion(qid) {
   if (current?.id === q.id && current.answer.revision > q.answer.revision)
     q.answer = current.answer;
   current = q;
+  pendingStudyQuestion = null;
   conflict = false;
   dirty = false;
   displayQuestion();
@@ -627,11 +630,11 @@ for (const [id, value] of [
     renderNavigation();
     updateURL();
   };
-let searchTimer;
+let searchTimer, searchSequence = 0;
 $("search").oninput = () => {
   renderNavigation();
   clearTimeout(searchTimer);
-  const sequence = ++loadSequence;
+  const sequence = loadSequence, search = ++searchSequence;
   $("clear-search").hidden = !$("search").value;
   searchTimer = setTimeout(
     safe(async () => {
@@ -647,7 +650,7 @@ $("search").oninput = () => {
                 : { exam: selectedExam },
           ),
       );
-      if (sequence !== loadSequence || !openLearning.canLeave()) return;
+      if (search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave()) return;
       rows = found;
       resultQuery = query;
       renderQuestionList();
@@ -675,6 +678,7 @@ async function showView(manage, { answerAlreadySelected = false } = {}) {
   skip.href = manage ? "#manage" : "#study";
   $("study-tab").setAttribute("aria-current", manage ? "false" : "page");
   $("manage-tab").setAttribute("aria-current", manage ? "page" : "false");
+  if (!manage && pendingStudyQuestion) await selectQuestion(pendingStudyQuestion);
   updateURL();
   if (manage) await management.load();
   return true;
@@ -998,7 +1002,13 @@ async function start() {
       ),
   );
   const qid = params.get("q") || rows[0]?.id;
-  if (qid) await selectQuestion(qid);
+  if (currentView === "study") {
+    if (qid) await selectQuestion(qid);
+  } else {
+    // A hidden study draft must not block the requested startup page.
+    pendingStudyQuestion = qid || null;
+    displayQuestion();
+  }
   renderQuestionList();
   if (currentView === "manage") await showView(true);
   else if (currentView === "retry") await showRetryLibrary();

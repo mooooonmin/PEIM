@@ -1,7 +1,70 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
-for (const fails of [false, true]) test(`이력 조회 중 입력은 복원 전에 저장하며 저장 실패=${fails}이면 복원하지 않는다`, async t => {
+test("늦은 회차 응답이 나중에 완료된 검색을 지우지 않는다", async t => {
+  const f = await fixture(t); let release;
+  f.state.gate = new Promise(r => release = r);
+  [...f.$("navigation").querySelectorAll("button")].find(b => b.textContent.includes("141회")).click();
+  await until(() => f.state.requested);
+  f.$("search").value = "q2"; f.$("search").oninput();
+  await untilSlow(() => new URL(f.w.location.href).searchParams.get("search") === "q2");
+  release(); await new Promise(r => setImmediate(r));
+  assert.equal(f.$("search").value, "q2");
+  assert.equal(new URL(f.w.location.href).searchParams.get("search"), "q2");
+});
+test("학습 초기 조회 중 검색해도 선택 문항의 답안을 표시한다", async t => {
+  const f = await fixture(t, {url:"http://localhost:8000/?view=manage&mode=exam&exam=exam-140&q=q1", readyView:"manage"});
+  let release;
+  f.state.gateId = "q1"; f.state.gate = new Promise(r => release = r);
+  const opening = f.$("study-tab").onclick();
+  await until(() => f.state.requested);
+  f.$("search").value = "검색"; f.$("search").oninput();
+  await untilSlow(() => new URL(f.w.location.href).searchParams.get("search") === "검색");
+  release(); await opening;
+  assert.equal(f.$("answer").value, "q1 기존 답안");
+  assert.equal(f.$("answer").disabled, false);
+});
+test("학습 초기 조회 중 빈 회차를 선택하면 대기 문항도 해제한다", async t => {
+  const f = await fixture(t, {url:"http://localhost:8000/?view=manage&mode=exam&exam=exam-140&q=q1", readyView:"manage"});
+  let release;
+  f.state.gateId = "q1"; f.state.gate = new Promise(r => release = r);
+  const opening = f.$("study-tab").onclick();
+  await until(() => f.state.requested);
+  [...f.$("navigation").querySelectorAll("button")].find(b => b.textContent.includes("141회")).click();
+  await new Promise(r => setImmediate(r));
+  release(); await opening;
+  await until(() => new URL(f.w.location.href).searchParams.get("exam") === "exam-141");
+  assert.equal(new URL(f.w.location.href).searchParams.has("q"), false);
+  await f.$("manage-tab").onclick(); await f.$("study-tab").onclick();
+  assert.equal(f.$("answer").disabled, true);
+});
+for (const view of ["manage", "retry"]) test(`${view} 직접 접근은 충돌 초안에 막히지 않고 학습 진입 시 복구한다`, async t => {
+  const draft = {body:"충돌한 기존 초안",status:"draft",revision:0};
+  const f = await fixture(t, {
+    url:`http://localhost:8000/?view=${view}&mode=exam&exam=exam-140&q=q1`,
+    readyView:view === "manage" ? "manage" : "retry-library",
+    storage:{"peim:draft:q1":draft},
+  });
+  assert.equal(f.$("study").hidden, true);
+  assert.equal(new URL(f.w.location.href).searchParams.get("q"), "q1");
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:draft:q1")).body, draft.body);
+  await f.$("study-tab").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("answer").value, draft.body);
+  assert.equal(f.$("save-error").hidden, false);
+});
+test("다시 풀기 직접 진입 후 다른 문항을 풀어도 이전 초안을 보존한다", async t => {
+  const f = await fixture(t, {
+    url:"http://localhost:8000/?view=retry&mode=exam&exam=exam-140&q=q1",
+    readyView:"retry-library", storage:{"peim:draft:q1":{body:"q1 초안",status:"draft",revision:0}},
+  });
+  await until(() => f.$("retry-items").querySelector("button"));
+  await f.$("retry-items").querySelector("button").onclick();
+  assert.equal(f.$("answer").value, "q2 기존 답안");
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:draft:q1")).body, "q1 초안");
+  assert.equal(new URL(f.w.location.href).searchParams.get("q"), "q2");
+});
+for (const fails of [false, true]) test(`이력 조회 중 입력 보존: ${fails ? "저장 실패 시 복원 중단" : "저장 후 복원"}`, async t => {
   const f = await fixture(t), writes = [];
   let release, requested = false;
   const gate = new Promise(r => release = r), fetch = f.w.fetch;

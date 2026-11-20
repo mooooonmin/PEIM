@@ -137,7 +137,7 @@ export async function fixture(t, initial = {}) {
     return { ok: true, json: async () => data };
   };
   w.eval(bundle.outputFiles[0].text);
-  await until(() => $("answer").value === "q1 기존 답안");
+  await until(() => initial.readyView ? !$(initial.readyView).hidden : $("answer").value === "q1 기존 답안");
   function edit() {
     $("answer").value = "응답 대기 중 추가 입력";
     $("answer").dispatchEvent(new w.Event("input"));
