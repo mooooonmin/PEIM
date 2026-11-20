@@ -59,3 +59,24 @@ class BackupTests(unittest.TestCase):
             self.assertIn('ON_ERROR_STOP=1', command)
             self.assertTrue(options['input'].startswith(b'DROP SCHEMA public CASCADE;'))
             self.assertTrue(options['input'].endswith(sql))
+
+    def test_restore_rejects_upload_completed_while_stopping_web(self):
+        archive = self.archive({'database.sql': b'SELECT 1;', 'exams/test.pdf': b'archived'})
+        with tempfile.TemporaryDirectory() as folder:
+            called_sql = []
+            def docker(args, **kwargs):
+                output = b''
+                if 'config' in args:
+                    output = json.dumps({'services': {'web': {'volumes': [
+                        {'target': '/exams', 'type': 'bind', 'source': folder}]}}}).encode()
+                elif 'stop' in args:
+                    (Path(folder) / 'test.pdf').write_bytes(b'completed upload')
+                elif 'psql' in args:
+                    called_sql.append(args)
+                return subprocess.CompletedProcess(args, 0, stdout=output)
+            with patch('backup.subprocess.run', side_effect=docker), patch.object(sys, 'argv', [
+                'backup.py', 'restore', str(archive), '--confirm-replace-database']):
+                with self.assertRaisesRegex(ValueError, 'Original conflicts'):
+                    main()
+            self.assertEqual(called_sql, [])
+            self.assertEqual((Path(folder) / 'test.pdf').read_bytes(), b'completed upload')
