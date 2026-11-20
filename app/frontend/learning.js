@@ -180,8 +180,9 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     )
       return;
     const key = draftKey();
-    const restored = await loadNote(false);
-    if (restored) {
+    const restoreDraft = !loaded && !dirty;
+    const restored = await loadNote(restoreDraft);
+    if (restored && !restoreDraft) {
       try {
         localStorage.removeItem(key);
       } catch {}

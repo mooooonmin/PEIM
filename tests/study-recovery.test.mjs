@@ -26,3 +26,14 @@ test("늦은 서버 답안 응답은 다른 문항의 입력과 임시 보관을
   assert.equal(f.answers.get("q2").body, "q2 기존 답안");
 });
 
+test("메모 초기 조회 실패의 재시도는 임시 메모를 복구한다", async (t) => {
+  const f = await fixture(t, {failLearning:true, storage:{"peim:learning:q1":{note:"preserve me", retry_requested:true, revision:0}}});
+  await until(() => f.$("learning-result").textContent.includes("불러오지 못했습니다"));
+  assert.equal(f.$("learning-note").value, "");
+  f.state.failLearning = false;
+  await f.$("reload-learning").onclick();
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:learning:q1")).note, "preserve me");
+  assert.equal(f.$("learning-note").value, "preserve me");
+  assert.equal(f.confirmCount(), 0);
+});
+
