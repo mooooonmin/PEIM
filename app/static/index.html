@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=collection-manage-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=collection-manage-1" />
-    <script type="module" src="/assets/main.js?v=collection-manage-1"></script>
+    <link rel="stylesheet" href="/style.css?v=collection-pdf-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=collection-pdf-1" />
+    <script type="module" src="/assets/main.js?v=collection-pdf-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -329,14 +329,9 @@
         </div>
       </section>
       <section id="managed-upload" aria-label="PDF와 새 문항 등록" hidden>
-        <ol class="upload-steps" aria-label="새 문항 등록 순서">
-          <li>PDF 등록 또는 기존 시험지 선택</li>
-          <li>문항 추출 또는 직접 입력</li>
-          <li>원본 대조 후 문항 등록</li>
-        </ol>
-        <div class="manager-grid">
-          <section class="management-panel">
-            <h2>PDF 첨부</h2>
+        <div class="upload-library-head"><div><h2>시험지 선택</h2><p class="quiet">시험지를 선택하고 원본과 문항을 함께 확인하세요.</p></div></div>
+        <details id="add-pdf" class="add-pdf">
+          <summary>새 PDF 추가</summary>
             <form id="upload-form">
               <label for="round">시험 회차</label
               ><input
@@ -363,19 +358,33 @@
               <button type="submit" class="primary">원본 등록</button>
               <p id="upload-result" role="status"></p>
             </form>
-            <h2 class="list-heading">등록된 시험지</h2>
-            <div id="exam-list" class="exam-list">불러오는 중입니다.</div>
+        </details>
+        <details id="exam-picker" class="exam-picker" open>
+          <summary>등록된 시험지 찾기 <span id="selected-exam-label" class="quiet">아직 선택하지 않음</span></summary>
+          <label for="exam-search">회차·파일 형식 검색</label>
+          <input id="exam-search" type="search" placeholder="예: 140 또는 PDF" />
+          <p id="exam-count" class="quiet" role="status"></p>
+          <div id="exam-list" class="exam-list">불러오는 중입니다.</div>
+        </details>
+        <div id="upload-workspace" class="upload-workspace" data-pane="source" tabindex="-1" role="region" aria-label="시험지 대조 및 문항 등록" hidden>
+          <nav class="upload-pane-tabs" aria-label="원본과 문항 입력 전환"><button type="button" data-upload-pane="source" aria-pressed="true">원본 확인</button><button type="button" data-upload-pane="edit" aria-pressed="false">문항 입력</button></nav>
+          <section class="upload-source management-panel" aria-label="선택한 시험지 원본">
+            <div class="section-head"><h2>원본 시험지</h2><button id="review-original" disabled>원본 열기</button></div>
+            <p id="upload-pdf-status" class="quiet" role="status"></p>
+            <div class="upload-pdf-tools"><button id="upload-pdf-previous" disabled aria-label="원본 이전 페이지">이전</button><span id="upload-pdf-position"></span><button id="upload-pdf-next" disabled aria-label="원본 다음 페이지">다음</button><button id="upload-pdf-zoom" disabled>확대</button></div>
+            <div id="upload-pdf-canvas" class="upload-pdf-canvas"></div>
+            <button id="use-upload-page" class="utility-button" disabled>보고 있는 페이지 연결</button>
+            <p class="quiet">페이지를 연결해도 원본 대조 확인은 직접 해야 합니다.</p>
           </section>
           <section class="management-panel review-panel">
             <div class="section-head">
               <h2 id="review-title">문항 확인</h2>
               <div class="actions">
-                <button id="review-original" disabled>원본 열기</button
-                ><button id="extract" disabled>문항 추출</button>
+                <button id="extract" disabled>문항 추출</button>
               </div>
             </div>
             <p id="extraction-state" role="status">
-              왼쪽에서 PDF 시험지를 선택해 주세요.
+              등록된 시험지에서 PDF를 선택해 주세요.
             </p>
             <label for="candidates">추출된 문항 초안</label
             ><select id="candidates" disabled>

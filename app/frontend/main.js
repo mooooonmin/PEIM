@@ -1,3 +1,4 @@
+import { setupUploadPreview } from "./upload-preview.js";
 import { setupRetryList } from "./retry-list.js";
 import { setupStudyLayout, setupStudyNavigation } from "./study-layout.js";
 import { setupManagement } from "./manage.js";
@@ -726,31 +727,53 @@ function populateTopics() {
     $("topic-options").append(o);
   }
 }
-async function loadExams() {
-  const list = await api("/exams");
+let examRows = [], examListSequence = 0;
+const uploadPreview = setupUploadPreview();
+function uploadPane(name) {
+  $("upload-workspace").dataset.pane = name;
+  document.querySelectorAll("[data-upload-pane]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.uploadPane === name)));
+}
+document.querySelectorAll("[data-upload-pane]").forEach(b => { b.onclick = () => uploadPane(b.dataset.uploadPane); });
+$("question-form").addEventListener("invalid", () => uploadPane("edit"), true);
+$("upload-form").addEventListener("invalid", () => { $("add-pdf").open = true; }, true);
+$("use-upload-page").onclick = () => {
+  const page = uploadPreview.page();
+  if (!page) return;
+  $("page").value = String(page); $("reviewed").checked = false;
+  uploadPane("edit"); $("page").focus();
+};
+function renderExams() {
+  const query = $("exam-search").value.trim().toLowerCase();
+  const attached = examRows.filter(e => e.attachment_id);
+  const visible = attached.filter(e => `${e.round} ${e.format}`.toLowerCase().includes(query));
+  text("exam-count", `${attached.length}개 시험지 중 ${visible.length}개 표시`);
   $("exam-list").replaceChildren();
-  for (const e of list) {
-    if (!e.attachment_id) continue;
-    const b = button(
-      `${e.round}회 ${e.format.toUpperCase()}`,
-      safe(() => chooseExam(e)),
-      "exam-item" +
-        (chosenExam?.attachment_id === e.attachment_id ? " active" : ""),
-    );
-    b.append(
-      element(
-        "span",
-        e.status === "draft" ? "등록 대기" : "학습 자료",
-        "quiet",
-      ),
-    );
+  for (const e of visible) {
+    const active = chosenExam?.attachment_id === e.attachment_id;
+    const b = button(`${e.round}회 ${e.format.toUpperCase()}`, safe(() => chooseExam(e)), "exam-item" + (active ? " active" : ""));
+    b.setAttribute("aria-pressed", String(active));
+    b.append(element("span", e.status === "draft" ? "등록 대기" : "학습 자료", "quiet"));
     $("exam-list").append(b);
   }
-  if (!list.length) text("exam-list", "등록된 시험지가 없습니다.");
+  if (!visible.length) text("exam-list", attached.length ? "검색 결과가 없습니다. 회차나 파일 형식을 바꿔 주세요." : "등록된 시험지가 없습니다. 새 PDF 추가로 시작하세요.");
+}
+$("exam-search").oninput = renderExams;
+async function loadExams() {
+  const sequence = ++examListSequence;
+  const list = await api("/exams");
+  if (sequence !== examListSequence) return;
+  examRows = list; renderExams();
 }
 async function chooseExam(e) {
   const sequence = ++reviewSequence;
   chosenExam = e;
+  $("upload-workspace").hidden = false;
+  $("exam-picker").open = false;
+  text("selected-exam-label", `${e.round}회 ${e.format.toUpperCase()} 선택됨`);
+  renderExams(); uploadPane("source");
+  $("upload-workspace").focus({ preventScroll: true });
+  $("upload-workspace").scrollIntoView({ block: "start" });
+  void uploadPreview.open(e);
   text("review-title", `${e.round}회 문항 확인`);
   $("review-original").disabled = false;
   extraction = null;
@@ -858,6 +881,7 @@ $("upload-form").onsubmit = async (e) => {
     await loadExams();
     const list = await api("/exams");
     await chooseExam(list.find((x) => x.attachment_id === result.id));
+    $("add-pdf").open = false;
   } catch (error) {
     text("upload-result", error.message);
   } finally {

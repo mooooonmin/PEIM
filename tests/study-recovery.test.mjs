@@ -1,6 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("시험지 검색과 모바일 영역 전환은 선택한 원본과 입력을 유지한다", async t => {
+  const f = await fixture(t);
+  await f.$("manage-tab").onclick(); await f.$("manage-upload").onclick();
+  f.$("exam-search").value = "141"; f.$("exam-search").oninput();
+  assert.equal(f.$("exam-list").querySelectorAll("button").length, 1);
+  f.$("exam-list").querySelector("button").click();
+  await until(() => !f.$("review-fields").disabled);
+  assert.match(f.$("selected-exam-label").textContent, /141회/);
+  assert.equal(f.$("exam-picker").open, false);
+  f.$("new-question").value = "보존할 등록 초안";
+  f.w.document.querySelector('[data-upload-pane="edit"]').onclick();
+  f.w.document.querySelector('[data-upload-pane="source"]').onclick();
+  assert.equal(f.$("new-question").value, "보존할 등록 초안");
+});
 test("화면 이동을 위한 저장 대기 중 클릭한 이력이 관리 화면에 열리지 않는다", async t => {
   const f = await fixture(t); const fetch = f.w.fetch;
   let release, pending = false;

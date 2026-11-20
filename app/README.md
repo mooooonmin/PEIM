@@ -8,6 +8,7 @@
 | `main.py` | 문항·검수 이력·답안·시험지 API와 정적 파일 제공 |
 | `db.py`, `schema.sql` | DB 연결, 스키마와 최초 콘텐츠 가져오기 |
 | `frontend/study-layout.js` | 2열 배치·모바일 전환·문항 목록·메모 접기와 이전/다음 이동 |
+| `frontend/upload-preview.js` | 등록 화면의 원본 PDF 표시·페이지 이동과 늦은 응답 격리 |
 | `frontend/main.js` | 학습·답안 저장과 화면 전환 |
 | `frontend/learning.js`, `migrations/` | 답안 비교·복습 메모 및 개인 데이터의 추가형 이행 |
 | `frontend/manage.js`, `frontend/review.js` | 문제·주제 검색과 상태별 문항 목록, 연속 검수·수정과 PDF 배율 |
