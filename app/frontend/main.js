@@ -631,8 +631,9 @@ $("clear-search").onclick = () => {
   $("search").focus();
 };
 
-async function showView(manage) {
-  if (!openLearning.canLeave() || !(await save())) return;
+async function showView(manage, { answerAlreadySelected = false } = {}) {
+  // Retry navigation already saved the outgoing answer; expose incoming conflicts.
+  if (!answerAlreadySelected && (!openLearning.canLeave() || !(await save()))) return;
   currentView = manage ? "manage" : "study";
   $("retry-library").hidden = true;
   $("retry-tab").setAttribute("aria-current", "false");
@@ -668,7 +669,7 @@ const retryLibrary = setupRetryList({
     $("retry-only").checked = false;
     renderNavigation();
     renderQuestionList();
-    if (!(await showView(false))) return false;
+    if (!(await showView(false, { answerAlreadySelected: true }))) return false;
     $("back-to-retries").hidden = false;
     $("study").focus({ preventScroll: true });
     document.querySelector(".writing").scrollIntoView({ block: "start" });

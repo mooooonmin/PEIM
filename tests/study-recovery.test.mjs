@@ -37,3 +37,18 @@ test("메모 초기 조회 실패의 재시도는 임시 메모를 복구한다"
   assert.equal(f.confirmCount(), 0);
 });
 
+test("다시 풀기에서 충돌 문항의 학습 복구 화면을 표시한다", async (t) => {
+  const f = await fixture(t, {storage:{"peim:draft:q2":{body:"local Q2", status:"draft", revision:0}}});
+  await f.$("retry-tab").onclick();
+  assert.equal(f.$("retry-library").hidden, false);
+  await f.$("retry-items").querySelector("button").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("save-error").hidden, false);
+  assert.equal(f.$("answer").value, "local Q2");
+  assert.match(f.$("save-state").textContent, /충돌/);
+  await f.$("study-tab").onclick();
+  await f.$("manage-tab").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("manage").hidden, true);
+});
+
