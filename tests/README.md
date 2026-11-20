@@ -8,6 +8,7 @@
 | `test_backup.py` | 백업 해시·경로·필수 항목 검사 |
 | `test_app.py` | 실제 PostgreSQL API·문항 검수·답안 보존·추가형 이행 검사 |
 | `review-ui.test.mjs` | 검수 핸들러의 연속 이동·저장 실패·목록 순서·PDF 배율 회귀 검사 |
+| `study-save.test.mjs` | 메인 화면의 문항·빈 회차 응답 대기 중 답안 저장과 실패 시 이동 중단 |
 | `study-layout.test.mjs` | 2열 전환·접기 시 편집기·메모 유지와 연속 문항 이동 검사 |
 | `learning-ui.test.mjs` | 답안 비교·메모 저장·임시 복구·충돌·참고 자료 전환 회귀 검사 |
 

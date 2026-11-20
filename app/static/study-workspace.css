@@ -1,5 +1,6 @@
 /* Two-column study workspace. Existing management screens keep their own styles. */
 #study.study-workspace {
+  --muted: #526071;
   display: flex;
   flex-direction: column;
   height: calc(100dvh - 68px);
@@ -121,7 +122,7 @@
   flex: 1;
 }
 #study #verification {
-  font-size: 12px;
+  font-size: 14px;
   margin: 6px 0 0;
 }
 #study .question-collapsed .question-pane {
@@ -171,7 +172,7 @@
   min-width: 0;
 }
 #study .material-switch button[aria-pressed="true"] {
-  box-shadow: inset 0 -2px var(--accent);
+  box-shadow: inset 0 -3px var(--accent);
   color: var(--accent);
   font-weight: 700;
 }
@@ -234,7 +235,7 @@
   font-size: 20px;
 }
 #study #save-state {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   padding-top: 8px;
 }
@@ -270,7 +271,7 @@
   margin: 0;
 }
 #study #review-state {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 #study #learning-form {
@@ -291,7 +292,7 @@
 #study #learning-form > .quiet {
   grid-column: 1 / -1;
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 #study #learning-form > label {
   grid-column: 1;
@@ -311,7 +312,7 @@
 #study #learning-result {
   grid-column: 1 / -1;
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 #study .compare-switch {
   display: none;
@@ -407,4 +408,17 @@ body.focus-mode #study.study-workspace {
   #study #learning-note {
     min-height: 88px;
   }
+}
+
+/* Reserve filled blue for actionable review saving; secondary tools stay quiet. */
+#study #save-learning {
+  min-width: 144px;
+  padding: 10px 24px;
+}
+#study textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+.topbar button[aria-current="page"] {
+  font-weight: 700;
 }
