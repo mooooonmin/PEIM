@@ -8,8 +8,8 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=workspace-2" />
-    <script type="module" src="/assets/main.js?v=workspace-2"></script>
+    <link rel="stylesheet" href="/style.css?v=compare-notes-1" />
+    <script type="module" src="/assets/main.js?v=compare-notes-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -114,6 +114,10 @@
             ><span id="review-state" role="status">복습: 문항 선택 전</span>
           </div>
         </div>
+        <nav class="compare-switch" aria-label="비교할 답안">
+          <button id="compare-mine" aria-pressed="false">내 답안</button>
+          <button id="compare-reference" aria-pressed="true">참고 답안</button>
+        </nav>
         <div class="study-columns">
           <section class="answer-pane">
             <h2 class="answer-heading">내 답안</h2>
@@ -168,6 +172,7 @@
               </div>
               <div id="learning-reference" class="reading-body"></div>
             </section>
+            <button id="toggle-compare-note" class="quiet-button" aria-expanded="false" aria-controls="learning-form">보완 메모 펼치기</button>
             <form id="learning-form">
               <h3>복습 기록</h3>
               <p class="quiet">
