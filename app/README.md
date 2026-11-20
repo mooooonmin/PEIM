@@ -16,5 +16,5 @@
 [실행·저장 정책](../docs/local-storage.md), [데이터 모델](../docs/data-model.md)을 따릅니다.
 변경 후 [앱 통합 검사와 화면 확인](../docs/testing.md#앱-통합-검사)을 수행합니다.
 
-`frontend/retry-list.js`는 주제·회차를 넘는 전체 다시 풀기 목록과 검색·열기 상태를 담당합니다.
+`frontend/retry-list.js`는 주제·회차를 넘는 전체 다시 풀기 목록과 검색·필터·정렬·메모 펼치기·열기 상태를 담당합니다.
 목록 사용법은 [로컬 사용 안내](../docs/local-storage.md#전체-다시-풀기-목록)를 참고하세요.

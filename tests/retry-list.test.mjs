@@ -87,3 +87,19 @@ test("failed reload keeps the previous list and failed or blocked opening does n
   await f.library.load();
   assert.match(f.$("retry-items").textContent, /표시한 문항이 없습니다/);
 });
+
+test("retry filters combine without changing saved rows and reset restores the default order", async () => {
+  const f = fixture(); await f.library.load();
+  f.$("retry-sort").value = "round"; f.$("retry-sort").onchange();
+  assert.match(f.$("retry-items").firstChild.textContent, /129회/);
+  f.$("retry-topic").value = "보안"; f.$("retry-topic").oninput();
+  f.$("retry-status").value = "completed"; f.$("retry-status").onchange();
+  assert.equal(f.$("retry-items").querySelectorAll("article").length, 0);
+  f.$("retry-reset").onclick();
+  assert.equal(f.$("retry-items").querySelectorAll("article").length, 2);
+  assert.match(f.$("retry-items").firstChild.textContent, /63회/);
+  assert.equal(f.state.rows[0].note, "<script>보완 메모</script>");
+  assert.equal(f.$("retry-items").querySelector("details").open, false);
+  f.$("retry-round").value = "129"; f.$("retry-round").onchange();
+  assert.equal(f.$("retry-items").querySelectorAll("article").length, 1);
+});

@@ -656,6 +656,7 @@ async function showView(manage, { answerAlreadySelected = false } = {}) {
 }
 const retryLibrary = setupRetryList({
   api,
+  openStudy: safe(() => showView(false)),
   openQuestion: async (qid) => {
     if (!(await selectQuestion(qid))) return false;
     if (currentView !== "retry") return false;
