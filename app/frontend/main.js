@@ -738,8 +738,13 @@ async function chooseExam(e) {
   chosenExam = e;
   text("review-title", `${e.round}회 문항 확인`);
   $("review-original").disabled = false;
-  $("extract").disabled = e.format !== "pdf";
-  $("review-fields").disabled = e.format !== "pdf";
+  extraction = null;
+  $("extract").disabled = true;
+  $("review-fields").disabled = true;
+  $("candidates").replaceChildren();
+  $("candidates").disabled = true;
+  text("raw-text", "");
+  text("extraction-state", "선택한 시험지의 추출 정보를 불러오는 중입니다.");
   $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
@@ -749,6 +754,8 @@ async function chooseExam(e) {
   if (sequence !== reviewSequence) return;
   extraction = result;
   displayExtraction();
+  $("extract").disabled = e.format !== "pdf";
+  $("review-fields").disabled = e.format !== "pdf";
   await loadExams();
 }
 function displayExtraction() {
@@ -771,6 +778,7 @@ function displayExtraction() {
   );
 }
 $("candidates").onchange = () => {
+  if (!extraction) return;
   const q = extraction.candidates[Number($("candidates").value)];
   if ($("candidates").value === "" || !q) return;
   $("session").value = String(q.session);
@@ -859,6 +867,8 @@ $("question-form").onsubmit = async (e) => {
     (o) => o.value === $("topic-search").value,
   );
   try {
+    if (!extraction || $("review-fields").disabled)
+      throw new Error("선택한 시험지의 추출 정보를 불러온 뒤 등록해 주세요.");
     if (!option)
       throw new Error(
         "목록에서 연결할 주제를 선택하거나 새 주제를 만들어 주세요.",
