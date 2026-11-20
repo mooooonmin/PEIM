@@ -84,7 +84,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
       $("managed-list").append(
         node(
           "p",
-          "조건에 맞는 문항이 없습니다. 필터 초기화로 전체 목록을 보거나 PDF·새 문항 등록에서 추가해 주세요.",
+          "조건에 맞는 문항이 없습니다. 조건 지우기로 전체 목록을 보거나 시험지·문항 등록에서 추가해 주세요.",
         ),
       );
     for (const q of filtered.slice(page * pageSize, (page + 1) * pageSize)) {
