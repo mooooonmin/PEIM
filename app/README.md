@@ -10,7 +10,7 @@
 | `frontend/study-layout.js` | 2열 배치·모바일 전환·문항 목록·메모 접기와 이전/다음 이동 |
 | `frontend/main.js` | 학습·답안 저장과 화면 전환 |
 | `frontend/learning.js`, `migrations/` | 답안 비교·복습 메모 및 개인 데이터의 추가형 이행 |
-| `frontend/manage.js`, `frontend/review.js` | 문항 관리 목록, 연속 검수·수정과 PDF 배율 |
+| `frontend/manage.js`, `frontend/review.js` | 문제·주제 검색과 상태별 문항 목록, 연속 검수·수정과 PDF 배율 |
 | `static/` | HTML·CSS와 빌드된 assets(생성 파일) |
 
 [실행·저장 정책](../docs/local-storage.md), [데이터 모델](../docs/data-model.md)을 따릅니다.

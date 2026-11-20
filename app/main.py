@@ -134,6 +134,8 @@ def navigation():
 def questions(topic: str | None = None, exam: str | None = None, search: str = ""):
     with connect() as db:
         return db.execute("""SELECT q.id,q.session,q.number,q.text,e.round,
+            coalesce((SELECT string_agg(t.title, ', ' ORDER BY t.title)
+                FROM question_topics x JOIN topics t ON t.id=x.topic_id WHERE x.question_id=q.id),'') AS topics,
             coalesce(a.status,'empty') AS answer_status,
             coalesce(n.retry_requested,false) AS retry_requested,
             coalesce(q.data->>'verification_status','unverified') AS verification_status
