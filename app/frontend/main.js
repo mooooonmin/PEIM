@@ -493,7 +493,9 @@ function displayQuestion() {
   text("character-count", `${current.answer.body.length.toLocaleString()}자`);
   $("original").disabled = !current.sources.length;
 }
+let readingGeneration = 0;
 function openReading(title) {
+  readingGeneration++;
   text("reading-title", title);
   $("reading-controls").replaceChildren();
   $("reading-body").replaceChildren();
@@ -569,6 +571,10 @@ $("history").onclick = safe(async () => {
     list = await api(`/questions/${encodeURIComponent(qid)}/history`);
   if (current !== q || currentView !== view || sequence !== loadSequence) return;
   openReading("답안 저장 이력");
+  const reading = readingGeneration;
+  let restoring = false;
+  const canRestore = () => current === q && currentView === view && sequence === loadSequence &&
+    reading === readingGeneration && $("reading-dialog").open;
   if (!list.length) text("reading-body", "아직 저장된 답안이 없습니다.");
   for (const item of list) {
     const box = element("details");
@@ -583,11 +589,17 @@ $("history").onclick = safe(async () => {
       button(
         "이 내용으로 복원",
         safe(async () => {
-          if (current !== q || currentView !== view || sequence !== loadSequence) return;
+          if (restoring || !canRestore()) return;
           // The editor remains usable while the history request is in flight.
           // Preserve those newer edits before replacing them with an old version.
-          if (!(await save())) return;
-          if (current !== q || currentView !== view || sequence !== loadSequence) return;
+          restoring = true;
+          const saved = await save();
+          if (!canRestore()) return;
+          if (!saved) {
+            $("reading-dialog").close();
+            $("save-error").scrollIntoView({ block: "nearest" });
+            return;
+          }
           $("answer").value = item.body;
           $("completed").checked = item.status === "completed";
           edited();

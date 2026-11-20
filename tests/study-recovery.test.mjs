@@ -18,7 +18,7 @@ for (const fails of [false, true]) test(`이력 조회 중 입력은 복원 전�
   await until(() => fails ? !f.$("save-error").hidden : f.answers.get("q1").body === "q1 history");
   if (fails) {
     assert.equal(f.$("answer").value, "응답 대기 중 추가 입력");
-    assert.equal(f.$("reading-dialog").open, true);
+    assert.equal(f.$("reading-dialog").open, false);
     assert.deepEqual(writes, ["응답 대기 중 추가 입력"]);
   } else {
     assert.deepEqual(writes, ["응답 대기 중 추가 입력", "q1 history"]);
@@ -266,4 +266,24 @@ test("답안 저장 재시도 대기 중 새 입력은 서버 재불러오기가
   release(); await reload;
   await until(() => f.answers.get('q1').body === '저장 대기 중 최신 입력');
   assert.equal(f.$("answer").value, '저장 대기 중 최신 입력');
+});
+
+test("복원 전 저장 중 이력 창을 닫으면 복원을 취소한다", async t => {
+  const f = await fixture(t);
+  await f.$("history").onclick();
+  f.edit();
+  let release, requested = false;
+  const gate = new Promise(r => release = r), fetch = f.w.fetch;
+  f.w.fetch = async (url, options) => {
+    if (String(url).endsWith('/answer')) { requested = true; await gate; }
+    return fetch(url, options);
+  };
+  f.$("reading-body").querySelector("button").click();
+  await until(() => requested);
+  f.$("close-reading").onclick();
+  release();
+  await until(() => f.$("save-state").textContent === "답안: 저장됨");
+  await new Promise(r => setImmediate(r));
+  assert.equal(f.$("answer").value, "응답 대기 중 추가 입력");
+  assert.equal(f.answers.get("q1").body, "응답 대기 중 추가 입력");
 });
