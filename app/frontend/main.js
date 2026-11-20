@@ -399,7 +399,9 @@ function renderQuestionList() {
   $("question-list").append(table);
 }
 async function selectQuestion(qid) {
+  const originView = currentView, originSequence = loadSequence;
   if (!openLearning.canLeave() || !(await save())) return;
+  if (currentView !== originView || originSequence !== loadSequence) return;
   const sequence = ++loadSequence;
   const q = await api(`/questions/${encodeURIComponent(qid)}`);
   if (sequence !== loadSequence || !openLearning.canLeave()) return;
@@ -637,6 +639,7 @@ $("clear-search").onclick = () => {
 async function showView(manage, { answerAlreadySelected = false } = {}) {
   // Retry navigation already saved the outgoing answer; expose incoming conflicts.
   if (!answerAlreadySelected && (!openLearning.canLeave() || !(await save()))) return;
+  if (currentView !== (manage ? "manage" : "study")) loadSequence++;
   currentView = manage ? "manage" : "study";
   $("retry-library").hidden = true;
   $("retry-tab").setAttribute("aria-current", "false");
@@ -657,10 +660,7 @@ const retryLibrary = setupRetryList({
     if (currentView !== "retry") return false;
     const topic = current.topics[0]?.id || "";
     const exam = topic ? "" : current.exam_id;
-    const nextRows = await api(
-      "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
-    );
-    if (currentView !== "retry") return false;
+    const selected = current;
     selectedTopic = topic;
     selectedExam = exam;
     mode = topic ? "topic" : "exam";
@@ -668,7 +668,7 @@ const retryLibrary = setupRetryList({
     $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
     resultQuery = "";
     $("search").value = "";
-    rows = nextRows;
+    rows = [];
     $("retry-only").checked = false;
     renderNavigation();
     renderQuestionList();
@@ -676,11 +676,23 @@ const retryLibrary = setupRetryList({
     $("back-to-retries").hidden = false;
     $("study").focus({ preventScroll: true });
     document.querySelector(".writing").scrollIntoView({ block: "start" });
+    const sequence = loadSequence;
+    try {
+      const nextRows = await api(
+        "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
+      );
+      if (current !== selected || sequence !== loadSequence) return true;
+      rows = nextRows;
+      renderQuestionList();
+    } catch (error) {
+      if (current === selected && sequence === loadSequence) report(error);
+    }
     return true;
   },
 });
 async function showRetryLibrary() {
   if (!openLearning.canLeave() || !(await save())) return;
+  if (currentView !== "retry") loadSequence++;
   currentView = "retry";
   $("study").hidden = true;
   $("manage").hidden = true;

@@ -1,6 +1,43 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("다시 풀기 연결 목록 조회 실패에도 충돌 복구 화면을 표시한다", async t => {
+  const f = await fixture(t, {storage:{"peim:draft:q2":{body:"local Q2",status:"draft",revision:0}}});
+  await f.$("retry-tab").onclick();
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).includes('/questions?')
+    ? Promise.resolve(new f.w.Response(JSON.stringify({detail:'목록 실패'}), {status:503}))
+    : fetch(url, options);
+  await f.$("retry-items").querySelector("button").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("save-error").hidden, false);
+  assert.equal(f.$("answer").value, 'local Q2');
+});
+
+test("다시 풀기 문항 조회 중 관리 화면으로 이동하면 숨겨진 충돌을 적용하지 않는다", async t => {
+  const f = await fixture(t, {storage:{"peim:draft:q2":{body:"local Q2",status:"draft",revision:0}}});
+  await f.$("retry-tab").onclick();
+  let release;
+  f.state.gateId = 'q2'; f.state.gate = new Promise(r => release = r);
+  const opening = f.$("retry-items").querySelector("button").onclick();
+  await until(() => f.state.requested);
+  await f.$("manage-tab").onclick();
+  release(); await opening;
+  await f.$("study-tab").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("save-error").hidden, true);
+  assert.equal(f.$("answer").value, 'q1 기존 답안');
+});
+
+test("학습 화면을 나갔다 돌아와도 이전 이력 응답을 표시하지 않는다", async t => {
+  const f = await fixture(t); let release;
+  f.state.historyGate = new Promise(r => release = r);
+  const history = f.$("history").onclick();
+  await f.$("manage-tab").onclick();
+  await f.$("study-tab").onclick();
+  release(); await history;
+  assert.equal(f.$("reading-dialog").open, false);
+});
 test("서버 재불러오기 실패 후 예약된 자동 저장을 유지한다", async t => {
   const f = await fixture(t);
   f.state.fail = true; f.edit();
