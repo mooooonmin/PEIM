@@ -1769,3 +1769,8 @@ body.focus-mode .workbench {
   .manage .managed-content { min-width: 0; }
   .collection-page button, .collection-page summary { min-height: 40px; }
 }
+
+.draft-copies { flex: none; font-size: 13px; margin: 8px 0; }
+.draft-copies summary { cursor: pointer; overflow-wrap: anywhere; }
+.draft-copies > div { max-height: 200px; overflow: auto; padding: 8px; background: var(--surface); }
+.draft-copies pre { white-space: pre-wrap; overflow-wrap: anywhere; }

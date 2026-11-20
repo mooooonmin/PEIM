@@ -1,3 +1,4 @@
+import { createDraftStore, renderDraftCopies } from "./draft-store.js";
 import { setupUploadPreview } from "./upload-preview.js";
 import { setupRetryList } from "./retry-list.js";
 import { setupStudyLayout, setupStudyNavigation } from "./study-layout.js";
@@ -85,6 +86,9 @@ function report(error) {
 function safe(action) {
   return (...args) => Promise.resolve(action(...args)).catch(report);
 }
+const answerDrafts = createDraftStore();
+function showAnswerDrafts() { renderDraftCopies($("answer-drafts"), answerDrafts, current ? draftKey(current.id) : null); }
+window.addEventListener("storage", showAnswerDrafts);
 function draftKey(qid) {
   return "peim:draft:" + qid;
 }
@@ -98,7 +102,8 @@ function snapshot() {
 function cacheDraft() {
   if (!current) return;
   try {
-    localStorage.setItem(draftKey(current.id), JSON.stringify(snapshot()));
+    answerDrafts.write(draftKey(current.id), snapshot());
+    showAnswerDrafts();
   } catch {
     text("save-state", "브라우저 임시 보관 불가");
   }
@@ -137,7 +142,8 @@ async function save() {
       if (dirty) cacheDraft();
       else {
         try {
-          localStorage.removeItem(draftKey(q.id));
+          answerDrafts.clear(draftKey(q.id), value);
+          showAnswerDrafts();
         } catch {}
       }
       text("save-state", dirty ? "저장 대기" : "저장됨");
@@ -218,7 +224,8 @@ $("load-server").onclick = safe(async () => {
       draftKey(q.id) + ":before-reload",
       JSON.stringify(value),
     );
-    localStorage.removeItem(draftKey(q.id));
+    answerDrafts.archive(draftKey(q.id), value);
+    showAnswerDrafts();
   } catch {}
   dirty = false;
   conflict = false;
@@ -416,7 +423,7 @@ async function selectQuestion(qid) {
   dirty = false;
   displayQuestion();
   try {
-    const draft = JSON.parse(localStorage.getItem(draftKey(q.id)) || "null");
+    const draft = answerDrafts.read(draftKey(q.id));
     if (
       draft &&
       typeof draft.body === "string" &&
@@ -441,6 +448,7 @@ async function selectQuestion(qid) {
       text("character-count", `${$("answer").value.length.toLocaleString()}자`);
     }
   } catch {}
+  showAnswerDrafts();
   renderQuestionList();
   updateURL();
   return true;

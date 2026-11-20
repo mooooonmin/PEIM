@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=collection-toolbar-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=collection-toolbar-1" />
-    <script type="module" src="/assets/main.js?v=collection-toolbar-1"></script>
+    <link rel="stylesheet" href="/style.css?v=draft-preservation-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=draft-preservation-1" />
+    <script type="module" src="/assets/main.js?v=draft-preservation-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -195,6 +195,7 @@
               ><button id="download-draft">내 글 내려받기</button
               ><button id="load-server">서버 답안 불러오기</button>
             </div>
+            <details id="answer-drafts" class="draft-copies" hidden><summary>보관된 임시 글</summary><div></div></details>
             <label class="sr-only" for="answer"
               >선택한 기출문항의 내 답안</label
             >
@@ -259,6 +260,7 @@
               </details>
             </div>
             <p id="learning-result" role="status"></p>
+            <details id="learning-drafts" class="draft-copies" hidden><summary>보관된 임시 글</summary><div></div></details>
           </form>
         </section>
       </section>

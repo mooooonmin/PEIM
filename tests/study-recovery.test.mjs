@@ -1,6 +1,24 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("다른 탭의 미저장 답안은 먼저 끝난 저장 이후에도 복구할 수 있다", async t => {
+  const f = await fixture(t);
+  let release, pending = false;
+  const fetch = f.w.fetch, gate = new Promise(r => release = r);
+  f.w.fetch = async (url, options) => {
+    if (String(url).endsWith('/answer')) { pending = true; await gate; }
+    return fetch(url, options);
+  };
+  f.edit();
+  const saving = f.$("retry").onclick();
+  await until(() => pending);
+  // An older still-open app tab can write the legacy key during this request.
+  const other = {body:"다른 탭의 미저장 답안", status:"draft", revision:1};
+  f.w.localStorage.setItem("peim:draft:q1", JSON.stringify(other));
+  release(); await saving;
+  await until(() => f.$("save-state").textContent === "답안: 저장됨");
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:draft:q1")).body, other.body);
+});
 test("시험지 검색과 모바일 영역 전환은 선택한 원본과 입력을 유지한다", async t => {
   const f = await fixture(t);
   await f.$("manage-tab").onclick(); await f.$("manage-upload").onclick();
