@@ -52,3 +52,20 @@ test("다시 풀기에서 충돌 문항의 학습 복구 화면을 표시한다"
   assert.equal(f.$("manage").hidden, true);
 });
 
+test("현재 문항 검수 후 예시와 연결 주제를 새로 불러온다", async (t) => {
+  const f = await fixture(t);
+  await until(() => f.$("writing-example").textContent.includes("Superseded example"));
+  await f.$("manage-tab").onclick();
+  assert.ok(f.$("managed-list").querySelector("button"), f.$("managed-count").textContent + " - " + f.$("managed-list").textContent);
+  await f.$("managed-list").querySelector("button").onclick();
+  f.$("edit-question-text").value = "수정된 문제";
+  await f.$("edit-question-form").onsubmit({ preventDefault() {} });
+  f.$("close-question-review").onclick();
+  await f.$("study-tab").onclick();
+  assert.equal(f.$("question-text").textContent, "수정된 문제");
+  assert.equal(f.$("question-title").textContent, "After");
+  assert.equal(f.$("learning-topic").value, "after");
+  assert.doesNotMatch(f.$("writing-example").textContent, /Superseded example/);
+  assert.equal(f.state.guideCalls, 2);
+});
+
