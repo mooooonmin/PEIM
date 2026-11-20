@@ -44,3 +44,14 @@ class WritingGuideTests(unittest.TestCase):
         self.assertTrue(requirements[0].startswith('가. 1차 정규화'))
         self.assertTrue(requirements[1].startswith('나. 2차 정규화'))
         self.assertTrue(requirements[2].startswith('다. 정규화의 목적'))
+
+    def test_cross_reference_ocr_and_premise_lists(self):
+        questions = {q['id']: q for q in json.loads(Path('public/data/questions.json').read_text(encoding='utf-8'))}
+        cross = writing_guide(questions['r117-s4-q02'], [])['requirements']
+        self.assertEqual(len(cross), 2)
+        self.assertTrue(cross[1].startswith('나. 위의 가. 조건에서'))
+        ocr = questions['r90-s4-q04']
+        self.assertEqual(writing_guide(ocr, [])['requirements'], [ocr['text'].strip()])
+        premise = writing_guide(questions['r84-s3-q02'], [])['requirements']
+        self.assertEqual(len(premise), 3)
+        self.assertEqual(premise[0], '가. 기능점수 산출방법의 간이법과 정규법의 차이점을 비교 설명하시오.')

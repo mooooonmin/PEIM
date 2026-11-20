@@ -14,8 +14,24 @@ def writing_guide(question, topics):
     entry = entries.get(question['id'])
     matched = entry is not None and normalize(entry['question_text']) == normalize(text)
     # Keep the question's actual sub-demands; do not infer a technical answer from topic names.
-    parts = re.split(r"(?<!\S)([가나다라마바사아자차카타파하])\.\s*", text)
-    requirements = [f'{parts[i]}. {parts[i+1].strip()}' for i in range(1, len(parts), 2)] if len(parts) > 1 else [text]
+    labels = '가나다라마바사아자차카타파하'
+    markers = list(re.finditer(r'(?<!\S)([' + labels + r'])\.\s*', text))
+    selected = []
+    # Require an ordered list. A lone OCR ending or an in-sentence reference
+    # must not discard the stem. The final list follows any premise list.
+    for start, marker in enumerate(markers):
+        if marker[1] != labels[0]:
+            continue
+        sequence = [marker]
+        for candidate in markers[start + 1:]:
+            if len(sequence) < len(labels) and candidate[1] == labels[len(sequence)]:
+                sequence.append(candidate)
+        if len(sequence) > 1:
+            selected = sequence
+    requirements = [
+        f'{marker[1]}. {text[marker.end():selected[i + 1].start() if i + 1 < len(selected) else len(text)].strip()}'
+        for i, marker in enumerate(selected)
+    ] if selected else [text]
     if matched:
         return {'kind': 'example', 'requirements': requirements, **entry,
                 'notice': '학습용 작성 예시이며 공식 정답이나 채점 기준이 아닙니다. 주제 상세 해설과 함께 검토하세요.'}
