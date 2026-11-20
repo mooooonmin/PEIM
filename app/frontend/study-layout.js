@@ -4,7 +4,7 @@ export function setupStudyLayout() {
   const writing = document.querySelector(".writing");
   const buttons = [...document.querySelectorAll("[data-study-mode]")];
   let currentId, compareSide = "reference", notesOpen = false, restoreSequence = 0;
-  const positions = { answer: 0, "learning-reference": 0 };
+  const positions = { answer: 0, "learning-reference": 0, "writing-guide": 0 };
   function remember() {
     for (const id of Object.keys(positions)) {
       const node = $(id);
@@ -72,7 +72,7 @@ export function setupStudyLayout() {
       if (id === currentId) return;
       currentId = id;
       mode("write");
-      positions.answer = positions["learning-reference"] = 0;
+      positions.answer = positions["learning-reference"] = positions["writing-guide"] = 0;
       compareSide = "reference";
       notesOpen = false;
       compareState();

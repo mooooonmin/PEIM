@@ -4,6 +4,7 @@
 
 | 경로 | 역할 |
 | --- | --- |
+| `writing_guide.py`, `writing_examples.json`, `frontend/writing-guide.js` | 읽기 전용 문항별 작성 틀·편집 예시와 자가 점검 |
 | `main.py` | 문항·검수 이력·답안·시험지 API와 정적 파일 제공 |
 | `db.py`, `schema.sql` | DB 연결, 스키마와 최초 콘텐츠 가져오기 |
 | `frontend/study-layout.js` | 작성·비교·복습 단계와 문제 접기 |

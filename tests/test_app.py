@@ -51,6 +51,25 @@ class AppTests(unittest.TestCase):
         return self.client.post("/api/exams/upload", headers=HEADERS, data={"round_number": number},
                                 files={"file": (filename, pdf() if content is None else content, "application/pdf")})
 
+    def test_writing_guide_is_read_only_and_handles_unknown_question(self):
+        route = f"/api/questions/{self.qid}"
+        self.client.put(route + "/answer", headers=HEADERS,
+                        json={"body": "보존할 답안", "revision": 0, "status": "draft"})
+        with connect() as db:
+            before = {table: db.execute(f"SELECT * FROM {table} ORDER BY 1,2").fetchall()
+                      for table in ("questions", "reference_answers", "user_answers", "answer_revisions", "learning_notes")}
+        result = self.client.get(route + "/writing-guide")
+        self.assertEqual(result.status_code, 200)
+        self.assertTrue(result.json()["requirements"])
+        example = self.client.get("/api/questions/r136-s1-q04/writing-guide").json()
+        self.assertEqual(example["kind"], "example")
+        self.assertIn("슈퍼키", example["example"])
+        self.assertEqual(self.client.get("/api/questions/absent/writing-guide").status_code, 404)
+        initialize()
+        with connect() as db:
+            after = {table: db.execute(f"SELECT * FROM {table} ORDER BY 1,2").fetchall() for table in before}
+        self.assertEqual(before, after)
+
     def test_seed_and_navigation(self):
         self.assertEqual(self.client.get("/api/health").status_code, 200)
         navigation = self.client.get("/api/navigation").json()

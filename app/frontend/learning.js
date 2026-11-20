@@ -1,7 +1,9 @@
+import { setupWritingGuide } from "./writing-guide.js";
 const $ = (id) => document.getElementById(id);
 
 export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
   const panel = $("learning-panel");
+  const guide = setupWritingGuide({ api });
   let question,
     revision = 0,
     dirty = false,
@@ -241,6 +243,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     cancelRender();
     panel.hidden = !q;
     if (!q) {
+      void guide.open(null);
       question = null;
       dirty = false;
       controls();
@@ -260,9 +263,10 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       $("learning-topic").append(option);
     }
     $("learning-topic").disabled = !q.topics.length;
-    await Promise.all([loadNote(true), loadReference()]);
+    await Promise.all([loadNote(true), loadReference(), guide.open(q)]);
     return true;
   };
+  open.showGuide = () => guide.select("guide");
   open.canLeave = () => {
     if (busy) {
       message("복습 저장이 끝난 뒤 이동해 주세요.");

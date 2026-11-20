@@ -114,3 +114,14 @@ DB 업데이트 전 백업은 [운영 안내](local-storage.md#백업과-복원)
 
 전체 다시 풀기 목록은 `GET /api/retry-questions`로 현재 로컬 프로필의 `retry_requested=true`인 문항을 조회합니다.
 문항·회차·주제·답안 상태와 저장된 보완 메모를 결합하며 읽기만 수행합니다. 추가 테이블이나 스키마 이행은 없습니다.
+
+
+## 문항별 작성 가이드
+
+`GET /api/questions/{qid}/writing-guide`는 읽기 전용입니다. DB 테이블·마이그레이션을 추가하지 않습니다.
+`app/writing_guide.py`는 현재 문항에서 요구사항·목차·검토할 주제 후보·자가 점검 초안을 만듭니다.
+`app/writing_examples.json`은 문항 ID별로 question_text, outline, keywords, checklist, example,
+source_topic_ids, provenance, revision을 가진 별도 편집 자료입니다. 기존 reference_answers와 개인 데이터는 수정하지 않습니다.
+공백을 제외한 현재 원문이 question_text와 일치할 때만 예시를 반환하며, 불일치하면 scaffold로 반환합니다.
+kind=example은 편집 자료가 있다는 뜻이며 공식 정답·학술적 검증 상태가 아닙니다.
+kind=scaffold는 예시 미등록 상태이며 example=null입니다. 자동 생성 결과는 초안으로 표시합니다.
