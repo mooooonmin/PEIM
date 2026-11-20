@@ -91,15 +91,16 @@ export function setupStudyLayout() {
 export function setupStudyNavigation({ select }) {
   let rows = [],
     currentId,
-    busy = false;
-  function update(nextRows = rows, id = currentId) {
+    busy = false, context = '';
+  function update(nextRows = rows, id = currentId, label = context) {
+    context = label;
     rows = nextRows;
     currentId = id;
     const index = rows.findIndex((q) => q.id === currentId);
     $("previous-question").disabled = busy || index <= 0;
     $("next-question").disabled = busy || index < 0 || index >= rows.length - 1;
     $("study-position").textContent =
-      index < 0 ? "" : `${index + 1} / ${rows.length}`;
+      index < 0 ? "" : `${context ? context + ' ' : ''}${index + 1} / ${rows.length}`;
   }
   for (const [id, step] of [
     ["previous-question", -1],

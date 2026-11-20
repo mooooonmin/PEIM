@@ -1,6 +1,35 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test('다시 풀기에서 선택한 결과 순서가 학습 이전 다음으로 유지된다', async t => {
+  const f = await fixture(t);
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).endsWith('/retry-questions')
+    ? Promise.resolve({ok:true,json:async()=>['q2','q1'].map((id,i)=>({id,round:140,session:1,number:i?1:2,text:id,answer_status:'draft',retry_requested:true}))})
+    : fetch(url,options);
+  await f.$('retry-tab').onclick();
+  await f.$('retry-items').querySelector('button').onclick();
+  assert.match(f.$('study-position').textContent, /다시 풀기.*1 \/ 2/);
+  assert.equal(f.$('previous-question').disabled, true);
+  await f.$('next-question').onclick();
+  assert.match(f.$('question-meta').textContent, /1번/);
+  assert.equal(f.$('next-question').disabled, true);
+});
+test('빈 시작 URL은 마지막 학습 문항을 복구하되 명시 URL을 우선한다', async t => {
+  const storage = {'peim:study-session':{query:'mode=exam&exam=exam-140&q=q2',retryIds:[]}};
+  const f = await fixture(t, {url:'http://localhost:8000/',storage,readyView:'study'});
+  await until(() => f.$('answer').value === 'q2 기존 답안');
+  const explicit = await fixture(t, {storage});
+  assert.equal(explicit.$('answer').value, 'q1 기존 답안');
+});
+test('다시 풀기 새로고침은 URL 매개변수 순서와 무관하게 순서를 복원한다', async t => {
+  const storage = {'peim:study-session':{query:'mode=exam&q=q1&queue=retry',retryIds:['q1','q2']}};
+  const f = await fixture(t, {url:'http://localhost:8000/?mode=exam&queue=retry&q=q1',storage});
+  assert.match(f.$('study-position').textContent, /다시 풀기.*1 \/ 2/);
+  await f.$('next-question').onclick();
+  assert.equal(f.$('answer').value, 'q2 기존 답안');
+});
+
 async function registration(t) {
   const f = await fixture(t);
   await f.$('manage-tab').onclick(); await f.$('manage-upload').onclick();

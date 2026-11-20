@@ -12,7 +12,7 @@
 | `frontend/upload-draft.js` | 탭별 신규 등록 초안 보관·복구와 교체 확인 |
 | `frontend/main.js`, `frontend/icons.js` | 학습·답안 저장·화면 전환과 접근성 이름을 가진 SVG 보조 버튼 |
 | `frontend/draft-store.js` | 탭별 답안·메모 임시 글 보존, 복구 후보와 내려받기 |
-| `frontend/retry-list.js`, `frontend/filter-chips.js` | 전체 다시 풀기 목록·메모 펼치기와 필터 표시·해제 |
+| `frontend/retry-list.js`, `frontend/filter-chips.js`, `frontend/study-session.js` | 다시 풀기 목록·필터와 학습 순서·마지막 위치 보관 |
 | `frontend/learning.js`, `migrations/` | 답안 비교·복습 메모 및 개인 데이터의 추가형 이행 |
 | `frontend/manage.js`, `frontend/review.js` | 문제·주제 검색과 상태별 문항 목록, 연속 검수·수정과 PDF 배율 |
 | `static/` | HTML·CSS와 빌드된 assets(생성 파일) |
