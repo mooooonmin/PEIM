@@ -69,3 +69,15 @@ test("현재 문항 검수 후 예시와 연결 주제를 새로 불러온다", 
   assert.equal(f.state.guideCalls, 2);
 });
 
+test("이전 문항의 늦은 이력 응답은 새 문항 위에 열리지 않는다", async (t) => {
+  const f = await fixture(t);
+  let release;
+  f.state.historyGate = new Promise((resolve) => { release = resolve; });
+  const history = f.$("history").onclick();
+  await f.$("next-question").onclick();
+  assert.match(f.$("question-meta").textContent, /2번/);
+  release();
+  await history;
+  assert.equal(f.$("reading-dialog").open, false);
+  assert.equal(f.$("answer").value, "q2 기존 답안");
+});

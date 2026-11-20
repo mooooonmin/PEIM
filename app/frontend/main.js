@@ -551,8 +551,10 @@ $("original").onclick = () => {
 };
 $("history").onclick = safe(async () => {
   if (!openLearning.canLeave() || !(await save())) return;
-  const qid = current.id,
+  const q = current, view = currentView, sequence = loadSequence;
+  const qid = q.id,
     list = await api(`/questions/${encodeURIComponent(qid)}/history`);
+  if (current !== q || currentView !== view || sequence !== loadSequence) return;
   openReading("답안 저장 이력");
   if (!list.length) text("reading-body", "아직 저장된 답안이 없습니다.");
   for (const item of list) {
