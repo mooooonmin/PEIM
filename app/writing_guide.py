@@ -14,7 +14,7 @@ def writing_guide(question, topics):
     entry = entries.get(question['id'])
     matched = entry is not None and normalize(entry['question_text']) == normalize(text)
     # Keep the question's actual sub-demands; do not infer a technical answer from topic names.
-    parts = re.split(r"(?:^|\n)\s*([가-하])\.\s*", text)
+    parts = re.split(r"(?<!\S)([가나다라마바사아자차카타파하])\.\s*", text)
     requirements = [f'{parts[i]}. {parts[i+1].strip()}' for i in range(1, len(parts), 2)] if len(parts) > 1 else [text]
     if matched:
         return {'kind': 'example', 'requirements': requirements, **entry,
