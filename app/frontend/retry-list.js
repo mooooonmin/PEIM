@@ -29,7 +29,7 @@ export function setupRetryList({ api, openQuestion }) {
           "p",
           rows.length
             ? "검색 조건에 맞는 문항이 없습니다."
-            : "다시 풀기로 표시한 문항이 없습니다. 학습 화면의 복습 단계에서 표시하고 저장해 주세요.",
+            : "다시 풀기로 표시한 문항이 없습니다. 학습 화면의 보완 메모에서 표시하고 저장해 주세요.",
           "empty",
         ),
       );

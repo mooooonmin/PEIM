@@ -7,7 +7,7 @@
 | `writing_guide.py`, `writing_examples.json`, `frontend/writing-guide.js` | 읽기 전용 문항별 작성 틀·편집 예시와 자가 점검 |
 | `main.py` | 문항·검수 이력·답안·시험지 API와 정적 파일 제공 |
 | `db.py`, `schema.sql` | DB 연결, 스키마와 최초 콘텐츠 가져오기 |
-| `frontend/study-layout.js` | 작성·비교·복습 단계와 문제 접기 |
+| `frontend/study-layout.js` | 2열 배치·모바일 전환·문항 목록·메모 접기와 이전/다음 이동 |
 | `frontend/main.js` | 학습·답안 저장과 화면 전환 |
 | `frontend/learning.js`, `migrations/` | 답안 비교·복습 메모 및 개인 데이터의 추가형 이행 |
 | `frontend/manage.js`, `frontend/review.js` | 문항 관리 목록, 연속 검수·수정과 PDF 배율 |

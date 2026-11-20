@@ -81,7 +81,7 @@ test("inline learning panel shares the main workspace and saves only learning me
   assert.equal(f.$("learning-panel").closest("dialog"), null);
   assert.equal(
     f.$("answer").closest(".study-columns"),
-    f.$("learning-panel").parentElement,
+    f.$("learning-panel").closest(".study-columns"),
   );
   f.edit("보완할 정의");
   f.$("learning-retry").checked = true;

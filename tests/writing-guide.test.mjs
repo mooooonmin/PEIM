@@ -13,12 +13,13 @@ test('guide separates details, sanitizes examples and preserves editor/note/chec
  const calls=[]; const guide=fixture(async(path)=>{calls.push(path);return data('<b>요구사항</b>')});
  $('answer').value='작성 중'; $('learning-note').value='메모';
  await guide.open({id:'q1'}); assert.ok($('writing-guide').textContent.includes('<b>요구사항</b>'));
- assert.equal(Boolean($('writing-guide').querySelector('script')),false);
+ assert.equal(Boolean($('writing-example').querySelector('script')),false);
  assert.equal(Boolean($('writing-guide').querySelector('b')),false);
  const check=$('writing-guide').querySelector('input');check.checked=true;
  $('writing-guide').scrollTop=180; guide.select('detail'); assert.equal($('writing-guide').hidden,true);assert.equal($('learning-reference').hidden,false);
  $('learning-reference').scrollTop=90;guide.select('guide');
  assert.equal($('writing-guide').scrollTop,180);assert.equal(check.checked,true);
+ guide.select('example');assert.equal($('writing-example').hidden,false);assert.match($('writing-example').textContent,/본문/);
  assert.equal($('answer').value,'작성 중');assert.equal($('learning-note').value,'메모');
  assert.deepEqual(calls,['/questions/q1/writing-guide']);
  await guide.open({id:'q2'}); assert.equal($('writing-guide').querySelector('input').checked,false);
@@ -35,6 +36,6 @@ test('missing examples and network failure are explicit and retryable',async()=>
  const guide=fixture(async()=>{if(fail)throw Error('offline');return {...data('가. 정의'),kind:'scaffold',example:null}});
  await guide.open({id:'q'});assert.match($('writing-guide').textContent,/offline/);
  fail=false;await $('writing-guide').querySelector('button').onclick();
- assert.match($('writing-guide').textContent,/등록된 작성 예시가 없습니다/);
+ assert.match($('writing-example').textContent,/등록된 작성 예시가 없습니다/);
  assert.match($('writing-guide').textContent,/검토할 후보/);
 });
