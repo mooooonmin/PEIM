@@ -430,7 +430,6 @@ function displayQuestion() {
     "completed",
     "history",
     "original",
-    "reference",
     "compare",
   ])
     $(id).disabled = !current;
@@ -468,7 +467,6 @@ function displayQuestion() {
   text("save-state", current.answer.revision ? "저장됨" : "아직 작성하지 않음");
   text("character-count", `${current.answer.body.length.toLocaleString()}자`);
   $("original").disabled = !current.sources.length;
-  $("reference").disabled = !current.topics.length;
 }
 function openReading(title) {
   text("reading-title", title);
@@ -517,7 +515,6 @@ const openLearning = setupLearning({
   },
 });
 const studyLayout = setupStudyLayout();
-$("reference").onclick = () => studyLayout.mode("compare");
 $("retry-only").onchange = renderQuestionList;
 $("original").onclick = () => {
   if (current.sources.length === 1) {
