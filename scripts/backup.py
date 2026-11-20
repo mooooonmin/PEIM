@@ -59,14 +59,7 @@ def main():
     if mount["type"] != "bind" or not folder.is_dir():
         raise ValueError("Existing exam bind folder is required")
     files = checked_archive(args.archive) if args.action == "restore" else None
-    if files:
-        for name, content in files.items():
-            if name == "database.sql":
-                continue
-            target = folder / name.split("/")[1]
-            if target.is_symlink() or (target.exists() and digest(target.read_bytes()) != digest(content)):
-                raise ValueError(f"Original conflicts with backup; no overwrite: {target.name}")
-    elif args.archive.exists():
+    if args.action == "create" and args.archive.exists():
         raise ValueError("Backup archive already exists")
     was_running = bool(run("ps", "--status", "running", "--quiet", "web", capture_output=True).stdout.strip())
     run("stop", "web")
@@ -88,7 +81,13 @@ def main():
                 archive.writestr("manifest.json", json.dumps(manifest, ensure_ascii=False))
             checked_archive(args.archive)
         else:
-            # Originals are written only if absent; conflicting originals were rejected above.
+            # Quiesce uploads before checking every original, then write absent files only.
+            for name, content in files.items():
+                if name == "database.sql":
+                    continue
+                target = folder / name.split("/")[1]
+                if target.is_symlink() or (target.exists() and digest(target.read_bytes()) != digest(content)):
+                    raise ValueError(f"Original conflicts with backup; no overwrite: {target.name}")
             for name, content in files.items():
                 if name == "database.sql":
                     continue
@@ -96,7 +95,9 @@ def main():
                 if not target.exists():
                     with target.open("xb") as stream:
                         stream.write(content)
-            run("exec", "-T", "db", "psql", "-U", "peim", "-d", "peim", "-v", "ON_ERROR_STOP=1", "--single-transaction", input=files["database.sql"], stdout=subprocess.DEVNULL)
+            # Replace the app schema and restore together; any SQL failure rolls both back.
+            sql = b"DROP SCHEMA public CASCADE;\nCREATE SCHEMA public;\n" + files["database.sql"]
+            run("exec", "-T", "db", "psql", "-U", "peim", "-d", "peim", "-v", "ON_ERROR_STOP=1", "--single-transaction", input=sql, stdout=subprocess.DEVNULL)
         success = True
         print(f"{args.action} completed: {args.archive}")
     finally:

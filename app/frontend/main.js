@@ -204,13 +204,20 @@ $("load-server").onclick = safe(async () => {
     )
   )
     return;
-  const updated = await api(`/questions/${encodeURIComponent(current.id)}`);
+  const q = current, sequence = ++loadSequence, view = currentView;
+  const value = snapshot();
+  const unchanged = () => current === q && sequence === loadSequence && currentView === view &&
+    JSON.stringify(snapshot()) === JSON.stringify(value);
+  if (saving) await saving;
+  if (saving || !unchanged()) return;
+  const updated = await api(`/questions/${encodeURIComponent(q.id)}`);
+  if (saving || !unchanged()) return;
   try {
     localStorage.setItem(
-      draftKey(current.id) + ":before-reload",
-      JSON.stringify(snapshot()),
+      draftKey(q.id) + ":before-reload",
+      JSON.stringify(value),
     );
-    localStorage.removeItem(draftKey(current.id));
+    localStorage.removeItem(draftKey(q.id));
   } catch {}
   dirty = false;
   conflict = false;
@@ -392,7 +399,9 @@ function renderQuestionList() {
   $("question-list").append(table);
 }
 async function selectQuestion(qid) {
+  const originView = currentView, originSequence = loadSequence;
   if (!openLearning.canLeave() || !(await save())) return;
+  if (currentView !== originView || originSequence !== loadSequence) return;
   const sequence = ++loadSequence;
   const q = await api(`/questions/${encodeURIComponent(qid)}`);
   if (sequence !== loadSequence || !openLearning.canLeave()) return;
@@ -544,9 +553,12 @@ $("original").onclick = () => {
   }
 };
 $("history").onclick = safe(async () => {
-  if (!openLearning.canLeave() || !(await save())) return;
-  const qid = current.id,
+  const q = current, view = currentView, sequence = loadSequence;
+  if (!q || !openLearning.canLeave() || !(await save())) return;
+  if (current !== q || currentView !== view || sequence !== loadSequence) return;
+  const qid = q.id,
     list = await api(`/questions/${encodeURIComponent(qid)}/history`);
+  if (current !== q || currentView !== view || sequence !== loadSequence) return;
   openReading("답안 저장 이력");
   if (!list.length) text("reading-body", "아직 저장된 답안이 없습니다.");
   for (const item of list) {
@@ -625,8 +637,10 @@ $("clear-search").onclick = () => {
   $("search").focus();
 };
 
-async function showView(manage) {
-  if (!openLearning.canLeave() || !(await save())) return;
+async function showView(manage, { answerAlreadySelected = false } = {}) {
+  // Retry navigation already saved the outgoing answer; expose incoming conflicts.
+  if (!answerAlreadySelected && (!openLearning.canLeave() || !(await save()))) return;
+  if (currentView !== (manage ? "manage" : "study")) loadSequence++;
   currentView = manage ? "manage" : "study";
   $("retry-library").hidden = true;
   $("retry-tab").setAttribute("aria-current", "false");
@@ -647,10 +661,7 @@ const retryLibrary = setupRetryList({
     if (currentView !== "retry") return false;
     const topic = current.topics[0]?.id || "";
     const exam = topic ? "" : current.exam_id;
-    const nextRows = await api(
-      "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
-    );
-    if (currentView !== "retry") return false;
+    const selected = current;
     selectedTopic = topic;
     selectedExam = exam;
     mode = topic ? "topic" : "exam";
@@ -658,19 +669,31 @@ const retryLibrary = setupRetryList({
     $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
     resultQuery = "";
     $("search").value = "";
-    rows = nextRows;
+    rows = [];
     $("retry-only").checked = false;
     renderNavigation();
     renderQuestionList();
-    if (!(await showView(false))) return false;
+    if (!(await showView(false, { answerAlreadySelected: true }))) return false;
     $("back-to-retries").hidden = false;
     $("study").focus({ preventScroll: true });
     document.querySelector(".writing").scrollIntoView({ block: "start" });
+    const sequence = loadSequence;
+    try {
+      const nextRows = await api(
+        "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
+      );
+      if (current !== selected || sequence !== loadSequence) return true;
+      rows = nextRows;
+      renderQuestionList();
+    } catch (error) {
+      if (current === selected && sequence === loadSequence) report(error);
+    }
     return true;
   },
 });
 async function showRetryLibrary() {
   if (!openLearning.canLeave() || !(await save())) return;
+  if (currentView !== "retry") loadSequence++;
   currentView = "retry";
   $("study").hidden = true;
   $("manage").hidden = true;
@@ -729,17 +752,30 @@ async function chooseExam(e) {
   chosenExam = e;
   text("review-title", `${e.round}회 문항 확인`);
   $("review-original").disabled = false;
-  $("extract").disabled = e.format !== "pdf";
-  $("review-fields").disabled = e.format !== "pdf";
+  extraction = null;
+  $("extract").disabled = true;
+  $("review-fields").disabled = true;
+  $("candidates").replaceChildren();
+  $("candidates").disabled = true;
+  text("raw-text", "");
+  text("extraction-state", "선택한 시험지의 추출 정보를 불러오는 중입니다.");
   $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
-  const result = await api(
-    `/attachments/${encodeURIComponent(e.attachment_id)}/extraction`,
-  );
+  let result;
+  try {
+    result = await api(`/attachments/${encodeURIComponent(e.attachment_id)}/extraction`);
+  } catch (error) {
+    if (sequence !== reviewSequence) return;
+    text("extraction-state", "추출 정보를 불러오지 못했습니다. PDF 텍스트 추출 버튼으로 다시 시도하거나 시험지를 다시 선택해 주세요.");
+    $("extract").disabled = e.format !== "pdf";
+    throw error;
+  }
   if (sequence !== reviewSequence) return;
   extraction = result;
   displayExtraction();
+  $("extract").disabled = e.format !== "pdf";
+  $("review-fields").disabled = e.format !== "pdf";
   await loadExams();
 }
 function displayExtraction() {
@@ -762,6 +798,7 @@ function displayExtraction() {
   );
 }
 $("candidates").onchange = () => {
+  if (!extraction) return;
   const q = extraction.candidates[Number($("candidates").value)];
   if ($("candidates").value === "" || !q) return;
   $("session").value = String(q.session);
@@ -792,6 +829,7 @@ $("extract").onclick = safe(async () => {
     if (sequence === reviewSequence) {
       extraction = result;
       displayExtraction();
+      $("review-fields").disabled = false;
     }
   } finally {
     if (sequence === reviewSequence) $("extract").disabled = false;
@@ -850,6 +888,8 @@ $("question-form").onsubmit = async (e) => {
     (o) => o.value === $("topic-search").value,
   );
   try {
+    if (!extraction || $("review-fields").disabled)
+      throw new Error("선택한 시험지의 추출 정보를 불러온 뒤 등록해 주세요.");
     if (!option)
       throw new Error(
         "목록에서 연결할 주제를 선택하거나 새 주제를 만들어 주세요.",

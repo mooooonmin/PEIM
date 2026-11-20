@@ -331,6 +331,27 @@ class AppTests(unittest.TestCase):
         self.assertEqual(self.client.get(f"/api/questions/{qid}").json()["answer"]["body"], "이행 보존")
         self.assertEqual(self.client.put(f"/api/questions/{qid}/review", headers=HEADERS, json=value).status_code, 200)
 
+    def test_changed_pdf_cannot_be_served_extracted_or_registered(self):
+        number = 160
+        original = pdf()
+        uploaded = self.upload(number, original).json()
+        aid = uploaded['id']
+        path = Path(self.folder.name) / uploaded['filename']
+        topic = self.client.get('/api/navigation').json()['topics'][0]['id']
+        payload = {'attachment_id': aid, 'session': 1, 'number': 1,
+                   'text': '원본 대조 문항', 'topic_id': topic, 'page': 1, 'reviewed': True}
+        path.write_bytes(pdf(250))
+        self.assertEqual(self.client.get(f'/api/attachments/{aid}/file').status_code, 409)
+        self.assertEqual(self.client.post(f'/api/attachments/{aid}/extract', headers=HEADERS).status_code, 409)
+        self.assertEqual(self.client.post(f'/api/exams/{number}/questions', headers=HEADERS, json=payload).status_code, 409)
+        self.assertEqual(self.client.get(f'/api/questions/r{number}-s1-q01').status_code, 404)
+        path.write_bytes(original)
+        self.assertEqual(self.client.get(f'/api/attachments/{aid}/file').content, original)
+        with connect() as db:
+            db.execute("UPDATE attachments SET data=jsonb_set(data,'{page_count}','99') WHERE id=%s", (aid,))
+        self.assertEqual(self.client.post(f'/api/exams/{number}/questions', headers=HEADERS, json={**payload, 'page': 2}).status_code, 422)
+        self.assertEqual(self.client.post(f'/api/exams/{number}/questions', headers=HEADERS, json=payload).status_code, 200)
+
 
 if __name__ == "__main__":
     unittest.main()

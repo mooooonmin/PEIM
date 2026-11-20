@@ -180,8 +180,9 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
     )
       return;
     const key = draftKey();
-    const restored = await loadNote(false);
-    if (restored) {
+    const restoreDraft = !loaded && !dirty;
+    const restored = await loadNote(restoreDraft);
+    if (restored && !restoreDraft) {
       try {
         localStorage.removeItem(key);
       } catch {}
@@ -237,24 +238,29 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
   });
   const open = async (q) => {
     if (!open.canLeave()) return false;
-    if (question?.id === q?.id && !panel.hidden) return true;
-    generation++;
+    const sameQuestion = question?.id === q?.id && !panel.hidden;
+    if (sameQuestion && JSON.stringify([question.text, question.session, question.topics]) ===
+        JSON.stringify([q.text, q.session, q.topics])) return true;
+    if (!sameQuestion) generation++;
     referenceSequence++;
     cancelRender();
     panel.hidden = !q;
     if (!q) {
       void guide.open(null);
       question = null;
+      loaded = false;
       dirty = false;
       controls();
       return true;
     }
     question = q;
-    dirty = false;
-    loaded = false;
-    revision = 0;
-    $("learning-note").value = "";
-    $("learning-retry").checked = false;
+    if (!sameQuestion) {
+      dirty = false;
+      loaded = false;
+      revision = 0;
+      $("learning-note").value = "";
+      $("learning-retry").checked = false;
+    }
     $("learning-topic").replaceChildren();
     for (const topic of q.topics) {
       const option = document.createElement("option");
@@ -263,7 +269,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       $("learning-topic").append(option);
     }
     $("learning-topic").disabled = !q.topics.length;
-    await Promise.all([loadNote(true), loadReference(), guide.open(q)]);
+    await Promise.all([sameQuestion ? null : loadNote(true), loadReference(), guide.open(q)]);
     return true;
   };
   open.showGuide = () => guide.select("guide");
