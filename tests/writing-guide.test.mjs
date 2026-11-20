@@ -38,6 +38,3 @@ test('missing examples and network failure are explicit and retryable',async()=>
  assert.match($('writing-guide').textContent,/등록된 작성 예시가 없습니다/);
  assert.match($('writing-guide').textContent,/검토할 후보/);
 });
-
-
-
