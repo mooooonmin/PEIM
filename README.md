@@ -10,7 +10,9 @@ Docker Desktop의 Linux 컨테이너 엔진이 필요합니다.
 [학습 화면](http://localhost:8000)을 엽니다.
 
 - 주제·회차 탐색, 문제 검색, 문항별 답안 자동 저장·이력 복원, 집중 모드
-- 주제 참고 답안과 도식, 원본 시험지 열람
+- 문제·자료와 내 답안을 나란히 보는 2열 학습 화면과 모바일 영역 전환
+- 문항별 작성 가이드·예시, 주제 상세 해설과 도식, 원본 시험지 열람
+- 답안 비교 중 보완 메모 작성과 전체 다시 풀기 목록에서 학습 이어가기
 - 원본 대조, 기존 문항·연결 주제·페이지 수정, 검증 상태와 수정 이력
 - 새 회차 PDF 첨부, 추출 초안 검토, 수동 문항·주제 등록
 
@@ -27,7 +29,7 @@ Docker Desktop의 Linux 컨테이너 엔진이 필요합니다.
 | `public/data/` | 기존 앱용 JSON. 보존 검사의 대상 |
 | [data/](data/README.md) | 원본 목록, 보존 해시, 기존 ID 목록 |
 | [scripts/](scripts/README.md) | 변환·검사·내보내기 도구 |
-| [tests/](tests/README.md) | 데이터·백업 검사와 PostgreSQL 앱 통합 검사 |
+| [tests/](tests/README.md) | 데이터·백업·화면 동작 검사와 PostgreSQL 앱 통합 검사 |
 | [app/](app/README.md) | API, DB 스키마·가져오기, 학습·문제 관리 화면 |
 
 - [데이터 모델과 식별자](docs/data-model.md)
