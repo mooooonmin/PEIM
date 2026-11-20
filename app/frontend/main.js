@@ -204,13 +204,19 @@ $("load-server").onclick = safe(async () => {
     )
   )
     return;
-  const updated = await api(`/questions/${encodeURIComponent(current.id)}`);
+  if (saving) await saving;
+  const q = current, sequence = ++loadSequence, view = currentView;
+  const value = snapshot();
+  clearTimeout(timer);
+  const updated = await api(`/questions/${encodeURIComponent(q.id)}`);
+  if (current !== q || sequence !== loadSequence || currentView !== view ||
+      JSON.stringify(snapshot()) !== JSON.stringify(value)) return;
   try {
     localStorage.setItem(
-      draftKey(current.id) + ":before-reload",
-      JSON.stringify(snapshot()),
+      draftKey(q.id) + ":before-reload",
+      JSON.stringify(value),
     );
-    localStorage.removeItem(draftKey(current.id));
+    localStorage.removeItem(draftKey(q.id));
   } catch {}
   dirty = false;
   conflict = false;
