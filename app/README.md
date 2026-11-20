@@ -10,12 +10,11 @@
 | `frontend/study-layout.js` | 2열 배치·모바일 전환·문항 목록·메모 접기와 이전/다음 이동 |
 | `frontend/upload-preview.js` | 등록 화면의 원본 PDF 표시·페이지 이동과 늦은 응답 격리 |
 | `frontend/main.js` | 학습·답안 저장과 화면 전환 |
+| `frontend/draft-store.js` | 탭별 답안·메모 임시 글 보존, 복구 후보와 내려받기 |
+| `frontend/retry-list.js`, `frontend/filter-chips.js` | 전체 다시 풀기 목록·메모 펼치기와 필터 표시·해제 |
 | `frontend/learning.js`, `migrations/` | 답안 비교·복습 메모 및 개인 데이터의 추가형 이행 |
 | `frontend/manage.js`, `frontend/review.js` | 문제·주제 검색과 상태별 문항 목록, 연속 검수·수정과 PDF 배율 |
 | `static/` | HTML·CSS와 빌드된 assets(생성 파일) |
 
-[실행·저장 정책](../docs/local-storage.md), [데이터 모델](../docs/data-model.md)을 따릅니다.
+[실행·저장 정책과 다시 풀기 사용법](../docs/local-storage.md), [데이터 모델](../docs/data-model.md)을 따릅니다.
 변경 후 [앱 통합 검사와 화면 확인](../docs/testing.md#앱-통합-검사)을 수행합니다.
-
-`frontend/retry-list.js`는 주제·회차를 넘는 전체 다시 풀기 목록과 검색·필터·정렬·메모 펼치기·열기 상태를 담당합니다.
-목록 사용법은 [로컬 사용 안내](../docs/local-storage.md#전체-다시-풀기-목록)를 참고하세요.

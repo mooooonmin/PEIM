@@ -9,7 +9,7 @@
 | `parse_questions.py`, `merge_topics.py` | 문항 파싱과 주제 병합 |
 | `build_content.py`, `build_priority.py` | 콘텐츠·우선 학습 데이터 생성 |
 | `export_dataset.py` | DB 가져오기용 데이터 출력 |
-| `build_frontend.mjs` | 화면·PDF 뷰어 번들과 로컬 폰트 자산 생성 |
+| `build_frontend.mjs` | 화면·PDF 뷰어 번들과 PDF 문자맵·표준 폰트 자산 생성 |
 | `backup.py` | DB·시험지 백업과 복원 |
 | `out/` | Git에서 제외된 생성 출력 |
 
