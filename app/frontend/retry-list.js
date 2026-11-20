@@ -10,6 +10,7 @@ const el = (tag, text, className) => {
 export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
   const desktop = document.defaultView.matchMedia("(min-width: 701px)");
   const filters = document.querySelector("#retry-tools .collection-filters");
+  filters.open = desktop.matches;
   desktop.addEventListener("change", () => {
     if (desktop.matches) filters.open = true;
   });
@@ -62,7 +63,7 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
       button.onclick = async () => {
         if (loading || opening) return;
         opening = true;
-        render();
+        list.querySelectorAll('.continue-button').forEach(b => { b.disabled = true; });
         $("retry-result").textContent = "문항을 여는 중입니다.";
         try {
           const opened = await openQuestion(q.id);
@@ -74,14 +75,15 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
             `문항을 열지 못했습니다. ${error.message}`;
         } finally {
           opening = false;
-          render();
+          list.querySelectorAll('.continue-button').forEach(b => { b.disabled = loading; });
+          if (!$("retry-library").hidden && button.isConnected) button.focus({preventScroll:true});
         }
       };
       const identity = el("div", "", "retry-identity");
       identity.append(el("p", meta, "retry-meta"), title,
         el("p", q.topics || "연결 주제 없음", "quiet"));
       header.append(identity, button);
-      item.append(header, el("span", ({empty:"미작성", draft:"작성 중", completed:"작성 완료"}[q.answer_status] || "미작성"), "status-badge"));
+      item.append(header, el("span", ({empty:"미작성", draft:"작성 중", completed:"작성 완료"}[q.answer_status] || "미작성"), "status-badge" + (q.answer_status === 'completed' ? ' status-verified' : '')));
       if (q.text.length > 120) {
         const full = el("details", "", "retry-full");
         full.append(el("summary", "문제 전체 보기"), el("p", q.text, "retry-question")); item.append(full);

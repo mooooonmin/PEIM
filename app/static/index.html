@@ -187,7 +187,6 @@
                 </button>
               </div>
             </header>
-            <span id="save-state" role="status">문항 선택 전</span>
             <div id="save-error" role="alert" hidden="">
               <span id="save-error-text"></span
               ><button id="retry">다시 저장</button
@@ -206,10 +205,10 @@
             ></textarea>
             <footer class="editor-footer">
               <span id="character-count">0자</span
-              ><label
+              ><div class="answer-status"><label
                 ><input type="checkbox" id="completed" disabled="" /> 작성
                 완료</label
-              ><span class="quiet">자동 저장</span>
+              ><span id="save-state" role="status">문항 선택 전</span></div>
             </footer>
           </section>
         </div>
@@ -263,14 +262,11 @@
       </section>
     </main>
     <main id="retry-library" class="retry-library collection-page" tabindex="-1" hidden>
-      <div class="collection-head">
-        <h1 class="sr-only">다시 풀기</h1>
-        <button id="refresh-retry" data-icon="refresh" class="utility-button">새로고침</button>
-      </div>
+      <h1 class="sr-only">다시 풀기</h1>
       <div id="retry-tools" class="collection-tools">
         <div class="retry-toolbar">
           <label class="collection-search search-control"><span class="sr-only">문제·메모 검색</span>
-            <input id="retry-search" type="search" placeholder="문제·메모 검색" />
+            <input id="retry-search" type="search" placeholder="문제·주제·메모 검색" />
           </label>
           <details class="collection-filters" open>
             <summary>필터·정렬</summary>
@@ -284,21 +280,21 @@
         </div>
         <div class="applied-filters"><div id="retry-chips" class="filter-chips" role="group" aria-label="적용된 다시 풀기 조건"></div><button id="retry-reset" data-icon="close" class="utility-button" hidden>조건 지우기</button></div>
       </div>
-      <div class="collection-results"><p id="retry-count" role="status"></p></div>
+      <div class="collection-results"><p id="retry-count" role="status"></p><button id="refresh-retry" data-icon="refresh" class="utility-button">새로고침</button></div>
       <p id="retry-result" role="status"></p>
       <div id="retry-items"></div>
     </main>
     <main id="manage" class="manage collection-page" tabindex="-1" hidden>
       <div class="collection-head">
         <h1 class="sr-only">문제 관리</h1>
-        <button id="manage-add-pdf" class="primary">＋ 시험지 등록</button>
-      </div>
       <nav class="management-tabs" aria-label="문제 관리 메뉴">
         <button id="manage-existing" aria-pressed="true">문항 목록</button>
         <button id="manage-upload" aria-pressed="false">
           시험지·문항 등록
         </button>
       </nav>
+        <button id="manage-add-pdf" class="primary">＋ 시험지 등록</button>
+      </div>
       <section id="managed-questions" aria-label="기존 문항 검수">
         <div class="management-filters collection-tools">
           <label class="management-search search-control"><span class="sr-only">문제·주제 검색</span><input id="managed-search" type="search" placeholder="문제·주제 검색" /></label>
@@ -557,7 +553,7 @@
           id="save-question-review"
           type="submit"
           form="edit-question-form"
-          class="primary"
+          class="utility-button"
         >
           문항 수정 저장
         </button>

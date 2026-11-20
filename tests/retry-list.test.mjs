@@ -4,6 +4,14 @@ import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
 import { setupRetryList } from "../app/frontend/retry-list.js";
 const html = await readFile("app/static/index.html", "utf8");
+test('blocked opening preserves the expanded memo and keyboard focus', async () => {
+  const f = fixture(); await f.library.load();
+  const memo = f.$('retry-items').querySelector('.retry-memo'); memo.open = true;
+  const button = f.$('retry-items').querySelector('button'); button.focus();
+  f.state.openResult = false; await button.onclick();
+  assert.equal(f.$('retry-items').querySelector('.retry-memo').open, true);
+  assert.equal(document.activeElement, button);
+});
 test("removing a retry condition preserves other filters and returns keyboard focus", async () => {
   const f = fixture();
   await f.library.load();

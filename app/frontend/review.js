@@ -77,7 +77,7 @@ export function setupQuestionReview({ api, refreshed }) {
       input.onchange = () => {
         input.checked ? selected.add(t.id) : selected.delete(t.id);
         changed = true;
-        topicList();
+        $("edit-topic-count").textContent = `${selected.size}개 주제 선택`;
       };
       label.append(input, node("span", t.title));
       $("edit-topics").append(label);

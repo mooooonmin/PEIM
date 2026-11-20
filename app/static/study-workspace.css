@@ -23,12 +23,13 @@ button.icon-control[aria-pressed="true"] {
   color: var(--accent);
   background: var(--surface-selected);
 }
-.collection-page > .collection-head { justify-content: flex-end; margin-bottom: 8px; }
+.collection-page > .collection-head { justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px; }
+.collection-head .management-tabs { margin: 0; }
+.collection-head > button { flex: none; }
 #study .answer-pane .answer-tools { justify-content: flex-end; }
 #study .icon-control.disclosure-button::after { content: none; }
 #study .question-pane > .section-head { justify-content: flex-end; }
 #study.study-workspace {
-  --muted: #526071;
   display: flex;
   flex-direction: column;
   height: calc(100dvh - 68px);
@@ -123,10 +124,10 @@ button.icon-control[aria-pressed="true"] {
 #study .question-pane {
   display: flex;
   flex-direction: column;
-  flex: 0 1 46%;
-  min-height: 140px;
-  max-height: 55%;
-  padding: 12px 20px;
+  flex: 0 1 auto;
+  min-height: 100px;
+  max-height: 40%;
+  padding: 8px 20px;
   overflow: hidden;
   resize: none;
 }
@@ -140,8 +141,11 @@ button.icon-control[aria-pressed="true"] {
 }
 #study .question-pane .actions {
   display: flex;
+  flex: 0 0 auto;
+  width: auto;
   order: initial;
   flex-basis: auto;
+  margin-left: auto;
 }
 #study #question-text {
   overflow: auto;
@@ -247,7 +251,7 @@ button.icon-control[aria-pressed="true"] {
 #study .answer-pane {
   display: flex;
   min-height: 0;
-  padding: 12px 24px 0;
+  padding: 8px 20px 0;
   background: var(--paper);
 }
 #study .answer-tools {
@@ -255,8 +259,7 @@ button.icon-control[aria-pressed="true"] {
   align-items: center;
   justify-content: space-between;
   flex: none;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
+  padding-bottom: 0;
   gap: 8px;
 }
 #study .answer-tools h2 {
@@ -265,7 +268,7 @@ button.icon-control[aria-pressed="true"] {
 #study #save-state {
   font-size: 14px;
   color: var(--muted);
-  padding-top: 8px;
+  padding: 0;
 }
 #study #answer {
   min-height: 100px;
@@ -279,6 +282,8 @@ button.icon-control[aria-pressed="true"] {
   gap: 8px;
   padding: 10px 0;
 }
+#study .answer-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-left: auto; }
+#study .answer-status label, #study .learning-actions label { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
 #study .study-notes {
   flex: none;
   border-top: 1px solid var(--line);
@@ -287,7 +292,7 @@ button.icon-control[aria-pressed="true"] {
 }
 #study .study-notes > header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   gap: 12px;
 }
@@ -334,7 +339,8 @@ button.icon-control[aria-pressed="true"] {
 #study .learning-actions {
   grid-column: 2;
   grid-row: 2 / 4;
-  align-content: center;
+  align-content: end;
+  align-items: center;
   gap: 8px;
 }
 #study #learning-result {
@@ -449,4 +455,28 @@ body.focus-mode #study.study-workspace {
 }
 .topbar button[aria-current="page"] {
   font-weight: 700;
+}
+
+/* Keep each action next to the content or state it controls. */
+.manage.collection-page > .collection-head { border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.manage .collection-head .management-tabs { margin: 0; border: 0; }
+.manage .management-filters { grid-template-columns: minmax(240px, 1fr) 140px 170px; }
+#study .learning-actions { display: flex; flex-wrap: wrap; max-width: 300px; }
+#study .learning-actions > details { flex-basis: 100%; }
+#study .learning-actions > details:not([open]) { font-size: 13px; }
+#study #learning-result:empty { display: none; }
+@media (min-width: 601px) and (max-width: 850px) {
+  .manage .management-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .manage .management-search { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+  .manage .management-filters { display: grid; grid-template-columns: minmax(0, 1fr) 40px; align-items: center; gap: 8px; }
+  .manage .management-search { grid-column: 1; }
+  .manage .mobile-filter-toggle { margin: 0; }
+  .manage .managed-filter-controls { grid-column: 1 / -1; margin: 0; }
+  .manage .collection-results .actions { width: auto; margin-left: auto; }
+  .manage .collection-head { flex-wrap: wrap; }
+  .manage .collection-head .management-tabs { flex: 1; }
+  .manage .collection-head button { font-size: 13px; padding: 8px; }
+  #study .answer-status { gap: 4px 10px; }
 }
