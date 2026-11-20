@@ -295,6 +295,8 @@ async function chooseFilter(topic, exam) {
     "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
   );
   if (sequence !== loadSequence || !openLearning.canLeave()) return;
+  if (!(await save()) || sequence !== loadSequence || !openLearning.canLeave())
+    return;
   selectedTopic = topic;
   selectedExam = exam;
   resultQuery = "";
@@ -394,6 +396,11 @@ async function selectQuestion(qid) {
   const sequence = ++loadSequence;
   const q = await api(`/questions/${encodeURIComponent(qid)}`);
   if (sequence !== loadSequence || !openLearning.canLeave()) return;
+  // The editor remains usable while the next question is loading.
+  if (!(await save()) || sequence !== loadSequence || !openLearning.canLeave())
+    return;
+  if (current?.id === q.id && current.answer.revision > q.answer.revision)
+    q.answer = current.answer;
   current = q;
   conflict = false;
   dirty = false;
@@ -431,12 +438,7 @@ async function selectQuestion(qid) {
 function displayQuestion() {
   studyLayout.question(current?.id);
   void openLearning(current);
-  for (const id of [
-    "answer",
-    "completed",
-    "history",
-    "original",
-  ])
+  for (const id of ["answer", "completed", "history", "original"])
     $(id).disabled = !current;
   $("save-error").hidden = true;
   if (!current) {
