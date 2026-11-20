@@ -8,8 +8,8 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=compare-notes-1" />
-    <script type="module" src="/assets/main.js?v=compare-notes-1"></script>
+    <link rel="stylesheet" href="/style.css?v=writing-guide-1" />
+    <script type="module" src="/assets/main.js?v=writing-guide-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -103,6 +103,7 @@
             </button>
           </nav>
           <div class="actions">
+            <button id="open-writing-guide" class="quiet-button" disabled>작성 가이드</button>
             <button id="history" class="quiet-button" disabled>
               저장 이력</button
             ><button id="focus" class="quiet-button" aria-pressed="false">
@@ -116,7 +117,7 @@
         </div>
         <nav class="compare-switch" aria-label="비교할 답안">
           <button id="compare-mine" aria-pressed="false">내 답안</button>
-          <button id="compare-reference" aria-pressed="true">참고 답안</button>
+          <button id="compare-reference" aria-pressed="true">학습 자료</button>
         </nav>
         <div class="study-columns">
           <section class="answer-pane">
@@ -147,9 +148,15 @@
           <section id="learning-panel" aria-label="참고 답안과 복습" hidden>
             <section
               id="learning-reference-pane"
-              aria-label="비교할 주제 참고 답안"
+              aria-label="문항 가이드와 주제 상세 해설"
             >
-              <h3>주제 참고 답안</h3>
+              <nav class="material-switch" aria-label="학습 자료 유형">
+                <button id="material-guide" aria-pressed="true">문항별 작성 가이드</button>
+                <button id="material-detail" aria-pressed="false">주제 상세 해설</button>
+              </nav>
+              <div id="writing-guide" class="reading-body" aria-live="polite"></div>
+              <div id="topic-detail-controls" hidden>
+              <h3>주제 상세 해설</h3>
               <p class="learning-notice">
                 주제별 학습 자료이며 이 문항의 공식 정답은 아닙니다.
               </p>
@@ -170,7 +177,8 @@
                   </svg>
                 </button>
               </div>
-              <div id="learning-reference" class="reading-body"></div>
+              </div>
+              <div id="learning-reference" class="reading-body" hidden></div>
             </section>
             <button id="toggle-compare-note" class="quiet-button" aria-expanded="false" aria-controls="learning-form">보완 메모 펼치기</button>
             <form id="learning-form">

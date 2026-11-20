@@ -18,6 +18,7 @@ from psycopg.types.json import Jsonb
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.db import connect, initialize
+from app.writing_guide import writing_guide
 from scripts.data_contract import EXAM_DIRECTORY, EXAM_NAME, exam_filename
 from scripts.parse_questions import parse_round
 
@@ -157,6 +158,14 @@ def question(qid: str):
         q["sources"] = db.execute("SELECT a.id,a.format,s.data FROM attachments a JOIN question_sources s ON s.attachment_id=a.id WHERE s.question_id=%s ORDER BY a.format", (qid,)).fetchall()
         q["answer"] = db.execute("SELECT body,status,revision,updated_at FROM user_answers WHERE question_id=%s AND profile_id='local'", (qid,)).fetchone() or {"body": "", "status": "draft", "revision": 0, "updated_at": None}
         return q
+
+
+@app.get("/api/questions/{qid}/writing-guide")
+def question_writing_guide(qid: str):
+    with connect() as db:
+        q = require_row(db.execute("SELECT id,text,session FROM questions WHERE id=%s", (qid,)).fetchone())
+        topics = db.execute("SELECT t.id,t.title FROM topics t JOIN question_topics x ON x.topic_id=t.id WHERE x.question_id=%s ORDER BY t.title", (qid,)).fetchall()
+        return writing_guide(q, topics)
 
 
 class Answer(BaseModel):

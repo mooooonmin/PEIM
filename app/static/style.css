@@ -1541,3 +1541,15 @@ body.focus-mode .workbench {
 @media (max-width: 900px) {
   .writing[data-mode="compare"][data-compare-side="mine"] #learning-panel { overflow: auto; }
 }
+
+/* Question-specific aids share the comparison workspace without editing answers. */
+.material-switch { display: flex; flex-wrap: wrap; gap: 6px; flex: none; margin-bottom: 12px; }
+.material-switch button { flex: 1; font-size: 14px; }
+.material-switch button[aria-pressed="true"] { color: var(--accent); background: var(--surface-selected); border-color: currentColor; }
+#writing-guide { flex: 1; min-height: 0; overflow: auto; overflow-wrap: anywhere; padding-right: 8px; }
+#writing-guide li { margin-bottom: 8px; }
+#writing-guide summary { cursor: pointer; font-weight: 600; padding: 12px 0; }
+.guide-check { display: flex; align-items: flex-start; gap: 8px; margin: 12px 0; }
+.guide-check input { flex: none; margin-top: 5px; }
+#writing-guide[hidden], #learning-reference[hidden], #topic-detail-controls[hidden] { display: none; }
+.writing[data-mode="compare"][data-compare-notes="true"] #writing-guide { min-height: 120px; }

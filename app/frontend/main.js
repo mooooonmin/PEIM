@@ -424,6 +424,7 @@ async function selectQuestion(qid) {
 }
 function displayQuestion() {
   studyLayout.question(current?.id);
+  $("open-writing-guide").disabled = !current;
   void openLearning(current);
   for (const id of [
     "answer",
@@ -515,6 +516,12 @@ const openLearning = setupLearning({
   },
 });
 const studyLayout = setupStudyLayout();
+$("open-writing-guide").onclick = () => {
+  openLearning.showGuide();
+  studyLayout.mode("compare");
+  $("compare-reference").click();
+  $("material-guide").focus();
+};
 $("retry-only").onchange = renderQuestionList;
 $("original").onclick = () => {
   if (current.sources.length === 1) {
