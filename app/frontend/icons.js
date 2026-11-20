@@ -1,4 +1,7 @@
 const paths = {
+  save: 'M4 3h13l4 4v14H3V3ZM7 3v6h10V3M7 21v-8h10v8',
+  book: 'M12 5v16M12 5C9 3 5 3 2 4v16c3-1 7-1 10 1 3-2 7-2 10-1V4c-3-1-7-1-10 1Z',
+  layers: 'm12 3 10 5-10 5L2 8ZM2 12l10 5 10-5M2 16l10 5 10-5',
   previous: 'm14 6-6 6 6 6', next: 'm10 6 6 6-6 6', close: 'm6 6 12 12M18 6 6 18',
   refresh: 'M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1',
   list: 'M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1',
@@ -26,6 +29,12 @@ export function setIconLabel(button, label, icon = button.dataset.icon) {
   path.setAttribute('d', paths[icon]);
   svg.append(path);
   button.replaceChildren(svg);
+  if (button.dataset.caption) {
+    const caption = document.createElement('span');
+    caption.textContent = button.dataset.caption;
+    button.append(caption);
+    button.classList.add('caption-control');
+  }
 }
 
 export function setupIcons() {

@@ -8,9 +8,10 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=compact-controls-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=compact-controls-1" />
-    <script type="module" src="/assets/main.js?v=compact-controls-1"></script>
+    <link rel="stylesheet" href="/style.css?v=charcoal-workspace-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=charcoal-workspace-1" />
+    <link rel="stylesheet" href="/workspace-theme.css?v=charcoal-workspace-1" />
+    <script type="module" src="/assets/main.js?v=charcoal-workspace-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -20,12 +21,12 @@
           <path
             d="M16 2 30 10v16L16 34 2 26V10Z M2 10l14 8 14-8 M16 18v16"
           /></svg
-        ><strong>정보관리기술사</strong></a
+        ><span class="brand-wordmark">PEIM</span><strong>정보관리기술사</strong></a
       >
       <nav aria-label="주 메뉴">
-        <button id="study-tab" aria-current="page">학습</button
-        ><button id="retry-tab">다시 풀기</button
-        ><button id="manage-tab">문제 관리</button>
+        <button id="study-tab" data-icon="book" data-caption="학습" aria-current="page">학습</button
+        ><button id="retry-tab" data-icon="refresh" data-caption="다시 풀기">다시 풀기</button
+        ><button id="manage-tab" data-icon="layers" data-caption="문제 관리">문제 관리</button>
       </nav>
 
     </header>
@@ -33,7 +34,7 @@
     <main id="study" class="workbench study-workspace" tabindex="-1">
       <header class="question-navigation">
         <button
-          id="toggle-question-list" data-icon="list"
+          id="toggle-question-list" data-icon="list" data-caption="문항 목록"
           aria-expanded="false"
           aria-controls="question-drawer"
         >
@@ -98,7 +99,7 @@
             <section class="question-pane">
               <div class="section-head">
                 <div>
-                  <h1 class="sr-only">문제</h1>
+                  <h1>문제</h1>
                 </div>
                 <div class="actions">
                   <button id="original" data-icon="file" class="quiet-button" disabled="">
@@ -179,7 +180,7 @@
           </section>
           <section class="answer-pane">
             <header class="answer-tools">
-              <h2 class="sr-only">내 답안</h2>
+              <h2>내 답안</h2>
               <div class="actions">
                 <button id="history" data-icon="history" class="quiet-button" disabled="">
                   저장 이력</button
@@ -216,7 +217,7 @@
         <section class="study-notes" aria-label="보완 메모">
           <header>
             <button
-              id="toggle-compare-note" data-icon="note"
+              id="toggle-compare-note" data-icon="note" data-caption="보완 메모"
               aria-expanded="false"
               aria-controls="learning-form"
             >
@@ -226,7 +227,7 @@
           <form id="learning-form" hidden>
 
 
-            <label for="learning-note">보완 메모</label>
+            <label class="sr-only" for="learning-note">보완 메모</label>
             <textarea
               id="learning-note"
               rows="3"
@@ -240,12 +241,12 @@
                 풀기</label
               >
               <button
-                id="save-learning"
+                id="save-learning" data-icon="save" aria-label="메모 저장"
                 type="submit"
                 class="primary"
                 disabled=""
               >
-                복습 저장
+                메모 저장
               </button>
               <details>
                 <summary>저장 문제 해결</summary>

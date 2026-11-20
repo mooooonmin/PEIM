@@ -1,23 +1,28 @@
 :root {
-  --paper: #fafbfc;
-  --surface: #f6f8fb;
-  --surface-selected: #e7f0ff;
-  --ink: #17212d;
-  --muted: #526071;
-  --line: #dce3ec;
-  --accent: #1764d9;
+  --paper: #fafafa;
+  --surface: #f2f3f4;
+  --surface-selected: #e5e7e9;
+  --ink: #232529;
+  --muted: #60646c;
+  --line: #dfe1e4;
+  --accent: #242629;
   --accent-ink: #fff;
   --success: #216345;
   --success-bg: #edf7f0;
   --danger: #a82c36;
   --danger-bg: #fff1f1;
-  --focus: #0d5bc6;
+  --focus: #585d65;
   --backdrop: rgb(23 33 45 / 0.3);
-  --disabled-bg: #edf0f4;
-  --accent-active: #104fae;
+  --disabled-bg: #eceef0;
+  --accent-active: #3c4046;
   --font: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
   --radius: 7px;
   --space: 16px;
+  --canvas: #f0f1f3;
+  --chrome: #202124;
+  --chrome-ink: #f8f9fa;
+  --chrome-line: #55585d;
+  --panel-shadow: 0 2px 6px rgb(20 24 30 / 0.035);
 }
 .retry-filter {
   display: block;
@@ -1723,7 +1728,7 @@ body.focus-mode .workbench {
 .filter-chip { background: var(--surface-selected); color: var(--accent-active); border: 1px solid transparent; border-radius: 18px; padding: 5px 12px; font-size: 13px; overflow-wrap: anywhere; max-width: 100%; text-align: left; }
 .filter-chip:hover { border-color: var(--accent); }
 .applied-filters > button { flex: none; font-size: 13px; }
-.collection-page .utility-button:hover { background: #edf1f6; color: var(--accent-active); }
+.collection-page .utility-button:hover { background: var(--surface-selected); color: var(--accent-active); }
 .continue-button { color: var(--accent); border-color: var(--accent); background: transparent; font-weight: 600; white-space: nowrap; }
 .continue-button:hover { background: var(--surface-selected); }
 .manage .managed-table td { padding: 14px 12px; }
