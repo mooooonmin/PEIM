@@ -772,7 +772,6 @@ async function chooseExam(e) {
   text("selected-exam-label", `${e.round}회 ${e.format.toUpperCase()} 선택됨`);
   renderExams(); uploadPane("source");
   $("upload-workspace").focus({ preventScroll: true });
-  $("upload-workspace").scrollIntoView({ block: "start" });
   void uploadPreview.open(e);
   text("review-title", `${e.round}회 문항 확인`);
   $("review-original").disabled = false;
@@ -786,6 +785,7 @@ async function chooseExam(e) {
   $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
+  $("upload-workspace").scrollIntoView({ block: "start" });
   let result;
   try {
     result = await api(`/attachments/${encodeURIComponent(e.attachment_id)}/extraction`);
