@@ -1,9 +1,18 @@
 // Snapshot keys are immutable: deleting an acknowledged snapshot cannot delete
 // a newer write from another tab. The legacy key remains a compatibility mirror.
-export function createDraftStore(storage) {
+export function createDraftStore(storage, session) {
   const get = () => storage || localStorage;
   const own = new Map();
+  const ignored = new Map();
   const encode = value => JSON.stringify(value);
+  function suppressed(key) {
+    if (!ignored.has(key)) {
+      let names = [];
+      try { names = JSON.parse((session || sessionStorage).getItem(key + ":ignored") || "[]"); } catch {}
+      ignored.set(key, new Set(Array.isArray(names) ? names : []));
+    }
+    return ignored.get(key);
+  }
   function records(key) {
     const result = [];
     for (let i = 0; i < get().length; i++) {
@@ -28,7 +37,7 @@ export function createDraftStore(storage) {
   return {
     records,
     read(key) {
-      const items = records(key).filter(r => !r.archived);
+      const items = records(key).filter(r => !r.archived && !suppressed(key).has(r.key));
       const mirror = get().getItem(key);
       return (items.find(r => r.key === own.get(key)) || items.find(r => encode(r.value) === mirror) || items[0])?.value || null;
     },
@@ -51,6 +60,11 @@ export function createDraftStore(storage) {
     archive(key, value) {
       // Explicit reload is not a server acknowledgement of this draft.
       // Keep a downloadable copy and never discard another tab's snapshot.
+      const hidden = suppressed(key);
+      const legacy = records(key).find(r => r.key === key);
+      if (legacy) snapshot(key, legacy.value);
+      for (const record of records(key)) if (record.key !== key) hidden.add(record.key);
+      try { (session || sessionStorage).setItem(key + ":ignored", encode([...hidden])); } catch {}
       snapshot(key, value, true);
       const previous = own.get(key);
       if (previous) get().removeItem(previous);

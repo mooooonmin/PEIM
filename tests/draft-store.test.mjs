@@ -3,6 +3,32 @@ import assert from "node:assert/strict";
 import { Window } from "happy-dom";
 import { createDraftStore } from "../app/frontend/draft-store.js";
 
+test("server reload suppresses existing copies across refresh only in this tab", () => {
+  const storage = new Window().localStorage, session = new Window().sessionStorage;
+  const otherSession = new Window().sessionStorage, key = "peim:draft:q1";
+  createDraftStore(storage, session).write(key, {body:"first"});
+  const other = createDraftStore(storage, otherSession);
+  other.write(key, {body:"second"});
+  const refreshed = createDraftStore(storage, session);
+  refreshed.archive(key, refreshed.read(key));
+  assert.equal(createDraftStore(storage, session).read(key), null);
+  assert.deepEqual(other.read(key), {body:"second"});
+  assert.ok(refreshed.records(key).some(r => r.value.body === "first"));
+  other.write(key, {body:"new edit"});
+  assert.deepEqual(createDraftStore(storage, session).read(key), {body:"new edit"});
+});
+
+test("server reload preserves but suppresses a legacy-only competing draft", () => {
+  const storage = new Window().localStorage, session = new Window().sessionStorage;
+  const key = "peim:draft:q1", store = createDraftStore(storage, session);
+  store.write(key, {body:"modern"});
+  storage.setItem(key, JSON.stringify({body:"legacy other tab"}));
+  store.archive(key, {body:"modern"});
+  assert.equal(createDraftStore(storage, session).read(key), null);
+  assert.deepEqual(JSON.parse(storage.getItem(key)), {body:"legacy other tab"});
+  assert.ok(store.records(key).some(r => r.value.body === "legacy other tab"));
+});
+
 for (const kind of ["answer", "note"]) test(`${kind}: independent tab snapshots survive competing saves and reload`, () => {
   const storage = new Window().localStorage;
   const a = createDraftStore(storage), b = createDraftStore(storage);
