@@ -79,7 +79,7 @@ export function setupStudyLayout() {
         positions[key] = 0;
         $(key).scrollTop = 0;
       }
-      showSide("reference");
+      showSide(side);
       notes(false);
       writing.classList.remove("question-collapsed");
       $("toggle-question").setAttribute("aria-expanded", "true");

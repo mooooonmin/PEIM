@@ -7,6 +7,15 @@ import {
   setupStudyNavigation,
 } from "../app/frontend/study-layout.js";
 const html = await readFile("app/static/index.html", "utf8");
+test('next question preserves the chosen answer side while showing the new question', () => {
+  const { $, layout, frame } = fixture();
+  layout.question('q1'); frame();
+  $('compare-mine').click(); frame();
+  $('toggle-question').click();
+  layout.question('q2'); frame();
+  assert.equal(document.querySelector('.writing').dataset.compareSide, 'mine');
+  assert.equal($('toggle-question').getAttribute('aria-expanded'), 'true');
+});
 function fixture() {
   const window = new Window();
   globalThis.document = window.document;
