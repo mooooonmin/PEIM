@@ -1,6 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("서버 재불러오기 실패 후 예약된 자동 저장을 유지한다", async t => {
+  const f = await fixture(t);
+  f.state.fail = true; f.edit();
+  await untilSlow(() => !f.$("save-error").hidden);
+  f.state.fail = false;
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).endsWith('/questions/q1')
+    ? Promise.resolve(new f.w.Response(JSON.stringify({detail:'조회 실패'}), {status:503}))
+    : fetch(url, options);
+  f.$("answer").value = '예약된 최신 답안';
+  f.$("answer").dispatchEvent(new f.w.Event('input'));
+  await f.$("load-server").onclick();
+  await untilSlow(() => f.answers.get('q1').body === '예약된 최신 답안');
+});
 test("늦은 서버 답안 응답은 다른 문항의 입력과 임시 보관을 유지한다", async (t) => {
   const f = await fixture(t);
   let release;

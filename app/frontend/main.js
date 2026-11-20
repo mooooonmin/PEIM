@@ -208,7 +208,6 @@ $("load-server").onclick = safe(async () => {
   const value = snapshot();
   const unchanged = () => current === q && sequence === loadSequence && currentView === view &&
     JSON.stringify(snapshot()) === JSON.stringify(value);
-  clearTimeout(timer);
   if (saving) await saving;
   if (saving || !unchanged()) return;
   const updated = await api(`/questions/${encodeURIComponent(q.id)}`);
