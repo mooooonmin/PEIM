@@ -126,7 +126,7 @@ def navigation():
         return {
             "domains": [r["data"] for r in db.execute("SELECT data FROM domains ORDER BY array_position(ARRAY['SE','DB','NW','SEC','CA','MGT','NEW','DS'],code)")],
             "topics": db.execute("SELECT t.id,t.title,t.domain,count(q.question_id) AS count FROM topics t LEFT JOIN question_topics q ON q.topic_id=t.id GROUP BY t.id ORDER BY t.title").fetchall(),
-            "exams": db.execute("SELECT e.id,e.round,e.status,count(q.id) AS count FROM exams e LEFT JOIN questions q ON q.exam_id=e.id GROUP BY e.id ORDER BY e.round DESC").fetchall(),
+            "exams": db.execute("SELECT e.id,e.round,e.status,count(q.id) AS count, count(q.id) FILTER (WHERE a.status='completed') AS completed FROM exams e LEFT JOIN questions q ON q.exam_id=e.id LEFT JOIN user_answers a ON a.question_id=q.id AND a.profile_id='local' GROUP BY e.id ORDER BY e.round DESC").fetchall(),
         }
 
 
@@ -143,9 +143,14 @@ def questions(topic: str | None = None, exam: str | None = None, search: str = "
             LEFT JOIN user_answers a ON a.question_id=q.id AND a.profile_id='local'
             LEFT JOIN learning_notes n ON n.question_id=q.id AND n.profile_id='local'
             WHERE (%s::text IS NULL OR EXISTS(SELECT 1 FROM question_topics t WHERE t.question_id=q.id AND t.topic_id=%s))
-            AND (%s::text IS NULL OR q.exam_id=%s) AND (%s='' OR q.text ILIKE %s)
+            AND (%s::text IS NULL OR q.exam_id=%s) AND (%s='' OR q.text ILIKE %s
+                OR EXISTS(SELECT 1 FROM question_topics x JOIN topics t ON t.id=x.topic_id
+                    WHERE x.question_id=q.id AND t.title ILIKE %s)
+                OR EXISTS(SELECT 1 FROM question_topics x JOIN topic_keywords tk ON tk.topic_id=x.topic_id
+                    JOIN keywords k ON k.id=tk.keyword_id WHERE x.question_id=q.id
+                    AND concat_ws(' ', k.data->>'term', k.data->>'term_en') ILIKE %s))
             ORDER BY e.round DESC,q.session,q.number""",
-            (topic, topic, exam, exam, search, "%" + search + "%")).fetchall()
+            (topic, topic, exam, exam, search, *(["%" + search + "%"] * 3))).fetchall()
 
 
 @app.get("/api/retry-questions")

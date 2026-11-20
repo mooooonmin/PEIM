@@ -1,5 +1,6 @@
 import { setupIcons, setIconLabel } from "./icons.js";
 import { setupUploadDraft } from "./upload-draft.js";
+import { readStudySession, rememberStudySession } from "./study-session.js";
 import { createDraftStore, renderDraftCopies } from "./draft-store.js";
 import { setupUploadPreview } from "./upload-preview.js";
 import { setupRetryList } from "./retry-list.js";
@@ -21,6 +22,7 @@ let nav,
   current = null,
   pendingStudyQuestion = null,
   rows = [];
+let retryQueue = false;
 let timer,
   saving = null,
   dirty = false,
@@ -140,7 +142,10 @@ async function save() {
         `/questions/${encodeURIComponent(q.id)}/answer`,
         { method: "PUT", body: JSON.stringify(value) },
       );
+      const wasCompleted = q.answer.status === 'completed';
       q.answer = result;
+      const exam = nav.exams.find(e => e.round === q.round);
+      if (exam) exam.completed = Math.max(0, (Number(exam.completed) || 0) + Number(result.status === 'completed') - Number(wasCompleted));
       dirty =
         $("answer").value !== value.body ||
         ($("completed").checked ? "completed" : "draft") !== value.status;
@@ -156,6 +161,7 @@ async function save() {
       const row = rows.find((r) => r.id === q.id);
       if (row) row.answer_status = result.status;
       renderQuestionList();
+      renderNavigation();
       return true;
     } catch (error) {
       conflict = error.status === 409;
@@ -240,7 +246,7 @@ $("load-server").onclick = safe(async () => {
 
 function renderNavigation() {
   $("navigation").replaceChildren();
-  const query = $("search").value.trim().toLowerCase();
+  const query = ''; // Keep navigation available while searching questions.
   if (mode === "exam") {
     for (const exam of nav.exams.filter(
       (e) => !query || String(e.round).includes(query),
@@ -250,7 +256,7 @@ function renderNavigation() {
         safe(() => chooseFilter("", exam.id)),
         "topic-button" + (exam.id === selectedExam ? " active" : ""),
       );
-      b.append(element("span", `${exam.count}문항`, "count"));
+      b.append(element("span", `완료 ${exam.completed || 0}/${exam.count}`, "count"));
       $("navigation").append(b);
     }
   } else {
@@ -290,6 +296,8 @@ function updateURL() {
   params.delete("exam");
   params.delete("q");
   params.delete("search");
+  params.delete("queue");
+  if (retryQueue) params.set('queue', 'retry');
   if (resultQuery) params.set("search", resultQuery);
   params.set("mode", mode);
   if (currentView === "manage") {
@@ -306,6 +314,7 @@ function updateURL() {
   if (selectedExam) params.set("exam", selectedExam);
   if (current || pendingStudyQuestion) params.set("q", current?.id || pendingStudyQuestion);
   history.replaceState(null, "", "?" + params);
+  if (currentView === 'study' && current) rememberStudySession(params, retryQueue ? rows.map(q => q.id) : []);
 }
 async function chooseFilter(topic, exam) {
   clearTimeout(searchTimer);
@@ -319,6 +328,8 @@ async function chooseFilter(topic, exam) {
     return;
   selectedTopic = topic;
   selectedExam = exam;
+  retryQueue = false;
+  $("back-to-retries").hidden = true;
   resultQuery = "";
   $("search").value = "";
   rows = nextRows;
@@ -336,7 +347,7 @@ function renderQuestionList() {
   $("question-list").replaceChildren();
   text(
     "related-title",
-    resultQuery ? "검색 결과" : selectedTopic ? "연결 기출" : "기출문항",
+    retryQueue ? "다시 풀기" : resultQuery ? "검색 결과" : selectedTopic ? "연결 기출" : "기출문항",
   );
   $("related").setAttribute(
     "aria-label",
@@ -351,7 +362,8 @@ function renderQuestionList() {
   const visibleRows = $("retry-only").checked
     ? rows.filter((q) => q.retry_requested)
     : rows;
-  studyNavigation.update(visibleRows, current?.id);
+  studyNavigation.update(visibleRows, current?.id, retryQueue ? '다시 풀기' : resultQuery ? '검색' : '');
+  text('study-progress', `완료 ${visibleRows.filter(q => q.answer_status === 'completed').length} / ${visibleRows.length}`);
   if (!visibleRows.length) {
     $("question-list").append(
       element(
@@ -651,11 +663,13 @@ $("search").oninput = () => {
               ? { search: query }
               : selectedTopic
                 ? { topic: selectedTopic }
-                : { exam: selectedExam },
+                : selectedExam ? { exam: selectedExam } : {},
           ),
       );
       if (search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave()) return;
       rows = found;
+      retryQueue = false;
+      $("back-to-retries").hidden = true;
       resultQuery = query;
       renderQuestionList();
       updateURL();
@@ -690,20 +704,15 @@ async function showView(manage, { answerAlreadySelected = false } = {}) {
 const retryLibrary = setupRetryList({
   api,
   openStudy: safe(() => showView(false)),
-  openQuestion: async (qid) => {
+  openQuestion: async (qid, queue) => {
     if (!(await selectQuestion(qid))) return false;
     if (currentView !== "retry") return false;
-    const topic = current.topics[0]?.id || "";
-    const exam = topic ? "" : current.exam_id;
-    const selected = current;
-    selectedTopic = topic;
-    selectedExam = exam;
-    mode = topic ? "topic" : "exam";
-    $("by-topic").setAttribute("aria-pressed", String(mode === "topic"));
-    $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
+    retryQueue = true;
+    selectedTopic = '';
+    selectedExam = '';
     resultQuery = "";
     $("search").value = "";
-    rows = [];
+    rows = queue.map(q => ({...q, retry_requested:true}));
     $("retry-only").checked = false;
     renderNavigation();
     renderQuestionList();
@@ -711,17 +720,6 @@ const retryLibrary = setupRetryList({
     $("back-to-retries").hidden = false;
     $("study").focus({ preventScroll: true });
     document.querySelector(".writing").scrollIntoView({ block: "start" });
-    const sequence = loadSequence;
-    try {
-      const nextRows = await api(
-        "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
-      );
-      if (current !== selected || sequence !== loadSequence) return true;
-      rows = nextRows;
-      renderQuestionList();
-    } catch (error) {
-      if (current === selected && sequence === loadSequence) report(error);
-    }
     return true;
   },
 });
@@ -1007,31 +1005,48 @@ $("question-form").onsubmit = async (e) => {
 async function start() {
   nav = await api("/navigation");
   populateTopics();
-  const params = new URLSearchParams(location.search);
+  const stored = readStudySession();
+  const restored = !location.search && stored;
+  const params = new URLSearchParams(restored ? stored.query : location.search);
+  retryQueue = params.get('queue') === 'retry';
   mode = params.get("mode") === "exam" ? "exam" : "topic";
   selectedTopic = params.get("topic") || "";
   selectedExam = params.get("exam") || "";
+  if (restored) {
+    if (!nav.topics.some(t => t.id === selectedTopic)) selectedTopic = '';
+    if (!nav.exams.some(e => e.id === selectedExam)) selectedExam = '';
+  }
   resultQuery = params.get("search") || "";
   $("search").value = resultQuery;
   $("by-topic").setAttribute("aria-pressed", String(mode === "topic"));
   $("by-exam").setAttribute("aria-pressed", String(mode === "exam"));
-  if (!selectedTopic && !selectedExam)
+  if (!selectedTopic && !selectedExam && !retryQueue)
     selectedTopic =
       nav.topics.find((t) => t.title.startsWith("정규화"))?.id ||
       nav.topics[0]?.id ||
       "";
   renderNavigation();
-  rows = await api(
+  if (retryQueue) {
+    const previous = new URLSearchParams(stored?.query || '');
+    const sameContext = ['mode','topic','exam','search','q','queue'].every(key => previous.get(key) === params.get(key));
+    const ids = sameContext ? stored.retryIds : [];
+    if (ids.length) {
+      const available = new Map((await api('/questions')).map(q => [q.id,q]));
+      rows = ids.map(id => available.get(id)).filter(Boolean);
+    } else rows = await api('/retry-questions');
+    $('back-to-retries').hidden = false;
+  } else rows = await api(
     "/questions?" +
       new URLSearchParams(
         resultQuery
           ? { search: resultQuery }
           : selectedTopic
             ? { topic: selectedTopic }
-            : { exam: selectedExam },
+            : selectedExam ? { exam: selectedExam } : {},
       ),
   );
-  const qid = params.get("q") || rows[0]?.id;
+  let qid = params.get("q") || rows[0]?.id;
+  if ((restored || retryQueue) && !rows.some(q => q.id === qid)) qid = rows[0]?.id;
   if (currentView === "study") {
     if (qid) await selectQuestion(qid);
   } else {
@@ -1051,6 +1066,7 @@ const openQuestionReview = setupQuestionReview({
     nav = await api("/navigation");
     populateTopics();
     renderNavigation();
+    const queueIds = retryQueue ? rows.map(q => q.id) : null;
     rows = await api(
       "/questions?" +
         new URLSearchParams(
@@ -1058,9 +1074,13 @@ const openQuestionReview = setupQuestionReview({
             ? { search: resultQuery }
             : selectedTopic
               ? { topic: selectedTopic }
-              : { exam: selectedExam },
+              : selectedExam ? { exam: selectedExam } : {},
         ),
     );
+    if (queueIds) {
+      const available = new Map(rows.map(q => [q.id, q]));
+      rows = queueIds.map(id => available.get(id)).filter(Boolean);
+    }
     if (current?.id === qid) await selectQuestion(qid);
     else renderQuestionList();
     await management.refreshQuestions({ throwOnError: true });

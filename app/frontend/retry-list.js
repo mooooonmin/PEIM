@@ -66,7 +66,7 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
         list.querySelectorAll('.continue-button').forEach(b => { b.disabled = true; });
         $("retry-result").textContent = "문항을 여는 중입니다.";
         try {
-          const opened = await openQuestion(q.id);
+          const opened = await openQuestion(q.id, visible.map(row => ({...row})));
           $("retry-result").textContent = opened
             ? ""
             : "현재 답안의 저장 상태를 확인한 뒤 다시 선택해 주세요.";

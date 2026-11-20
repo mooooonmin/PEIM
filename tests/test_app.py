@@ -80,6 +80,26 @@ class AppTests(unittest.TestCase):
         titles = [t['title'] for t in self.client.get(f'/api/questions/{self.qid}').json()['topics']]
         self.assertEqual(summary['topics'], ', '.join(titles))
 
+    def test_search_matches_linked_topics_and_keywords_without_duplicates(self):
+        with connect() as db:
+            domain = db.execute('SELECT code FROM domains LIMIT 1').fetchone()['code']
+            db.execute("INSERT INTO topics VALUES ('search-test-topic',%s,'검색전용주제987','{}')", (domain,))
+            db.execute("INSERT INTO question_topics VALUES (%s,'search-test-topic')", (self.qid,))
+            db.execute('INSERT INTO keywords VALUES (\'search-test-keyword\',\'{"term":"검색전용키워드987","term_en":"UniqueKeyword987"}\')')
+            db.execute("INSERT INTO topic_keywords VALUES ('search-test-topic','search-test-keyword')")
+        try:
+            for term in ('검색전용주제987', '검색전용키워드987', 'UniqueKeyword987'):
+                result = self.client.get('/api/questions', params={'search':term})
+                self.assertEqual(result.status_code, 200)
+                self.assertEqual([q['id'] for q in result.json()], [self.qid])
+            self.assertEqual(self.client.get('/api/questions',params={'search':'UniqueKeyword987','exam':'exam-140'}).json(), [])
+        finally:
+            with connect() as db:
+                db.execute("DELETE FROM topic_keywords WHERE topic_id='search-test-topic'")
+                db.execute("DELETE FROM question_topics WHERE topic_id='search-test-topic'")
+                db.execute("DELETE FROM topics WHERE id='search-test-topic'")
+                db.execute("DELETE FROM keywords WHERE id='search-test-keyword'")
+
     def test_save_history_conflict_and_reimport(self):
         route = f"/api/questions/{self.qid}/answer"
         payload = {"body": "내 답안", "revision": 0, "status": "draft"}
