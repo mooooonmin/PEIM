@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=collection-pdf-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=collection-pdf-1" />
-    <script type="module" src="/assets/main.js?v=collection-pdf-1"></script>
+    <link rel="stylesheet" href="/style.css?v=collection-toolbar-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=collection-toolbar-1" />
+    <script type="module" src="/assets/main.js?v=collection-toolbar-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -269,19 +269,21 @@
         <button id="refresh-retry" class="utility-button">새로고침</button>
       </div>
       <div id="retry-tools" class="collection-tools">
-        <label class="collection-search" for="retry-search">문제·메모 검색
-          <input id="retry-search" type="search" placeholder="문제, 주제, 보완할 내용 찾기" />
-        </label>
-        <details class="collection-filters" open>
-          <summary>필터·정렬</summary>
-          <div class="filter-fields">
-            <label>주제<input id="retry-topic" type="search" placeholder="주제 이름" /></label>
-            <label>회차<select id="retry-round"><option value="">전체 회차</option></select></label>
-            <label>답안 상태<select id="retry-status"><option value="">전체 상태</option><option value="empty">미작성</option><option value="draft">작성 중</option><option value="completed">작성 완료</option></select></label>
-            <label>정렬<select id="retry-sort"><option value="recent">최근 복습 저장순</option><option value="oldest">오래된 복습 저장순</option><option value="round">최신 회차순</option></select></label>
-            <button id="retry-reset" class="utility-button">필터 초기화</button>
-          </div>
-        </details>
+        <div class="retry-toolbar">
+          <label class="collection-search search-control"><span class="sr-only">문제·메모 검색</span>
+            <input id="retry-search" type="search" placeholder="문제·메모 검색" />
+          </label>
+          <details class="collection-filters" open>
+            <summary>필터·정렬</summary>
+            <div class="filter-fields">
+              <label><span class="sr-only">주제</span><input id="retry-topic" type="search" placeholder="주제 검색" /></label>
+              <label><span class="sr-only">회차</span><select id="retry-round"><option value="">전체 회차</option></select></label>
+              <label><span class="sr-only">답안 상태</span><select id="retry-status"><option value="">답안 상태</option><option value="empty">미작성</option><option value="draft">작성 중</option><option value="completed">작성 완료</option></select></label>
+              <label><span class="sr-only">정렬</span><select id="retry-sort"><option value="recent">최근 복습 저장순</option><option value="oldest">오래된 복습 저장순</option><option value="round">최신 회차순</option></select></label>
+            </div>
+          </details>
+        </div>
+        <div class="applied-filters"><div id="retry-chips" class="filter-chips" role="group" aria-label="적용된 다시 풀기 조건"></div><button id="retry-reset" class="utility-button" hidden>조건 지우기</button></div>
       </div>
       <div class="collection-results"><p id="retry-count" role="status"></p><span id="retry-hint" class="quiet">문항을 열어도 다시 풀기 표시는 유지됩니다.</span></div>
       <p id="retry-result" role="status"></p>
@@ -292,26 +294,27 @@
         <div>
           <h1>문제 관리</h1>
           <p class="muted">
-            기존 문항을 검수하거나 PDF에서 새 문항을 등록합니다.
+            기출문항을 찾고 원문을 확인하세요.
           </p>
         </div>
+        <button id="manage-add-pdf" class="primary">＋ 시험지 등록</button>
       </div>
       <nav class="management-tabs" aria-label="문제 관리 메뉴">
-        <button id="manage-existing" aria-pressed="true">기존 문항 검수</button>
+        <button id="manage-existing" aria-pressed="true">문항 목록</button>
         <button id="manage-upload" aria-pressed="false">
-          PDF·새 문항 등록
+          시험지·문항 등록
         </button>
       </nav>
       <section id="managed-questions" aria-label="기존 문항 검수">
         <div class="management-filters collection-tools">
-          <label class="management-search">문제·주제 검색<input id="managed-search" type="search" placeholder="문제 내용이나 연결 주제 찾기" /></label>
+          <label class="management-search search-control"><span class="sr-only">문제·주제 검색</span><input id="managed-search" type="search" placeholder="문제·주제 검색" /></label>
           <button id="managed-filter-toggle" class="mobile-filter-toggle" aria-expanded="false" aria-controls="managed-filter-controls">필터 보기</button>
           <div id="managed-filter-controls" class="managed-filter-controls" data-expanded="false">
-          <label>회차<select id="managed-exam"><option value="">전체 회차</option></select></label>
-          <label>원문 확인 상태<select id="managed-status"><option value="">전체 상태</option><option value="unverified">미확인</option><option value="verified">확인 완료</option><option value="needs_review">재검토 필요</option></select></label>
-          <button id="managed-reset" class="utility-button">필터 초기화</button>
+          <label><span class="sr-only">회차</span><select id="managed-exam"><option value="">전체 회차</option></select></label>
+          <label><span class="sr-only">원문 확인 상태</span><select id="managed-status"><option value="">확인 상태</option><option value="unverified">미확인</option><option value="verified">확인 완료</option><option value="needs_review">재검토 필요</option></select></label>
           </div>
         </div>
+        <div class="applied-filters"><div id="managed-chips" class="filter-chips" role="group" aria-label="적용된 문항 조건"></div><button id="managed-reset" class="utility-button" hidden>조건 지우기</button></div>
         <div class="collection-results">
           <div><p id="managed-count" role="status"></p><span id="managed-range" class="quiet"></span></div>
           <div class="actions">

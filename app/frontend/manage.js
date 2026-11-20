@@ -1,3 +1,4 @@
+import { renderFilterChips } from "./filter-chips.js";
 const $ = (id) => document.getElementById(id);
 const statuses = {
   unverified: "미확인",
@@ -26,6 +27,12 @@ export function setupManagement({ api, openReview, loadUploads }) {
       : "questions";
   const pageSize = 50;
   function render() {
+    renderFilterChips($("managed-chips"), [
+      { control: $("managed-search"), label: "검색" },
+      { control: $("managed-exam"), label: "회차" },
+      { control: $("managed-status"), label: "확인 상태" },
+    ], () => { page = 0; render(); });
+    $("managed-reset").hidden = !$("managed-chips").childElementCount;
     const query = $("managed-search").value.trim().toLowerCase();
     const exam = $("managed-exam").value,
       status = $("managed-status").value;
@@ -97,7 +104,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
       const badge = node("span", statuses[q.verification_status] || "미확인");
       badge.className = `status-badge status-${Object.hasOwn(statuses, q.verification_status) ? q.verification_status : "unverified"}`;
       status.append(badge); row.append(identity, content, status);
-      const button = node("button", "검수·수정");
+      const button = node("button", "수정 →");
       button.type = "button";
       button.className = "utility-button";
       button.setAttribute(
@@ -127,9 +134,14 @@ export function setupManagement({ api, openReview, loadUploads }) {
       questions = data;
       const selected = initialExam || $("managed-exam").value;
       initialExam = "";
-      $("managed-exam").replaceChildren(new Option("전체 회차", ""));
-      for (const exam of nav.exams)
-        $("managed-exam").append(new Option(`${exam.round}회`, exam.id));
+      const all = node("option", "전체 회차");
+      all.value = "";
+      $("managed-exam").replaceChildren(all);
+      for (const exam of nav.exams) {
+        const option = node("option", `${exam.round}회`);
+        option.value = exam.id;
+        $("managed-exam").append(option);
+      }
       if (nav.exams.some((e) => e.id === selected))
         $("managed-exam").value = selected;
       render();
@@ -164,6 +176,11 @@ export function setupManagement({ api, openReview, loadUploads }) {
   }
   $("manage-existing").onclick = () => selectSection("questions");
   $("manage-upload").onclick = () => selectSection("upload");
+  $("manage-add-pdf").onclick = async () => {
+    await selectSection("upload");
+    $("add-pdf").open = true;
+    $("round").focus();
+  };
   $("managed-filter-toggle").onclick = () => {
     const expanded = $("managed-filter-toggle").getAttribute("aria-expanded") !== "true";
     $("managed-filter-toggle").setAttribute("aria-expanded", String(expanded));

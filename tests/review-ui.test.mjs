@@ -274,6 +274,20 @@ test("management passes every filtered ID across pagination in displayed order",
   f.$("managed-reset").onclick();
   assert.equal(f.$("managed-status").value, "");
   assert.equal(f.$("managed-list").querySelectorAll("tbody tr").length, 50);
+  f.$("managed-exam").value = "exam-139";
+  f.$("managed-exam").dispatchEvent(new f.window.Event("change"));
+  f.$("managed-status").value = "unverified";
+  f.$("managed-status").dispatchEvent(new f.window.Event("change"));
+  f.$("managed-next-top").click();
+  f.$("managed-chips").querySelector("button").click();
+  assert.equal(f.$("managed-exam").value, "");
+  assert.equal(f.$("managed-status").value, "unverified");
+  assert.match(f.$("managed-page").textContent, /^1 /);
+  assert.equal(new URL(location.href).searchParams.has("manageExam"), false);
+  await f.$("manage-add-pdf").onclick();
+  assert.equal(f.$("managed-upload").hidden, false);
+  assert.equal(f.$("add-pdf").open, true);
+  assert.equal(document.activeElement, f.$("round"));
 });
 
 test("management refresh failure propagates to the save-and-next caller only when requested", async () => {

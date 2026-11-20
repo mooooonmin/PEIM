@@ -4,6 +4,22 @@ import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
 import { setupRetryList } from "../app/frontend/retry-list.js";
 const html = await readFile("app/static/index.html", "utf8");
+test("removing a retry condition preserves other filters and returns keyboard focus", async () => {
+  const f = fixture();
+  await f.library.load();
+  f.$("retry-search").value = "보안";
+  f.$("retry-search").oninput();
+  f.$("retry-status").value = "draft";
+  f.$("retry-status").onchange();
+  f.$("retry-chips").querySelector("button").click();
+  assert.equal(f.$("retry-search").value, "");
+  assert.equal(f.$("retry-status").value, "draft");
+  assert.equal(f.$("retry-items").querySelectorAll("article").length, 1);
+  assert.equal(document.activeElement, f.$("retry-chips").querySelector("button"));
+  f.$("retry-chips").querySelector("button").click();
+  assert.equal(f.$("retry-items").querySelectorAll("article").length, 2);
+  assert.equal(document.activeElement, f.$("retry-search"));
+});
 function fixture() {
   const window = new Window();
   globalThis.document = window.document;

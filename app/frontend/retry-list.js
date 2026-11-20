@@ -1,3 +1,4 @@
+import { renderFilterChips } from "./filter-chips.js";
 const $ = (id) => document.getElementById(id);
 const el = (tag, text, className) => {
   const node = document.createElement(tag);
@@ -7,11 +8,23 @@ const el = (tag, text, className) => {
 };
 
 export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
+  const desktop = document.defaultView.matchMedia("(min-width: 701px)");
+  const filters = document.querySelector("#retry-tools .collection-filters");
+  desktop.addEventListener("change", () => {
+    if (desktop.matches) filters.open = true;
+  });
   let rows = [],
     loading = false,
     opening = false,
     hasLoaded = false;
   function render() {
+    renderFilterChips($("retry-chips"), [
+      { control: $("retry-search"), label: "검색" },
+      { control: $("retry-topic"), label: "주제" },
+      { control: $("retry-round"), label: "회차" },
+      { control: $("retry-status"), label: "답안 상태" },
+    ], render);
+    $("retry-reset").hidden = !$("retry-chips").childElementCount && $("retry-sort").value === "recent";
     const query = $("retry-search").value.trim().toLowerCase();
     const round = $("retry-round").value, status = $("retry-status").value;
     const topic = $("retry-topic").value.trim().toLowerCase();
@@ -44,7 +57,7 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
       const header = el("div", "", "retry-item-head");
       const meta = `${q.round}회 / ${q.session}교시 / ${q.number}번`;
       const title = el("h2", q.text, "retry-title");
-      const button = el("button", "이어서 풀기", "primary");
+      const button = el("button", "이어서 풀기 →", "continue-button");
       button.disabled = loading || opening;
       button.setAttribute("aria-label", `${meta} 이어서 풀기`);
       button.onclick = async () => {
@@ -66,7 +79,8 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
         }
       };
       const identity = el("div", "", "retry-identity");
-      identity.append(el("p", `${meta} · ${q.topics || "연결 주제 없음"}`, "quiet"), title);
+      identity.append(el("p", meta, "retry-meta"), title,
+        el("p", q.topics || "연결 주제 없음", "quiet"));
       header.append(identity, button);
       item.append(header, el("span", ({empty:"미작성", draft:"작성 중", completed:"작성 완료"}[q.answer_status] || "미작성"), "status-badge"));
       if (q.text.length > 120) {
