@@ -761,9 +761,15 @@ async function chooseExam(e) {
   $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
-  const result = await api(
-    `/attachments/${encodeURIComponent(e.attachment_id)}/extraction`,
-  );
+  let result;
+  try {
+    result = await api(`/attachments/${encodeURIComponent(e.attachment_id)}/extraction`);
+  } catch (error) {
+    if (sequence !== reviewSequence) return;
+    text("extraction-state", "추출 정보를 불러오지 못했습니다. PDF 텍스트 추출 버튼으로 다시 시도하거나 시험지를 다시 선택해 주세요.");
+    $("extract").disabled = e.format !== "pdf";
+    throw error;
+  }
   if (sequence !== reviewSequence) return;
   extraction = result;
   displayExtraction();
@@ -822,6 +828,7 @@ $("extract").onclick = safe(async () => {
     if (sequence === reviewSequence) {
       extraction = result;
       displayExtraction();
+      $("review-fields").disabled = false;
     }
   } finally {
     if (sequence === reviewSequence) $("extract").disabled = false;

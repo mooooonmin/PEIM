@@ -1,6 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("PDF 조회 실패 후 이전 후보 없이 추출 재시도 경로를 제공한다", async t => {
+  const f = await fixture(t);
+  await f.$("manage-tab").onclick(); await f.$("manage-upload").onclick();
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).endsWith('/extraction')
+    ? Promise.resolve(new f.w.Response(JSON.stringify({detail:'조회 실패'}), {status:503}))
+    : fetch(url, options);
+  f.$("exam-list").querySelector("button").click();
+  await until(() => f.$("extraction-state").textContent.includes('다시 시도'));
+  assert.equal(f.$("extract").disabled, false);
+  assert.equal(f.$("review-fields").disabled, true);
+  assert.equal(f.$("candidates").options.length, 0);
+  f.w.fetch = fetch;
+  f.$("exam-list").querySelector("button").click();
+  await until(() => !f.$("review-fields").disabled);
+});
 test("다시 풀기 연결 목록 조회 실패에도 충돌 복구 화면을 표시한다", async t => {
   const f = await fixture(t, {storage:{"peim:draft:q2":{body:"local Q2",status:"draft",revision:0}}});
   await f.$("retry-tab").onclick();
