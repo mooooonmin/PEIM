@@ -1,4 +1,4 @@
-/* Two-column study workspace. Existing management screens keep their own styles. */
+/* Two-column study mechanics; workspace-theme.css supplies the shared visual theme. */
 button.icon-control,
 #study button.icon-control {
   width: 40px;
@@ -449,7 +449,7 @@ body.focus-mode #study.study-workspace {
   }
 }
 
-/* Reserve filled blue for actionable review saving; secondary tools stay quiet. */
+/* Reserve the filled primary treatment for actionable review saving. */
 #study #save-learning {
   min-width: 144px;
   padding: 10px 24px;
