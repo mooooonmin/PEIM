@@ -1,5 +1,5 @@
 import { setupRetryList } from "./retry-list.js";
-import { setupStudyLayout } from "./study-layout.js";
+import { setupStudyLayout, setupStudyNavigation } from "./study-layout.js";
 import { setupManagement } from "./manage.js";
 import { setupQuestionReview } from "./review.js";
 import { setupLearning } from "./learning.js";
@@ -328,6 +328,7 @@ function renderQuestionList() {
   const visibleRows = $("retry-only").checked
     ? rows.filter((q) => q.retry_requested)
     : rows;
+  studyNavigation.update(visibleRows, current?.id);
   if (!visibleRows.length) {
     $("question-list").append(
       element(
@@ -359,7 +360,12 @@ function renderQuestionList() {
     const cell = element("td");
     const b = button(
       `${q.round}회`,
-      safe(() => selectQuestion(q.id)),
+      safe(async () => {
+        if (await selectQuestion(q.id)) {
+          studyLayout.drawer(false);
+          $("toggle-question-list").focus();
+        }
+      }),
     );
     b.setAttribute(
       "aria-label",
@@ -424,14 +430,12 @@ async function selectQuestion(qid) {
 }
 function displayQuestion() {
   studyLayout.question(current?.id);
-  $("open-writing-guide").disabled = !current;
   void openLearning(current);
   for (const id of [
     "answer",
     "completed",
     "history",
     "original",
-    "compare",
   ])
     $(id).disabled = !current;
   $("save-error").hidden = true;
@@ -516,12 +520,7 @@ const openLearning = setupLearning({
   },
 });
 const studyLayout = setupStudyLayout();
-$("open-writing-guide").onclick = () => {
-  openLearning.showGuide();
-  studyLayout.mode("compare");
-  $("compare-reference").click();
-  $("material-guide").focus();
-};
+const studyNavigation = setupStudyNavigation({ select: safe(selectQuestion) });
 $("retry-only").onchange = renderQuestionList;
 $("original").onclick = () => {
   if (current.sources.length === 1) {
@@ -577,11 +576,6 @@ $("focus").onclick = () => {
   const on = document.body.classList.toggle("focus-mode");
   $("focus").setAttribute("aria-pressed", String(on));
   text("focus", on ? "집중 모드 종료" : "집중 모드");
-};
-$("toggle-related").onclick = () => {
-  const hidden = document.body.classList.toggle("related-collapsed");
-  $("toggle-related").setAttribute("aria-expanded", String(!hidden));
-  text("toggle-related", hidden ? "펼치기" : "접기");
 };
 for (const [id, value] of [
   ["by-topic", "topic"],

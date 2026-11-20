@@ -2,77 +2,119 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
-import { setupStudyLayout } from "../app/frontend/study-layout.js";
-
-test("study modes preserve the live editor, notes and selection; a new question resets the workspace", async () => {
+import {
+  setupStudyLayout,
+  setupStudyNavigation,
+} from "../app/frontend/study-layout.js";
+const html = await readFile("app/static/index.html", "utf8");
+function fixture() {
   const window = new Window();
   globalThis.document = window.document;
-  document.body.innerHTML = await readFile("app/static/index.html", "utf8");
-  const layout = setupStudyLayout();
-  layout.question("q1");
-  const answer = document.getElementById("answer");
-  answer.value = "기존 답안과 작성 중 내용";
-  answer.setSelectionRange(3, 7);
-  document.getElementById("learning-note").value = "보완 메모";
-  for (const mode of ["compare", "review", "write"]) {
-    document.querySelector(`[data-study-mode="${mode}"]`).click();
-    assert.equal(document.querySelector(".writing").dataset.mode, mode);
-    assert.equal(
-      document.querySelectorAll('[data-study-mode][aria-pressed="true"]')
-        .length,
-      1,
-    );
-    assert.equal(document.getElementById("answer"), answer);
-    assert.equal(answer.value, "기존 답안과 작성 중 내용");
-    assert.equal(answer.selectionStart, 3);
-    assert.equal(answer.selectionEnd, 7);
-    assert.equal(document.getElementById("learning-note").value, "보완 메모");
-  }
-  document.getElementById("toggle-question").click();
-  layout.mode("review");
-  layout.question("q1");
-  assert.equal(document.querySelector(".writing").dataset.mode, "review");
-  layout.question("q2");
-  assert.equal(document.querySelector(".writing").dataset.mode, "write");
-  assert.equal(
-    document.getElementById("toggle-question").getAttribute("aria-expanded"),
-    "true",
-  );
-});
-
-test("mobile comparison restores independent reading positions and shares the review form", async () => {
-  const window = new Window();
-  globalThis.document = window.document;
-  document.body.innerHTML = await readFile("app/static/index.html", "utf8");
+  document.body.innerHTML = html;
   let pending;
-  window.requestAnimationFrame = (fn) => { pending = fn; return 1; };
-  const writing = document.querySelector('.writing');
-  const answer = document.getElementById('answer');
-  const reference = document.getElementById('learning-reference');
-  const note = document.getElementById('learning-note');
-  answer.getClientRects = () => writing.dataset.compareSide === 'mine' ? [{}] : [];
-  reference.getClientRects = () => writing.dataset.compareSide === 'reference' ? [{}] : [];
-  const layout = setupStudyLayout();
-  layout.question('q1'); pending(); layout.mode('compare'); pending();
-  reference.scrollTop = 350;
-  document.getElementById('compare-mine').click();
-  reference.scrollTop = 0; pending();
-  assert.equal(reference.scrollTop, 350);
-  answer.scrollTop = 220;
-  document.getElementById('compare-reference').click();
-  answer.scrollTop = 0; pending();
-  assert.equal(answer.scrollTop, 220);
-  assert.equal(reference.scrollTop, 350);
-  document.getElementById('toggle-compare-note').click(); pending();
-  assert.equal(writing.dataset.compareNotes, 'true');
-  note.value = '비교하며 보완한 내용';
-  layout.mode('review'); pending();
-  assert.equal(document.getElementById('learning-note'), note);
-  assert.equal(note.value, '비교하며 보완한 내용');
-  assert.equal(document.querySelectorAll('#learning-form').length, 1);
-  layout.question('q2'); pending();
-  assert.equal(reference.scrollTop, 0);
+  window.requestAnimationFrame = (fn) => {
+    pending = fn;
+    return 1;
+  };
+  const $ = (id) => document.getElementById(id),
+    layout = setupStudyLayout();
+  return { $, layout, frame: () => pending() };
+}
+test("two fixed panes and collapsible navigation/memo preserve live editor and notes", () => {
+  const { $, layout, frame } = fixture();
+  layout.question("q1");
+  frame();
+  const answer = $("answer");
+  answer.value = "기존 답안";
+  answer.setSelectionRange(1, 3);
+  $("learning-note").value = "미저장 메모";
+  assert.equal(Boolean(answer.closest(".answer-pane")), true);
+  assert.equal(Boolean($("question-text").closest(".study-reading")), true);
+  assert.equal(Boolean($("learning-panel").closest(".study-reading")), true);
+  assert.equal(Boolean($("learning-form").closest(".study-columns")), false);
+  $("toggle-question-list").click();
+  assert.equal($("question-drawer").hidden, false);
+  $("toggle-question-list").click();
+  assert.equal($("question-drawer").hidden, true);
+  $("toggle-compare-note").click();
+  frame();
+  assert.equal($("learning-form").hidden, false);
+  $("toggle-compare-note").click();
+  frame();
+  assert.equal($("learning-form").hidden, true);
+  assert.equal(answer.value, "기존 답안");
+  assert.equal(answer.selectionStart, 1);
+  assert.equal($("learning-note").value, "미저장 메모");
+  assert.equal(document.querySelectorAll("#answer").length, 1);
+  assert.equal(document.querySelectorAll("#learning-form").length, 1);
+});
+test("mobile switches preserve scroll and question change resets positions and disclosures", () => {
+  const { $, layout, frame } = fixture(),
+    writing = document.querySelector(".writing");
+  const answer = $("answer"),
+    guide = $("writing-guide");
+  answer.getClientRects = () =>
+    writing.dataset.compareSide === "mine" ? [{}] : [];
+  guide.getClientRects = () =>
+    writing.dataset.compareSide === "reference" ? [{}] : [];
+  layout.question("q1");
+  frame();
+  guide.scrollTop = 300;
+  $("compare-mine").click();
+  guide.scrollTop = 0;
+  frame();
+  assert.equal(guide.scrollTop, 300);
+  answer.scrollTop = 150;
+  $("compare-reference").click();
+  answer.scrollTop = 0;
+  frame();
+  assert.equal(answer.scrollTop, 150);
+  $("toggle-question").click();
+  $("toggle-compare-note").click();
+  layout.question("q2");
+  frame();
+  assert.equal(guide.scrollTop, 0);
   assert.equal(answer.scrollTop, 0);
-  assert.equal(writing.dataset.compareSide, 'reference');
-  assert.equal(writing.dataset.compareNotes, 'false');
+  assert.equal($("learning-form").hidden, true);
+  assert.equal($("toggle-question").getAttribute("aria-expanded"), "true");
+});
+test("previous/next use filtered order, respect boundaries and block rapid duplicate moves", async () => {
+  const { $ } = fixture();
+  const calls = [];
+  let release;
+  const nav = setupStudyNavigation({
+    select: async (id) => {
+      calls.push(id);
+      await new Promise((r) => (release = r));
+      nav.update(undefined, id);
+    },
+  });
+  nav.update([{ id: "a" }, { id: "c" }], "a");
+  assert.equal($("previous-question").disabled, true);
+  const moving = $("next-question").onclick();
+  await $("next-question").onclick();
+  assert.deepEqual(calls, ["c"]);
+  release();
+  await moving;
+  assert.equal($("next-question").disabled, true);
+  assert.equal($("study-position").textContent, "2 / 2");
+  nav.update([], "c");
+  assert.equal($("previous-question").disabled, true);
+  assert.equal($("next-question").disabled, true);
+});
+test("cancelled or failed navigation keeps the current position and enables retry", async () => {
+  const { $ } = fixture();
+  const nav = setupStudyNavigation({ select: async () => false });
+  nav.update([{ id: "a" }, { id: "b" }], "a");
+  await $("next-question").onclick();
+  assert.equal($("study-position").textContent, "1 / 2");
+  assert.equal($("next-question").disabled, false);
+  const failing = setupStudyNavigation({
+    select: async () => {
+      throw Error("offline");
+    },
+  });
+  failing.update([{ id: "a" }, { id: "b" }], "a");
+  await assert.rejects($("next-question").onclick(), /offline/);
+  assert.equal($("next-question").disabled, false);
 });

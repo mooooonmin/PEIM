@@ -1,0 +1,410 @@
+/* Two-column study workspace. Existing management screens keep their own styles. */
+#study.study-workspace {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 68px);
+  min-height: 540px;
+  max-width: 1600px;
+  overflow: auto;
+}
+#study .question-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+#study .question-navigation strong {
+  font-size: 17px;
+}
+#study #study-position {
+  font-size: 13px;
+  color: var(--muted);
+}
+#study #question-drawer {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  height: 270px;
+  flex: none;
+  border-bottom: 1px solid var(--line);
+}
+#study #question-drawer[hidden] {
+  display: none;
+}
+#study #explorer {
+  display: flex;
+  padding: 12px 16px;
+}
+#study #explorer .mode-tabs {
+  margin-bottom: 8px;
+}
+#study #explorer input {
+  margin-bottom: 8px;
+}
+#study #related {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 16px;
+  border: 0;
+  overflow: hidden;
+}
+#study #related .section-head {
+  min-height: 32px;
+  margin: 0;
+}
+#study #question-list {
+  display: block;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+#study #question-list table {
+  width: 100%;
+}
+#study #related .retry-filter {
+  padding: 4px 0;
+}
+#study .writing {
+  flex: 1;
+  min-height: 400px;
+  padding: 0;
+  overflow: visible;
+}
+#study .study-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  flex: 1;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+}
+#study .study-reading {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+#study .question-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 0 1 46%;
+  min-height: 140px;
+  max-height: 55%;
+  padding: 12px 20px;
+  overflow: hidden;
+  resize: none;
+}
+#study .question-pane .section-head {
+  flex: none;
+  min-height: 32px;
+  gap: 8px;
+}
+#study .question-pane .section-head h1 {
+  font-size: 20px;
+}
+#study .question-pane .actions {
+  display: flex;
+  order: initial;
+  flex-basis: auto;
+}
+#study #question-text {
+  overflow: auto;
+  min-height: 0;
+  font-size: 16px;
+  flex: 1;
+}
+#study #verification {
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+#study .question-collapsed .question-pane {
+  flex: none;
+  min-height: 0;
+  max-height: none;
+  padding: 8px 20px;
+}
+#study .question-collapsed #question-text,
+#study .question-collapsed #question-title,
+#study .question-collapsed #verification {
+  display: none;
+}
+#study #learning-panel {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+#study #learning-panel[hidden] {
+  display: none;
+}
+#study #learning-reference-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+#study .material-switch {
+  margin: 0;
+  padding: 0 12px;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: nowrap;
+}
+#study .material-switch button {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 4px;
+  font-size: 14px;
+  min-width: 0;
+}
+#study .material-switch button[aria-pressed="true"] {
+  box-shadow: inset 0 -2px var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+#study #writing-guide,
+#study #writing-example,
+#study #learning-reference {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 20px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+}
+#study #writing-guide[hidden],
+#study #writing-example[hidden],
+#study #learning-reference[hidden] {
+  display: none;
+}
+#study #writing-guide p,
+#study #writing-example p {
+  margin: 8px 0 12px;
+}
+#study .reading-body h2,
+#study .reading-body h3 {
+  font-size: 16px;
+  margin: 12px 0 8px;
+}
+#study #topic-detail-controls {
+  padding: 8px 20px;
+  flex: none;
+}
+#study #topic-detail-controls h3 {
+  display: none;
+}
+#study .learning-selectors {
+  flex-wrap: wrap;
+}
+#study .learning-selectors label {
+  min-width: 0;
+}
+#study .learning-selectors select {
+  max-width: 180px;
+}
+#study .answer-pane {
+  display: flex;
+  min-height: 0;
+  padding: 12px 24px 0;
+  background: var(--paper);
+}
+#study .answer-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+  gap: 8px;
+}
+#study .answer-tools h2 {
+  font-size: 20px;
+}
+#study #save-state {
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 8px;
+}
+#study #answer {
+  min-height: 100px;
+  flex: 1;
+  padding: 20px 0;
+  font-size: 18px;
+}
+#study .editor-footer {
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0;
+}
+#study .study-notes {
+  flex: none;
+  border-top: 1px solid var(--line);
+  padding: 4px 20px;
+  background: var(--surface);
+}
+#study .study-notes > header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+#study #toggle-compare-note {
+  display: block;
+  background: transparent;
+  border-color: transparent;
+  font-weight: 600;
+  margin: 0;
+}
+#study #review-state {
+  font-size: 12px;
+  color: var(--muted);
+}
+#study #learning-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  max-height: 28dvh;
+  height: auto;
+  overflow: auto;
+  padding: 4px 0 8px;
+}
+#study #learning-form[hidden] {
+  display: none;
+}
+#study #learning-form h3 {
+  display: none;
+}
+#study #learning-form > .quiet {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 12px;
+}
+#study #learning-form > label {
+  grid-column: 1;
+}
+#study #learning-note {
+  grid-column: 1;
+  min-height: 70px;
+  max-height: 150px;
+  margin: 0;
+}
+#study .learning-actions {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-content: center;
+  gap: 8px;
+}
+#study #learning-result {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 12px;
+}
+#study .compare-switch {
+  display: none;
+}
+body.focus-mode .topbar {
+  display: none;
+}
+body.focus-mode #study.study-workspace {
+  height: 100dvh;
+}
+@media (max-width: 900px) {
+  #study.study-workspace {
+    height: auto;
+    min-height: calc(100dvh - 100px);
+  }
+  #study .question-navigation {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  #study .question-navigation strong {
+    font-size: 14px;
+  }
+  #study .question-navigation > .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  #study #question-drawer {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+  #study #explorer {
+    height: 220px;
+  }
+  #study #related {
+    height: 240px;
+  }
+  #study .writing {
+    min-height: 0;
+  }
+  #study .compare-switch {
+    display: flex;
+    flex: none;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  #study .compare-switch button {
+    flex: 1;
+  }
+  #study .study-columns {
+    display: flex;
+    flex-direction: column;
+    height: 65dvh;
+    min-height: 400px;
+    flex: none;
+  }
+  #study .study-reading {
+    flex: 1;
+    border-right: 0;
+  }
+  #study .answer-pane {
+    flex: 1;
+    padding: 12px 16px 0;
+  }
+  #study .writing[data-compare-side="mine"] .study-reading {
+    display: none;
+  }
+  #study .writing[data-compare-side="reference"] .answer-pane {
+    display: none;
+  }
+  #study .question-pane {
+    padding: 8px 16px;
+    flex-basis: 42%;
+  }
+  #study .question-pane .section-head {
+    flex-wrap: wrap;
+  }
+  #study .study-notes {
+    padding: 4px 12px;
+  }
+  #study #learning-form {
+    display: flex;
+    flex-direction: column;
+    max-height: none;
+  }
+  #study #learning-form[hidden] {
+    display: none;
+  }
+  #study .learning-actions {
+    flex-wrap: wrap;
+  }
+  #study #learning-note {
+    min-height: 88px;
+  }
+}
