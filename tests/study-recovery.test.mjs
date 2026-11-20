@@ -1,6 +1,81 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+async function registration(t) {
+  const f = await fixture(t);
+  await f.$('manage-tab').onclick(); await f.$('manage-upload').onclick();
+  f.$('exam-list').querySelector('button').click();
+  await until(() => f.$('candidates').textContent.includes('Round 140 source'));
+  return f;
+}
+test('등록 초안 교체 취소와 시험지별 복구를 지원한다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '보존할 신규 문항';
+  f.$('new-question').dispatchEvent(new f.w.Event('input', {bubbles:true}));
+  f.w.confirm = () => false;
+  f.$('candidates').value = '0'; f.$('candidates').onchange();
+  assert.equal(f.$('new-question').value, '보존할 신규 문항');
+  assert.equal(f.$('candidates').value, '');
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  assert.match(f.$('review-title').textContent, /140회/);
+  f.w.confirm = () => true;
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  await until(() => f.$('candidates').textContent.includes('Round 141 source'));
+  f.$('exam-list').querySelector('button').click();
+  await until(() => f.$('candidates').textContent.includes('Round 140 source'));
+  assert.equal(f.$('new-question').value, '보존할 신규 문항');
+  assert.equal(f.$('reviewed').checked, false);
+});
+test('등록 대조 체크 이후 내용 수정은 재확인을 요구한다', async t => {
+  const f = await registration(t);
+  for (const id of ['new-question', 'session', 'number', 'page', 'topic-search']) {
+    f.$('reviewed').checked = true;
+    f.$(id).dispatchEvent(new f.w.Event('input', {bubbles:true}));
+    assert.equal(f.$('reviewed').checked, false, id);
+  }
+});
+test('등록 요청 중 시험지 전환을 막고 실패하면 입력을 유지한다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '등록 대기 문항';
+  f.$('new-question').dispatchEvent(new f.w.Event('input', {bubbles:true}));
+  f.$('topic-search').value = f.$('topic-options').options[0].value;
+  f.$('reviewed').checked = true;
+  let release;
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).endsWith('/exams/140/questions')
+    ? new Promise(r => { release = () => r({ok:false,status:503,json:async()=>({detail:'등록 실패'})}); })
+    : fetch(url, options);
+  const pending = f.$('question-form').onsubmit({target:f.$('question-form'),preventDefault(){}});
+  await until(() => !!release);
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  assert.match(f.$('review-title').textContent, /140회/);
+  assert.equal(f.$('review-fields').disabled, true);
+  release(); await pending;
+  assert.equal(f.$('new-question').value, '등록 대기 문항');
+  assert.equal(f.$('review-fields').disabled, false);
+});
+test('늦은 추출 응답은 등록 잠금을 풀지 않고 제출 이후 초안을 지우지 않는다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '제출 문항';
+  f.$('topic-search').value = f.$('topic-options').options[0].value;
+  let extracted, registered;
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => {
+    if (String(url).endsWith('/extract')) return new Promise(r => { extracted = () => r({ok:true,json:async()=>({candidates:[],pages:[],message:'완료'})}); });
+    if (String(url).endsWith('/exams/140/questions')) return new Promise(r => { registered = () => r({ok:true,json:async()=>({id:'new'})}); });
+    return fetch(url, options);
+  };
+  const extracting = f.$('extract').onclick();
+  const registering = f.$('question-form').onsubmit({target:f.$('question-form'),preventDefault(){}});
+  await until(() => !!registered && !!extracted);
+  extracted(); await extracting;
+  assert.equal(f.$('review-fields').disabled, true);
+  assert.equal(f.$('candidates').disabled, true);
+  // A programmatic edit must also remain distinguishable from the submitted snapshot.
+  f.$('new-question').value = '제출 이후 문항';
+  registered(); await registering;
+  assert.equal(JSON.parse(f.w.sessionStorage.getItem('peim:registration:a140'))['new-question'], '제출 이후 문항');
+});
 test("아이콘 도구의 이름과 토글 상태는 조작 후에도 유지된다", async t => {
   const f = await fixture(t);
   for (const button of f.w.document.querySelectorAll('button[data-icon]')) {

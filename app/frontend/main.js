@@ -1,4 +1,5 @@
 import { setupIcons, setIconLabel } from "./icons.js";
+import { setupUploadDraft } from "./upload-draft.js";
 import { createDraftStore, renderDraftCopies } from "./draft-store.js";
 import { setupUploadPreview } from "./upload-preview.js";
 import { setupRetryList } from "./retry-list.js";
@@ -760,6 +761,8 @@ function populateTopics() {
 }
 let examRows = [], examListSequence = 0;
 const uploadPreview = setupUploadPreview();
+const uploadDraft = setupUploadDraft();
+let registrationBusy = false;
 function uploadPane(name) {
   $("upload-workspace").dataset.pane = name;
   document.querySelectorAll("[data-upload-pane]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.uploadPane === name)));
@@ -768,9 +771,11 @@ document.querySelectorAll("[data-upload-pane]").forEach(b => { b.onclick = () =>
 $("question-form").addEventListener("invalid", () => uploadPane("edit"), true);
 $("upload-form").addEventListener("invalid", () => { $("add-pdf").open = true; }, true);
 $("use-upload-page").onclick = () => {
+  if (registrationBusy) return;
   const page = uploadPreview.page();
   if (!page) return;
   $("page").value = String(page); $("reviewed").checked = false;
+  uploadDraft.stash();
   uploadPane("edit"); $("page").focus();
 };
 function renderExams() {
@@ -796,6 +801,7 @@ async function loadExams() {
   examRows = list; renderExams();
 }
 async function chooseExam(e) {
+  if (registrationBusy || !uploadDraft.allowReplace()) return;
   const sequence = ++reviewSequence;
   chosenExam = e;
   $("upload-workspace").hidden = false;
@@ -816,6 +822,7 @@ async function chooseExam(e) {
   $("question-form").hidden = e.format !== "pdf";
   $("question-form").reset();
   text("question-result", "");
+  uploadDraft.open(e.attachment_id);
   $("upload-workspace").scrollIntoView({ block: "start" });
   let result;
   try {
@@ -853,7 +860,11 @@ function displayExtraction() {
   );
 }
 $("candidates").onchange = () => {
-  if (!extraction) return;
+  if (!extraction || registrationBusy) return;
+  if (!uploadDraft.allowReplace()) {
+    $("candidates").value = uploadDraft.candidate();
+    return;
+  }
   const q = extraction.candidates[Number($("candidates").value)];
   if ($("candidates").value === "" || !q) return;
   $("session").value = String(q.session);
@@ -861,6 +872,7 @@ $("candidates").onchange = () => {
   $("new-question").value = q.text;
   $("page").value = "";
   $("reviewed").checked = false;
+  uploadDraft.acceptCandidate();
 };
 $("review-original").onclick = () =>
   window.open(
@@ -869,6 +881,7 @@ $("review-original").onclick = () =>
     "noopener",
   );
 $("extract").onclick = safe(async () => {
+  if (registrationBusy) return;
   const sequence = ++reviewSequence,
     aid = chosenExam.attachment_id;
   $("extract").disabled = true;
@@ -884,7 +897,8 @@ $("extract").onclick = safe(async () => {
     if (sequence === reviewSequence) {
       extraction = result;
       displayExtraction();
-      $("review-fields").disabled = false;
+      $("review-fields").disabled = registrationBusy;
+      $("candidates").disabled = registrationBusy;
     }
   } finally {
     if (sequence === reviewSequence) $("extract").disabled = false;
@@ -935,14 +949,18 @@ $("create-topic").onclick = safe(async () => {
   );
   $("topic-search").value = option.value;
   $("new-topic-title").value = "";
+  $("reviewed").checked = false;
+  uploadDraft.stash();
 });
 $("question-form").onsubmit = async (e) => {
   e.preventDefault();
+  if (registrationBusy) return;
   const submit = e.target.querySelector("button[type=submit]");
   submit.disabled = true;
   const option = [...$("topic-options").options].find(
     (o) => o.value === $("topic-search").value,
   );
+  const submitted = uploadDraft.value();
   try {
     if (!extraction || $("review-fields").disabled)
       throw new Error("선택한 시험지의 추출 정보를 불러온 뒤 등록해 주세요.");
@@ -950,6 +968,9 @@ $("question-form").onsubmit = async (e) => {
       throw new Error(
         "목록에서 연결할 주제를 선택하거나 새 주제를 만들어 주세요.",
       );
+    registrationBusy = true;
+    $("review-fields").disabled = true;
+    $("candidates").disabled = true;
     const result = await api(`/exams/${chosenExam.round}/questions`, {
       method: "POST",
       body: JSON.stringify({
@@ -967,12 +988,18 @@ $("question-form").onsubmit = async (e) => {
       "문항을 등록했습니다. 학습 화면에서 답안을 작성할 수 있습니다.",
     );
     $("reviewed").checked = false;
+    uploadDraft.saved(submitted);
     nav = await api("/navigation");
     renderNavigation();
     await loadExams();
   } catch (error) {
     text("question-result", error.message);
   } finally {
+    registrationBusy = false;
+    if (extraction) {
+      $("review-fields").disabled = false;
+      $("candidates").disabled = false;
+    }
     submit.disabled = false;
   }
 };

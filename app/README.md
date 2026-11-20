@@ -9,6 +9,7 @@
 | `db.py`, `schema.sql` | DB 연결, 스키마와 최초 콘텐츠 가져오기 |
 | `frontend/study-layout.js` | 2열 배치·모바일 전환·문항 목록·메모 접기와 이전/다음 이동 |
 | `frontend/upload-preview.js` | 등록 화면의 원본 PDF 표시·페이지 이동과 늦은 응답 격리 |
+| `frontend/upload-draft.js` | 탭별 신규 등록 초안 보관·복구와 교체 확인 |
 | `frontend/main.js`, `frontend/icons.js` | 학습·답안 저장·화면 전환과 접근성 이름을 가진 SVG 보조 버튼 |
 | `frontend/draft-store.js` | 탭별 답안·메모 임시 글 보존, 복구 후보와 내려받기 |
 | `frontend/retry-list.js`, `frontend/filter-chips.js` | 전체 다시 풀기 목록·메모 펼치기와 필터 표시·해제 |
