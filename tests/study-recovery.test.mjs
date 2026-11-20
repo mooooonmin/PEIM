@@ -1,6 +1,59 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+async function registration(t) {
+  const f = await fixture(t);
+  await f.$('manage-tab').onclick(); await f.$('manage-upload').onclick();
+  f.$('exam-list').querySelector('button').click();
+  await until(() => f.$('candidates').textContent.includes('Round 140 source'));
+  return f;
+}
+test('등록 초안 교체 취소와 시험지별 복구를 지원한다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '보존할 신규 문항';
+  f.$('new-question').dispatchEvent(new f.w.Event('input', {bubbles:true}));
+  f.w.confirm = () => false;
+  f.$('candidates').value = '0'; f.$('candidates').onchange();
+  assert.equal(f.$('new-question').value, '보존할 신규 문항');
+  assert.equal(f.$('candidates').value, '');
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  assert.match(f.$('review-title').textContent, /140회/);
+  f.w.confirm = () => true;
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  await until(() => f.$('candidates').textContent.includes('Round 141 source'));
+  f.$('exam-list').querySelector('button').click();
+  await until(() => f.$('candidates').textContent.includes('Round 140 source'));
+  assert.equal(f.$('new-question').value, '보존할 신규 문항');
+  assert.equal(f.$('reviewed').checked, false);
+});
+test('등록 대조 체크 이후 내용 수정은 재확인을 요구한다', async t => {
+  const f = await registration(t);
+  for (const id of ['new-question', 'session', 'number', 'page', 'topic-search']) {
+    f.$('reviewed').checked = true;
+    f.$(id).dispatchEvent(new f.w.Event('input', {bubbles:true}));
+    assert.equal(f.$('reviewed').checked, false, id);
+  }
+});
+test('등록 요청 중 시험지 전환을 막고 실패하면 입력을 유지한다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '등록 대기 문항';
+  f.$('new-question').dispatchEvent(new f.w.Event('input', {bubbles:true}));
+  f.$('topic-search').value = f.$('topic-options').options[0].value;
+  f.$('reviewed').checked = true;
+  let release;
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => String(url).endsWith('/exams/140/questions')
+    ? new Promise(r => { release = () => r({ok:false,status:503,json:async()=>({detail:'등록 실패'})}); })
+    : fetch(url, options);
+  const pending = f.$('question-form').onsubmit({target:f.$('question-form'),preventDefault(){}});
+  await until(() => !!release);
+  f.$('exam-list').querySelectorAll('button')[1].click();
+  assert.match(f.$('review-title').textContent, /140회/);
+  assert.equal(f.$('review-fields').disabled, true);
+  release(); await pending;
+  assert.equal(f.$('new-question').value, '등록 대기 문항');
+  assert.equal(f.$('review-fields').disabled, false);
+});
 test("아이콘 도구의 이름과 토글 상태는 조작 후에도 유지된다", async t => {
   const f = await fixture(t);
   for (const button of f.w.document.querySelectorAll('button[data-icon]')) {
