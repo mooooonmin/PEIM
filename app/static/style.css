@@ -1553,3 +1553,51 @@ body.focus-mode .workbench {
 .guide-check input { flex: none; margin-top: 5px; }
 #writing-guide[hidden], #learning-reference[hidden], #topic-detail-controls[hidden] { display: none; }
 .writing[data-mode="compare"][data-compare-notes="true"] #writing-guide { min-height: 120px; }
+
+/* Collection pages share the study palette and action hierarchy. */
+.collection-page { width: 100%; max-width: 1240px; margin: auto; padding: 28px 32px 48px; }
+.collection-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.collection-head h1 { margin: 0 0 8px; font-size: 26px; }
+.collection-head p { margin: 0; line-height: 1.6; }
+.utility-button { background: transparent; border-color: transparent; color: var(--muted); }
+.collection-tools { padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.collection-search { display: grid; gap: 8px; }
+.collection-page #retry-search { max-width: none; width: 100%; margin: 0; }
+.collection-filters { margin-top: 16px; }
+.collection-filters summary { cursor: pointer; font-size: 14px; color: var(--muted); }
+.filter-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; padding-top: 12px; }
+.filter-fields label { display: grid; gap: 6px; flex: 1; min-width: 140px; font-size: 14px; }
+.filter-fields input, .filter-fields select { width: 100%; min-width: 0; }
+.collection-results { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.collection-results p { margin: 0; font-weight: 700; }
+.collection-page #retry-result:empty { display: none; }
+.collection-empty { padding: 48px 24px; text-align: center; border: 1px dashed var(--line); border-radius: var(--radius); background: var(--surface); }
+.collection-empty h2 { font-size: 20px; margin-top: 0; }
+.collection-empty p { color: var(--muted); line-height: 1.6; }
+.retry-item { padding: 24px 0; }
+.retry-item-head { align-items: flex-start; flex-wrap: nowrap; }
+.retry-identity { flex: 1; min-width: 0; }
+.retry-identity p { margin: 0 0 8px; }
+.retry-title { margin: 0 0 12px; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.retry-item-head button { flex: none; }
+.status-badge { display: inline-block; font-size: 13px; font-weight: 700; padding: 4px 9px; border-radius: var(--radius); background: var(--surface); color: var(--muted); white-space: nowrap; }
+.retry-memo { margin-top: 14px; background: var(--surface); border-radius: var(--radius); padding: 12px 16px; }
+.retry-memo summary { cursor: pointer; font-size: 14px; font-weight: 700; }
+.memo-preview { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 400; line-height: 1.65; margin-top: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.retry-memo[open] .memo-preview { display: none; }
+.retry-item .retry-question, .retry-item .retry-note { max-height: none; overflow: visible; padding: 0; }
+.retry-full { margin-top: 12px; font-size: 14px; }
+.retry-full summary { cursor: pointer; color: var(--accent); }
+@media (max-width: 700px) {
+  .collection-page { padding: 20px 16px 32px; }
+  .collection-head { align-items: flex-start; margin-bottom: 20px; }
+  .collection-head h1 { font-size: 23px; }
+  .collection-head p { font-size: 14px; }
+  .collection-tools { padding: 14px; }
+  .filter-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .filter-fields label { min-width: 0; }
+  .retry-item-head { flex-wrap: wrap; }
+  .retry-identity { flex-basis: 100%; }
+  .retry-item-head button { margin-bottom: 12px; }
+  .collection-results .quiet { font-size: 13px; }
+}

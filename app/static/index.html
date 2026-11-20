@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=study-emphasis-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=study-emphasis-1" />
-    <script type="module" src="/assets/main.js?v=study-emphasis-1"></script>
+    <link rel="stylesheet" href="/style.css?v=collection-retry-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=collection-retry-1" />
+    <script type="module" src="/assets/main.js?v=collection-retry-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -263,28 +263,27 @@
         </section>
       </section>
     </main>
-    <main id="retry-library" class="retry-library" tabindex="-1" hidden>
-      <div class="page-head">
-        <div>
-          <h1>전체 다시 풀기</h1>
-          <p class="muted">
-            주제·회차에 관계없이 다시 풀기로 저장한 문항과 보완 메모를
-            모았습니다.
-          </p>
-        </div>
-        <button id="refresh-retry">새로고침</button>
+    <main id="retry-library" class="retry-library collection-page" tabindex="-1" hidden>
+      <div class="collection-head">
+        <div><h1>다시 풀기</h1><p class="muted">보완할 내용을 확인하고, 내 답안을 이어서 작성하세요.</p></div>
+        <button id="refresh-retry" class="utility-button">새로고침</button>
       </div>
-      <p class="quiet">
-        이어서 풀기는 기존 답안을 그대로 엽니다. 복습 후 표시를 해제하려면 복습
-        단계에서 ‘다시 풀기’를 끄고 저장하세요.
-      </p>
-      <label for="retry-search">문제·주제·메모·회차 검색</label
-      ><input
-        id="retry-search"
-        type="search"
-        placeholder="보완할 개념이나 회차 찾기"
-      />
-      <p id="retry-count" role="status"></p>
+      <div id="retry-tools" class="collection-tools">
+        <label class="collection-search" for="retry-search">문제·메모 검색
+          <input id="retry-search" type="search" placeholder="문제, 주제, 보완할 내용 찾기" />
+        </label>
+        <details class="collection-filters" open>
+          <summary>필터·정렬</summary>
+          <div class="filter-fields">
+            <label>주제<input id="retry-topic" type="search" placeholder="주제 이름" /></label>
+            <label>회차<select id="retry-round"><option value="">전체 회차</option></select></label>
+            <label>답안 상태<select id="retry-status"><option value="">전체 상태</option><option value="empty">미작성</option><option value="draft">작성 중</option><option value="completed">작성 완료</option></select></label>
+            <label>정렬<select id="retry-sort"><option value="recent">최근 복습 저장순</option><option value="oldest">오래된 복습 저장순</option><option value="round">최신 회차순</option></select></label>
+            <button id="retry-reset" class="utility-button">필터 초기화</button>
+          </div>
+        </details>
+      </div>
+      <div class="collection-results"><p id="retry-count" role="status"></p><span id="retry-hint" class="quiet">문항을 열어도 다시 풀기 표시는 유지됩니다.</span></div>
       <p id="retry-result" role="status"></p>
       <div id="retry-items"></div>
     </main>
