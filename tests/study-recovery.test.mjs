@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("늦은 회차 응답이 나중에 완료된 검색을 지우지 않는다", async t => {
+  const f = await fixture(t); let release;
+  f.state.gate = new Promise(r => release = r);
+  [...f.$("navigation").querySelectorAll("button")].find(b => b.textContent.includes("141회")).click();
+  await until(() => f.state.requested);
+  f.$("search").value = "q2"; f.$("search").oninput();
+  await untilSlow(() => new URL(f.w.location.href).searchParams.get("search") === "q2");
+  release(); await new Promise(r => setImmediate(r));
+  assert.equal(f.$("search").value, "q2");
+  assert.equal(new URL(f.w.location.href).searchParams.get("search"), "q2");
+});
 test("학습 초기 조회 중 검색해도 선택 문항의 답안을 표시한다", async t => {
   const f = await fixture(t, {url:"http://localhost:8000/?view=manage&mode=exam&exam=exam-140&q=q1", readyView:"manage"});
   let release;

@@ -306,12 +306,12 @@ function updateURL() {
 async function chooseFilter(topic, exam) {
   clearTimeout(searchTimer);
   if (!openLearning.canLeave() || !(await save())) return;
-  const sequence = ++loadSequence;
+  const sequence = ++loadSequence, search = searchSequence;
   const nextRows = await api(
     "/questions?" + new URLSearchParams(topic ? { topic } : { exam }),
   );
-  if (sequence !== loadSequence || !openLearning.canLeave()) return;
-  if (!(await save()) || sequence !== loadSequence || !openLearning.canLeave())
+  if (search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave()) return;
+  if (!(await save()) || search !== searchSequence || sequence !== loadSequence || !openLearning.canLeave())
     return;
   selectedTopic = topic;
   selectedExam = exam;
