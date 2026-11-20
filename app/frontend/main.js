@@ -583,7 +583,11 @@ $("history").onclick = safe(async () => {
       button(
         "이 내용으로 복원",
         safe(async () => {
-          if (current.id !== qid) return;
+          if (current !== q || currentView !== view || sequence !== loadSequence) return;
+          // The editor remains usable while the history request is in flight.
+          // Preserve those newer edits before replacing them with an old version.
+          if (!(await save())) return;
+          if (current !== q || currentView !== view || sequence !== loadSequence) return;
           $("answer").value = item.body;
           $("completed").checked = item.status === "completed";
           edited();

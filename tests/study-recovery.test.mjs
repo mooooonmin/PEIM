@@ -1,6 +1,30 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+for (const fails of [false, true]) test(`이력 조회 중 입력은 복원 전에 저장하며 저장 실패=${fails}이면 복원하지 않는다`, async t => {
+  const f = await fixture(t), writes = [];
+  let release, requested = false;
+  const gate = new Promise(r => release = r), fetch = f.w.fetch;
+  f.w.fetch = async (url, options) => {
+    if (String(url).endsWith('/history')) { requested = true; await gate; }
+    if (String(url).endsWith('/answer')) writes.push(JSON.parse(options.body).body);
+    return fetch(url, options);
+  };
+  const opening = f.$("history").onclick();
+  await until(() => requested);
+  f.edit(); f.state.fail = fails;
+  release(); await opening;
+  f.$("reading-body").querySelector("button").click();
+  await until(() => fails ? !f.$("save-error").hidden : f.answers.get("q1").body === "q1 history");
+  if (fails) {
+    assert.equal(f.$("answer").value, "응답 대기 중 추가 입력");
+    assert.equal(f.$("reading-dialog").open, true);
+    assert.deepEqual(writes, ["응답 대기 중 추가 입력"]);
+  } else {
+    assert.deepEqual(writes, ["응답 대기 중 추가 입력", "q1 history"]);
+    assert.equal(f.answers.get("q1").body, "q1 history");
+  }
+});
 test("다른 탭의 미저장 답안은 먼저 끝난 저장 이후에도 복구할 수 있다", async t => {
   const f = await fixture(t);
   let release, pending = false;
