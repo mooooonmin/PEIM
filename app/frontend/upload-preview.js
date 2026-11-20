@@ -1,3 +1,4 @@
+import { setIconLabel } from "./icons.js";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 GlobalWorkerOptions.workerSrc = "/assets/pdf-worker.js";
 
@@ -45,7 +46,7 @@ export function setupUploadPreview({ loadDocument = getDocument } = {}) {
     task = null; pdf = null; busy = true; page = 1; controls();
     $("upload-pdf-canvas").replaceChildren();
     $("upload-pdf-canvas").dataset.zoom = "false";
-    $("upload-pdf-zoom").textContent = "확대";
+    setIconLabel($("upload-pdf-zoom"), "확대", "zoom");
     $("upload-pdf-position").textContent = "";
     if (exam.format !== "pdf") {
       busy = false; controls();
@@ -77,7 +78,7 @@ export function setupUploadPreview({ loadDocument = getDocument } = {}) {
   $("upload-pdf-zoom").onclick = () => {
     const zoom = $("upload-pdf-canvas").dataset.zoom !== "true";
     $("upload-pdf-canvas").dataset.zoom = String(zoom);
-    $("upload-pdf-zoom").textContent = zoom ? "너비 맞춤" : "확대";
+    setIconLabel($("upload-pdf-zoom"), zoom ? "너비 맞춤" : "확대", zoom ? "fit" : "zoom");
   };
   return { open, page: () => !busy && pdf ? page : null };
 }

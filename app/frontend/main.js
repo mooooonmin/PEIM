@@ -1,3 +1,4 @@
+import { setupIcons, setIconLabel } from "./icons.js";
 import { createDraftStore, renderDraftCopies } from "./draft-store.js";
 import { setupUploadPreview } from "./upload-preview.js";
 import { setupRetryList } from "./retry-list.js";
@@ -10,6 +11,7 @@ import DOMPurify from "dompurify";
 import mermaid from "mermaid";
 
 const $ = (id) => document.getElementById(id);
+setupIcons();
 let nav,
   mode = "topic",
   selectedTopic = "",
@@ -63,6 +65,7 @@ async function api(path, options = {}) {
   return response.json();
 }
 function text(id, value) {
+  if ($(id).dataset.icon) { setIconLabel($(id), value); return; }
   $(id).textContent = id === "save-state" ? `답안: ${value}` : value;
 }
 function element(tag, value, className) {

@@ -8,9 +8,9 @@
       content="정보관리기술사 기출문항 학습과 문항별 답안 작성"
     />
     <title>PEIM · 정보관리기술사</title>
-    <link rel="stylesheet" href="/style.css?v=draft-preservation-1" />
-    <link rel="stylesheet" href="/study-workspace.css?v=draft-preservation-1" />
-    <script type="module" src="/assets/main.js?v=draft-preservation-1"></script>
+    <link rel="stylesheet" href="/style.css?v=compact-controls-1" />
+    <link rel="stylesheet" href="/study-workspace.css?v=compact-controls-1" />
+    <script type="module" src="/assets/main.js?v=compact-controls-1"></script>
   </head>
   <body>
     <a class="skip" href="#study">주요 콘텐츠로 이동</a>
@@ -27,13 +27,13 @@
         ><button id="retry-tab">다시 풀기</button
         ><button id="manage-tab">문제 관리</button>
       </nav>
-      <span class="local-label">내 학습 공간</span>
+
     </header>
     <div id="global-error" role="alert" hidden></div>
     <main id="study" class="workbench study-workspace" tabindex="-1">
       <header class="question-navigation">
         <button
-          id="toggle-question-list"
+          id="toggle-question-list" data-icon="list"
           aria-expanded="false"
           aria-controls="question-drawer"
         >
@@ -42,8 +42,8 @@
         <strong id="question-meta"></strong>
         <div class="actions">
           <span id="study-position" role="status"></span
-          ><button id="previous-question" disabled>이전 문항</button
-          ><button id="next-question" disabled>다음 문항</button>
+          ><button id="previous-question" data-icon="previous" disabled>이전 문항</button
+          ><button id="next-question" data-icon="next" disabled>다음 문항</button>
         </div>
       </header>
       <div id="question-drawer" hidden>
@@ -59,7 +59,7 @@
             placeholder="정규화, 트랜잭션…"
             autocomplete="off"
           />
-          <button id="clear-search" hidden="">검색 해제</button>
+          <button id="clear-search" data-icon="close" hidden="">검색 해제</button>
           <div id="navigation" class="navigation" aria-live="polite">
             학습 자료를 불러오는 중입니다.
           </div>
@@ -75,8 +75,7 @@
             hidden=""
           ></p>
           <label class="retry-filter"
-            ><input id="retry-only" type="checkbox" /> 이 목록에서 다시 풀
-            문항만</label
+            ><input id="retry-only" type="checkbox" /> 다시 풀기만</label
           >
           <div id="question-list">
             <p class="empty">
@@ -86,7 +85,7 @@
         </aside>
       </div>
       <section class="writing" aria-label="문제와 내 답안">
-        <button id="back-to-retries" class="quiet-button" hidden="">
+        <button id="back-to-retries" data-icon="previous" class="quiet-button" hidden="">
           전체 다시 풀기 목록으로
         </button>
         <nav class="compare-switch" aria-label="모바일 학습 영역">
@@ -98,15 +97,15 @@
             <section class="question-pane">
               <div class="section-head">
                 <div>
-                  <h1>문제</h1>
+                  <h1 class="sr-only">문제</h1>
                 </div>
                 <div class="actions">
-                  <button id="original" class="quiet-button" disabled="">
+                  <button id="original" data-icon="file" class="quiet-button" disabled="">
                     원본 시험지
                   </button>
                 </div>
                 <button
-                  id="toggle-question"
+                  id="toggle-question" data-icon="collapse"
                   class="quiet-button disclosure-button"
                   aria-expanded="true"
                 >
@@ -144,9 +143,9 @@
                   aria-live="polite"
                 ></div>
                 <div id="topic-detail-controls" hidden="">
-                  <h3>주제 상세 해설</h3>
+
                   <p class="learning-notice">
-                    주제별 학습 자료이며 이 문항의 공식 정답은 아닙니다.
+                    주제 참고 자료 · 비공식
                   </p>
                   <div class="learning-selectors">
                     <label>주제<select id="learning-topic"></select></label>
@@ -179,11 +178,11 @@
           </section>
           <section class="answer-pane">
             <header class="answer-tools">
-              <h2>내 답안</h2>
+              <h2 class="sr-only">내 답안</h2>
               <div class="actions">
-                <button id="history" class="quiet-button" disabled="">
+                <button id="history" data-icon="history" class="quiet-button" disabled="">
                   저장 이력</button
-                ><button id="focus" class="quiet-button" aria-pressed="false">
+                ><button id="focus" data-icon="focus" class="quiet-button" aria-pressed="false">
                   집중 모드
                 </button>
               </div>
@@ -201,7 +200,7 @@
             >
             <textarea
               id="answer"
-              placeholder="문제를 읽고, 내 언어로 답안을 작성해 보세요."
+              placeholder="답안 작성"
               disabled=""
               spellcheck="false"
             ></textarea>
@@ -210,14 +209,14 @@
               ><label
                 ><input type="checkbox" id="completed" disabled="" /> 작성
                 완료</label
-              ><span class="quiet">입력 후 자동 저장</span>
+              ><span class="quiet">자동 저장</span>
             </footer>
           </section>
         </div>
         <section class="study-notes" aria-label="보완 메모">
           <header>
             <button
-              id="toggle-compare-note"
+              id="toggle-compare-note" data-icon="note"
               aria-expanded="false"
               aria-controls="learning-form"
             >
@@ -225,16 +224,14 @@
             ><span id="review-state" role="status">복습: 문항 선택 전</span>
           </header>
           <form id="learning-form" hidden>
-            <h3>복습 기록</h3>
-            <p class="quiet">
-              보완 메모와 다시 풀기는 ‘복습 저장’을 눌러야 DB에 저장됩니다.
-            </p>
+
+
             <label for="learning-note">보완 메모</label>
             <textarea
               id="learning-note"
               rows="3"
               maxlength="30000"
-              placeholder="빠뜨린 핵심 개념, 보완할 도식, 다시 쓸 내용을 정리하세요."
+              placeholder="메모 작성"
               disabled=""
             ></textarea>
             <div class="learning-actions">
@@ -267,8 +264,8 @@
     </main>
     <main id="retry-library" class="retry-library collection-page" tabindex="-1" hidden>
       <div class="collection-head">
-        <div><h1>다시 풀기</h1><p class="muted">보완할 내용을 확인하고, 내 답안을 이어서 작성하세요.</p></div>
-        <button id="refresh-retry" class="utility-button">새로고침</button>
+        <h1 class="sr-only">다시 풀기</h1>
+        <button id="refresh-retry" data-icon="refresh" class="utility-button">새로고침</button>
       </div>
       <div id="retry-tools" class="collection-tools">
         <div class="retry-toolbar">
@@ -285,20 +282,15 @@
             </div>
           </details>
         </div>
-        <div class="applied-filters"><div id="retry-chips" class="filter-chips" role="group" aria-label="적용된 다시 풀기 조건"></div><button id="retry-reset" class="utility-button" hidden>조건 지우기</button></div>
+        <div class="applied-filters"><div id="retry-chips" class="filter-chips" role="group" aria-label="적용된 다시 풀기 조건"></div><button id="retry-reset" data-icon="close" class="utility-button" hidden>조건 지우기</button></div>
       </div>
-      <div class="collection-results"><p id="retry-count" role="status"></p><span id="retry-hint" class="quiet">문항을 열어도 다시 풀기 표시는 유지됩니다.</span></div>
+      <div class="collection-results"><p id="retry-count" role="status"></p></div>
       <p id="retry-result" role="status"></p>
       <div id="retry-items"></div>
     </main>
     <main id="manage" class="manage collection-page" tabindex="-1" hidden>
       <div class="collection-head">
-        <div>
-          <h1>문제 관리</h1>
-          <p class="muted">
-            기출문항을 찾고 원문을 확인하세요.
-          </p>
-        </div>
+        <h1 class="sr-only">문제 관리</h1>
         <button id="manage-add-pdf" class="primary">＋ 시험지 등록</button>
       </div>
       <nav class="management-tabs" aria-label="문제 관리 메뉴">
@@ -310,31 +302,31 @@
       <section id="managed-questions" aria-label="기존 문항 검수">
         <div class="management-filters collection-tools">
           <label class="management-search search-control"><span class="sr-only">문제·주제 검색</span><input id="managed-search" type="search" placeholder="문제·주제 검색" /></label>
-          <button id="managed-filter-toggle" class="mobile-filter-toggle" aria-expanded="false" aria-controls="managed-filter-controls">필터 보기</button>
+          <button id="managed-filter-toggle" data-icon="filter" class="mobile-filter-toggle" aria-expanded="false" aria-controls="managed-filter-controls">필터 보기</button>
           <div id="managed-filter-controls" class="managed-filter-controls" data-expanded="false">
           <label><span class="sr-only">회차</span><select id="managed-exam"><option value="">전체 회차</option></select></label>
           <label><span class="sr-only">원문 확인 상태</span><select id="managed-status"><option value="">확인 상태</option><option value="unverified">미확인</option><option value="verified">확인 완료</option><option value="needs_review">재검토 필요</option></select></label>
           </div>
         </div>
-        <div class="applied-filters"><div id="managed-chips" class="filter-chips" role="group" aria-label="적용된 문항 조건"></div><button id="managed-reset" class="utility-button" hidden>조건 지우기</button></div>
+        <div class="applied-filters"><div id="managed-chips" class="filter-chips" role="group" aria-label="적용된 문항 조건"></div><button id="managed-reset" data-icon="close" class="utility-button" hidden>조건 지우기</button></div>
         <div class="collection-results">
           <div><p id="managed-count" role="status"></p><span id="managed-range" class="quiet"></span></div>
           <div class="actions">
-            <button id="managed-refresh" class="utility-button">새로고침</button>
-            <button id="managed-previous-top" aria-label="이전 목록 (상단)">이전</button>
+            <button id="managed-refresh" data-icon="refresh" class="utility-button">새로고침</button>
+            <button id="managed-previous-top" data-icon="previous" aria-label="이전 목록 (상단)">이전</button>
             <span id="managed-page-top" class="quiet"></span>
-            <button id="managed-next-top" aria-label="다음 목록 (상단)">다음</button>
+            <button id="managed-next-top" data-icon="next" aria-label="다음 목록 (상단)">다음</button>
           </div>
         </div>
         <div id="managed-list" class="managed-list"></div>
         <div class="actions">
-          <button id="managed-previous">이전 목록</button
+          <button id="managed-previous" data-icon="previous">이전 목록</button
           ><span id="managed-page"></span
-          ><button id="managed-next">다음 목록</button>
+          ><button id="managed-next" data-icon="next">다음 목록</button>
         </div>
       </section>
       <section id="managed-upload" aria-label="PDF와 새 문항 등록" hidden>
-        <div class="upload-library-head"><div><h2>시험지 선택</h2><p class="quiet">시험지를 선택하고 원본과 문항을 함께 확인하세요.</p></div></div>
+        <h2 class="sr-only">시험지 선택</h2>
         <details id="add-pdf" class="add-pdf">
           <summary>새 PDF 추가</summary>
             <form id="upload-form">
@@ -374,12 +366,12 @@
         <div id="upload-workspace" class="upload-workspace" data-pane="source" tabindex="-1" role="region" aria-label="시험지 대조 및 문항 등록" hidden>
           <nav class="upload-pane-tabs" aria-label="원본과 문항 입력 전환"><button type="button" data-upload-pane="source" aria-pressed="true">원본 확인</button><button type="button" data-upload-pane="edit" aria-pressed="false">문항 입력</button></nav>
           <section class="upload-source management-panel" aria-label="선택한 시험지 원본">
-            <div class="section-head"><h2>원본 시험지</h2><button id="review-original" disabled>원본 열기</button></div>
+            <div class="section-head"><h2>원본 시험지</h2><button id="review-original" data-icon="file" disabled>원본 열기</button></div>
             <p id="upload-pdf-status" class="quiet" role="status"></p>
-            <div class="upload-pdf-tools"><button id="upload-pdf-previous" disabled aria-label="원본 이전 페이지">이전</button><span id="upload-pdf-position"></span><button id="upload-pdf-next" disabled aria-label="원본 다음 페이지">다음</button><button id="upload-pdf-zoom" disabled>확대</button></div>
+            <div class="upload-pdf-tools"><button id="upload-pdf-previous" data-icon="previous" disabled aria-label="원본 이전 페이지">이전</button><span id="upload-pdf-position"></span><button id="upload-pdf-next" data-icon="next" disabled aria-label="원본 다음 페이지">다음</button><button id="upload-pdf-zoom" data-icon="zoom" disabled>확대</button></div>
             <div id="upload-pdf-canvas" class="upload-pdf-canvas"></div>
             <button id="use-upload-page" class="utility-button" disabled>보고 있는 페이지 연결</button>
-            <p class="quiet">페이지를 연결해도 원본 대조 확인은 직접 해야 합니다.</p>
+
           </section>
           <section class="management-panel review-panel">
             <div class="section-head">
@@ -463,7 +455,7 @@
     <dialog id="reading-dialog">
       <div class="section-head">
         <h2 id="reading-title"></h2>
-        <button id="close-reading">닫기</button>
+        <button id="close-reading" data-icon="close">닫기</button>
       </div>
       <div id="reading-controls"></div>
       <div id="reading-body" class="reading-body"></div>
@@ -471,13 +463,13 @@
     <dialog id="question-review-dialog" aria-labelledby="question-review-title">
       <div class="section-head">
         <h2 id="question-review-title">문항 검수·수정</h2>
-        <button id="close-question-review">닫기</button>
+        <button id="close-question-review" data-icon="close">닫기</button>
       </div>
       <p id="review-identity" class="quiet"></p>
       <nav class="review-navigation" aria-label="검수 문항 이동">
-        <button id="review-previous" type="button">이전 문항</button>
+        <button id="review-previous" data-icon="previous" type="button">이전 문항</button>
         <span id="review-position" role="status"></span>
-        <button id="review-next" type="button">다음 문항</button>
+        <button id="review-next" data-icon="next" type="button">다음 문항</button>
       </nav>
       <nav class="review-tabs" aria-label="검수 화면 전환">
         <button type="button" data-review-tab="source" aria-pressed="false">
@@ -500,9 +492,9 @@
           <p id="review-preview-note" class="quiet"></p>
           <div id="review-pdf" hidden>
             <div class="actions">
-              <button id="pdf-previous" type="button">이전 페이지</button
+              <button id="pdf-previous" data-icon="previous" type="button">이전 페이지</button
               ><span id="pdf-page-state" role="status"></span
-              ><button id="pdf-next" type="button">다음 페이지</button>
+              ><button id="pdf-next" data-icon="next" type="button">다음 페이지</button>
             </div>
             <div class="pdf-zoom" aria-label="PDF 배율">
               <button id="pdf-zoom-out" type="button" aria-label="PDF 축소">
@@ -512,7 +504,7 @@
               <button id="pdf-zoom-in" type="button" aria-label="PDF 확대">
                 +
               </button>
-              <button id="pdf-fit" type="button">너비 맞춤</button>
+              <button id="pdf-fit" data-icon="fit" type="button">너비 맞춤</button>
             </div>
             <div class="pdf-canvas-wrap">
               <canvas

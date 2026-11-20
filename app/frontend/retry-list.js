@@ -38,7 +38,6 @@ export function setupRetryList({ api, openQuestion, openStudy = () => {} }) {
     if ($("retry-sort").value === "oldest") visible.reverse();
     if ($("retry-sort").value === "round") visible.sort((a, b) => b.round - a.round || a.session - b.session || a.number - b.number);
     $("retry-tools").hidden = hasLoaded && !rows.length;
-    $("retry-hint").hidden = hasLoaded && !rows.length;
     $("retry-count").textContent = hasLoaded
       ? `${rows.length}문항 중 ${visible.length}문항 표시`
       : "";

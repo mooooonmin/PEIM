@@ -1,6 +1,23 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
+test("아이콘 도구의 이름과 토글 상태는 조작 후에도 유지된다", async t => {
+  const f = await fixture(t);
+  for (const button of f.w.document.querySelectorAll('button[data-icon]')) {
+    assert.ok(button.getAttribute('aria-label'));
+    assert.equal(button.title, button.getAttribute('aria-label'));
+    assert.ok(button.querySelector('svg[aria-hidden="true"]'));
+  }
+  f.$('toggle-question').click();
+  assert.equal(f.$('toggle-question').getAttribute('aria-expanded'), 'false');
+  assert.equal(f.$('toggle-question').getAttribute('aria-label'), '문제 펼치기');
+  f.$('focus').click();
+  assert.equal(f.$('focus').getAttribute('aria-label'), '집중 모드 종료');
+  assert.ok(f.$('focus').querySelector('svg'));
+  f.$('toggle-compare-note').click();
+  assert.equal(f.$('learning-form').hidden, false);
+  assert.equal(f.$('toggle-compare-note').getAttribute('aria-label'), '보완 메모 접기');
+});
 test("늦은 회차 응답이 나중에 완료된 검색을 지우지 않는다", async t => {
   const f = await fixture(t); let release;
   f.state.gate = new Promise(r => release = r);

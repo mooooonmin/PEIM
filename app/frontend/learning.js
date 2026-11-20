@@ -130,7 +130,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
       message(
         data.revision
           ? "저장된 복습 정보입니다."
-          : "보완할 내용을 적고 다시 풀 문항을 표시해 보세요.",
+          : "",
       );
       if (restoreDraft) {
         try {
@@ -230,7 +230,7 @@ export function setupLearning({ api, renderMarkdown, cancelRender, saved }) {
         drafts.clear(draftKey(), value);
         showDrafts();
       } catch {}
-      message("복습 정보를 저장했습니다. 내 답안과 저장 이력은 유지됩니다.");
+      message("복습 정보를 저장했습니다.");
       saved(question.id, result);
     } catch (error) {
       message(`저장하지 못했습니다. 입력 내용은 유지됩니다. ${error.message}`);

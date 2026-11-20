@@ -38,7 +38,10 @@ export function setupWritingGuide({ api }) {
       const data = await api(`/questions/${encodeURIComponent(question.id)}/writing-guide`);
       if (seq !== sequence) return;
       const fragment = document.createDocumentFragment();
-      fragment.append(node('p', data.notice));
+      const notice = node('p', data.kind === 'example' ? '문항별 작성 예시 · 비공식' : '자동 작성 틀 · 비공식');
+      notice.className = 'quiet';
+      notice.title = data.notice;
+      fragment.append(notice);
       function list(title, items, ordered = false) {
         fragment.append(node('h3', title));
         const ul = document.createElement(ordered ? 'ol' : 'ul');
@@ -49,7 +52,6 @@ export function setupWritingGuide({ api }) {
       list('작성 목차', data.outline.map(item => `${item.title} — ${item.hint}`), true);
       list(data.kind === 'example' ? '필수 키워드' : '출제어·연결 주제 (검토할 후보)', data.keywords);
       const example = document.createElement('section');
-      example.append(node('h3', '문항별 작성 예시'));
       if (data.example) {
         example.append(node('p', data.provenance));
         const body = document.createElement('div');
@@ -59,7 +61,7 @@ export function setupWritingGuide({ api }) {
         example.append(body);
       } else example.append(node('p', '등록된 작성 예시가 없습니다. 작성 가이드 탭과 주제 상세 해설을 활용하세요.'));
       $('writing-example').replaceChildren(example);
-      fragment.append(node('h3', '자가 점검'), node('p', '체크는 현재 문항을 보는 동안만 유지됩니다. 남길 내용은 보완 메모에 기록하세요.'));
+      fragment.append(node('h3', '자가 점검 (저장 안 됨)'));
       for (const item of data.checklist) {
         const label = document.createElement('label');
         label.className = 'guide-check';

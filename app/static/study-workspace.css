@@ -1,4 +1,32 @@
 /* Two-column study workspace. Existing management screens keep their own styles. */
+button.icon-control,
+#study button.icon-control {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  padding: 8px;
+  flex: none;
+  line-height: 1;
+}
+button.icon-control svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+button.icon-control[aria-expanded="true"],
+button.icon-control[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--surface-selected);
+}
+.collection-page > .collection-head { justify-content: flex-end; margin-bottom: 8px; }
+#study .answer-pane .answer-tools { justify-content: flex-end; }
+#study .icon-control.disclosure-button::after { content: none; }
+#study .question-pane > .section-head { justify-content: flex-end; }
 #study.study-workspace {
   --muted: #526071;
   display: flex;
