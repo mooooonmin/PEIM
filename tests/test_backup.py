@@ -9,10 +9,55 @@ from unittest.mock import patch
 import subprocess
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
-from backup import checked_archive, main
+from backup import checked_archive, main, restore_original
 
 
 class BackupTests(unittest.TestCase):
+    def test_publish_never_replaces_an_existing_original(self):
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / 'test.pdf'
+            target.write_bytes(b'existing original')
+            with self.assertRaises(FileExistsError):
+                restore_original(target, b'backup original')
+            self.assertEqual(target.read_bytes(), b'existing original')
+            self.assertEqual(list(Path(folder).iterdir()), [target])
+
+    def test_interrupted_file_restore_can_retry_without_partial_original(self):
+        archive = self.archive({'database.sql': b'SELECT 1;', 'exams/test.pdf': b'complete original'})
+        with tempfile.TemporaryDirectory() as folder:
+            calls = []
+            def docker(args, **kwargs):
+                calls.append(args)
+                output = json.dumps({'services': {'web': {'volumes': [
+                    {'target': '/exams', 'type': 'bind', 'source': folder}]}}}).encode() if 'config' in args else b''
+                return subprocess.CompletedProcess(args, 0, stdout=output)
+            class InterruptedWriter:
+                def __init__(self, stream): self.stream = stream
+                def __getattr__(self, name): return getattr(self.stream, name)
+                def __enter__(self): return self
+                def __exit__(self, *args): return self.stream.__exit__(*args)
+                def write(self, data):
+                    self.stream.write(data[:3])
+                    self.stream.flush()
+                    raise OSError('simulated interrupted write')
+            original_open, original_temp = Path.open, tempfile.NamedTemporaryFile
+            def open_file(path, mode='r', *args, **kwargs):
+                stream = original_open(path, mode, *args, **kwargs)
+                return InterruptedWriter(stream) if mode == 'xb' else stream
+            def temporary(*args, **kwargs):
+                return InterruptedWriter(original_temp(*args, **kwargs))
+            with patch('backup.subprocess.run', side_effect=docker), patch.object(sys, 'argv', [
+                'backup.py', 'restore', str(archive), '--confirm-replace-database']):
+                with patch.object(Path, 'open', open_file), patch('tempfile.NamedTemporaryFile', temporary):
+                    with self.assertRaisesRegex(OSError, 'interrupted write'):
+                        main()
+                self.assertFalse((Path(folder) / 'test.pdf').exists())
+                self.assertFalse(any('psql' in args for args in calls))
+                self.assertEqual(list(Path(folder).iterdir()), [])
+                main()
+                self.assertEqual((Path(folder) / 'test.pdf').read_bytes(), b'complete original')
+                self.assertTrue(any('psql' in args for args in calls))
+
     def archive(self, files, alter=False):
         temp = tempfile.TemporaryDirectory()
         self.addCleanup(temp.cleanup)

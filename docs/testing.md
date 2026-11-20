@@ -22,6 +22,7 @@ python scripts/export_dataset.py
 [콘텐츠 파이프라인](content-pipeline.md)을 참고하세요.
 
 호스트 unittest는 데이터·백업 검사를 실행하고 앱 통합 검사는 건너뜁니다.
+백업 검사는 임시 폴더와 모의 Docker 명령으로 파일 쓰기 중단·재시도, 기존 원본 충돌과 SQL 트랜잭션을 확인합니다.
 앱 테스트는 아래 Docker 명령으로 실행해야 합니다.
 
 ## 앱 통합 검사

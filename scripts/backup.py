@@ -2,8 +2,10 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
+import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -11,6 +13,24 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
+
+
+def restore_original(target, content):
+    """Publish complete bytes exclusively; a failed write never claims the final name."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=".peim-upload-restore-", dir=target.parent, delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+        if digest(temporary.read_bytes()) != digest(content):
+            raise ValueError(f"Restored file hash mismatch: {target.name}")
+        # Same-directory hard link is atomic and cannot replace an existing file.
+        os.link(temporary, target)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def checked_archive(path):
@@ -93,8 +113,7 @@ def main():
                     continue
                 target = folder / name.split("/")[1]
                 if not target.exists():
-                    with target.open("xb") as stream:
-                        stream.write(content)
+                    restore_original(target, content)
             # Replace the app schema and restore together; any SQL failure rolls both back.
             sql = b"DROP SCHEMA public CASCADE;\nCREATE SCHEMA public;\n" + files["database.sql"]
             run("exec", "-T", "db", "psql", "-U", "peim", "-d", "peim", "-v", "ON_ERROR_STOP=1", "--single-transaction", input=sql, stdout=subprocess.DEVNULL)
