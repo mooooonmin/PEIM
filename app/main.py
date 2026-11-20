@@ -2,15 +2,16 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 import hashlib
+from io import BytesIO
 import json
 import os
 from pathlib import Path
 import tempfile
 import uuid
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, quote
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from pypdf import PdfReader
@@ -102,6 +103,14 @@ def attachment_path(row):
     if path.parent != exam_dir() or not path.is_file():
         raise HTTPException(404, "원본 파일이 없습니다. 시험지 폴더 연결을 확인해 주세요.")
     return path
+
+
+def read_attachment(row):
+    path = attachment_path(row)
+    content = path.read_bytes()
+    if hashlib.sha256(content).hexdigest() != row["sha256"]:
+        raise HTTPException(409, "원본 파일이 등록 당시와 다릅니다. 원본을 확인해 주세요.")
+    return path, content
 
 
 @app.get("/api/health")
@@ -240,9 +249,10 @@ def exams():
 def original(aid: str):
     with connect() as db:
         row = require_row(db.execute("SELECT * FROM attachments WHERE id=%s", (aid,)).fetchone())
-    path = attachment_path(row)
-    return FileResponse(path, media_type="application/pdf" if row["format"] == "pdf" else "application/octet-stream",
-                        filename=path.name, content_disposition_type="inline" if row["format"] == "pdf" else "attachment")
+    path, content = read_attachment(row)
+    disposition = "inline" if row["format"] == "pdf" else "attachment"
+    return Response(content, media_type="application/pdf" if row["format"] == "pdf" else "application/octet-stream",
+                    headers={"Content-Disposition": f"{disposition}; filename*=utf-8''{quote(path.name)}"})
 
 
 @app.post("/api/exams/upload")
@@ -318,7 +328,8 @@ def extract(aid: str):
     if row["format"] != "pdf":
         raise HTTPException(422, "현재 문항 추출은 PDF만 지원합니다.")
     try:
-        reader = PdfReader(attachment_path(row))
+        _, content = read_attachment(row)
+        reader = PdfReader(BytesIO(content))
         pages = [{"page": i + 1, "text": page.extract_text() or ""} for i, page in enumerate(reader.pages)]
         candidates = parse_round("\n".join(p["text"] for p in pages), row["round"])
         result = {"pages": pages, "candidates": candidates,
@@ -381,8 +392,14 @@ def register_question(round_number: int, value: NewQuestion):
     with connect() as db:
         require_row(db.execute("SELECT id FROM exams WHERE id=%s FOR UPDATE", (eid,)).fetchone())
         attachment = require_row(db.execute("SELECT * FROM attachments WHERE id=%s AND exam_id=%s", (value.attachment_id, eid)).fetchone())
-        page_count = attachment["data"].get("page_count")
-        if value.page and (not page_count or value.page > page_count):
+        if attachment["format"] != "pdf":
+            raise HTTPException(422, "새 문항 등록은 PDF 원본에서만 지원합니다.")
+        _, content = read_attachment(attachment)
+        try:
+            page_count = len(PdfReader(BytesIO(content)).pages)
+        except Exception as exc:
+            raise HTTPException(422, "PDF 페이지를 읽을 수 없습니다.") from exc
+        if value.page and value.page > page_count:
             raise HTTPException(422, "확인된 PDF 페이지 범위 안에서 입력해 주세요.")
         require_row(db.execute("SELECT id FROM topics WHERE id=%s", (value.topic_id,)).fetchone(), "주제를 선택해 주세요.")
         if db.execute("SELECT id FROM questions WHERE id=%s", (qid,)).fetchone():
@@ -447,11 +464,9 @@ def review_question(qid: str, value: QuestionReview):
             if source.page_start is not None:
                 if attachment["format"] != "pdf":
                     raise HTTPException(422, "페이지 연결은 PDF에서만 지원합니다.")
-                path = attachment_path(attachment)
-                if hashlib.sha256(path.read_bytes()).hexdigest() != attachment["sha256"]:
-                    raise HTTPException(409, "원본 파일이 등록 당시와 다릅니다. 원본을 확인해 주세요.")
+                _, content = read_attachment(attachment)
                 try:
-                    count = len(PdfReader(path).pages)
+                    count = len(PdfReader(BytesIO(content)).pages)
                 except Exception as exc:
                     raise HTTPException(422, "PDF 페이지를 읽을 수 없습니다.") from exc
                 if source.page_end > count:
