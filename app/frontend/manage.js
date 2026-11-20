@@ -1,3 +1,4 @@
+import { setIconLabel } from "./icons.js";
 import { renderFilterChips } from "./filter-chips.js";
 const $ = (id) => document.getElementById(id);
 const statuses = {
@@ -111,6 +112,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
         "aria-label",
         `${q.round}회 ${q.session}교시 ${q.number}번 검수·수정`,
       );
+      setIconLabel(button, button.getAttribute("aria-label"), "edit");
       button.onclick = () =>
         openReview(
           q.id,
@@ -184,7 +186,7 @@ export function setupManagement({ api, openReview, loadUploads }) {
   $("managed-filter-toggle").onclick = () => {
     const expanded = $("managed-filter-toggle").getAttribute("aria-expanded") !== "true";
     $("managed-filter-toggle").setAttribute("aria-expanded", String(expanded));
-    $("managed-filter-toggle").textContent = expanded ? "필터 접기" : "필터 보기";
+    setIconLabel($("managed-filter-toggle"), expanded ? "필터 접기" : "필터 보기");
     $("managed-filter-controls").dataset.expanded = String(expanded);
   };
   $("managed-refresh").onclick = refreshQuestions;

@@ -1,3 +1,4 @@
+import { setIconLabel } from "./icons.js";
 const $ = (id) => document.getElementById(id);
 
 export function setupStudyLayout() {
@@ -43,9 +44,7 @@ export function setupStudyLayout() {
     notesOpen = open;
     $("learning-form").hidden = !open;
     $("toggle-compare-note").setAttribute("aria-expanded", String(open));
-    $("toggle-compare-note").textContent = open
-      ? "보완 메모 접기"
-      : "보완 메모 펼치기";
+    setIconLabel($("toggle-compare-note"), open ? "보완 메모 접기" : "보완 메모 펼치기");
     restore();
   }
   function drawer(open) {
@@ -59,7 +58,7 @@ export function setupStudyLayout() {
   $("toggle-question").onclick = () => {
     const collapsed = writing.classList.toggle("question-collapsed");
     $("toggle-question").setAttribute("aria-expanded", String(!collapsed));
-    $("toggle-question").textContent = collapsed ? "문제 펼치기" : "문제 접기";
+    setIconLabel($("toggle-question"), collapsed ? "문제 펼치기" : "문제 접기", collapsed ? "expand" : "collapse");
   };
   for (const id of ["learning-topic", "learning-variant", "reload-reference"])
     $(id).addEventListener(
@@ -84,7 +83,7 @@ export function setupStudyLayout() {
       notes(false);
       writing.classList.remove("question-collapsed");
       $("toggle-question").setAttribute("aria-expanded", "true");
-      $("toggle-question").textContent = "문제 접기";
+      setIconLabel($("toggle-question"), "문제 접기", "collapse");
     },
   };
 }
