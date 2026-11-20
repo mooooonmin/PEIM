@@ -24,6 +24,7 @@ export function setupUploadDraft() {
     stash(); event.preventDefault(); event.returnValue = '';
   });
   return {
+    value,
     stash,
     allowReplace() { stash(); return !dirty() || window.confirm('작성 중인 등록 내용을 바꾸시겠습니까? 시험지별 마지막 초안은 이 탭에 임시 보관됩니다.'); },
     open(attachment) {
@@ -39,8 +40,10 @@ export function setupUploadDraft() {
     },
     candidate() { return candidate; },
     acceptCandidate() { candidate = $('candidates').value; stash(); },
-    saved() {
-      baseline = JSON.stringify(value()); memory.delete(key);
+    saved(submitted) {
+      baseline = JSON.stringify(submitted);
+      if (dirty()) { stash(); return; }
+      memory.delete(key);
       try { sessionStorage.removeItem(key); } catch {}
     },
   };

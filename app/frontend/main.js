@@ -897,7 +897,8 @@ $("extract").onclick = safe(async () => {
     if (sequence === reviewSequence) {
       extraction = result;
       displayExtraction();
-      $("review-fields").disabled = false;
+      $("review-fields").disabled = registrationBusy;
+      $("candidates").disabled = registrationBusy;
     }
   } finally {
     if (sequence === reviewSequence) $("extract").disabled = false;
@@ -959,6 +960,7 @@ $("question-form").onsubmit = async (e) => {
   const option = [...$("topic-options").options].find(
     (o) => o.value === $("topic-search").value,
   );
+  const submitted = uploadDraft.value();
   try {
     if (!extraction || $("review-fields").disabled)
       throw new Error("선택한 시험지의 추출 정보를 불러온 뒤 등록해 주세요.");
@@ -986,7 +988,7 @@ $("question-form").onsubmit = async (e) => {
       "문항을 등록했습니다. 학습 화면에서 답안을 작성할 수 있습니다.",
     );
     $("reviewed").checked = false;
-    uploadDraft.saved();
+    uploadDraft.saved(submitted);
     nav = await api("/navigation");
     renderNavigation();
     await loadExams();

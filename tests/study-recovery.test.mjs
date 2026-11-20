@@ -54,6 +54,28 @@ test('등록 요청 중 시험지 전환을 막고 실패하면 입력을 유지
   assert.equal(f.$('new-question').value, '등록 대기 문항');
   assert.equal(f.$('review-fields').disabled, false);
 });
+test('늦은 추출 응답은 등록 잠금을 풀지 않고 제출 이후 초안을 지우지 않는다', async t => {
+  const f = await registration(t);
+  f.$('new-question').value = '제출 문항';
+  f.$('topic-search').value = f.$('topic-options').options[0].value;
+  let extracted, registered;
+  const fetch = f.w.fetch;
+  f.w.fetch = (url, options) => {
+    if (String(url).endsWith('/extract')) return new Promise(r => { extracted = () => r({ok:true,json:async()=>({candidates:[],pages:[],message:'완료'})}); });
+    if (String(url).endsWith('/exams/140/questions')) return new Promise(r => { registered = () => r({ok:true,json:async()=>({id:'new'})}); });
+    return fetch(url, options);
+  };
+  const extracting = f.$('extract').onclick();
+  const registering = f.$('question-form').onsubmit({target:f.$('question-form'),preventDefault(){}});
+  await until(() => !!registered && !!extracted);
+  extracted(); await extracting;
+  assert.equal(f.$('review-fields').disabled, true);
+  assert.equal(f.$('candidates').disabled, true);
+  // A programmatic edit must also remain distinguishable from the submitted snapshot.
+  f.$('new-question').value = '제출 이후 문항';
+  registered(); await registering;
+  assert.equal(JSON.parse(f.w.sessionStorage.getItem('peim:registration:a140'))['new-question'], '제출 이후 문항');
+});
 test("아이콘 도구의 이름과 토글 상태는 조작 후에도 유지된다", async t => {
   const f = await fixture(t);
   for (const button of f.w.document.querySelectorAll('button[data-icon]')) {
