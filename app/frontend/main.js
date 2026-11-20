@@ -16,6 +16,7 @@ let nav,
   selectedExam = "",
   resultQuery = "",
   current = null,
+  pendingStudyQuestion = null,
   rows = [];
 let timer,
   saving = null,
@@ -299,7 +300,7 @@ function updateURL() {
   if (currentView === "retry") params.set("view", "retry");
   if (selectedTopic) params.set("topic", selectedTopic);
   if (selectedExam) params.set("exam", selectedExam);
-  if (current) params.set("q", current.id);
+  if (current || pendingStudyQuestion) params.set("q", current?.id || pendingStudyQuestion);
   history.replaceState(null, "", "?" + params);
 }
 async function chooseFilter(topic, exam) {
@@ -419,6 +420,7 @@ async function selectQuestion(qid) {
   if (current?.id === q.id && current.answer.revision > q.answer.revision)
     q.answer = current.answer;
   current = q;
+  pendingStudyQuestion = null;
   conflict = false;
   dirty = false;
   displayQuestion();
@@ -675,6 +677,7 @@ async function showView(manage, { answerAlreadySelected = false } = {}) {
   skip.href = manage ? "#manage" : "#study";
   $("study-tab").setAttribute("aria-current", manage ? "false" : "page");
   $("manage-tab").setAttribute("aria-current", manage ? "page" : "false");
+  if (!manage && pendingStudyQuestion) await selectQuestion(pendingStudyQuestion);
   updateURL();
   if (manage) await management.load();
   return true;
@@ -998,7 +1001,13 @@ async function start() {
       ),
   );
   const qid = params.get("q") || rows[0]?.id;
-  if (qid) await selectQuestion(qid);
+  if (currentView === "study") {
+    if (qid) await selectQuestion(qid);
+  } else {
+    // A hidden study draft must not block the requested startup page.
+    pendingStudyQuestion = qid || null;
+    displayQuestion();
+  }
   renderQuestionList();
   if (currentView === "manage") await showView(true);
   else if (currentView === "retry") await showRetryLibrary();

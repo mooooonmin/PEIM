@@ -1,7 +1,33 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { fixture, until, untilSlow } from "./helpers/study-fixture.mjs";
-for (const fails of [false, true]) test(`이력 조회 중 입력은 복원 전에 저장하며 저장 실패=${fails}이면 복원하지 않는다`, async t => {
+for (const view of ["manage", "retry"]) test(`${view} 직접 접근은 충돌 초안에 막히지 않고 학습 진입 시 복구한다`, async t => {
+  const draft = {body:"충돌한 기존 초안",status:"draft",revision:0};
+  const f = await fixture(t, {
+    url:`http://localhost:8000/?view=${view}&mode=exam&exam=exam-140&q=q1`,
+    readyView:view === "manage" ? "manage" : "retry-library",
+    storage:{"peim:draft:q1":draft},
+  });
+  assert.equal(f.$("study").hidden, true);
+  assert.equal(new URL(f.w.location.href).searchParams.get("q"), "q1");
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:draft:q1")).body, draft.body);
+  await f.$("study-tab").onclick();
+  assert.equal(f.$("study").hidden, false);
+  assert.equal(f.$("answer").value, draft.body);
+  assert.equal(f.$("save-error").hidden, false);
+});
+test("다시 풀기 직접 진입 후 다른 문항을 풀어도 이전 초안을 보존한다", async t => {
+  const f = await fixture(t, {
+    url:"http://localhost:8000/?view=retry&mode=exam&exam=exam-140&q=q1",
+    readyView:"retry-library", storage:{"peim:draft:q1":{body:"q1 초안",status:"draft",revision:0}},
+  });
+  await until(() => f.$("retry-items").querySelector("button"));
+  await f.$("retry-items").querySelector("button").onclick();
+  assert.equal(f.$("answer").value, "q2 기존 답안");
+  assert.equal(JSON.parse(f.w.localStorage.getItem("peim:draft:q1")).body, "q1 초안");
+  assert.equal(new URL(f.w.location.href).searchParams.get("q"), "q2");
+});
+for (const fails of [false, true]) test(`이력 조회 중 입력 보존: ${fails ? "저장 실패 시 복원 중단" : "저장 후 복원"}`, async t => {
   const f = await fixture(t), writes = [];
   let release, requested = false;
   const gate = new Promise(r => release = r), fetch = f.w.fetch;
