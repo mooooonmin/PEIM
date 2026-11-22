@@ -34,7 +34,8 @@
 - 위협·악성코드 관련 6개 주제 [PR #51](https://github.com/mooooonmin/PEIM/pull/51) 병합.
 - 정보 탈취·스파이웨어·크라임웨어 3개 주제 [PR #52](https://github.com/mooooonmin/PEIM/pull/52) 병합.
 - BPFdoor·미라이·스턱스넷 3개 주제 [PR #53](https://github.com/mooooonmin/PEIM/pull/53) 병합.
-- Meltdown·Spectre·TOCTOU 3개 주제 전문 검토·교정 통합 중.
+- Meltdown·Spectre·TOCTOU 3개 주제 [PR #54](https://github.com/mooooonmin/PEIM/pull/54) 병합.
+- 인젝션·포맷 스트링·개발보안 관련 7개 주제 전문 검토·교정 통합 중. 이전 SQL 인젝션·XSS 편집본도 전문 대조 범위로 확대.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
