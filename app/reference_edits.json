@@ -9190,5 +9190,423 @@
         "Nutanix·VxRail·PowerFlex·HPE 등의 현행 제품 지원·RF/EC 동작·성능은 이번 Microsoft 출처로 이것은 확인할 수 없습니다."
       ]
     }
+  },
+  "t-de300924": {
+    "short": {
+      "source_sha256": "1b3dcbea39b438c78ae59795c59bbb69a1660db2bc1317d24f8e1086404ffe62",
+      "body": "## 1. 접근제어 모델의 개요\n- 정의: 주체(Subject)가 객체(Object)에 접근하는 규칙을 [[confidentiality|기밀성]]·[[integrity|무결성]] 관점에서 수학적·형식적으로 정의한 보안 정책 모델\n- 필요성: 기업 DB·국방 시스템의 정보 유출 및 변조 방지, [[reference-monitor|참조 모니터]] 구현 기준 제공\n\n## 2. 접근제어 모델의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[주체 Subject] -->|접근 요청| RM[\"참조 모니터(보안 커널)\"]\n  RM -->|규칙 판정| O[객체 Object]\n  P[보안 정책 모델 BLP·Biba·Clark-Wilson] --> RM\n```\n| 구성요소 | 역할 |\n|---|---|\n| 주체·객체 | 접근 주체(사용자·프로세스), 접근 대상(파일·DB) |\n| [[security-label|보안 등급]] | 비밀등급(Top Secret~Unclassified)과 범주 부여 |\n| 참조 모니터 | 모든 접근을 중재, 정책 규칙 강제 |\n\n비교의 Biba 규칙은 엄격 무결성 정책 기준이다. 모든 Biba 변형에 동일 규칙이 적용되는 것은 아니다. 레이블 절차는 격자 모델 예이며 Clark-Wilson은 TP·CDI·IVP와 인증/강제 규칙으로 설명한다.\n\n## 3. 접근제어 모델의 유형 비교\n| 구분 | [[bell-lapadula-model|BLP 모델]] | [[biba-model|Biba 모델]] | [[clark-wilson-model|Clark-Wilson 모델]] |\n|---|---|---|---|\n| 목표 | 기밀성 | 무결성 | 무결성(상용) |\n| 핵심 규칙 | No Read Up, No Write Down(*-속성) | No Read Down, No Write Up | 적격 트랜잭션, [[separation-of-duty|직무 분리]] |\n| 적용 | 군·정부 [[mandatory-access-control|MAC]] | 무결성 중요 시스템 | 금융·회계 응용 |\n\n## 4. 고려사항\n- DB 접근제어는 [[discretionary-access-control|DAC]]·MAC·[[role-based-access-control|RBAC]] 조합, [[least-privilege|최소 권한]] 원칙 적용\n- BLP는 무결성 미보장, Biba는 기밀성 미보장으로 상호 보완 설계 필요",
+      "sources": [
+        {
+          "title": "Clark·Wilson 1987 원 논문",
+          "url": "https://theory.stanford.edu/~ninghui/courses/Fall03/papers/clark_wilson.pdf",
+          "scope": "CDI·UDI·TP·IVP와 인증/강제 규칙 및 응용별 인증 부담"
+        },
+        {
+          "title": "NIST RBAC FAQ",
+          "url": "https://csrc.nist.gov/projects/role-based-access-control/faqs",
+          "scope": "역할·세션·계층·정적/동적 직무 분리"
+        },
+        {
+          "title": "NIST SP 800-162",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
+          "scope": "ABAC 주체·객체·연산·환경"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. Clark-Wilson 구성과 한계, RBAC/ABAC 결정 요소와 모델별 적용 전제를 대조.",
+      "unresolved": [
+        "Biba 원 보고서는 스캔 PDF로 본문 추출 불가. 엄격 정책 외 변형·BLP 정식 속성은 원 보고서 추가 대조 필요.",
+        "개인정보 안전성 확보조치 현행 고시의 3년 보관 조항과 SELinux/Oracle Label Security 구현 세부는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "d9a6e4a4dbcf2de9e4b6256d43b295bf221c1c7cb391f205ecb4730a70637f9d",
+      "body": "## 1. 접근제어 모델의 개요\n### 가. 정의\n- 주체(Subject)의 객체(Object)에 대한 접근 권한을 [[confidentiality|기밀성]]·[[integrity|무결성]] 보호 목표에 따라 형식적 규칙으로 정의한 보안 정책 모델\n### 나. 등장배경 / 필요성\n- 1970년대 미 국방부의 다중 등급 보안(MLS) 요구, 상용 환경의 데이터 변조·개인정보 유출 방지 요구\n- [[personal-information-protection-act|개인정보보호법]] 제29조 안전조치의무에 따른 DB 접근권한 관리 근거\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| [[reference-monitor|참조 모니터]] | 모든 접근을 중재하는 추상 개념, [[security-kernel|보안 커널]]로 구현 |\n| [[security-label|보안 등급]] | 비밀등급(Top Secret, Secret, Confidential, Unclassified)과 범주(Category)의 격자 구조 |\n| 접근 모드 | Read, Write, Append, Execute 등 주체가 객체에 수행하는 연산 |\n\n## 2. 접근제어 모델의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph G1[\"기밀성 모델\"]\n    BLP[\"BLP: No Read Up / No Write Down\"]\n  end\n  subgraph G2[\"무결성 모델\"]\n    BIBA[\"Biba: No Read Down / No Write Up\"]\n    CW[\"Clark-Wilson: TP·CDI·IVP\"]\n  end\n  S[주체] --> RM[\"참조 모니터\"]\n  RM --> O[객체]\n  BLP --> RM\n  BIBA --> RM\n  CW --> RM\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 주체·객체 | 접근 요청자(사용자·프로세스), 보호 대상(파일·DB 레코드) | 식별·[[authentication|인증]] |\n| 보안 정책 | 허용 접근 규칙 집합 | [[lattice-based-access-control|격자 기반 접근제어]] |\n| 참조 모니터 | 정책 규칙 강제, 우회 불가·검증 가능·항상 호출 | 보안 커널, [[mandatory-access-control|MAC]] |\n| 감사 추적 | 접근 기록 보존 | [[audit-log|감사 로그]], [[accountability|책임추적성]] |\n### 다. 동작 절차\n1. 주체 식별·인증 후 보안 등급(Clearance) 부여\n2. 객체에 보안 등급(Classification) 레이블링\n3. 접근 요청 시 참조 모니터가 모델 규칙(지배 관계) 판정\n4. 허용·거부 결정 및 감사 로그 기록\n\n비교의 Biba 규칙은 엄격 무결성 정책 기준이다. 모든 Biba 변형에 동일 규칙이 적용되는 것은 아니다. 레이블 절차는 격자 모델 예이며 Clark-Wilson은 TP·CDI·IVP와 인증/강제 규칙으로 설명한다.\n\n## 3. 접근제어 모델의 상세\n### 가. BLP·Biba·Clark-Wilson 모델 비교\n| 구분 | [[bell-lapadula-model|BLP 모델]] | [[biba-model|Biba 모델]] | [[clark-wilson-model|Clark-Wilson 모델]] |\n|---|---|---|---|\n| 보호 목표 | 기밀성(정보 유출 방지) | 무결성(비인가 변조 방지) | 상용 무결성(내·외부 일관성) |\n| 단순 보안 속성 | No Read Up: 상위 등급 읽기 금지 | No Read Down: 하위 등급 읽기 금지 | 사용자는 TP를 통해서만 CDI 접근 |\n| 스타(*) 속성 | No Write Down: 하위 등급 쓰기 금지 | No Write Up: 상위 등급 쓰기 금지 | TP는 CDI를 유효 상태로만 변환 |\n| 추가 규칙 | 강한 스타 속성(동일 등급만 읽기·쓰기) | 호출 속성(Invocation): 상위 주체 호출 금지 | [[separation-of-duty|직무 분리]], IVP 무결성 검증 |\n| 한계 | 무결성 미보장, 비밀 채널·등급 변경 미고려 | 기밀성 미보장, 상용 적용 어려움 | 구현 복잡, 응용별 TP·IVP 인증과 직무 분리의 정확한 구현·운영 필요 |\n| 적용 | 군·정부 MLS, SELinux | 무결성 중시 OS·펌웨어 | 금융·회계·ERP 트랜잭션 |\n- Clark-Wilson 구성: CDI(제한된 데이터), UDI(비제한 데이터), TP(적격 트랜잭션), IVP(무결성 검증 절차)\n- 보완 모델: [[brewer-nash-model|Brewer-Nash(만리장성) 모델]]은 이해충돌 방지, 접근 이력에 따라 동적 통제\n\n### 나. 개인정보 유출 방지를 위한 DB 접근제어 모델 3가지\n| 구분 | [[discretionary-access-control|DAC]] | MAC | [[role-based-access-control|RBAC]] |\n|---|---|---|---|\n| 권한 결정 주체 | 객체 소유자 | 시스템(보안 관리자) 정책 | 조직 역할(Role) |\n| 통제 수단 | [[access-control-list|ACL]], GRANT·REVOKE | 보안 레이블 지배 관계 비교 | 역할-권한, 사용자-역할 매핑 |\n| 장점 | 유연, 구현 용이 | 중앙 통제, [[trojan-horse|트로이목마]] 유출 방지 | 관리 효율, [[least-privilege|최소 권한]]·직무 분리 용이 |\n| 단점 | 권한 전파 통제 어려움, 소유자 실수 | 경직, 운영 비용 높음 | 역할 폭증, 세밀 통제 한계 |\n| DB 적용 | 뷰·테이블 단위 권한 부여 | 행 수준 보안 레이블(Oracle Label Security) | DBMS Role, 직무별 권한 묶음 |\n- 발전형: [[attribute-based-access-control|ABAC]]은 주체·객체·요청 연산·환경 속성 기반 동적 정책으로 RBAC 한계 보완\n\n## 4. 접근제어 모델 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 정책 설계 | 기밀성·무결성 요구 분석 후 BLP와 엄격 Biba를 동일한 등급 순서로 결합하면 동일 등급 읽기·쓰기로 제한될 수 있음; 기밀성·무결성 격자가 다르면 별도 분석하여 하이브리드 설계 |\n| DB 운영 | 접근권한 부여·변경·말소 기록 보관(국내 개인정보 규정의 3년 요건은 해당 현행 고시·대상 범위를 추가 확인), [[database-encryption|DB 암호화]]와 병행 |\n| 관리 | 정기 권한 검토(Recertification), 퇴직·전보 시 즉시 회수 |\n| 발전방향 | ABAC·정책 엔진 기반 [[zero-trust|제로 트러스트]] 동적 접근제어로 진화 |\n\n## 5. 결론\n- 접근제어 모델은 보호 목표에 따라 선택·결합해야 하며, DB 환경에서는 RBAC을 기본으로 MAC 레이블과 ABAC 속성을 보강하여 개인정보 유출을 예방하는 것이 핵심",
+      "sources": [
+        {
+          "title": "Clark·Wilson 1987 원 논문",
+          "url": "https://theory.stanford.edu/~ninghui/courses/Fall03/papers/clark_wilson.pdf",
+          "scope": "CDI·UDI·TP·IVP와 인증/강제 규칙 및 응용별 인증 부담"
+        },
+        {
+          "title": "NIST RBAC FAQ",
+          "url": "https://csrc.nist.gov/projects/role-based-access-control/faqs",
+          "scope": "역할·세션·계층·정적/동적 직무 분리"
+        },
+        {
+          "title": "NIST SP 800-162",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
+          "scope": "ABAC 주체·객체·연산·환경"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. Clark-Wilson 구성과 한계, RBAC/ABAC 결정 요소와 모델별 적용 전제를 대조.",
+      "unresolved": [
+        "Biba 원 보고서는 스캔 PDF로 본문 추출 불가. 엄격 정책 외 변형·BLP 정식 속성은 원 보고서 추가 대조 필요.",
+        "개인정보 안전성 확보조치 현행 고시의 3년 보관 조항과 SELinux/Oracle Label Security 구현 세부는 미확인."
+      ]
+    }
+  },
+  "t-3dd2be00": {
+    "short": {
+      "source_sha256": "cfad5c20f3b955ed9af9bbc4dd6e11cbae6834bf965f52da68c2607cac5c39ce",
+      "body": "## 1. 접근제어의 개요\n- 정의: 인가된 주체만이 허용된 방식으로 객체(자원)에 접근하도록 [[identification|식별]]·[[authentication|인증]]·[[authorization|인가]]·[[accountability|책임추적]]을 수행하는 보안 통제\n- 필요성: 암호화가 데이터 자체를 보호하는 반면 접근제어는 비인가 접근 자체를 차단, [[confidentiality|기밀성]]·[[integrity|무결성]]·[[availability|가용성]] 확보\n\n## 2. 접근제어의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] --> ID[식별] --> AU[인증] --> AZ[인가] --> R[자원]\n  AZ --> AC[책임추적·감사]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 정책(Policy) | 누가 무엇에 어떻게 접근 가능한지 규칙 정의 |\n| 절차(Procedure) | 식별→인증→인가→감사의 처리 흐름 |\n| 메커니즘(Mechanism) | [[access-control-list|ACL]]·[[capability-list|CL]]·보안 레이블 등 구현 수단 |\n\n## 3. 접근제어 통제정책 비교\n| 구분 | [[discretionary-access-control|DAC]] | [[mandatory-access-control|MAC]] | [[role-based-access-control|RBAC]] |\n|---|---|---|---|\n| 권한 결정 | 객체 소유자 | 시스템 보안 레이블 | 조직 역할 |\n| 구현 | ACL, GRANT | [[security-label|보안 등급]] 비교 | 역할-권한 매핑 |\n| 특징 | 유연, 유출 위험 | 엄격, 경직 | 관리 효율 |\n\n## 4. 고려사항\n- [[ldap|LDAP]] 디렉터리 기반 중앙 인증, [[multi-factor-authentication|다중 인증]]·[[least-privilege|최소 권한]] 적용\n- [[attribute-based-access-control|ABAC]]·[[zero-trust|제로 트러스트]] 기반 동적·지속적 접근제어로 발전",
+      "sources": [
+        {
+          "title": "RFC 4513",
+          "url": "https://www.rfc-editor.org/rfc/rfc4513.html",
+          "scope": "LDAP Bind 종류·빈 비밀번호·보호 채널"
+        },
+        {
+          "title": "RFC 6331",
+          "url": "https://www.rfc-editor.org/rfc/rfc6331.html",
+          "scope": "DIGEST-MD5 Historic 전환"
+        },
+        {
+          "title": "NIST SP 800-63-4 인증 모델",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63/model/",
+          "scope": "서로 다른 인증 요소와 동일 종류 중복의 구분"
+        },
+        {
+          "title": "NIST SP 800-162",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
+          "scope": "속성과 요청 연산에 따른 인가"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. LDAP 인증 흐름과 anonymous/unauthenticated 예외, DIGEST-MD5 상태, MFA와 ABAC의 요소 대조.",
+      "unresolved": [
+        "ACL/Capability 행렬과 BLP·Biba의 세부 형식 모델 원자료는 이 항목에서 재대조하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "3358c2e82ec63104d70972fb26fdb0895e38eff9c2fc122dd46393ec295d11e2",
+      "body": "## 1. 접근제어의 개요\n### 가. 정의\n- 자원에 대한 비인가 접근을 차단하고 인가된 주체에게만 허용된 권한을 부여하기 위해 [[identification|식별]]·[[authentication|인증]]·[[authorization|인가]]·[[accountability|책임추적]]을 수행하는 정책·절차·메커니즘의 집합\n### 나. 등장배경 / 필요성\n- 암호화와 접근제어는 상호 보완하는 통제이며 정보보호 방법 전체가 이 둘로만 나뉘는 것은 아님\n- 내부자 유출·권한 오남용 증가, 클라우드·원격근무로 경계가 사라지며 [[identity-and-access-management|IAM]] 중심 통제 필요\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 정책 | 조직의 접근 규칙 정의(DAC·MAC·RBAC·ABAC) |\n| 절차 | 정책을 집행하는 단계별 흐름(식별→인증→인가→감사) |\n| 메커니즘 | 정책을 기술적으로 구현하는 수단(ACL·CL·보안 레이블·[[reference-monitor|참조 모니터]]) |\n\n## 2. 접근제어의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  U[\"주체: 사용자·프로세스\"] --> I[\"1. 식별: ID 제시\"]\n  I --> A[\"2. 인증: 지식·소유·생체\"]\n  A --> Z[\"3. 인가: 정책 기반 권한 판정\"]\n  Z --> O[\"객체: 파일·DB·서비스\"]\n  Z --> L[\"4. 책임추적: 로그·감사\"]\n  D[\"디렉터리(LDAP)\"] --> A\n  P[정책 저장소] --> Z\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 식별 | 주체를 고유하게 구분 | ID, 인증서 DN |\n| 인증 | 주체 신원 검증 | 패스워드, [[otp|OTP]], 생체, [[multi-factor-authentication|MFA]], [[kerberos|Kerberos]] |\n| 인가 | 정책에 따라 권한 부여 | [[access-control-list|ACL]], [[capability-list|CL]], [[access-control-matrix|접근제어 행렬]] |\n| 책임추적 | 행위 기록·추적 | [[audit-log|감사 로그]], [[siem|SIEM]] |\n### 다. 동작 절차\n1. 식별: 사용자가 ID 또는 인증서 제시\n2. 인증: 지식(패스워드)·소유(토큰)·존재(생체) 요소 검증, 서로 다른 종류의 요소를 2개 이상 조합해야 MFA(패스워드+PIN은 단일 종류)\n3. 인가: 참조 모니터가 정책과 비교하여 접근 허용·거부\n4. 책임추적: 정책에 따른 접근 기록과 사후 감사; 로그만으로 [[non-repudiation|부인방지]]가 보장되지는 않음\n\n## 3. 접근제어의 상세\n### 가. 통제정책 비교\n| 구분 | [[discretionary-access-control|DAC]] | [[mandatory-access-control|MAC]] | [[role-based-access-control|RBAC]] | [[attribute-based-access-control|ABAC]] |\n|---|---|---|---|---|\n| 권한 결정 | 객체 소유자 재량 | 시스템의 [[security-label|보안 등급]] 비교 | 조직 내 역할 | 주체·객체·요청 연산·환경 속성 |\n| 메커니즘 | ACL, CL | 레이블, [[bell-lapadula-model|BLP]]·[[biba-model|Biba]] 규칙 | 역할-권한 매핑 | 정책 엔진(XACML) |\n| 장점 | 유연, 구현 용이 | 중앙 통제, 유출 방지 | 관리 효율, [[separation-of-duty|직무 분리]] | 세밀·동적 통제 |\n| 단점 | 권한 전파 통제 어려움 | 경직, 비용 | 역할 폭증 | 정책 복잡 |\n### 나. 구현 메커니즘\n| 메커니즘 | 설명 |\n|---|---|\n| ACL | 객체 기준으로 접근 가능한 주체·권한 목록 유지(열 기준) |\n| CL | 주체 기준으로 접근 가능한 객체·권한 목록 유지(행 기준) |\n| 접근제어 행렬 | 주체×객체 행렬에 권한 표기, ACL·CL의 모체 |\n| 보안 레이블 | 주체 등급과 객체 등급의 지배 관계로 판정 |\n| 참조 모니터 | 모든 접근 중재, 우회 불가·변조 불가·검증 가능 |\n### 다. LDAP 인증 흐름\n- [[ldap|LDAP]]: [[x-500|X.500]] 기반 [[directory-service|디렉터리 서비스]]에 TCP/IP로 접근하는 경량 프로토콜(389, LDAPS 636)\n```mermaid\nsequenceDiagram\n  participant C as 클라이언트\n  participant S as LDAP 서버\n  C->>S: 1. 연결 설정 (TCP 389 또는 LDAPS 636)\n  C->>S: 2. Bind 요청 (DN + 비밀번호 또는 SASL)\n  S->>S: 3. DN 검색 및 자격 검증\n  S-->>C: 4. Bind 응답 (성공·실패 코드)\n  C->>S: 5. Search·Compare 요청 (속성 조회)\n  S-->>C: 6. 검색 결과 반환\n  C->>S: 7. Unbind (세션 종료)\n```\n| Bind 유형 | 설명 |\n|---|---|\n| Anonymous Bind | 자격 없이 공개 속성 조회 |\n| Simple Bind | [[distinguished-name|DN]]과 비밀번호를 직접 사용; TLS 등 보호 채널 필요 |\n| [[sasl|SASL]] Bind | Kerberos 등 SASL 메커니즘 연계(DIGEST-MD5는 RFC 6331에서 Historic 전환) |\n- 응용 서버는 사용자가 입력한 ID로 DN을 검색하고 빈 비밀번호를 거부한 후 해당 DN으로 인증 Bind를 수행(unauthenticated Bind의 success는 신원 인증 성공이 아님), [[single-sign-on|SSO]]·[[radius|RADIUS]] 백엔드로 활용\n\n## 4. 접근제어 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 정책 | [[least-privilege|최소 권한]]·직무 분리, 정기 권한 재검토 |\n| 기술 | LDAP 평문 Bind 금지(LDAPS·StartTLS), 계정 잠금·MFA 적용 |\n| 운영 | 퇴직자 계정 즉시 회수, 특권 계정 [[privileged-access-management|PAM]] 통제 |\n| 발전방향 | 정적 RBAC에서 ABAC·[[zero-trust|제로 트러스트]] 기반 지속 검증형 접근제어로 진화 |\n\n## 5. 결론\n- 접근제어는 정책·절차·메커니즘이 일관되게 설계되어야 효과가 있으며, LDAP 등 중앙 인증 기반 위에 최소 권한과 지속 검증을 결합하는 것이 핵심",
+      "sources": [
+        {
+          "title": "RFC 4513",
+          "url": "https://www.rfc-editor.org/rfc/rfc4513.html",
+          "scope": "LDAP Bind 종류·빈 비밀번호·보호 채널"
+        },
+        {
+          "title": "RFC 6331",
+          "url": "https://www.rfc-editor.org/rfc/rfc6331.html",
+          "scope": "DIGEST-MD5 Historic 전환"
+        },
+        {
+          "title": "NIST SP 800-63-4 인증 모델",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63/model/",
+          "scope": "서로 다른 인증 요소와 동일 종류 중복의 구분"
+        },
+        {
+          "title": "NIST SP 800-162",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
+          "scope": "속성과 요청 연산에 따른 인가"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. LDAP 인증 흐름과 anonymous/unauthenticated 예외, DIGEST-MD5 상태, MFA와 ABAC의 요소 대조.",
+      "unresolved": [
+        "ACL/Capability 행렬과 BLP·Biba의 세부 형식 모델 원자료는 이 항목에서 재대조하지 않음."
+      ]
+    }
+  },
+  "t-66c5acac": {
+    "short": {
+      "source_sha256": "ac80aec9bd942e60dc1de3ad02888ad0edf04580711fc69830c38e5b7445d620",
+      "body": "## 1. 제로 트러스트의 개요\n- 정의: 네트워크 위치에 따른 암묵적 신뢰를 제거하고 모든 접근 요청을 \"절대 신뢰하지 말고 항상 검증(Never Trust, Always Verify)\"하는 보안 모델([[nist-sp-800-207|NIST SP 800-207]])\n- 필요성: 클라우드·원격근무로 [[perimeter-security|경계 기반 보안]] 붕괴, 내부자·[[lateral-movement|측면 이동]] 공격 증가\n\n## 2. 제로 트러스트의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[주체·단말] --> PEP[\"PEP(정책 시행점)\"] --> R[기업 자원]\n  PEP <--> PDP[\"PDP(정책 결정점): 정책 엔진 + 정책 관리자\"]\n  D[ID·단말·위협 정보·로그] --> PDP\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[policy-decision-point|PDP]] | 기준 충족 또는 점수 기반 평가로 접근 결정(숫자 점수 필수 아님) |\n| [[policy-enforcement-point|PEP]] | 세션 단위 연결 허용·차단·종료 |\n| 데이터 소스 | [[identity-and-access-management|IAM]], [[endpoint-detection-and-response|EDR]], [[siem|SIEM]], 위협 인텔리전스 |\n\n경계 기반 열은 위치만으로 과도하게 신뢰하는 단순 모델 예다. 기존 방화벽·VPN도 세밀한 권한·분할 정책을 적용할 수 있으며 제로 트러스트와 공존할 수 있다.\n\n## 3. 경계 기반 보안과 비교\n| 구분 | 경계 기반 보안 | 제로 트러스트 |\n|---|---|---|\n| 신뢰 기준 | 네트워크 위치(내부=신뢰) | ID·단말·컨텍스트 지속 검증 |\n| 통제 단위 | 네트워크 경계([[firewall|방화벽]]·[[vpn|VPN]]) | 자원·세션 단위 [[micro-segmentation|마이크로 세그멘테이션]] |\n| 권한 | 광범위·정적 | [[least-privilege|최소 권한]]·동적 |\n| 성숙도 | 단일 통제 | [[zero-trust-maturity-model|CISA ZTMM 2.0]] 5개 기둥·4단계 |\n\n## 4. 고려사항\n- 자산·ID 식별 선행, 단계적 도입(핵심 자원 우선), [[multi-factor-authentication|MFA]]·[[continuous-authentication|지속 인증]] 기반\n- 과기정통부 제로트러스트 가이드라인 2.0 성숙도 기준 자체 진단 후 로드맵 수립",
+      "sources": [
+        {
+          "title": "NIST SP 800-207",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf",
+          "scope": "세션별 자원 인가·PE/PA/PEP·기준/점수 기반 알고리즘·최근 인증 재사용"
+        },
+        {
+          "title": "CISA 공식 발표",
+          "url": "https://content.govdelivery.com/accounts/USDHSCISA/bulletins/3543f28",
+          "scope": "ZTMM v2의 2023-04 발표와 Traditional/Initial/Advanced/Optimal 4단계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 신뢰 점수의 필수성·매 요청 로그인 오해·경계 보안 비교의 적용 범위·성숙도 4단계 대조.",
+      "unresolved": [
+        "CISA 성숙도 PDF 접근 403으로 기둥별 최적 단계 상세 원문은 미확인.",
+        "국내 가이드라인·N2SF 적용 조건과 미국 행정명령의 현행 법적 의무 범위는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "daa0791466cc1d1379f56f6aa8f463d2cdd0d5475981d80e62e7ad5572f876c1",
+      "body": "## 1. 제로 트러스트의 개요\n### 가. 정의\n- 네트워크 내부·외부 위치에 기반한 암묵적 신뢰를 제거하고, 모든 주체·단말·자원 접근을 세션 단위로 지속 검증하여 [[least-privilege|최소 권한]]만 부여하는 보안 아키텍처([[nist-sp-800-207|NIST SP 800-207]], 2020)\n### 나. 등장배경 / 필요성\n- 클라우드·SaaS·원격근무 확산으로 [[perimeter-security|경계 기반 보안]]의 전제(내부=안전) 붕괴\n- [[apt|APT]]·내부자 위협이 경계 통과 후 [[lateral-movement|측면 이동]]으로 피해 확대\n- 미 행정명령 14028(2021) 연방기관 ZTA 의무화, 국내 과기정통부 제로트러스트 가이드라인 1.0(2023)·2.0(2024) 발표\n### 다. 핵심 원칙\n| 원칙 | 내용 |\n|---|---|\n| Never Trust, Always Verify | 접근 전 인증·인가 상태 평가; 정책에 따라 최근 인증 재사용·재인증 시점 결정 |\n| 최소 권한 | 필요한 자원에 필요한 시간만 접근 허용 |\n| 침해 가정(Assume Breach) | 내부도 이미 침해됐다고 가정, 가시성·세그멘테이션 강화 |\n\n## 2. 제로 트러스트의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph CP[\"제어 평면\"]\n    PE[\"정책 엔진(PE)\"] --> PA[\"정책 관리자(PA)\"]\n    IAM[\"IAM·ID 거버넌스\"] --> PE\n    EDR[\"단말 상태(EDR)\"] --> PE\n    TI[\"위협 인텔리전스·SIEM\"] --> PE\n  end\n  subgraph DP[\"데이터 평면\"]\n    S[주체·단말] --> PEP[\"정책 시행점(PEP)\"] --> R[기업 자원]\n  end\n  PA <--> PEP\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[policy-decision-point|PDP]](PE+PA) | 신뢰 알고리즘으로 접근 판정, PEP에 세션 설정 지시 | 기준/점수 기반 신뢰 알고리즘, 정책 엔진 |\n| [[policy-enforcement-point|PEP]] | 주체와 자원 사이 연결 허용·감시·종료 | [[zero-trust-network-access|ZTNA]] 게이트웨이, 에이전트 |\n| ID 관리 | 사용자·서비스 ID 인증 | [[identity-and-access-management|IAM]], [[multi-factor-authentication|MFA]], [[single-sign-on|SSO]] |\n| 단말 보안 | 단말 상태·준수 여부 평가 | [[endpoint-detection-and-response|EDR]], MDM |\n| 네트워크 | 자원 단위 격리 | [[micro-segmentation|마이크로 세그멘테이션]], [[software-defined-perimeter|SDP]] |\n| 가시성·분석 | 로그 수집·이상 탐지 | [[siem|SIEM]], UEBA |\n### 다. 동작 절차\n1. 주체가 PEP에 접근 요청, PEP는 PDP로 전달\n2. PE가 ID·단말 상태·위치·시간·위협 정보 기반 정책 기준 충족 여부 또는 신뢰 점수 평가\n3. PA가 판정 결과를 PEP에 전달, PEP가 세션 연결 허용 또는 차단\n4. 세션 중에도 상태 변화를 감시하여 [[continuous-authentication|지속 인증]]·재평가, 위험 시 세션 종료\n\n## 3. 제로 트러스트의 상세\n### 가. 경계 기반 보안과 제로 트러스트 비교\n위치만으로 과도하게 신뢰하는 단순 모델과 비교한다. 모든 기존 배포가 광범위 권한을 허용하는 것은 아니다.\n| 구분 | 경계 기반 보안(Trust Security) | 제로 트러스트 |\n|---|---|---|\n| 보안 원리 | 성(Castle-and-Moat): 경계 통과 후 내부 신뢰 | 암묵적 신뢰 제거, 모든 접근 명시적 검증 |\n| 통제 지점 | [[firewall|방화벽]], [[vpn|VPN]], IDS 등 네트워크 경계 | 자원 앞 PEP, ID·단말·데이터 중심 |\n| 접근 단위 | 네트워크 세그먼트 전체 | 자원·애플리케이션·세션 단위 |\n| 권한 | 정적·광범위(한 번 인증 후 지속) | 동적·최소 권한, 세션별 재검증 |\n| 측면 이동 | 내부 침투 후 자유로운 이동 가능 | 세그멘테이션과 인가로 위험 제한(모든 이동 차단 보장 아님) |\n| 적용 분야 | 온프레미스 단일 네트워크 | 클라우드·하이브리드, 원격근무, OT·IoT, 공급망 |\n### 나. CISA 제로 트러스트 성숙도 모델(ZTMM) 2.0\n- 2023년 4월 [[cisa|CISA]] 발표, 5개 기둥(Pillar)과 3개 공통 역량, 4단계 성숙도로 구성\n| 기둥 | 전통적(Traditional) | 최적(Optimal) |\n|---|---|---|\n| 신원(Identity) | 패스워드·MFA 일부 | 피싱 저항 MFA, 지속적 ID 검증·위험 분석 |\n| 단말(Devices) | 수동 자산 관리 | 실시간 단말 상태 기반 접근 결정 |\n| 네트워크(Networks) | 대규모 경계 세그먼트 | 마이크로 세그멘테이션, 전 구간 암호화 |\n| 애플리케이션·워크로드 | 경계 뒤 로컬 접근 | 인터넷 노출 상태에서도 지속 인가, DevSecOps |\n| 데이터(Data) | 수동 분류·온프레미스 저장 | 자동 분류·태깅, 전 생애주기 암호화, [[data-loss-prevention|DLP]] |\n- 공통 역량: 가시성·분석, 자동화·오케스트레이션, 거버넌스\n- 성숙도 단계: Traditional → Initial → Advanced → Optimal, 기둥별 독립 평가 후 단계적 상향\n\n### 다. 적용 분야\n| 분야 | 적용 형태 |\n|---|---|\n| 원격근무 | VPN 대체 ZTNA, [[sase|SASE]] |\n| 클라우드 | 워크로드 간 ID 기반 통신, 서비스 메시 |\n| 공공·금융 | 망분리 대안으로 데이터 중요도 기반 다층 보안(N²SF) |\n\n## 4. 제로 트러스트 아키텍처 도입 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 준비 | 자산·ID·데이터 흐름 식별 및 분류 선행, 보호 대상(Protect Surface) 정의 |\n| 설계 | 기존 인프라와 공존하는 하이브리드 단계적 도입, 핵심 자원 우선 적용 |\n| 운영 | 정책 오탐에 의한 업무 중단 최소화, 로그 통합·자동화 |\n| 조직 | 경영진 지원, 성숙도 자체 진단 기반 로드맵, 인력 역량 확보 |\n| 발전방향 | AI 기반 동적 신뢰 평가, 국내 가이드라인 2.0 성숙도 측정 및 실증 사업 확대 |\n\n## 5. 결론\n- 제로 트러스트는 제품이 아닌 아키텍처 원칙이므로, ZTMM 기둥별 현재 수준을 진단하고 ID·단말·네트워크·데이터 통제를 단계적으로 고도화하는 지속적 여정으로 추진하는 것이 핵심",
+      "sources": [
+        {
+          "title": "NIST SP 800-207",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf",
+          "scope": "세션별 자원 인가·PE/PA/PEP·기준/점수 기반 알고리즘·최근 인증 재사용"
+        },
+        {
+          "title": "CISA 공식 발표",
+          "url": "https://content.govdelivery.com/accounts/USDHSCISA/bulletins/3543f28",
+          "scope": "ZTMM v2의 2023-04 발표와 Traditional/Initial/Advanced/Optimal 4단계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 신뢰 점수의 필수성·매 요청 로그인 오해·경계 보안 비교의 적용 범위·성숙도 4단계 대조.",
+      "unresolved": [
+        "CISA 성숙도 PDF 접근 403으로 기둥별 최적 단계 상세 원문은 미확인.",
+        "국내 가이드라인·N2SF 적용 조건과 미국 행정명령의 현행 법적 의무 범위는 미확인."
+      ]
+    }
+  },
+  "t-ead2cfae": {
+    "short": {
+      "source_sha256": "beb18cbe2e8533db0d3c0777827dffd23bd88cee4e3e204c28b3476a79ff7705",
+      "body": "## 1. AAA의 개요\n- 정의: 네트워크 자원 접근 시 사용자의 신원을 확인하는 [[authentication|인증]], 권한을 부여하는 [[authorization|인가]], 자원 사용을 기록하는 [[accounting|과금·기록]]을 통합 제공하는 보안 프레임워크\n- 필요성: 원격 접속·무선 LAN·ISP 환경에서 다수 장비의 사용자 인증을 중앙 서버로 일원화\n\n## 2. AAA의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] --> NAS[\"NAS(접근 서버·스위치·AP)\"]\n  NAS <-->|RADIUS·Diameter·TACACS+| AAA[AAA 서버]\n  AAA <--> DB[\"사용자 DB(LDAP·AD)\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[network-access-server|NAS]] | 접속 요청 수신, AAA 클라이언트 역할 |\n| AAA 서버 | 인증·인가 판정, 세션 기록 집계 |\n| 사용자 DB | 계정·정책 저장([[ldap|LDAP]], AD) |\n\n## 3. AAA 프로토콜 비교\n| 구분 | [[radius|RADIUS]] | [[diameter-protocol|Diameter]] | [[tacacs-plus|TACACS+]] |\n|---|---|---|---|\n| 전송 | [[udp|UDP]] 1812/1813 | [[tcp|TCP]]·SCTP 3868 | TCP 49 |\n| 암호화 | 기본 RADIUS는 User-Password 은닉; TLS 확장 별도 | 피어 구간 TLS/DTLS·IPsec | 본문 난독화·헤더 노출 |\n| 인증·인가 | 결합 | 결합, 확장 AVP | 분리 |\n| 적용 | ISP·무선 LAN | LTE·IMS·5G 연동 등(5G SBA 자체와 구분) | 장비 관리자 접근 |\n\n## 4. 고려사항\n- [[ieee-802-1x|IEEE 802.1X]]·[[extensible-authentication-protocol|EAP]] 연계, [[multi-factor-authentication|MFA]]·[[otp|OTP]] 적용으로 인증 강화\n- 서버 이중화, 보호된 로그로 책임추적·감사 지원(로그만으로 [[non-repudiation|부인방지]] 보장 불가)",
+      "sources": [
+        {
+          "title": "RFC 8907",
+          "url": "https://www.rfc-editor.org/rfc/rfc8907.html",
+          "scope": "TACACS+ 난독화·헤더·무결성 한계"
+        },
+        {
+          "title": "RFC 6733",
+          "url": "https://www.rfc-editor.org/rfc/rfc6733.html",
+          "scope": "Diameter 피어 전송과 보호 요구(구형 암호 목록은 최신 TLS 권고 아님)"
+        },
+        {
+          "title": "RFC 2865",
+          "url": "https://www.rfc-editor.org/rfc/rfc2865.html",
+          "scope": "RADIUS NAS·Access 메시지와 User-Password"
+        },
+        {
+          "title": "RFC 6614",
+          "url": "https://www.rfc-editor.org/rfc/rfc6614.html",
+          "scope": "RADIUS TLS 전송 프로파일"
+        },
+        {
+          "title": "NIST 인증 모델",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63/model/",
+          "scope": "서로 다른 종류의 MFA 요소"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TACACS+ 암호화 오표기·Diameter 구간 보호·RADIUS 예시 범위·MFA 구별 대조.",
+      "unresolved": [
+        "5G 인터워킹별 Diameter 인터페이스와 신규 RADIUS/TACACS+ TLS 확장 최신 상태는 추가 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "33f0e73fc46b1162479ef9285362e499929f1ae5fdfb0a9d87c22ff8f2b32d4b",
+      "body": "## 1. AAA의 개요\n### 가. 정의\n- 네트워크 접근 통제를 위해 사용자 신원 확인([[authentication|Authentication]]), 접근 권한 부여([[authorization|Authorization]]), 자원 사용 기록·과금([[accounting|Accounting]])의 세 기능을 중앙 서버에서 통합 제공하는 보안 프레임워크(RFC 2903)\n### 나. 등장배경 / 필요성\n- 다이얼업·VPN·무선 LAN 등 다양한 접속 장비마다 개별 인증 시 계정 불일치·관리 부담\n- 통신사·ISP의 사용량 기반 과금, 기업의 [[accountability|책임추적성]] 확보 요구\n### 다. 핵심 개념\n| 요소 | 질문 | 내용 |\n|---|---|---|\n| 인증 | 누구인가 | ID·패스워드, 인증서, [[otp|OTP]], 생체정보로 신원 검증 |\n| 인가 | 무엇을 할 수 있는가 | 접속 시간·대역폭·VLAN·명령어 등 허용 범위 결정 |\n| 과금·기록 | 무엇을 했는가 | 세션 시작·종료, 전송량, 명령 이력 기록 |\n\n## 2. AAA의 구성도 및 구성요소\n### 가. 구성도\n다음 흐름은 RADIUS 예이며 모든 AAA 프로토콜의 공통 메시지명이 아니다.\n```mermaid\nsequenceDiagram\n  participant U as 사용자\n  participant N as NAS\n  participant A as AAA 서버\n  participant D as 사용자 DB\n  U->>N: 1. 접속 요청 (PPP·802.1X)\n  N->>A: 2. Access-Request (예: ID·User-Password 은닉 또는 EAP)\n  A->>D: 3. 계정 조회 (LDAP·SQL)\n  D-->>A: 4. 계정·정책 응답\n  A-->>N: 5. Access-Accept (인가 속성: VLAN·시간 등)\n  N->>A: 6. Accounting-Start\n  N->>A: 7. Accounting-Stop (세션 종료 시 사용량)\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 사용자·단말 | 접속 요청, 자격 증명 제시 | PPP, [[ieee-802-1x|802.1X]] 서플리컨트 |\n| [[network-access-server|NAS]] | AAA 클라이언트, 요청 중계 및 정책 적용 | VPN 게이트웨이, 무선 AP, 스위치 |\n| AAA 서버 | 인증·인가 판정, 기록 집계 | [[radius|RADIUS]], [[diameter-protocol|Diameter]], [[tacacs-plus|TACACS+]] |\n| 사용자 DB | 계정·그룹·정책 저장 | [[ldap|LDAP]], AD, [[kerberos|Kerberos]] KDC |\n### 다. 동작 절차\n1. 사용자가 NAS에 접속 요청, NAS는 공유 비밀키로 보호된 Access-Request를 AAA 서버로 전송\n2. 서버는 사용자 DB 조회 후 Access-Accept·Reject·Challenge 응답([[extensible-authentication-protocol|EAP]] 사용 시 다단계 교환)\n3. Accept 시 인가 속성(AVP) 전달, NAS가 세션 정책 적용\n4. 세션 시작·종료·중간 갱신 시 Accounting 레코드 전송, 과금·감사에 활용\n\n## 3. AAA의 상세\n### 가. AAA 프로토콜 비교\n| 구분 | RADIUS | Diameter | TACACS+ |\n|---|---|---|---|\n| 표준 | RFC 2865·2866 | RFC 6733 | Cisco 기원, RFC 8907 Informational 공개 명세 |\n| 전송 계층 | [[udp|UDP]] 1812(인증)·1813(과금) | [[tcp|TCP]]·SCTP 3868, 신뢰 전송 | TCP 49 |\n| 보안 | 패스워드 필드만 MD5 기반 은닉 | 피어 사이 TLS/DTLS·IPsec(중계 노드를 관통하는 종단 암호화와 구분) | 본문 난독화(현대적 암호화·무결성 보장 아님; 별도 안전한 전송 경로 필요) |\n| 인증·인가 | 하나의 메시지에 결합 | 결합, 확장 가능한 AVP | 인증·인가·과금 독립 수행 |\n| 통신 모델 | 클라이언트-서버 | 피어 투 피어, 서버 주도 메시지 가능 | 클라이언트-서버 |\n| 장애 조치 | 재전송 의존 | 내장 Failover·Watchdog | TCP 기반 |\n| 주 용도 | ISP, 무선 LAN, VPN 사용자 인증 | LTE 코어(HSS·PCRF)·IMS·5G 연동; 5G SBA 자체와 구분 | 네트워크 장비 관리자 명령 통제 |\n### 나. 인증 방식 유형\n| 유형 | 설명 |\n|---|---|\n| 지식 기반 | 패스워드, PIN, PAP·CHAP |\n| 소유 기반 | 인증서(EAP-TLS), 하드웨어 토큰, OTP |\n| 존재 기반 | 지문·안면 등 생체 인식 |\n| [[multi-factor-authentication|다중 인증]] | 서로 다른 종류의 요소를 두 개 이상 결합, 피싱 저항형 FIDO 연계 |\n### 다. 적용 사례\n- 기업 무선 LAN: 802.1X + EAP-TLS + RADIUS, 인증 결과에 따라 동적 VLAN 할당\n- 이동통신: Diameter 기반 가입자 인증·정책·과금(S6a, Gx 인터페이스), 5G에서는 HTTP/2 기반 SBA로 전환\n- 장비 관리: TACACS+로 관리자별 명령어 수준 인가 및 명령 이력 기록\n\n## 4. AAA 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 가용성 | AAA 서버 이중화·부하분산, 장애 시 로컬 폴백 정책 |\n| 보안 | RADIUS over TLS(RadSec) 적용, 공유 비밀키 관리, 리플레이 방지 |\n| 운영 | 계정 생명주기 관리, Accounting 로그의 무결성·시각·접근 통제로 감사 지원; 보관만으로 부인방지 불가 |\n| 발전방향 | [[single-sign-on|SSO]]·[[identity-and-access-management|IAM]] 통합, [[zero-trust|제로 트러스트]] 정책 결정점으로 확장 |\n\n## 5. 결론\n- AAA는 네트워크 접근 통제의 기반 프레임워크로, 환경에 맞는 프로토콜 선택과 MFA·중앙 로그 관리가 결합될 때 인증 강화와 책임추적성을 동시에 확보 가능",
+      "sources": [
+        {
+          "title": "RFC 8907",
+          "url": "https://www.rfc-editor.org/rfc/rfc8907.html",
+          "scope": "TACACS+ 난독화·헤더·무결성 한계"
+        },
+        {
+          "title": "RFC 6733",
+          "url": "https://www.rfc-editor.org/rfc/rfc6733.html",
+          "scope": "Diameter 피어 전송과 보호 요구(구형 암호 목록은 최신 TLS 권고 아님)"
+        },
+        {
+          "title": "RFC 2865",
+          "url": "https://www.rfc-editor.org/rfc/rfc2865.html",
+          "scope": "RADIUS NAS·Access 메시지와 User-Password"
+        },
+        {
+          "title": "RFC 6614",
+          "url": "https://www.rfc-editor.org/rfc/rfc6614.html",
+          "scope": "RADIUS TLS 전송 프로파일"
+        },
+        {
+          "title": "NIST 인증 모델",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63/model/",
+          "scope": "서로 다른 종류의 MFA 요소"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TACACS+ 암호화 오표기·Diameter 구간 보호·RADIUS 예시 범위·MFA 구별 대조.",
+      "unresolved": [
+        "5G 인터워킹별 Diameter 인터페이스와 신규 RADIUS/TACACS+ TLS 확장 최신 상태는 추가 대조 필요."
+      ]
+    }
+  },
+  "t-2689c903": {
+    "short": {
+      "source_sha256": "6edc836e612a9719e79cf22d722ad2c099cf3b76996abdc37d6341c26d92f5bf",
+      "body": "## 1. 사용자 인증의 개요\n- 정의: 정보시스템에 접근을 요청하는 사용자가 제시한 신원([[identification|식별]])이 실제 본인임을 지식·소지·생체 등 인증 요소를 검증하여 확인하는 절차, 접근통제의 [[aaa|AAA]](인증·[[authorization|인가]]·[[accounting|사용 기록·과금]]) 중 첫 관문\n- 필요성: 식별만으로는 사칭 방지 불가, 인증 결과에 기반하여 인가·책임추적성이 성립, 계정 탈취([[phishing|피싱]]·[[brute-force-attack|무차별 대입]]) 대응\n\n## 2. 사용자 인증의 개념도 및 절차\n```mermaid\nflowchart LR\n  I[\"식별: ID 제시\"] --> P[\"인증 요소 제시(비밀번호·OTP·생체)\"]\n  P --> V[\"검증: 등록 정보와 비교\"]\n  V -->|\"성공\"| Z[\"인가·세션 발급·로깅\"]\n  V -->|\"실패\"| F[\"재시도 제한·잠금·경보\"]\n```\n| 절차 | 내용 |\n|---|---|\n| 등록(Enrollment) | 신원 확인 후 비밀번호 [[hash-function|해시]]+[[salt|솔트]]·공개키·바이오 템플릿 저장 |\n| 식별 | 사용자 ID 제시로 주체 주장 |\n| 인증 | 제시 요소를 저장 정보와 비교([[challenge-response|챌린지-응답]] 등) |\n| 인가·기록 | 권한 부여, 세션 토큰 발급, 감사 로그 |\n\n## 3. 인증 요소별 특징\n| 구분 | 요소 | 특징 | 위협 |\n|---|---|---|---|\n| 지식 기반(Type 1) | [[password|비밀번호]]·PIN | 저비용·보편적, 기억 의존 | 추측·[[dictionary-attack|사전 공격]]·피싱 |\n| 소지 기반(Type 2) | [[otp|OTP]]·[[smart-card|스마트카드]]·보안토큰·[[pki|PKI]] 인증서에 대응하는 개인키의 소유 증명 | 복제 어려움, [[replay-attack|재생 공격]] 저항 | 분실·도난, SIM 스와핑 |\n| 생체 기반(Type 3) | 지문·얼굴·홍채·정맥 | 분실 없음·편의성, [[fido|FIDO]] 결합 | 위조 생체, [[false-acceptance-rate|FAR]]·[[false-rejection-rate|FRR]] 오류, 변경 불가 |\n| 보조 요소 | 위치·시간·행동 패턴 | 무자각 [[risk-based-authentication|위험 기반 인증]] | 단독 사용 불가 |\n\n인증은 등록 계정에 결합된 인증기의 제어를 확인한다. 실명 신원 확인은 별도 등록·신원 증명 절차다. NIST 기준에서 생체는 물리 인증기와 결합하며 단독 요소로 사용하지 않는다. 행동 생체는 별도의 네 번째 독립 요소로 세지 않는다.\n\n## 4. 고려사항\n- 이종 요소 2개 이상 결합한 [[multi-factor-authentication|다중 인증]], 보안 수준(전자금융 거래 등급)별 차등 적용\n- 비밀번호 솔트 해시 저장·시도 횟수 제한, 세션 관리, [[single-sign-on|SSO]] 시 단일 실패점 대비\n- 발전방향: 패스워드리스(패스키), [[zero-trust|제로 트러스트]] 지속 인증, 분산 신원(DID)\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. 인증·신원 증명 구분, 공개키 증명, 생체·비밀번호 정책과 로그의 보장 범위 교정.",
+      "unresolved": [
+        "전자금융·개인정보 법령의 거래별 인증 수단과 국내 적용 의무는 현행 조항 대조 미완료. 이것은 확인할 수 없습니다."
+      ]
+    },
+    "long": {
+      "source_sha256": "d35e7897c3282bca3f2010d4d66eee076a55261d7eb4796c470e30b6e80c2263",
+      "body": "## 1. 사용자 인증의 개요\n### 가. 정의\n- 정보시스템 접근을 요청하는 사용자가 [[identification|식별]] 단계에서 주장한 신원이 실제 본인임을, 사용자만 알고(지식)·가지고(소지)·갖추고(생체) 있는 인증 요소를 검증하여 확인하는 절차이며, 접근통제의 [[aaa|AAA]](Authentication·[[authorization|Authorization]]·[[accounting|Accounting]]) 중 인가와 책임추적의 전제가 되는 단계\n\n### 나. 필요성\n| 구분 | 내용 |\n|---|---|\n| 사칭 방지 | 식별(ID)은 누구나 제시 가능, 인증으로 주체의 진정성 확인 |\n| 접근통제 기반 | 인증된 신원에 기반하여 권한 부여([[role-based-access-control|RBAC]] 등) |\n| 책임추적성 | 보호된 인증 로그로 행위 주체 추적 지원; 로그만으로 부인방지를 보장하지 않음 |\n| 위협 대응 | 계정 탈취, [[phishing|피싱]], [[brute-force-attack|무차별 대입]], 자격증명 스터핑 등 증가 |\n| 규제 준수 | 전자금융거래법 거래 유형별 인증 수단, 개인정보보호법 안전조치(접근통제·인증) |\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 식별 vs 인증 | 식별은 \"누구인가\" 주장, 인증은 \"주장이 맞는가\" 검증 |\n| 인증 요소 | Type 1 지식, Type 2 소지, Type 3 생체, 보조(위치·행위) |\n| 단일·다중 인증 | 동일 유형 2개는 2단계, 서로 다른 유형 결합이 [[multi-factor-authentication|다중 인증]](MFA) |\n\n## 2. 사용자 인증의 구성도 및 절차\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph SG1[\"등록 단계\"]\n    E1[\"신원 확인(대면·비대면)\"] --> E2[\"인증 정보 등록: 해시+솔트, 공개키, 바이오 템플릿\"]\n    E2 --> DB[\"인증 정보 저장소\"]\n  end\n  subgraph SG2[\"인증 단계\"]\n    U[\"사용자\"] -->|\"1. ID 제시(식별)\"| AS[\"인증 서버\"]\n    AS -->|\"2. 챌린지·요소 요구\"| U\n    U -->|\"3. 비밀번호·OTP·인증기 서명 제시\"| AS\n    AS -->|\"4. 저장 정보와 비교\"| DB\n    AS -->|\"5. 위험 평가\"| RISK[\"위험 엔진: 단말·위치·행위\"]\n    AS -->|\"6. 성공: 세션·토큰 발급\"| AZ[\"인가·자원 접근\"]\n    AS -->|\"실패: 횟수 제한·잠금\"| LOG[\"감사 로그·경보\"]\n    AZ --> LOG\n  end\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 인증 정보 저장소 | 검증용 정보 안전 보관 | [[hash-function|해시]]+[[salt|솔트]](bcrypt·PBKDF2), 공개키, 템플릿 보호 |\n| 인증 서버 | 요소 검증, 정책 적용, 세션 발급 | [[challenge-response|챌린지-응답]], RADIUS, [[kerberos|Kerberos]], OIDC |\n| 인증 수단 | 사용자 측 요소 제시 | [[password|비밀번호]], [[otp|OTP]], [[smart-card|스마트카드]], 생체 센서 |\n| 위험 엔진 | 맥락 기반 인증 강도 조정 | [[risk-based-authentication|위험 기반 인증]], 단말 핑거프린팅 |\n| 세션·토큰 관리 | 인증 상태 유지·만료 | 세션 ID, JWT, [[single-sign-on|SSO]] |\n| 감사 모듈 | 성공·실패 기록, 이상 징후 경보 | 로그 보존, SIEM 연계 |\n\n### 다. 사용자 인증의 절차\n1. 등록(Enrollment): 신원 확인 후 비밀번호 해시·공개키·바이오 템플릿 등 검증 정보 생성·저장\n2. 식별(Identification): 사용자가 ID·이메일 등으로 신원 주장\n3. 요소 제시(Presentation): 서버 요구에 따라 지식·소지·생체 요소 제시, 챌린지에 응답\n4. 검증(Verification): 제시 정보를 저장 정보와 비교, 소지 요소는 서명·OTP 검증, 생체는 임계치 매칭\n5. 위험 평가(Risk Evaluation): 단말·위치·시간·행위 분석, 고위험 시 추가 요소 요구(Step-up)\n6. 결정·세션 발급: 성공 시 세션·토큰 발급 후 인가 단계로, 실패 시 횟수 제한·계정 잠금·경보\n7. 유지·종료: 세션 만료·재인증 정책, 로그아웃, 감사 로그 보존\n\n## 3. 사용자 인증 요소별 특징\n### 가. 인증 요소별 상세\n| 요소 | 수단 | 장점 | 단점·위협 | 대응 |\n|---|---|---|---|---|\n| 지식 기반(Something you know) | 비밀번호, PIN, 패턴 | 구현·비용 최소, 범용 | 추측·[[dictionary-attack|사전 공격]], 피싱, 재사용, 키로깅 | 충분한 길이, 비용 인자·솔트를 사용한 비밀번호 해싱, 시도 제한, 유출 값 차단 |\n| 소지 기반(Something you have) | OTP(하드웨어·소프트웨어), 스마트카드, 보안토큰, [[pki|PKI]] 인증서에 대응하는 개인키의 소유 증명, 푸시 인증 | 복제 곤란, [[replay-attack|재생 공격]] 저항 | 분실·도난, 스미싱·[[sim-swapping|SIM 스와핑]](SMS OTP), 중간자 피싱 | 분실 신고·폐기, 시간 동기 OTP, 오리진 바인딩(FIDO) |\n| 생체 기반(Something you are) | 지문·얼굴·홍채·정맥, 음성·행동 | 분실·망각 없음, 편의성 | 위조 생체, [[false-acceptance-rate|FAR]]·[[false-rejection-rate|FRR]] 오류, 변경 불가, 프라이버시 | 생체 검출, 단말 내 매칭([[fido|FIDO]]), 템플릿 보호·분산 저장 |\n| 위치·맥락(Somewhere you are) | GPS, IP, 네트워크, 시간대 | 무자각, 위험 평가 보조 | 위조(VPN·GPS 스푸핑), 단독 사용 불가 | 다른 요소와 결합 |\n| 행위 기반(Something you do) | 타이핑·터치 패턴, 걸음걸이 | 지속 인증 가능 | 정확도 변동, 학습 기간 | 보조 요소·지속 인증 |\n\n### 나. 인증 요소 비교\n| 구분 | 지식 기반 | 소지 기반 | 생체 기반 |\n|---|---|---|---|\n| 보안 강도 | 길이·저장·전송·재사용 정책에 좌우 | 키 보호·피싱 저항성에 좌우 | 센서·위조 방어·결합 인증기에 좌우 |\n| 비용 | 최저 | 토큰 발급·관리 비용 | 센서·등록 비용 |\n| 편의성 | 기억 부담 | 휴대 부담 | 최고 |\n| 분실·변경 | 변경 용이 | 재발급 가능 | 변경 불가 |\n| 대표 공격 | 피싱·무차별 대입 | 도난·중간자 | 위조·템플릿 유출 |\n| 적합 용도 | 저위험 로그인 | 추가 인증·고액 거래 | 모바일 로그인·간편결제 |\n\n### 다. 인증 프로토콜·방식\n| 방식 | 내용 | 특징 |\n|---|---|---|\n| 비밀번호 전송 | 비밀번호를 TLS 구간에서 전송 후 해시 비교 | 단순, 서버 유출 시 오프라인 공격 |\n| 챌린지-응답 | 서버 난수에 비밀·키로 응답 계산 | 비밀 미전송, 재생 방지(CHAP, FIDO 서명) |\n| 시간·이벤트 동기 OTP | 공유 비밀+시간·카운터로 일회용 코드 | TOTP(RFC 6238), HOTP |\n| 티켓 기반 | 인증 서버가 서비스 티켓 발급 | Kerberos, SSO |\n| 연합 인증 | 신뢰 IdP의 인증 결과를 토큰으로 전달 | SAML, OIDC(OAuth 2.0 위의 인증 계층) |\n\n인증은 등록 계정에 결합된 인증기의 제어를 확인한다. 실명 신원 확인은 별도 등록·신원 증명 절차다. NIST 기준에서 생체는 물리 인증기와 결합하며 단독 요소로 사용하지 않는다. 행동 생체는 별도의 네 번째 독립 요소로 세지 않는다.\n\n## 4. 사용자 인증 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 다중 인증 | 이종 요소 2개 이상 결합, 거래 위험도·자산 중요도별 인증 수준(AAL) 차등(NIST SP 800-63B) |\n| 저장 보안 | 비밀번호 솔트 해시(bcrypt·Argon2), 템플릿 비가역 변환, 키는 HSM·TEE 보관 |\n| 운영 통제 | 시도 횟수 제한·잠금, 세션 만료, 유출 계정 모니터링, 복구 절차의 보안 |\n| 사용성·접근성 | 인증 피로 최소화, 대체 수단 제공, 고령·장애 사용자 고려 |\n| 단일 실패점 | SSO·IdP 장애·침해 시 전체 영향, 이중화와 세션 폐기 체계 |\n| 발전방향 | 패스워드리스(패스키·FIDO2), [[zero-trust|제로 트러스트]] 지속 인증, 무자각 행위 인증, 분산 신원(DID) |\n\n## 5. 결론\n- 사용자 인증은 접근통제와 책임추적의 출발점으로, 지식·소지·생체 요소의 특성과 위협을 이해하여 이종 요소를 결합한 위험 기반 다중 인증을 설계하고, 패스워드리스·제로 트러스트 방향으로 고도화 필요\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. 인증·신원 증명 구분, 공개키 증명, 생체·비밀번호 정책과 로그의 보장 범위 교정.",
+      "unresolved": [
+        "전자금융·개인정보 법령의 거래별 인증 수단과 국내 적용 의무는 현행 조항 대조 미완료. 이것은 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-a77df2af": {
+    "short": {
+      "source_sha256": "3b4acdc750c0f551bcce49cc3bbe478043bac7af1eb7df9366a7c88d691fc544",
+      "body": "## 1. 식별과 인증의 개요\n- 정의: 식별은 주체가 시스템에 자신이 누구인지 주장(ID 제시)하는 과정, 인증은 그 주장을 [[credential|크리덴셜]](증거)로 검증하는 과정\n- 필요성: [[access-control|접근통제]]의 첫 단계로 이후 [[authorization|인가]]·[[accountability|책임추적성]]의 전제 조건\n\n## 2. 식별·인증의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] -->|ID 제시| I[식별]\n  I -->|크리덴셜 검증| A[인증]\n  A -->|권한 부여| Z[인가]\n  Z -->|로그·감사| C[책임추적성]\n```\n| 구분 | 식별(Identification) | 인증(Authentication) |\n|---|---|---|\n| 목적 | 주체 구분·유일성 확보 | 주체의 진위 검증 |\n| 수단 | ID, 사용자명, 계정 | 패스워드, [[otp|OTP]], 생체정보, 인증서 |\n| 특성 | 식별자 제시·계정 선택 | 인증기 제어 증명; 공개 검증키도 사용 |\n\n## 3. 인증 요소와 행동 생체\n| 유형 | 내용 | 예시 |\n|---|---|---|\n| 지식 기반(Something you know) | 본인만 아는 정보 | [[password|패스워드]], PIN |\n| 소유 기반(Something you have) | 본인만 가진 물리 매체 | OTP 토큰, [[smart-card|스마트카드]], 공동인증서에 대응하는 개인키 소유 증명 |\n| 존재 기반(Something you are) | 고유한 신체 특징 | [[biometric-authentication|생체인증]](지문·얼굴·홍채) |\n| 행위 기반(Something you do) | 개인 고유 행동 특성 | 서명 동작, 키스트로크, 걸음걸이 |\n\nNIST는 지식·소지·생체를 구분하며 행동 생체는 생체 범주다. 지문과 행동 패턴을 결합한 것만으로 MFA가 되지 않는다. 생체의 1:N 식별·1:1 검증 구분을 모든 계정 인증에 일률 적용하지 않는다.\n\n## 4. 고려사항\n- 서로 다른 유형 두 가지 이상을 결합한 [[multi-factor-authentication|다중요소 인증(MFA)]]으로 단일 요소 탈취 위험 완화\n- 패스워드는 [[salt|솔트]]+[[hash-function|해시]]로 저장, 인증 실패 횟수 제한으로 [[brute-force-attack|무차별 대입 공격]] 방어",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 검토. 요소 분류·행동 생체·개인키 소유 증명·식별과 생체 매칭의 혼동 및 비밀번호 정책 교정.",
+      "unresolved": [
+        "생체 템플릿의 국내 민감정보 적용 요건과 개별 보호 방식의 복원 저항 성능은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "b077e3debfa8af6418f22e975fca700d066f47b64d6791125fb34cdc6bfbfad4",
+      "body": "## 1. 식별과 인증의 개요\n### 가. 정의\n| 구분 | 정의 |\n|---|---|\n| 개인 식별(Identification) | 주체가 시스템에 자신의 신원(ID)을 제시·주장하여 다른 주체와 유일하게 구분되는 과정 |\n| 사용자 인증(Authentication) | 제시된 신원 주장이 진정한 것인지 [[credential|크리덴셜]](패스워드·토큰·생체정보 등 증거)로 검증·확인하는 과정 |\n\n### 나. 등장배경 / 필요성\n- 네트워크·클라우드 환경에서 비대면 접근이 일반화되어 접근 주체의 진위 확인이 필수\n- [[access-control|접근통제]] 체계(식별 → 인증 → [[authorization|인가]] → [[accountability|책임추적성]])의 출발점이며 사고 발생 시 행위 주체 추적의 근거\n\n### 다. 개인 식별과 사용자 인증의 차이점\n| 비교 항목 | 식별 | 인증 |\n|---|---|---|\n| 질문 | 당신은 누구인가 | 정말 그 사람인가 |\n| 정보 성격 | 공개 가능(ID, 이메일, 사번) | 비밀·고유(패스워드, 생체정보) |\n| 매칭 방식 | 주체 식별자 제시·선택 | 해당 계정의 인증기 제어 검증 |\n| 핵심 요건 | 유일성(Uniqueness) | 검증 강도·위조 불가성 |\n| 실패 결과 | 존재하지 않는 사용자 | 인증 거부, 실패 횟수 누적·계정 잠금 |\n\n## 2. 식별·인증의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  U[사용자] -->|1. ID 제시| ID[식별 모듈]\n  ID -->|2. 주체 존재 조회| DB[(계정·검증정보 저장소)]\n  U -->|3. 크리덴셜 제출| AU[인증 모듈]\n  AU -->|4. 해시·OTP·생체 템플릿 비교| DB\n  AU -->|5. 세션·토큰 발급| S[세션 관리]\n  S --> AZ[인가·접근통제]\n  AU --> L[감사 로그]\n  AZ --> L\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 식별 모듈 | 계정 유일성 검증, 주체 조회 | 계정 관리, 디렉터리 서비스([[ldap|LDAP]]) |\n| 인증 모듈 | 크리덴셜 검증, 실패 처리·잠금 | [[salt|솔트]]+[[hash-function|해시]] 비교, [[otp|OTP]] 검증, [[pki|PKI]] 인증서, [[fido|FIDO]] |\n| 계정·검증정보 저장소 | 식별자·검증정보 안전 보관 | 암호화 저장, 접근 권한 최소화 |\n| 세션·토큰 관리 | 인증 상태 유지, 만료 관리 | 세션 ID 재발급, [[json-web-token|JWT]] |\n| 감사 로그 | 인증 성공·실패 이벤트 기록 | 로그 무결성 보장, 이상 징후 탐지 |\n\n### 다. 동작 절차\n1. 사용자가 ID 제시(식별) → 시스템이 저장소에서 주체 존재 여부 확인\n2. 사용자가 인증 요소(패스워드·OTP·생체정보) 제출\n3. 시스템이 저장된 검증정보와 비교(해시 비교, OTP 검증, 생체 템플릿 매칭)\n4. 성공 시 세션·토큰 발급 후 인가 단계로 이동, 실패 시 횟수 누적·계정 잠금\n5. 모든 인증 이벤트를 감사 로그에 기록\n\n## 3. 인증 시 보안 요구사항 및 요소 분류\n### 가. 사용자 인증 시 보안 요구사항\n| 요구사항 | 내용 | 구현 방안 |\n|---|---|---|\n| 기밀성 | 크리덴셜 전송·저장 중 노출 방지 | [[tls|TLS]] 전송 암호화, 솔트 해시 저장, 평문 저장 금지 |\n| 무결성 | 인증 정보·메시지 위변조 방지 | [[digital-signature|전자서명]], [[message-authentication-code|MAC]] |\n| 재사용 방지 | 탈취된 인증 정보의 재전송 차단 | 난수(Nonce)·타임스탬프, OTP로 [[replay-attack|재전송 공격]] 방어 |\n| 추측·대입 방지 | 패스워드 추측 및 자동화 대입 차단 | 충분한 길이·유출 비밀번호 차단, 실패 횟수 제한, [[brute-force-attack|무차별 대입]]·[[credential-stuffing|크리덴셜 스터핑]] 탐지, CAPTCHA |\n| 상호 인증 | 서버 위장([[phishing|피싱]]) 방지 | 서버 인증서 검증, 상호 TLS |\n| 가용성·편의성 | 정당 사용자의 거부 최소화 | 생체인증 [[false-rejection-rate|FRR]] 관리, 안전한 복구 절차 |\n| 책임추적성 | 인증 행위의 사후 추적 가능 | 감사 로그, 계정 공유 금지, 1인 1계정 |\n\n### 나. 인증 요소와 행동 생체의 특징\n| 유형 | 원리 | 장점 | 단점 | 예시 |\n|---|---|---|---|---|\n| 지식 기반(Type 1, Know) | 본인만 아는 비밀 정보 | 저비용, 구현 용이 | 추측·유출·재사용에 취약, 망각 | [[password|패스워드]], PIN(보안 질문은 권장 인증 수단에서 제외) |\n| 소유 기반(Type 2, Have) | 본인만 소유한 물리 매체 | 복제 어려움, 암기 불필요 | 분실·도난, 발급·관리 비용 | OTP 토큰, [[smart-card|스마트카드]], 공동인증서에 대응하는 개인키 소유 증명, 보안카드 |\n| 존재 기반(Type 3, Are) | 고유한 신체 특징 | 분실·망각 없음, 높은 편의성 | 변경 불가, [[false-acceptance-rate|FAR]]·FRR 오류, 프라이버시 민감 | [[biometric-authentication|생체인증]](지문·얼굴·홍채·정맥) |\n| 행동 생체(Are에 포함) | 개인 고유 행동 패턴 | 지속 인증 가능, 비침투적 | 변동성이 커 정확도 낮음 | 서명 동작, 키스트로크 다이내믹스, 음성, 걸음걸이 |\n- 서로 다른 유형 두 가지 이상 결합 시 [[multi-factor-authentication|다중요소 인증(MFA)]], 동일 유형의 반복 결합은 다단계 인증으로 구분\n\nNIST는 지식·소지·생체를 구분하며 행동 생체는 생체 범주다. 지문과 행동 패턴을 결합한 것만으로 MFA가 되지 않는다. 생체의 1:N 식별·1:1 검증 구분을 모든 계정 인증에 일률 적용하지 않는다.\n\n## 4. 식별·인증 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 위험 기반 인증 | 접속 위치·기기·시간 등 컨텍스트에 따라 인증 강도를 동적 조정하는 [[risk-based-authentication|위험 기반 인증(적응형 인증)]] |\n| 패스워드리스 | FIDO2/WebAuthn 공개키 인증으로 피싱 저항성 제공·서버의 재사용 비밀번호 유출 위험 축소, 사용자 편의 향상 |\n| 생체정보 보호 | 생체 템플릿 암호화·분산 저장, 복원 위험을 줄이는 템플릿 보호, 개인정보보호법상 민감정보 규정 준수 |\n| 통합 관리 | [[single-sign-on|SSO]]·[[identity-and-access-management|IAM]]으로 계정 생명주기(생성·변경·삭제) 일원화 |\n| 발전방향 | [[zero-trust|제로 트러스트]] 기반 지속 인증, 분산 ID([[decentralized-identity|DID]])로 사용자 신원 주권 강화 |\n\n## 5. 결론\n- 식별은 주체 구분, 인증은 진위 검증으로 역할이 명확히 다르며, 단일 요소의 한계를 MFA·위험 기반 인증으로 보완하고 보안성과 사용자 편의성의 균형을 확보하는 것이 핵심",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 검토. 요소 분류·행동 생체·개인키 소유 증명·식별과 생체 매칭의 혼동 및 비밀번호 정책 교정.",
+      "unresolved": [
+        "생체 템플릿의 국내 민감정보 적용 요건과 개별 보호 방식의 복원 저항 성능은 미확인."
+      ]
+    }
+  },
+  "t-73e1a8e2": {
+    "short": {
+      "source_sha256": "3e1c847af4106b11a31f91d51a27211c265cbbc30ceeecd161adf0dee46f37a5",
+      "body": "## 1. 시도-응답 인증의 개요\n- 정의: 검증자가 예측 불가능한 일회성 난수([[nonce|논스]])를 시도(Challenge)로 보내면 증명자가 비밀키·패스워드로 계산한 응답(Response)을 반환하고 검증자가 재계산하거나 공개키로 검증하는 인증 방식으로, 비밀 자체를 전송하지 않음\n- 등장배경: 패스워드 평문·고정값 전송은 도청과 [[replay-attack|재생 공격]]에 취약 → 매번 달라지는 응답으로 재사용 차단\n\n## 2. 시도-응답 인증의 절차 및 구성요소\n```mermaid\nsequenceDiagram\n  participant C as 증명자\n  participant V as 검증자\n  C->>V: 1. 인증 요청 (ID)\n  V->>C: 2. Challenge (난수 N)\n  C->>V: 3. Response = f(K, N)\n  V->>V: 4. f(K, N) 재계산·비교\n  V->>C: 5. 인증 성공/실패\n```\n| 구성요소 | 역할 |\n|---|---|\n| 시도(Challenge) | 검증자가 생성한 일회성 난수·타임스탬프, [[random-number-generator|난수 생성기]] 품질 중요 |\n| 비밀값(K) | 공유 비밀키, 패스워드 해시, 개인키 |\n| 응답 함수 f | [[hmac|HMAC]], 대칭키 암호화, [[digital-signature|전자서명]] |\n| 검증자 | 동일 함수로 재계산하거나 공개키로 서명 검증 |\n\n## 3. 시도-응답 인증의 유형\n| 구분 | 방식 | 사례 |\n|---|---|---|\n| 대칭키 기반 | 인증 암호화(ISO/IEC 9798-2:2019) 또는 MAC(Part 4) | [[kerberos|커버로스]], 스마트카드 상호인증 |\n| 해시 기반 | 패스워드 기반 프로토콜별 응답; Part 4는 암호학적 검사 함수 기반 | [[chap|CHAP]], [[ntlm|NTLM]], [[http-digest-authentication|HTTP Digest]], [[scram|SCRAM]] |\n| 공개키 기반 | 난수에 개인키 서명 (ISO/IEC 9798-3) | [[fido2|FIDO2]]/WebAuthn, [[tls|TLS]] 클라이언트 인증, SSH |\n| OTP 토큰 | 서버 질의값을 토큰에 입력해 응답 생성 | 질의응답형 [[otp|OTP]] |\n\n사례별 메시지는 다르다. Kerberos 사전인증의 타임스탬프, TLS의 핸드셰이크 전사록 서명, WebAuthn의 challenge·오리진·RP 결합을 단순 난수 서명과 동일시하지 않는다.\n\n## 4. 고려사항\n- 논스 예측 불가성·1회성 보장, [[reflection-attack|반사 공격]] 대비 역할 식별자 포함 및 서로 다른 챌린지로 [[mutual-authentication|상호인증]]\n- 패스워드 기반 시 응답 캡처 후 오프라인 [[dictionary-attack|사전 공격]] 위험 → 솔트·[[password-authenticated-key-exchange|PAKE]], [[adversary-in-the-middle|중간자 공격]] 대비 채널 바인딩·TLS 결합",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        },
+        {
+          "title": "ISO/IEC 9798-2:2019",
+          "url": "https://www.iso.org/standard/67114.html",
+          "scope": "인증 암호화 기반 범위"
+        },
+        {
+          "title": "ISO/IEC 9798-4:1999",
+          "url": "https://www.iso.org/standard/31488.html",
+          "scope": "암호학적 검사 함수와 신선성 파라미터"
+        },
+        {
+          "title": "RFC 6238",
+          "url": "https://www.rfc-editor.org/rfc/rfc6238.html",
+          "scope": "TOTP 유효창과 한 번 수락한 OTP의 재수락 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. ISO 부별 범위·공개키 검증·OTP 재사용·보장 조건을 교정.",
+      "unresolved": [
+        "ISO 유료 본문의 모든 메커니즘과 사례별 스마트카드·GSM·레거시 인증 구현은 전문 검증 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "18fa1db6d62126562cf4bd5327d6a1cc6af7aab3c86483325ccc0e09a2f80a27",
+      "body": "## 1. 시도-응답 인증의 개요\n### 가. 정의\n- 검증자(Verifier)가 예측 불가능한 일회성 시도값(Challenge)을 제시하고, 증명자(Claimant)가 자신만 아는 비밀(공유키·패스워드·개인키)로 시도값을 계산한 응답(Response)을 반환하면 검증자가 그 정당성을 확인하는 인증 방식\n- 비밀 자체는 네트워크로 전송되지 않고 매 세션 응답이 달라지므로 구현과 신선성 검증 조건에 따라 재사용을 방어하는 암호학적 인증 프로토콜의 기본 구조\n\n### 나. 등장배경 / 필요성\n- 패스워드 평문 전송(PAP)은 도청으로 즉시 노출, 해시만 전송해도 동일 값 재전송으로 [[replay-attack|재생 공격]] 가능\n- 비밀을 노출하지 않으면서 \"비밀을 알고 있음\"을 증명하는 방식 필요 → 시도값 의존 응답으로 1회성 확보\n- [[iso-iec-9798|ISO/IEC 9798]]에서 인증 암호화(Part 2:2019), 전자서명(Part 3), 암호학적 검사 함수(Part 4) 기반 시도-응답 메커니즘 표준화\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| [[nonce|논스]] | 한 번만 사용되는 난수·카운터·타임스탬프, 신선성(Freshness) 보장 |\n| 지식 증명 | 비밀을 보내지 않고 비밀로 계산한 결과로 소유 증명 |\n| 일방향성 | 응답에서 비밀을 역산할 수 없어야 함 ([[hash-function|해시]]·MAC·서명) |\n| 신선성 | 시도값이 매번 달라 과거 응답 재사용 불가 |\n\n## 2. 시도-응답 인증의 구성도 및 구성요소\n### 가. 구성도 (공유키 방식의 설명용 흐름; 배포용 프로토콜 명세가 아님)\n```mermaid\nsequenceDiagram\n  participant A as 증명자 A\n  participant B as 검증자 B\n  A->>B: 1. 인증 요청, ID_A\n  B->>A: 2. Challenge N_B (난수)\n  A->>B: 3. Response_A = f(K, N_B, ID_B), Challenge N_A\n  B->>B: 4. f(K, N_B, ID_B) 재계산 후 비교\n  B->>A: 5. Response_B = f(K, N_A, ID_A)\n  A->>A: 6. 재계산·비교 → 상호인증 완료\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 증명자 | 비밀 보유, 응답 계산 | 패스워드, 스마트카드, 보안 토큰, 개인키 |\n| 검증자 | 시도 생성, 응답 검증 | 인증 서버, 공유키·패스워드 검증자(해시)·공개키 보관 |\n| 시도값 | 신선성 제공 | 암호학적 [[random-number-generator|난수 생성기]], 카운터, 타임스탬프 |\n| 응답 함수 | 비밀과 시도값 결합 | [[hmac|HMAC]], AES-CMAC, 대칭키 암호화, [[digital-signature|전자서명]] |\n| 채널 | 메시지 전달 | 평문 채널 가능하나 [[tls|TLS]] 결합 권장 |\n\n### 다. 동작 절차\n1. 증명자가 식별자(ID)로 인증 요청\n2. 검증자가 예측 불가능한 논스 N 생성·전송 (유효 시간·1회성 관리)\n3. 증명자가 비밀 K와 N으로 응답 R = f(K, N) 계산 (필요 시 상대 식별자·자신의 논스 포함)\n4. 검증자가 보관 비밀로 f(K, N) 재계산하여 R과 비교하거나 공개키로 서명 검증\n5. 일치 시 인증 성공, 상호인증 시 역방향 반복, 세션키 파생 가능\n\n## 3. 시도-응답 인증의 상세\n### 가. 유형별 메커니즘\n| 구분 | 메커니즘 | 특징 | 적용 사례 |\n|---|---|---|---|\n| 대칭키 기반 | R = E_K(N) 또는 MAC_K(N) | 양측 동일 키 공유, 고속, 키 분배 문제 | [[kerberos|커버로스]] 사전인증, 스마트카드 EXTERNAL AUTHENTICATE, GSM A3 알고리즘 |\n| 해시·패스워드 기반 | R = H(N ∥ Password) 또는 HMAC(H(pw), N) | 구현 단순, 오프라인 [[dictionary-attack|사전 공격]] 위험 | [[chap|CHAP]](RFC 1994), MS-CHAPv2, [[ntlm|NTLM]], [[http-digest-authentication|HTTP Digest]], CRAM-MD5, [[scram|SCRAM]] |\n| 공개키 기반 | R = Sign_SK(N) | 공개키로 검증; 인증서는 키 배포 방식 중 하나이며 인증 서명만으로 법적 부인방지를 단정하지 않음 | [[fido2|FIDO2]]/WebAuthn, TLS 클라이언트 인증, SSH 공개키 인증 |\n| 질의응답형 OTP | 토큰에 서버 질의값 입력 → 응답 코드 | 하드웨어 보호, 사용자 입력 부담 | 금융 질의응답형 [[otp|OTP]] 토큰 |\n| 영지식 기반 | 비밀 정보 자체 노출 없이 지식 증명 | 정의된 증명 모델에서 지식 노출을 제한; 구현의 부채널까지 보장하지 않음 | Fiat-Shamir, [[zero-knowledge-proof|영지식 증명]] 인증 |\n\n### 나. 시도-응답 vs 시간 동기 OTP 비교\n| 구분 | 시도-응답 | 시간 동기([[totp|TOTP]]) | 이벤트 동기([[hotp|HOTP]]) |\n|---|---|---|---|\n| 신선성 원천 | 서버 난수 | 시각 | 카운터 |\n| 동기화 | 난수 방식은 시계 동기화 대신 사용 상태 관리 | 시간 오차 허용창 필요 | 카운터 불일치 시 재동기화 |\n| 통신 | 왕복 1회 추가 | 단방향 | 단방향 |\n| 재생 공격 | 논스 1회성으로 차단 | 수락한 OTP의 유효창 내 재수락 금지 필요 | 카운터 증가로 차단 |\n\n### 다. 보안 위협 및 대응\n| 위협 | 내용 | 대응 |\n|---|---|---|\n| 재생 공격 | 과거 응답 재전송 | 논스 1회성, 타임스탬프 유효창, 사용 논스 기록 |\n| [[reflection-attack|반사 공격]] | 상호인증 시 받은 챌린지를 상대에게 되돌려 응답 획득 | 방향별 다른 키·식별자 포함, 증명자가 먼저 응답 완료 후 챌린지 |\n| 오프라인 사전 공격 | 패스워드 기반 응답 캡처 후 후보 패스워드 대입 | 솔트·반복 해시(PBKDF2), [[password-authenticated-key-exchange|PAKE]](SRP, OPAQUE), TLS 보호 |\n| [[adversary-in-the-middle|중간자 공격]] | 중계로 정당 응답 전달 | [[channel-binding|채널 바인딩]], 서버 인증 결합, 원점 검증(FIDO2) |\n| 예측 가능한 논스 | 약한 난수로 사전 응답 계산 | 암호학적 난수 생성기, 프로토콜에서 요구하는 충분한 길이 |\n| 병렬 세션 공격 | 다중 세션 동시 개시로 응답 재활용 | 세션 식별자 포함, 동시 세션 제한 |\n\n사례별 메시지는 다르다. Kerberos 사전인증의 타임스탬프, TLS의 핸드셰이크 전사록 서명, WebAuthn의 challenge·오리진·RP 결합을 단순 난수 서명과 동일시하지 않는다.\n\n## 4. 시도-응답 인증 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 난수 품질 | 하드웨어 난수원·CSPRNG 사용, 논스 재사용 금지 |\n| 상호인증 | 서버 위장 방지 위해 양방향 적용, [[mutual-authentication|상호인증]] 시 역할 구분 |\n| 알고리즘 | MD5·DES 기반(CHAP, NTLMv1) 퇴출, 적용 프로토콜에서 승인한 해시·MAC·서명 알고리즘과 키 길이 |\n| 채널 보호 | TLS 위 구동으로 사전 공격·중계 위험 축소 |\n| 사용성 | 질의응답형 OTP 입력 부담 → 앱·하드웨어 키 자동 응답 |\n| 발전방향 | 피싱 저항 FIDO2 패스키 확산, PAKE 표준화, 양자내성 서명 기반 시도-응답 |\n\n## 5. 결론\n- 시도-응답 인증은 비밀을 전송하지 않고 일회성 시도값에 대한 응답으로 소유를 증명하고 신선성과 사용 상태를 정확히 검증하여 재생 공격을 방어하는 핵심 인증 구조이며, 난수 품질·상호인증·반사 공격 방어·채널 보호를 갖춘 설계로 FIDO2 등 현대 인증 체계의 기반으로 발전",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        },
+        {
+          "title": "ISO/IEC 9798-2:2019",
+          "url": "https://www.iso.org/standard/67114.html",
+          "scope": "인증 암호화 기반 범위"
+        },
+        {
+          "title": "ISO/IEC 9798-4:1999",
+          "url": "https://www.iso.org/standard/31488.html",
+          "scope": "암호학적 검사 함수와 신선성 파라미터"
+        },
+        {
+          "title": "RFC 6238",
+          "url": "https://www.rfc-editor.org/rfc/rfc6238.html",
+          "scope": "TOTP 유효창과 한 번 수락한 OTP의 재수락 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. ISO 부별 범위·공개키 검증·OTP 재사용·보장 조건을 교정.",
+      "unresolved": [
+        "ISO 유료 본문의 모든 메커니즘과 사례별 스마트카드·GSM·레거시 인증 구현은 전문 검증 미완료."
+      ]
+    }
+  },
+  "t-be74766f": {
+    "short": {
+      "source_sha256": "98eb55722ba9b4edb2a4012150ab9bb9229f9c04eaeff7203971a5d12b663bf8",
+      "body": "## 1. 크리덴셜 스터핑의 개요\n- 정의: 타 사이트에서 유출된 ID·비밀번호 목록([[credential|자격증명]])을 자동화 도구로 다른 서비스에 대량 대입하여, 동일 비밀번호를 재사용하는 계정을 탈취하는 공격\n- 등장배경: 대규모 개인정보 유출 사고와 [[dark-web|다크웹]] 유출 DB 거래, 사용자의 비밀번호 재사용 습관(재사용 비율은 조사별로 다름), [[botnet|봇넷]]·프록시 기반 자동화 용이\n\n## 2. 크리덴셜 스터핑의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"유출 DB(다크웹)\"] --> B[\"자동화 도구(봇)\"]\n  B -->|프록시·IP 분산| C[대상 서비스 로그인 API]\n  C -->|성공 계정| D[\"계정 탈취·전매·부정거래\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 유출 자격증명 목록 | 콤보 리스트(ID:PW), 규모는 유출 사건별로 다름 |\n| 자동화 도구 | 로그인 요청 반복, [[captcha|CAPTCHA]] 우회 설정 |\n| 프록시·봇넷 | IP 분산으로 [[rate-limiting|요청 제한]] 우회 |\n| 대상 서비스 | 단일 비밀번호 인증, 로그인 실패 제한 미비 |\n\n## 3. 유사 공격과 비교\n| 구분 | 크리덴셜 스터핑 | [[brute-force-attack|브루트포스]] | [[password-spraying|패스워드 스프레잉]] |\n|---|---|---|---|\n| 입력 | 유출된 실제 ID·PW 쌍 | 한 계정에 모든 조합 | 다수 계정에 소수 흔한 PW |\n| 시도 횟수 | 계정당 1~수회 | 계정당 대량 | 계정당 소수 |\n| 탐지 | 분산 IP로 곤란 | 실패 횟수로 용이 | 중간 |\n\n법 조항의 통지 의무와 모든 계정 비밀번호 초기화는 같은 요건이 아니다. 현행 법령의 적용·예외는 별도 확인이 필요하다.\n\n## 4. 대응방안\n- 서비스: [[multi-factor-authentication|MFA]], 유출 비밀번호 대조(NIST SP 800-63B), 로그인 이상행위·디바이스 핑거프린팅, [[bot-management|봇 관리]]·CAPTCHA, 요청 제한\n- 사용자: 사이트별 고유 비밀번호, [[password-manager|비밀번호 관리자]], [[fido2|FIDO2]]·패스키 사용\n- 제도: 유출 통지 의무([[personal-information-protection-act|개인정보보호법]] 제34조), 유출 계정 강제 비밀번호 변경\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        },
+        {
+          "title": "OWASP Credential Stuffing Prevention",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html",
+          "scope": "공격 구분·MFA·봇 방어·유출 비밀번호 대응"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. 재사용·성공률 수치의 무근거 일반화 제거, 방어 조건과 침해 시 변경을 구분.",
+      "unresolved": [
+        "원문의 평균 재사용 비율 60%·성공률 0.1~2% 통계 원전은 확인할 수 없습니다.",
+        "개인정보보호법 제29·34조의 현행 세부 적용·예외·기한은 직접 대조 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "70fbe73f8c36923a65730ccd0a589d364bdc2ac59f27adcf51c513c214923a1e",
+      "body": "## 1. 크리덴셜 스터핑의 개요\n### 가. 정의\n- 데이터 유출 사고로 확보한 ID·비밀번호 쌍([[credential|자격증명]]) 목록을 자동화 도구로 다른 웹 서비스의 로그인에 대량 대입하여, 동일 자격증명을 재사용하는 사용자의 계정을 탈취하는 [[account-takeover|계정 탈취]] 공격\n\n### 나. 등장배경 / 필요성\n- 대규모 개인정보 유출 사고 반복, [[dark-web|다크웹]]에서 유출 자격증명 목록 거래\n- 다수 사용자가 여러 서비스에 동일·유사 비밀번호 재사용\n- 오픈소스 자동화 도구와 [[botnet|봇넷]]·주거용 프록시로 저비용 대량 시도 가능, 수익성은 계정 가치·공격 비용·방어 수준에 좌우\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 공격 자원 | 유출 자격증명(콤보 리스트), 자동화 도구, 분산 IP |\n| 공격 특성 | 계정당 소수 시도, 정상 로그인과 유사한 트래픽, 저탐지 |\n| 피해 | 계정 전매, 포인트·결제정보 부정사용, 개인정보 2차 유출, 기업 내부 침투 |\n\n## 2. 크리덴셜 스터핑의 구성도 및 구성요소\n### 가. 공격 구성도\n```mermaid\nflowchart TB\n  A[\"유출 DB(다크웹 콤보 리스트)\"] --> B[\"자동화 도구(Sentry MBA·OpenBullet 등)\"]\n  B --> C[\"프록시·봇넷(IP 분산, UA 변조)\"]\n  C -->|대량 로그인 시도| D[\"대상 서비스 로그인 API\"]\n  D -->|성공 응답 분류| E[\"유효 계정 목록\"]\n  E --> F[\"계정 전매·부정결제·추가 공격\"]\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 콤보 리스트 | 공격 입력 데이터 | 다수 유출 DB 통합·중복 제거, 해시 크랙 결과 |\n| 자동화 도구 | 로그인 요청 생성·응답 판별 | 설정 파일(Config)로 사이트별 로그인 흐름 정의, 멀티스레드 |\n| IP 분산 인프라 | 차단 우회 | 봇넷, 주거용 프록시, 클라우드 인스턴스 |\n| 우회 기술 | 봇 탐지 회피 | [[captcha|CAPTCHA]] 해결 서비스, 헤드리스 브라우저, 핑거프린트 위조 |\n| 대상 서비스 | 공격 표면 | 단일 비밀번호 인증, [[rate-limiting|요청 제한]] 미비, 상세한 오류 메시지 |\n\n### 다. 공격 절차\n1. 다크웹에서 유출 자격증명 구매 또는 수집·결합\n2. 대상 사이트 로그인 흐름 분석 후 자동화 도구 설정\n3. 프록시로 IP·User-Agent를 분산하여 저속·대량 로그인 시도\n4. 성공 계정 분류, 포인트·결제정보·개인정보 확인\n5. 계정 전매, 부정 결제, 비밀번호 재사용 패턴을 이용한 타 서비스 연쇄 공격\n\n## 3. 크리덴셜 스터핑의 상세\n### 가. 유사 인증 공격 비교\n| 구분 | 크리덴셜 스터핑 | [[brute-force-attack|브루트포스]] | [[dictionary-attack|사전 공격]] | [[password-spraying|패스워드 스프레잉]] |\n|---|---|---|---|---|\n| 입력 | 유출된 실제 ID·PW 쌍 | 가능한 모든 조합 | 사전 단어 목록 | 소수의 흔한 비밀번호 |\n| 대상 | 다수 계정, 계정당 1~수회 | 특정 계정 집중 | 특정 계정 | 다수 계정에 동일 PW |\n| 성공 요인 | 비밀번호 재사용 | 짧은 비밀번호 | 추측 가능한 단어 | 약한 공통 비밀번호 |\n| 계정 잠금 우회 | 임계치 미만 시도 시 회피 가능 | 어려움 | 어려움 | 임계치 미만 시도 시 회피 가능 |\n\n### 나. 탐지 지표\n| 지표 | 내용 |\n|---|---|\n| 로그인 실패율 급증 | 평시 대비 실패율·시도량 이상 증가 |\n| IP·지리 분포 | 다수 국가·ASN에서 동시 시도, 데이터센터 IP 비율 상승 |\n| 세션 특성 | 동일 핑거프린트, 비정상 요청 간격, 자바스크립트 미실행 |\n| 성공 후 행위 | 즉시 개인정보·결제정보 페이지 접근, 비밀번호 변경 |\n\n### 다. 대응 기술\n| 계층 | 기술 |\n|---|---|\n| 인증 강화 | [[multi-factor-authentication|MFA]], 위험기반 인증([[risk-based-authentication|RBA]]), [[fido2|FIDO2]]·패스키 기반 패스워드리스 |\n| 비밀번호 정책 | 유출 비밀번호 대조(NIST SP 800-63B, Have I Been Pwned), 사이트별 고유 값, 침해 증거가 있을 때 변경 |\n| 봇 방어 | [[bot-management|봇 관리]] 솔루션, 디바이스 핑거프린팅, 행위 분석, CAPTCHA, 요청 제한 |\n| 모니터링 | 로그인 로그 상관분석([[siem|SIEM]]), 다크웹 유출 모니터링, 이상 로그인 알림 |\n\n법 조항의 통지 의무와 모든 계정 비밀번호 초기화는 같은 요건이 아니다. 현행 법령의 적용·예외는 별도 확인이 필요하다.\n\n## 4. 크리덴셜 스터핑 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 사용성 | MFA·CAPTCHA 강화 시 이탈률 증가, 위험기반 단계적 인증으로 균형 |\n| 오류 메시지 | ID 존재 여부를 노출하지 않는 일반화된 응답 |\n| 법·제도 | [[personal-information-protection-act|개인정보보호법]] 제29조 안전조치 의무, 제34조 유출 통지, 침해 범위에 따른 자격증명 폐기·변경(법적 의무와 기술 대응을 구분) |\n| 사용자 교육 | 사이트별 고유 비밀번호, [[password-manager|비밀번호 관리자]] 사용 권고 |\n| 발전방향 | 패스키 확산으로 비밀번호 자체 제거, 공유 위협 인텔리전스로 공격 IP·계정 조기 차단 |\n\n## 5. 결론\n- 크리덴셜 스터핑은 비밀번호 재사용과 서비스의 자동화 공격 방어 부족을 함께 악용하므로, MFA·패스워드리스 전환과 봇 탐지를 결합하고 사용자 습관 개선을 병행하는 것이 근본 대응임\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-63B-4: Authenticator requirements",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b/authenticators/",
+          "scope": "인증 요소·비밀번호 정책·공개키 소유 증명·재사용 방지 요구사항"
+        },
+        {
+          "title": "OWASP Credential Stuffing Prevention",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html",
+          "scope": "공격 구분·MFA·봇 방어·유출 비밀번호 대응"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "두 본문 전문 대조. 재사용·성공률 수치의 무근거 일반화 제거, 방어 조건과 침해 시 변경을 구분.",
+      "unresolved": [
+        "원문의 평균 재사용 비율 60%·성공률 0.1~2% 통계 원전은 확인할 수 없습니다.",
+        "개인정보보호법 제29·34조의 현행 세부 적용·예외·기한은 직접 대조 미완료."
+      ]
+    }
   }
 }
