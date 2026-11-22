@@ -50,7 +50,7 @@ export function setupWritingGuide({ api }) {
       }
       list('문제 요구사항', data.requirements);
       list('작성 목차', data.outline.map(item => `${item.title} — ${item.hint}`), true);
-      list(data.kind === 'example' ? '필수 키워드' : '출제어·연결 주제 (검토할 후보)', data.keywords);
+      list(data.kind === 'example' ? '핵심 개념' : '출제어·연결 주제 (검토할 후보)', data.keywords);
       const example = document.createElement('section');
       if (data.example) {
         example.append(node('p', data.provenance));

@@ -20,6 +20,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.db import connect, initialize
 from app.writing_guide import writing_guide
+from app.answer_format import reference_answer
 from scripts.data_contract import EXAM_DIRECTORY, EXAM_NAME, exam_filename
 from scripts.parse_questions import parse_round
 
@@ -242,7 +243,8 @@ def history(qid: str):
 def reference(tid: str):
     with connect() as db:
         topic = require_row(db.execute("SELECT title FROM topics WHERE id=%s", (tid,)).fetchone())
-        return {"title": topic["title"], "answers": db.execute("SELECT variant,body FROM reference_answers WHERE topic_id=%s ORDER BY variant DESC", (tid,)).fetchall()}
+        answers = db.execute("SELECT variant,body FROM reference_answers WHERE topic_id=%s ORDER BY variant DESC", (tid,)).fetchall()
+        return {"title": topic["title"], "answers": [reference_answer(tid, answer) for answer in answers]}
 
 
 @app.get("/api/exams")

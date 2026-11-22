@@ -64,6 +64,15 @@ class AppTests(unittest.TestCase):
         example = self.client.get("/api/questions/r136-s1-q04/writing-guide").json()
         self.assertEqual(example["kind"], "example")
         self.assertIn("슈퍼키", example["example"])
+        for tid in ('t-daae7f78', 't-47ad88b0', 't-3e6910a9'):
+            reference = self.client.get(f'/api/topics/{tid}/reference')
+            self.assertEqual(reference.status_code, 200)
+            for answer in reference.json()['answers']:
+                self.assertEqual(answer['editorial_status'], 'corrected')
+                self.assertIn('검토 근거', answer['body'])
+        calculation = self.client.get('/api/questions/r139-s4-q06/writing-guide').json()
+        self.assertEqual(calculation['kind'], 'example')
+        self.assertIn('192.168.0.0/22', calculation['example'])
         self.assertEqual(self.client.get("/api/questions/absent/writing-guide").status_code, 404)
         initialize()
         with connect() as db:

@@ -1,0 +1,110 @@
+{
+  "t-daae7f78": {
+    "short": {
+      "source_sha256": "b7f8c3e2a0c5eb8cfeacf9a660cc28323d7c3fa4d887231fa83f2b1724733eb0",
+      "body": "## 1. 정규화의 개요\n- 정의: [[functional-dependency|함수 종속]]·[[multivalued-dependency|다치 종속]]·[[join-dependency|조인 종속]]을 기준으로 [[relation|릴레이션]]을 [[lossless-join-decomposition|무손실 분해]]하여 중복과 [[database-anomaly|이상 현상]]을 제거하는 [[relational-database|관계형 데이터베이스]] 설계 기법\n- 필요성: 한 릴레이션에 여러 사실이 혼재하여 생기는 삽입·삭제·갱신 이상 제거, 데이터 일관성 확보\n\n## 2. 정규화의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[비정규] -->|원자값화| N1[1NF]\n  N1 -->|부분 종속 제거| N2[2NF]\n  N2 -->|이행 종속 제거| N3[3NF]\n  N3 -->|비자명 FD의 결정자 슈퍼키 확인| BC[BCNF]\n  BC -->|다치 종속 제거| N4[4NF]\n  N4 -->|조인 종속 제거| N5[5NF]\n```\n| 정규형 | 조건 |\n|---|---|\n| [[first-normal-form|1NF]] | 모든 속성이 원자값 |\n| [[second-normal-form|2NF]] | [[partial-dependency|부분 함수 종속]] 제거 |\n| [[third-normal-form|3NF]] | [[transitive-dependency|이행 함수 종속]] 제거 |\n| [[boyce-codd-normal-form|BCNF]] | 모든 비자명 함수 종속 X→Y에서 X가 슈퍼키 |\n| [[fourth-normal-form|4NF]] | 자명하지 않은 다치 종속 X→→Y의 X가 슈퍼키 |\n| [[fifth-normal-form|5NF]] | 모든 조인 종속이 후보키로 함축 |\n\n## 3. 정규화와 역정규화 비교\n| 구분 | 정규화 | [[denormalization|역정규화]] |\n|---|---|---|\n| 목적 | 중복·이상 현상 제거 | 조회 성능 향상 |\n| 방법 | 릴레이션 분해 | 테이블 통합, 중복·파생 컬럼 추가 |\n| 단점 | 조인 증가 | 갱신 비용, 불일치 위험 |\n\n## 4. 고려사항\n- 분해 시 무손실 조인과 [[dependency-preservation|종속성 보존]] 동시 검증\n- 실무는 3NF·BCNF까지 수행 후 성능 요구 시 반정규화 선택 적용",
+      "sources": [
+        {
+          "title": "UC Berkeley CS186: DB Design",
+          "url": "https://cs186berkeley.net/sp21/resources/static/notes/n13-DBDesign.pdf",
+          "scope": "슈퍼키·후보키, BCNF·3NF 정의와 함수 종속 전제"
+        },
+        {
+          "title": "Database System Concepts: 연습문제 7.19",
+          "url": "https://www.db-book.com/Practice-Exercises/PDF-practice-exer-dir/7.pdf",
+          "scope": "2NF의 모든 후보키에 대한 부분 종속 조건"
+        },
+        {
+          "title": "Database System Concepts 6판 Appendix B",
+          "url": "https://www.db-book.com/db6/appendices-dir/b.pdf",
+          "scope": "조인 종속과 분해의 업무 제약 전제. 기초 관계 이론 참고"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    },
+    "long": {
+      "source_sha256": "83a615439b56886f4d946b8d9e84ad202bd98058db2bbf18b4ca7ebd20a4e67d",
+      "body": "## 1. 정규화의 개요\n### 가. 정의\n- [[functional-dependency|함수 종속]](FD)·[[multivalued-dependency|다치 종속]](MVD)·[[join-dependency|조인 종속]](JD)을 기준으로 [[relation|릴레이션]]을 단계적으로 분해하여 데이터 중복과 [[database-anomaly|이상 현상]]을 제거하는 [[relational-database|관계형 데이터베이스]] 논리 설계 기법\n\n### 나. 등장배경 / 필요성\n- 한 릴레이션에 서로 다른 사실(학생 소속·수강 내역)이 혼재하면 [[insertion-anomaly|삽입 이상]]·[[deletion-anomaly|삭제 이상]]·[[update-anomaly|갱신 이상]] 발생\n- 중복 최소화로 저장 공간 절감, 무결성 유지 비용 감소, 스키마 확장 유연성 확보\n\n### 다. 핵심 개념\n- [[lossless-join-decomposition|무손실 조인 분해]]: 분해 릴레이션의 자연 조인으로 원 릴레이션 복원, R1∩R2가 R1 또는 R2의 슈퍼키이면 성립\n- [[dependency-preservation|종속성 보존]]: 원래 FD를 분해된 각 릴레이션 내부 FD만으로 검사 가능\n- 결정자: FD X→Y에서 Y를 결정하는 속성 집합 X\n\n## 2. 정규화의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  A[업무 규칙] --> B[FD 도출 및 함수종속도표]\n  B --> C[속성 폐포로 후보키 결정]\n  C --> D[1NF 원자값화]\n  D --> E[2NF 부분 종속 제거]\n  E --> F[3NF 이행 종속 제거]\n  F --> G[BCNF 비자명 FD의 결정자 슈퍼키 확인]\n  G --> H[4NF 다치 종속 제거]\n  H --> I[5NF 조인 종속 제거]\n  I --> J[무손실 및 종속성 보존 검증]\n```\n\n### 나. 정규형별 조건\n| 정규형 | 조건 | 제거 대상 |\n|---|---|---|\n| [[first-normal-form|1NF]] | 모든 속성 도메인이 원자값 | 반복 그룹·다중값 |\n| [[second-normal-form|2NF]] | 1NF이며 모든 비주요 속성이 모든 후보키에 완전 함수 종속 | [[partial-dependency|부분 함수 종속]] |\n| [[third-normal-form|3NF]] | 모든 비자명 FD X→A에서 X가 슈퍼키이거나 A가 주요 속성 | [[transitive-dependency|이행 함수 종속]] |\n| [[boyce-codd-normal-form|BCNF]] | 모든 비자명 함수 종속 X→Y에서 X가 슈퍼키 | 비자명 함수 종속의 슈퍼키 아닌 결정자 |\n| [[fourth-normal-form|4NF]] | 자명하지 않은 MVD의 결정자가 슈퍼키 | 독립 다치 종속 |\n| [[fifth-normal-form|5NF]] | 모든 JD가 후보키로 함축 | 조인 종속 |\n\n### 다. 키 도출 절차 (대출 스키마 예)\n1. FD: 지점명→{자산, 장소}, 대출번호→{지점명, 금액}\n2. 어느 FD 우변에도 없는 대출번호·고객명은 키에 반드시 포함\n3. [[attribute-closure|속성 폐포]] {대출번호, 고객명}+ = 전체 속성 → 후보키\n4. BCNF 분해: 지점(**지점명**, 자산, 장소), 대출(**대출번호**, 지점명, 금액), 차입(**고객명, 대출번호**)\n\n## 3. 수강테이블 이상 현상과 재구성\n### 가. 이상 현상 3가지와 발생 이유\n| 이상 현상 | 사례 |\n|---|---|\n| 삽입 이상 | 수강 신청 전 신입생의 학과·지도교수 등록 불가(수강코드 NULL 불가) |\n| 삭제 이상 | 211561의 C324 수강 취소 시 수학과·P2 정보 동시 소실 |\n| 갱신 이상 | 201511 지도교수 변경 시 2개 행 중 일부만 수정되면 불일치 |\n- 다음 업무 종속을 가정한 예시의 발생 이유: 기본키 {학번, 수강코드} 중 학번에만 학과·지도교수가 종속(부분 종속), 지도교수→학과 이행 종속\n\n### 나. 해결 방안 및 테이블 재구성\n- 2NF: 학생(**학번**, 학과, 지도교수), 수강(**학번, 수강코드**)\n- 3NF: 학생(**학번**, 지도교수), 지도교수(**지도교수**, 학과) — K1·M1→컴퓨터과, P2→수학과, C1→전기과\n- 수강은 (221571, C412) 등 학번·수강코드 쌍 5건만 보관하여 세 이상 현상 해소\n\n### 다. 4NF·5NF 사례\n- 4NF: 강좌(과목, 교수, 교재)에서 과목→→교수, 과목→→교재가 독립이면 (과목, 교수), (과목, 교재)로 분해\n- 5NF: 공급(공급자, 부품, 프로젝트)에 세 이항 투영의 자연 조인으로 원 관계를 복원하는 조인 종속이 성립하고 후보키만으로 함축되지 않을 때 5NF 위반이다. 세 이항 관계로의 분해는 해당 업무 제약이 실제 성립할 때 적용한다\n\n## 4. 정규화 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 분해 수준 | 실무는 3NF·BCNF까지, BCNF는 종속성 보존 미보장으로 3NF 선택 가능 |\n| 성능 | 조인 증가 시 [[denormalization|반정규화]] 선택 적용, 정합성은 [[database-trigger|트리거]]로 보완 |\n| 분석계 | 데이터 웨어하우스는 [[dimensional-modeling|차원 모델링]]으로 의도적 비정규화 |\n\n## 5. 결론\n- 정규화는 무결성 확보의 기본 원칙이며, 성능 요구와 균형을 이루도록 반정규화와 병행 설계 필요",
+      "sources": [
+        {
+          "title": "UC Berkeley CS186: DB Design",
+          "url": "https://cs186berkeley.net/sp21/resources/static/notes/n13-DBDesign.pdf",
+          "scope": "슈퍼키·후보키, BCNF·3NF 정의와 함수 종속 전제"
+        },
+        {
+          "title": "Database System Concepts: 연습문제 7.19",
+          "url": "https://www.db-book.com/Practice-Exercises/PDF-practice-exer-dir/7.pdf",
+          "scope": "2NF의 모든 후보키에 대한 부분 종속 조건"
+        },
+        {
+          "title": "Database System Concepts 6판 Appendix B",
+          "url": "https://www.db-book.com/db6/appendices-dir/b.pdf",
+          "scope": "조인 종속과 분해의 업무 제약 전제. 기초 관계 이론 참고"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    }
+  },
+  "t-47ad88b0": {
+    "short": {
+      "source_sha256": "c6abd319a1180a34339cbb6c566fe703e643573c8e12cd244cfc1982ba79de43",
+      "body": "## 1. 검색 증강 생성(RAG)의 개요\n- 정의: 사용자 질의와 관련된 외부 지식을 키워드·벡터·하이브리드 검색 등으로 찾아 프롬프트에 결합함으로써 [[large-language-model|LLM]]이 근거 기반으로 답변을 생성하도록 하는 기법\n- 필요성: LLM의 [[hallucination|환각]], 학습 시점 이후 지식 단절, 사내 비공개 문서 미반영 문제를 외부 근거 검색으로 완화하며, 검색·생성 오류는 별도 검증\n\n## 2. RAG의 구조 및 구성요소\n```mermaid\nflowchart LR\n  D[\"문서\"] --> C[\"청킹·임베딩\"] --> V[\"벡터 DB\"]\n  Q[\"질의\"] --> E[\"질의 임베딩\"] --> R[\"유사도 검색\"]\n  V --> R --> P[\"프롬프트 증강\"] --> L[\"LLM 생성\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 인덱싱 | 문서 [[chunking|청킹]] 후 [[text-embedding|임베딩]] 벡터 저장 |\n| 검색기 | [[cosine-similarity|코사인 유사도]] 기반 [[approximate-nearest-neighbor|ANN]] 탐색, 상위 k개 추출 |\n| 증강·생성기 | 검색 문맥을 프롬프트에 결합, 출처 인용 답변 |\n\n## 3. Advanced·Modular RAG 비교\n| 구분 | Advanced RAG | Modular RAG |\n|---|---|---|\n| 구조 | 인덱싱-검색-생성 선형 파이프라인 고도화 | 검색·메모리·라우팅·융합 등 모듈 조합형 |\n| 검색 전 | 질의 재작성·확장, 청크 최적화, 메타데이터 | 질의 라우팅, 다중 소스 검색 |\n| 검색 후 | [[reranking|재순위화]], 문맥 압축 | 반복·재귀·적응형 검색(Self-RAG) |\n| 특징 | 검색 전·후 품질 개선 중심 | 흐름 재구성 가능, [[llm-agent|에이전트]]와 결합 |\n\n## 4. 고려사항\n- 청크 크기·[[hybrid-search|하이브리드 검색]](키워드+벡터)·재순위화로 검색 정밀도 확보, 검색 품질과 생성 내용의 근거 일치 여부를 함께 평가\n- 문서 내 [[prompt-injection|프롬프트 인젝션]]·권한별 접근통제 등 보안 설계 필수\n\n### 검색·생성 검증\n검색 결과를 인용해도 환각이 완전히 제거되지는 않는다. 답변의 각 주장과 검색 근거의 일치 여부를 확인한다. Advanced와 Modular는 개선 관점의 분류이며 함께 적용할 수 있다.",
+      "sources": [
+        {
+          "title": "Microsoft Learn: RAG and indexes",
+          "url": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation?view=foundry-classic",
+          "scope": "검색 방식, 검색 근거가 있어도 남는 환각과 평가 필요성"
+        },
+        {
+          "title": "Gao et al.: RAG Survey (2024)",
+          "url": "https://arxiv.org/abs/2312.10997",
+          "scope": "Advanced·Modular 구분은 해당 문헌의 분류이며 상호 배타적 표준은 아님"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    },
+    "long": {
+      "source_sha256": "e967ba44ddd27933f4ca922629870ed9cc3cb73ea104f41e58eb60dc8a8a2cdc",
+      "body": "## 1. 검색 증강 생성(RAG)의 개요\n### 가. 정의\n- 질의 시점에 외부 지식 저장소에서 관련 문서를 검색(Retrieval)하여 [[large-language-model|LLM]]의 입력 문맥에 증강(Augmentation)한 뒤 답변을 생성(Generation)하는 아키텍처\n### 나. 등장배경 / 필요성\n- LLM 한계: 학습 데이터 시점 이후 지식 부재, 비공개 사내 문서 미학습, 그럴듯한 거짓을 생성하는 [[hallucination|환각]]\n- [[fine-tuning|미세조정]]은 비용·갱신 주기·근거 제시 측면에서 불리하여, 지식을 외부화하고 검색으로 결합하는 방식이 실용적\n### 다. 핵심 개념\n- [[text-embedding|임베딩]]: 문장을 의미 공간의 벡터로 변환, 의미 유사 문서는 가까운 벡터\n- [[semantic-search|의미 기반 검색]]: [[cosine-similarity|코사인 유사도]]로 질의와 가장 가까운 청크 탐색\n- 근거 기반 생성: 검색 문맥만 참조하도록 지시하고 출처를 인용해 검증 가능성 확보\n\n## 2. RAG의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph IDX[\"인덱싱 단계\"]\n    D[\"문서 수집·파싱\"] --> C[\"청킹\"] --> E1[\"임베딩\"] --> V[\"벡터 DB 저장\"]\n  end\n  subgraph QRY[\"질의 단계\"]\n    Q[\"사용자 질의\"] --> QR[\"질의 재작성·확장\"] --> E2[\"질의 임베딩\"]\n    E2 --> S[\"하이브리드 검색: 벡터+키워드\"] --> RR[\"재순위화·압축\"]\n    RR --> P[\"프롬프트 증강\"] --> G[\"LLM 생성\"] --> A[\"출처 포함 답변\"]\n  end\n  V --> S\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 문서 파서·[[chunking|청커]] | 비정형 문서를 의미 단위로 분할 | 고정 길이·문단·의미 기반 청킹, 중첩(overlap) |\n| 임베딩 모델 | 텍스트를 고차원 벡터로 변환 | 문장 임베딩, 다국어 모델 |\n| [[vector-database|벡터 DB]] | 벡터 저장·고속 유사도 검색 | [[approximate-nearest-neighbor|ANN]](HNSW), 메타데이터 필터 |\n| 검색기 | 질의와 관련 청크 상위 k 추출 | [[hybrid-search|하이브리드 검색]](BM25+벡터) |\n| [[reranking|재순위화기]] | 검색 결과 정밀 재정렬 | 크로스 인코더 |\n| 생성기 | 문맥 기반 답변 생성·인용 | LLM, [[prompt-engineering|프롬프트 템플릿]] |\n### 다. 동작 절차\n1. 인덱싱: 문서 수집 → 청킹 → 임베딩 → 벡터 DB 적재(메타데이터 포함)\n2. 질의 처리: 질의 재작성·확장 → 질의 임베딩\n3. 검색: 유사도 상위 k 청크 추출 → 재순위화·문맥 압축\n4. 생성: 시스템 프롬프트+문맥+질의로 LLM 호출 → 출처 표기 답변\n5. 평가·갱신: 검색 적합도·답변 충실도 평가, 문서 변경 시 증분 재인덱싱\n\n## 3. Advanced RAG와 Modular RAG 비교\n### 가. RAG 패러다임 발전\n- Naive RAG: 인덱싱-검색-생성의 단순 파이프라인, 검색 정밀도 낮고 문맥 중복·누락 발생\n- Advanced RAG: 검색 전·후 처리 단계를 추가해 Naive의 품질 문제 개선\n- Modular RAG: 기능을 모듈로 분리하고 흐름을 재구성·반복하는 유연한 프레임워크\n### 나. 비교표\n| 구분 | Advanced RAG | Modular RAG |\n|---|---|---|\n| 구조 | 검색 전·후 단계의 품질 고도화 | 검색·메모리·라우팅·예측·융합·태스크 어댑터 모듈의 자유 조합 |\n| 검색 전 처리 | 질의 재작성·확장(HyDE), 슬라이딩 윈도·계층 청킹, 메타데이터 부착 | 질의 라우팅(소스·도구 선택), [[knowledge-graph|지식 그래프]]·DB 등 다중 소스 |\n| 검색 후 처리 | 재순위화, 문맥 압축·선별, 중복 제거 | 검색 결과 융합(RAG-Fusion), 생성 결과 재검증 |\n| 흐름 예 | 검색 전 처리 → 검색 → 검색 후 처리 → 생성 | 반복 검색(Iterative), 재귀 검색(Recursive), 적응형 검색(Self-RAG·FLARE: 필요 시에만 검색) |\n| 학습 | 임베딩·재순위 모델 개별 최적화 | 검색기-생성기 공동 학습, 모듈 교체 용이 |\n| 장점 | 단계별 품질 개선과 평가에 집중 | 복잡 질의·다단계 추론 대응, [[llm-agent|에이전트]] 결합 |\n| 단점 | 복잡·다단계 질의 한계 | 설계·운영 복잡, 지연·비용 증가 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 검색 품질 | 청크 크기·중첩 실험, 하이브리드 검색·재순위화 적용, 도메인 임베딩 선택 |\n| 평가 | 검색 적합도(Recall@k)·답변 충실도·근거 일치도 자동 평가 체계 |\n| 보안 | 문서 권한 기반 검색 필터, 문서 삽입형 [[prompt-injection|프롬프트 인젝션]] 차단, [[llm-guardrail|가드레일]] |\n| 운영 | 문서 변경 증분 인덱싱, 캐시, 지연시간 관리 |\n| 발전방향 | GraphRAG(지식 그래프 결합), 에이전틱 RAG(도구·다단계 추론), 멀티모달 RAG |\n\n## 5. 결론\n- RAG는 LLM에 검증 가능한 외부 지식을 결합하는 설계 패턴이다. 검색 품질 개선과 모듈화를 업무 요구에 맞춰 조합하고 실제 질의로 효과를 평가한다\n\n### 검색·생성 검증\n검색 결과를 인용해도 환각이 완전히 제거되지는 않는다. 답변의 각 주장과 검색 근거의 일치 여부를 확인한다. Advanced와 Modular는 개선 관점의 분류이며 함께 적용할 수 있다.",
+      "sources": [
+        {
+          "title": "Microsoft Learn: RAG and indexes",
+          "url": "https://learn.microsoft.com/en-us/azure/foundry/concepts/retrieval-augmented-generation?view=foundry-classic",
+          "scope": "검색 방식, 검색 근거가 있어도 남는 환각과 평가 필요성"
+        },
+        {
+          "title": "Gao et al.: RAG Survey (2024)",
+          "url": "https://arxiv.org/abs/2312.10997",
+          "scope": "Advanced·Modular 구분은 해당 문헌의 분류이며 상호 배타적 표준은 아님"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    }
+  },
+  "t-3e6910a9": {
+    "short": {
+      "source_sha256": "29470371dd910db42b51633ece7ff8808cda8055b69e227b8511f45164a0fc2a",
+      "body": "## 1. 트랜잭션 격리 수준의 개요\n- 정의: 동시에 실행되는 [[transaction|트랜잭션]]이 다른 트랜잭션의 변경 내용을 볼 수 있는 정도를 ANSI/ISO SQL-92 표준이 허용 이상 현상 기준으로 정의한 4단계 수준\n- 필요성: [[acid|ACID]]의 고립성(Isolation)과 동시성·처리량 간 절충\n\n## 2. 격리 수준 개념도 및 구성요소\n```mermaid\nflowchart LR\n  RU[Read Uncommitted] -->|격리성 증가| RC[Read Committed]\n  RC -->|격리성 증가| RR[Repeatable Read]\n  RR -->|격리성 증가| SR[Serializable]\n```\n| 수준 | 동작 |\n|---|---|\n| [[read-uncommitted|Read Uncommitted]] | 미커밋 데이터 읽기 허용 |\n| [[read-committed|Read Committed]] | 커밋된 데이터만 읽기, Oracle·SQL Server 기본 |\n| [[repeatable-read|Repeatable Read]] | 읽은 행은 종료 시까지 동일, MySQL InnoDB 기본 |\n| [[serializable-isolation|Serializable]] | 직렬 실행과 동등한 결과 보장, 구현 방식은 DBMS별 상이 |\n\n## 3. 격리 수준별 이상 현상\n| 수준 | [[dirty-read|Dirty Read]] | [[non-repeatable-read|Non-Repeatable Read]] | [[phantom-read|Phantom Read]] |\n|---|---|---|---|\n| Read Uncommitted | 허용 가능 | 허용 가능 | 허용 가능 |\n| Read Committed | 방지 | 허용 가능 | 허용 가능 |\n| Repeatable Read | 방지 | 방지 | 허용 가능 |\n| Serializable | 방지 | 방지 | 방지 |\n\n## 4. 고려사항\n- 격리 수준 상향의 비용은 잠금 경합·대기 또는 직렬화 실패 재시도 등 구현에 따라 다름\n- [[multi-version-concurrency-control|MVCC]] 기반 DBMS는 읽기 비차단으로 성능 손실 완화\n\n### DBMS별 차이\n표의 허용 가능은 반드시 발생한다는 뜻이 아니다. PostgreSQL 18에서는 Read Uncommitted가 Read Committed로 동작하고, Repeatable Read도 팬텀 읽기를 허용하지 않는다. Serializable은 단순한 범위 잠금만으로 설명할 수 없으며 직렬화 실패 시 재시도가 필요할 수 있다.",
+      "sources": [
+        {
+          "title": "PostgreSQL 18: Transaction Isolation",
+          "url": "https://www.postgresql.org/docs/18/transaction-iso.html",
+          "scope": "표준의 허용 가능성과 실제 발생 구분, PostgreSQL의 RR·RU·Serializable 구현"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    },
+    "long": {
+      "source_sha256": "36740971077d3c17f1197447f5e3f6004e572005775f9ac18c45bc912b8013ba",
+      "body": "## 1. 트랜잭션 격리 수준의 개요\n### 가. 정의\n- 동시 실행 [[transaction|트랜잭션]] 간 데이터 변경의 가시성을 제어하는 수준으로, ANSI/ISO SQL-92 표준이 허용 이상 현상 기준 4단계로 정의\n\n### 나. 필요성\n- 완전한 직렬 실행은 동시성·처리량 저하, 업무 특성에 따라 일관성과 성능 절충 필요\n- [[acid|ACID]]의 고립성(Isolation)을 구현하는 [[concurrency-control|병행제어]] 정책 결정\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| [[shared-lock|공유 잠금]](S) | 읽기 잠금, 다른 S 잠금과 호환 |\n| [[exclusive-lock|배타 잠금]](X) | 쓰기 잠금, 모든 잠금과 비호환 |\n| [[multi-version-concurrency-control|MVCC]] | 여러 행 버전으로 스냅샷 읽기를 제공하며, 버전 보관 방식과 잠금 동작은 DBMS별로 다름 |\n\n## 2. 격리 수준 구성도 및 4가지 수준\n### 가. 구성도\n```mermaid\nflowchart LR\n  RU[Read Uncommitted] -->|격리성 증가| RC[Read Committed]\n  RC -->|격리성 증가| RR[Repeatable Read]\n  RR -->|격리성 증가| SR[Serializable]\n```\n\n### 나. 4가지 격리 수준\n| 수준 | 동작 | 구현 방식 |\n|---|---|---|\n| [[read-uncommitted|Read Uncommitted]] | 미커밋 데이터 읽기 허용 | 읽기 시 S 잠금 미사용 |\n| [[read-committed|Read Committed]] | 커밋된 데이터만 읽기 | 문장 단위 스냅샷 또는 S 잠금 즉시 해제(Oracle·SQL Server 기본) |\n| [[repeatable-read|Repeatable Read]] | 읽은 행은 종료 시까지 동일 | 트랜잭션 단위 스냅샷 또는 S 잠금 유지(InnoDB 기본) |\n| [[serializable-isolation|Serializable]] | 직렬 실행과 동일 결과 | 범위(Predicate) 잠금, 직렬화 스냅샷 격리(SSI) |\n\n### 다. 사례 (잔액 1,000원 계좌)\n- RU: T1이 500원으로 변경 후 미커밋, T2가 500원 조회, T1 롤백 시 T2는 존재하지 않는 값 사용\n- RC: T2 조회 1,000원 → T1 커밋(500원) → T2 재조회 500원으로 값 변경\n- RR: T2 재조회도 1,000원 유지, 단 T1의 신규 계좌 삽입 시 범위 조회 건수 변화 가능\n- Serializable: 동시에 실행해도 직렬 실행과 동등한 결과를 보장한다. 구현에 따라 대기하거나 직렬화 실패로 한 트랜잭션을 중단·재시도할 수 있다\n\n## 3. 격리 수준별 이상 현상\n### 가. 이상 현상 정의\n- [[dirty-read|Dirty Read]]: 다른 트랜잭션의 미커밋 변경을 읽어 롤백 시 무효 데이터 사용\n- [[non-repeatable-read|Non-Repeatable Read]]: 같은 행 재조회 사이 다른 트랜잭션의 UPDATE·DELETE 커밋으로 값 변경\n- [[phantom-read|Phantom Read]]: 같은 조건 범위 재조회 시 다른 트랜잭션의 INSERT로 없던 행 출현\n- [[lost-update|Lost Update]]: 읽은 후 갱신하는 두 트랜잭션 간 선행 갱신 유실, RC 이하에서 SELECT FOR UPDATE로 방지\n\n### 나. 표준상 이상 현상 허용 여부\n| 수준 | Dirty Read | Non-Repeatable Read | Phantom Read |\n|---|---|---|---|\n| Read Uncommitted | 허용 가능 | 허용 가능 | 허용 가능 |\n| Read Committed | 방지 | 허용 가능 | 허용 가능 |\n| Repeatable Read | 방지 | 방지 | 허용 가능 |\n| Serializable | 방지 | 방지 | 방지 |\n- [[snapshot-isolation|스냅샷 격리]]는 위 3가지를 방지하나 Write Skew 이상 발생 가능\n\n## 4. 격리 수준 적용 시 고려사항\n| 구분 | 고려사항 |\n|---|---|\n| 성능 | 격리 수준 상향 시 잠금 경합·[[deadlock|교착상태]]·처리량 저하 |\n| DBMS 차이 | InnoDB RR은 Next-Key Lock으로 팬텀 방지, Oracle은 RC·Serializable만 지원 |\n| 설계 | 기본 RC 유지, 필요 구간만 SELECT FOR UPDATE·[[optimistic-locking|낙관적 잠금]] 적용 |\n\n## 5. 결론\n- 격리 수준은 일관성과 동시성의 절충점으로, DBMS별 구현 차이를 이해하고 업무 정합성 요구에 맞게 선택해야 함\n\n### DBMS별 차이\n표의 허용 가능은 반드시 발생한다는 뜻이 아니다. PostgreSQL 18에서는 Read Uncommitted가 Read Committed로 동작하고, Repeatable Read도 팬텀 읽기를 허용하지 않는다. Serializable은 단순한 범위 잠금만으로 설명할 수 없으며 직렬화 실패 시 재시도가 필요할 수 있다.",
+      "sources": [
+        {
+          "title": "PostgreSQL 18: Transaction Isolation",
+          "url": "https://www.postgresql.org/docs/18/transaction-iso.html",
+          "scope": "표준의 허용 가능성과 실제 발생 구분, PostgreSQL의 RR·RU·Serializable 구현"
+        }
+      ],
+      "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
+    }
+  }
+}
