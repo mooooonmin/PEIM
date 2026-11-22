@@ -27,7 +27,8 @@
 - 암호 기초 8개 주제와 범위 표시: [PR #41](https://github.com/mooooonmin/PEIM/pull/41) 병합. 운용 모드·암호 분류 등 9개 주제는 [PR #42](https://github.com/mooooonmin/PEIM/pull/42) 병합.
 - 서명·PKI·웹 인증/전송 9개 주제: [PR #43](https://github.com/mooooonmin/PEIM/pull/43) 병합.
 - IPsec·VPN·WLAN·IDS·DDoS·ARP 스푸핑 6개 주제: [PR #44](https://github.com/mooooonmin/PEIM/pull/44) 병합.
-- DB 89개 주제: [PR #45](https://github.com/mooooonmin/PEIM/pull/45) 병합. CA 96개 주제 전문 검토·교정 통합 중, DS·SE·NW 후속 대조 진행.
+- DB 89개 주제: [PR #45](https://github.com/mooooonmin/PEIM/pull/45) 병합. CA 96개 주제 [PR #46](https://github.com/mooooonmin/PEIM/pull/46) 병합, DS·SE·NW 후속 대조 진행.
+- 접근제어·인증 8개 주제 전문 검토·교정 통합 중.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
