@@ -4,6 +4,8 @@
 
 ### 변경
 
+- IPsec·VPN·무선 LAN·IDS·DDoS·ARP 스푸핑의 보호 범위와 구성별 조건 교정.
+
 - 전자서명·PKI·CA·FIDO·JWT·OpenID·SSL·TLS·HTTPS의 인증 범위와 프로토콜별 예외 교정.
 
 - 블록 암호·운용 모드·MAC·암호 분류·보안강도·공격 모델·ElGamal·디지털 봉투의 조건 및 사용 상태 교정.
