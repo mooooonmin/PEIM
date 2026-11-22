@@ -172,5 +172,121 @@
       "reviewed_on": "2026-11-22",
       "review_scope": "정의·분류·방어 원칙과 적용 한계 대조. 사례별 실증·공식 채점 기준 검증은 아님."
     }
+  },
+  "t-e8a7d987": {
+    "short": {
+      "source_sha256": "29e427903fda46914e96de287d1bd5faa23027502db2e7f0573630e96217d4b8",
+      "body": "## 1. IPv6의 개요\n- 정의: [[ipv4|IPv4]] 주소 고갈 해결을 위해 128비트 주소, 고정 길이 헤더, 관련 자동설정·보안 프로토콜과 함께 사용하는 차세대 인터넷 프로토콜(RFC 8200)\n- 등장배경: IPv4 주소 공간의 제약, [[nat|NAT]] 남용에 따른 종단 간 통신 훼손, [[iot|IoT]]·[[5g|5G]] 단말 폭증\n\n## 2. IPv6의 헤더 구조 및 구성요소\n확장 헤더는 필요할 때 선택한다. 아래는 모든 패킷의 필수 구성이 아닌 체인 예시다.\n```mermaid\nflowchart LR\n  A[\"기본 헤더 40B\"] --> B[\"Hop-by-Hop\"] --> C[\"Routing\"] --> D[\"Fragment\"] --> E[\"AH/ESP\"] --> F[\"TCP/UDP\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 기본 헤더 | 40B 고정, Traffic Class·Flow Label·Next Header·Hop Limit·128비트 주소 |\n| 확장 헤더 | Next Header 체인으로 옵션·라우팅·단편화·보안 기능 분리 |\n| 주소 유형 | 유니캐스트·[[multicast|멀티캐스트]]·[[anycast|애니캐스트]], 브로드캐스트 폐지 |\n\n## 3. IPv4 대비 기술적 특성\n| 구분 | IPv4 | IPv6 |\n|---|---|---|\n| 주소 | 32비트 | 128비트(일반적인 SLAAC LAN은 Prefix 64 + Interface ID 64) |\n| 헤더 | 20~60B 가변, 체크섬 | 40B 고정, 체크섬 제거 |\n| 주소 설정 | 수동·[[dhcp|DHCP]] | [[stateless-address-autoconfiguration|SLAAC]]·DHCPv6 |\n| 주소 해석 | [[address-resolution-protocol|ARP]] | [[neighbor-discovery-protocol|NDP]] |\n| 보안 | [[ipsec|IPsec]] 선택 | IPsec 지원 권고(SHOULD), 실제 보호에는 별도 설정 필요 |\n\n## 4. 고려사항\n- 전환: [[dual-stack|듀얼스택]], [[tunneling|터널링]], [[nat64|NAT64]] 단계적 적용\n- 보안: RA 위장·NDP 스푸핑 대응(RA Guard), IPv6 지원 [[firewall|방화벽]] 정책 동기화",
+      "sources": [
+        {
+          "title": "IETF RFC 8200",
+          "url": "https://www.rfc-editor.org/rfc/rfc8200.html",
+          "scope": "IPv6 기본 헤더·확장 헤더·단편화"
+        },
+        {
+          "title": "IETF RFC 8504",
+          "url": "https://www.rfc-editor.org/rfc/rfc8504.html",
+          "scope": "IPsec 지원 권고와 실제 적용 구분"
+        },
+        {
+          "title": "IETF RFC 4862",
+          "url": "https://www.rfc-editor.org/rfc/rfc4862.html",
+          "scope": "SLAAC 주소 생성 조건·DAD"
+        },
+        {
+          "title": "IETF RFC 8981",
+          "url": "https://www.rfc-editor.org/rfc/rfc8981.html",
+          "scope": "임시 주소의 프라이버시 효과 범위"
+        },
+        {
+          "title": "IETF RFC 6164",
+          "url": "https://www.rfc-editor.org/rfc/rfc6164.html",
+          "scope": "/127 라우터 간 점대점 링크"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "주소·헤더·보안·계산의 명시한 조건과 예외를 출처 대조. 전체 주장에 대한 전문가 검수나 공식 정답 인증이 아님."
+    },
+    "long": {
+      "source_sha256": "0f531068bc8ef3417eb03ed77ae452a12a3da063290a5ef1fc704c9929e38373",
+      "body": "## 1. IPv6의 개요\n### 가. 정의\n- 128비트 주소, 40바이트 고정 기본 헤더와 확장 헤더 구조, 관련 자동설정·보안 프로토콜과 함께 사용하는 IETF 표준 차세대 인터넷 프로토콜(RFC 8200)\n\n### 나. 등장배경 / 필요성\n- [[ipv4|IPv4]] 주소 공간의 제약 → [[nat|NAT]] 의존 심화로 종단 간(End-to-End) 통신 원칙 훼손\n- [[iot|IoT]]·[[5g|5G]]·자율주행 등 대규모 단말의 고유 주소 필요, 헤더 처리 부하·라우팅 테이블 비대화 개선\n\n### 다. 핵심 개념\n- 주소 확장: 2^128개. /48을 할당받아 /64 LAN으로 나누는 예는 Global Routing Prefix(48) + Subnet ID(16) + Interface ID(64)이며 모든 망의 고정 배분 규칙은 아니다\n- 헤더 단순화: 필수 필드만 기본 헤더, 선택 기능은 확장 헤더로 분리\n- 관련 기능(지원·설정 조건 확인): [[stateless-address-autoconfiguration|SLAAC]], [[ipsec|IPsec]], [[mobile-ipv6|Mobile IPv6]], Flow Label 기반 [[quality-of-service|QoS]]\n\n## 2. IPv6의 구성도 및 구성요소\n### 가. 구성도(선택적인 확장 헤더 체인의 예)\n확장 헤더는 필요할 때 선택한다. 아래는 모든 패킷의 필수 구성이 아닌 체인 예시다.\n```mermaid\nflowchart LR\n  B[\"기본 헤더 40B<br/>NH=0\"] --> H[\"Hop-by-Hop<br/>NH=43\"] --> R[\"Routing<br/>NH=44\"] --> F[\"Fragment<br/>NH=51\"] --> A[\"AH<br/>NH=50\"] --> E[\"ESP<br/>NH=6\"] --> T[\"TCP 세그먼트\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 기본 헤더 | Version·Traffic Class·Flow Label(20b)·Payload Length·Next Header·Hop Limit·출발지/목적지 주소 | 40B 고정, 체크섬 제거 |\n| 확장 헤더 | Hop-by-Hop·Routing·Fragment·Destination Options·AH·ESP | Next Header 체인 |\n| 주소 체계 | 유니캐스트(Global, Link-local fe80::/10, ULA fc00::/7), [[multicast|멀티캐스트]](ff00::/8), [[anycast|애니캐스트]] | 브로드캐스트 폐지 |\n| [[icmpv6|ICMPv6]] | 오류 보고·진단, [[neighbor-discovery-protocol|NDP]]·MLD 수행 | [[address-resolution-protocol|ARP]]·IGMP 대체 |\n\n### 다. 동작 절차(SLAAC 주소 자동설정)\n1. 링크 유형과 구현의 Interface ID 생성 방식에 따라 Link-local 주소 생성\n2. DAD(Duplicate Address Detection): NS 메시지로 중복 확인\n3. RS 송신 → 라우터가 RA(Router Advertisement)로 Prefix·기본 게이트웨이 통지\n4. RA의 Prefix Information에서 Autonomous 플래그·수명·프리픽스 길이 조건을 확인한 뒤 주소 구성 및 DAD 수행. 모든 RA가 글로벌 주소 생성을 보장하지 않는다. DNS는 RDNSS 또는 [[dhcp|DHCPv6]] 등 별도 설정 경로로 획득\n\n## 3. IPv4 대비 기술적 특성 및 보안기능\n### 가. IPv4와 IPv6 비교\n| 구분 | IPv4 | IPv6 |\n|---|---|---|\n| 주소·표기 | 32비트, 점 10진수 | 128비트, 콜론 16진수(:: 축약) |\n| 헤더 | 20~60B 가변, 체크섬 포함 | 40B 고정, 기본 헤더 체크섬 없음 |\n| 단편화 | 송신 호스트·라우터 | 송신 호스트만, [[path-mtu-discovery|PMTUD]] 활용(IPv6 링크 최소 MTU 1,280B) |\n| 주소 설정·해석 | 수동·DHCP, ARP 브로드캐스트 | SLAAC·DHCPv6, NDP 멀티캐스트 |\n| QoS | ToS(DSCP) | Traffic Class + Flow Label |\n| 이동성 | Mobile IPv4(삼각 라우팅) | Mobile IPv6(경로 최적화) |\n\n### 나. IPv6 보안기능\n| 구분 | 내용 |\n|---|---|\n| IPsec | [[authentication-header|AH]](무결성·출발지 인증·재전송 방지), [[encapsulating-security-payload|ESP]](기밀성+무결성), [[transport-mode|전송 모드]]·[[tunnel-mode|터널 모드]], RFC 8504는 IPsec 지원을 SHOULD로 권고하며 IPv6 사용만으로 암호화·인증되지는 않음 |\n| 주소 프라이버시 | 임시 주소(RFC 8981) 변경으로 주소 기반 활동 상관분석의 시간 범위를 줄임. 모든 추적을 막는 익명화 수단은 아님 |\n| [[secure-neighbor-discovery|SEND]] | CGA·RSA 서명으로 NDP 메시지 위장 방지 |\n| 스캔 저항성 | /64 서브넷당 2^64 주소로 무작위 스캔 곤란 |\n\n## 4. IPv6 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 전환기술 | [[dual-stack|듀얼스택]], [[tunneling|터널링]](운영망 지원·보안 조건 확인), [[nat64|NAT64]]/DNS64 변환 |\n| 보안 위협 | RA 위장·NDP 스푸핑(RA Guard), 확장 헤더 악용 [[firewall|방화벽]] 우회 |\n| 운영 | IPv4·IPv6 보안정책 동기화, IPAM 주소 관리, 로그 128비트 대응 |\n| 발전방향 | IPv6-only 전환, [[segment-routing|SRv6]] 기반 [[network-slicing|네트워크 슬라이싱]], [[6lowpan|6LoWPAN]] 기반 IoT |\n\n## 5. 결론\n- 주소 확장을 넘어 관련 자동설정·보안 프로토콜과 함께 사용하는 미래 인터넷 기반으로, 듀얼스택 단계적 전환과 IPv6 전용 보안정책 병행 필요",
+      "sources": [
+        {
+          "title": "IETF RFC 8200",
+          "url": "https://www.rfc-editor.org/rfc/rfc8200.html",
+          "scope": "IPv6 기본 헤더·확장 헤더·단편화"
+        },
+        {
+          "title": "IETF RFC 8504",
+          "url": "https://www.rfc-editor.org/rfc/rfc8504.html",
+          "scope": "IPsec 지원 권고와 실제 적용 구분"
+        },
+        {
+          "title": "IETF RFC 4862",
+          "url": "https://www.rfc-editor.org/rfc/rfc4862.html",
+          "scope": "SLAAC 주소 생성 조건·DAD"
+        },
+        {
+          "title": "IETF RFC 8981",
+          "url": "https://www.rfc-editor.org/rfc/rfc8981.html",
+          "scope": "임시 주소의 프라이버시 효과 범위"
+        },
+        {
+          "title": "IETF RFC 6164",
+          "url": "https://www.rfc-editor.org/rfc/rfc6164.html",
+          "scope": "/127 라우터 간 점대점 링크"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "주소·헤더·보안·계산의 명시한 조건과 예외를 출처 대조. 전체 주장에 대한 전문가 검수나 공식 정답 인증이 아님."
+    }
+  },
+  "t-c05a40c5": {
+    "short": {
+      "source_sha256": "dcf6baa6ee53da5018313e8b6fb417473a475be27058f9585aae483b31eabb21",
+      "body": "## 1. 서브네팅의 개요\n- 정의: IP 주소의 호스트 비트 일부를 네트워크 비트로 차용해 하나의 네트워크를 여러 논리적 서브넷으로 분할하는 기법\n- 등장배경: [[classful-addressing|클래스풀]] 할당의 주소 낭비(B클래스 65,534호스트 고정), 대형 브로드캐스트 도메인의 성능 저하\n\n## 2. 서브넷 마스크 255.255.255.224 예시\n```mermaid\nflowchart LR\n  A[\"192.168.10.0/24\"] -->|\"호스트 3비트 차용\"| B[\"/27 서브넷 8개\"]\n  B --> C[\".0 .32 .64 ... .224\"]\n```\n| 항목 | 값 |\n|---|---|\n| [[subnet-mask|서브넷 마스크]] | 255.255.255.224(/27), 마지막 옥텟 11100000 |\n| 서브넷 수 | 2^3 = 8개 |\n| 서브넷당 주소 | 32개, 할당 가능 호스트 30개(2^5 - 2) |\n| 첫 서브넷 | 네트워크 .0, 호스트 .1~.30, 브로드캐스트 .31 |\n\n## 3. 서브네팅과 슈퍼네팅 비교\n| 구분 | 서브네팅 | [[supernetting|슈퍼네팅]] |\n|---|---|---|\n| 동작 | 네트워크 분할(프리픽스 증가) | 네트워크 병합(프리픽스 감소) |\n| 목적 | 주소 효율, 브로드캐스트 축소 | [[route-aggregation|경로 집약]] |\n| 주소 표현 | 고정 길이 분할 또는 [[vlsm|VLSM]], CIDR 프리픽스 사용 | [[cidr|CIDR]] 프리픽스로 집약 |\n\n## 4. 고려사항\n- 증설 여유 확보, 큰 서브넷부터 할당, 연속 블록 배치로 경로 집약 가능하게 설계\n- [[ipv6|IPv6]]의 일반적인 SLAAC LAN은 /64를 사용하지만 라우터 간 점대점 링크에는 /127 예외가 있다(RFC 6164). 링크 용도에 따라 설계한다",
+      "sources": [
+        {
+          "title": "IETF RFC 4632",
+          "url": "https://www.rfc-editor.org/rfc/rfc4632.html",
+          "scope": "CIDR 프리픽스·주소 블록·경로 집약"
+        },
+        {
+          "title": "IETF RFC 3021",
+          "url": "https://www.rfc-editor.org/rfc/rfc3021.html",
+          "scope": "IPv4 /31 점대점 링크의 두 호스트 주소"
+        },
+        {
+          "title": "IETF RFC 6164",
+          "url": "https://www.rfc-editor.org/rfc/rfc6164.html",
+          "scope": "IPv6 /127 라우터 간 점대점 링크"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "주소·헤더·보안·계산의 명시한 조건과 예외를 출처 대조. 전체 주장에 대한 전문가 검수나 공식 정답 인증이 아님."
+    },
+    "long": {
+      "source_sha256": "c989a55a5fd798bb3bd783590a4cbb63c0a1a046cf7dfc3031022528ab65bd3c",
+      "body": "## 1. 서브네팅의 개요\n### 가. 정의\n- IP 주소의 호스트 비트를 네트워크(서브넷) 비트로 차용해 하나의 네트워크를 여러 서브넷으로 분할하는 기법, 반대로 연속 네트워크를 병합하는 기법은 [[supernetting|슈퍼네팅]]\n\n### 나. 등장배경\n- [[classful-addressing|클래스풀]] 체계의 주소 낭비(C클래스 254, B클래스 65,534 호스트 고정)와 [[ipv4|IPv4]] 고갈\n- 대형 네트워크의 브로드캐스트 폭주, 보안 구역 분리 필요 → RFC 950 서브넷, [[cidr|CIDR]] 도입\n\n### 다. 핵심 개념\n- [[subnet-mask|서브넷 마스크]]: 네트워크 부분 1, 호스트 부분 0, IP와 AND 연산으로 네트워크 주소 산출\n- 동일 크기 서브넷 수 2^n(n: 차용 비트). 일반 IPv4 서브넷의 호스트 수는 2^h - 2(네트워크·브로드캐스트 제외). /31 점대점 링크는 두 주소 모두 호스트로 사용(RFC 3021), /32는 단일 주소를 지칭하므로 이 공식을 적용하지 않는다\n- [[vlsm|VLSM]]: 서브넷마다 다른 길이의 마스크 적용\n\n## 2. 서브네팅·슈퍼네팅 개념도 및 절차\n### 가. 개념도\n```mermaid\nflowchart TB\n  S[\"슈퍼넷 192.168.0.0/22\"] --> A[\"192.168.0.0/24\"]\n  S --> B[\"192.168.1.0/24\"]\n  S --> C[\"192.168.2.0/24\"]\n  S --> D[\"192.168.3.0/24\"]\n  D --> D1[\"서브넷 192.168.3.0/25\"]\n  D --> D2[\"서브넷 192.168.3.128/25\"]\n```\n\n### 나. 서브네팅과 슈퍼네팅 비교\n| 구분 | 서브네팅 | 슈퍼네팅 |\n|---|---|---|\n| 개념 | 하나의 네트워크를 여러 서브넷으로 분할 | 연속된 여러 네트워크를 하나로 병합 |\n| 프리픽스 | 증가(호스트 비트 차용) | 감소(네트워크 비트 반환) |\n| 목적 | 주소 낭비 방지, 브로드캐스트 도메인 축소 | [[routing-table|라우팅 테이블]] 축소, [[route-aggregation|경로 집약]] |\n| 조건 | 서브넷·호스트 수 산정 | 연속·2^n개·경계 정렬 블록 |\n\n### 다. 서브네팅 절차\n1. 필요 서브넷 수·서브넷별 호스트 수 산정\n2. 동일 크기 분할이면 차용 비트 결정(2^n ≥ 서브넷 수). 일반 IPv4 서브넷은 2^h - 2 ≥ 호스트 수 확인(/31·/32 예외 구분)\n3. 프리픽스 p의 전체 블록 크기 2^(32-p)를 구하고 정렬된 시작 주소부터 해당 크기씩 증가. 마지막 옥텟만으로 계산하는 요령은 /23처럼 옥텟을 넘는 블록에 일반화하지 않는다\n4. 서브넷별 네트워크·호스트 범위·브로드캐스트 주소 결정\n\n## 3. 서브넷 계산 사례\n### 가. 192.168.100.0/24 동일 크기 4개 분할\n- 4 = 2^2 → 2비트 차용, /26, 마스크 255.255.255.192, 블록 64, 서브넷당 할당 가능 IP 62개\n\n| 서브넷 | 네트워크 | 호스트 범위 | 브로드캐스트 |\n|---|---|---|---|\n| 1 | 192.168.100.0/26 | .1 ~ .62 | .63 |\n| 2 | 192.168.100.64/26 | .65 ~ .126 | .127 |\n| 3 | 192.168.100.128/26 | .129 ~ .190 | .191 |\n| 4 | 192.168.100.192/26 | .193 ~ .254 | .255 |\n\n### 나. 192.168.0.0/22 VLSM 분할(큰 서브넷부터 할당)\n| 부서(요구) | 프리픽스·마스크 | 할당 가능 Host IP 대역 |\n|---|---|---|\n| 개발팀(500) | /23, 255.255.254.0(510개) | 192.168.0.1 ~ 192.168.1.254 |\n| 영업팀(250) | /24, 255.255.255.0(254개) | 192.168.2.1 ~ 192.168.2.254 |\n| 인사팀(125) | /25, 255.255.255.128(126개) | 192.168.3.1 ~ 192.168.3.126 |\n| 보안팀(125) | /25, 255.255.255.128(126개) | 192.168.3.129 ~ 192.168.3.254 |\n- 전체 블록은 512 + 256 + 128 + 128 = 1,024주소로 모두 할당. 사용 가능 호스트는 510 + 254 + 126 + 126 = 1,016개이며 요구 1,000개 대비 여유는 16개다. 추가 서브넷용 미할당 블록은 없다. 경계가 정렬되어 /22로 집약할 수 있으나 실제 경로 도달성도 확인한다\n\n### 다. 255.255.255.224(/27) 예\n- /24 블록을 8개 서브넷(32주소, 호스트 30개)으로 분할, 네트워크 주소 .0·.32·.64 … .224\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 설계 | 증설 여유 확보, 큰 서브넷 우선 할당, 연속 블록 배치 |\n| 라우팅 | VLSM·CIDR 지원 클래스리스 프로토콜([[ospf|OSPF]], [[routing-information-protocol|RIPv2]]) |\n| 운영 | [[ip-address-management|IPAM]]으로 할당 관리, [[private-ip-address|사설 IP]](RFC 1918)와 [[nat|NAT]] 연계 |\n| 발전방향 | [[ipv6|IPv6]] 일반 SLAAC LAN /64와 라우터 간 점대점 /127 구분, 클라우드 VPC CIDR 중복 방지 설계 |\n\n## 5. 결론\n- 서브네팅은 주소 효율·보안 구역 분리를, 슈퍼네팅은 경로 집약을 실현하므로 VLSM·CIDR 기반 계층적 주소 설계가 핵심",
+      "sources": [
+        {
+          "title": "IETF RFC 4632",
+          "url": "https://www.rfc-editor.org/rfc/rfc4632.html",
+          "scope": "CIDR 프리픽스·주소 블록·경로 집약"
+        },
+        {
+          "title": "IETF RFC 3021",
+          "url": "https://www.rfc-editor.org/rfc/rfc3021.html",
+          "scope": "IPv4 /31 점대점 링크의 두 호스트 주소"
+        },
+        {
+          "title": "IETF RFC 6164",
+          "url": "https://www.rfc-editor.org/rfc/rfc6164.html",
+          "scope": "IPv6 /127 라우터 간 점대점 링크"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "주소·헤더·보안·계산의 명시한 조건과 예외를 출처 대조. 전체 주장에 대한 전문가 검수나 공식 정답 인증이 아님."
+    }
   }
 }
