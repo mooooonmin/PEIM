@@ -12,6 +12,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 from app.db import connect, initialize
+from app.answer_format import reference_edits
 from app.main import app, MAX_FILE
 
 HEADERS = {"X-PEIM-Request": "1"}
@@ -64,7 +65,7 @@ class AppTests(unittest.TestCase):
         example = self.client.get("/api/questions/r136-s1-q04/writing-guide").json()
         self.assertEqual(example["kind"], "example")
         self.assertIn("슈퍼키", example["example"])
-        for tid in ('t-daae7f78', 't-47ad88b0', 't-3e6910a9'):
+        for tid in reference_edits():
             reference = self.client.get(f'/api/topics/{tid}/reference')
             self.assertEqual(reference.status_code, 200)
             for answer in reference.json()['answers']:
