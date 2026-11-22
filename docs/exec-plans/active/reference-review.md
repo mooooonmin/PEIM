@@ -45,7 +45,8 @@
 - OWASP Top 10·PCI DSS·ISO 27017 3개 주제 [PR #62](https://github.com/mooooonmin/PEIM/pull/62) 병합.
 - 개인정보 비식별화·가명·익명처리·k-익명성 4개 주제 [PR #63](https://github.com/mooooonmin/PEIM/pull/63) 병합.
 - PET·프라이버시 보존 데이터 마이닝·통계 DB 보안 3개 주제 [PR #64](https://github.com/mooooonmin/PEIM/pull/64) 병합.
-- N2SF·망분리·CSAP 3개 주제 전문 검토·교정 통합 중.
+- N2SF·망분리·CSAP 3개 주제 [PR #65](https://github.com/mooooonmin/PEIM/pull/65) 병합.
+- 양자암호·동형암호·다자간 계산 3개 주제 전문 검토·교정 통합 중.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 

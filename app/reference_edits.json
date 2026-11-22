@@ -18062,5 +18062,277 @@
         "2026년 KISA 안내서 첨부 전체는 서버 응답 오류로 확인하지 못함. 유형별 세부 항목·간편등급 기간의 현행 예외와 인증 연계 면제 범위는 현행 고시·개별 인증서 추가 대조 필요. 2027년 계획의 실제 완료 여부는 현재 시점에 확인할 수 없음."
       ]
     }
+  },
+  "t-ddd27c9e": {
+    "short": {
+      "source_sha256": "4400d406418658206befb0e9e1d15c06c2dd1fa0dabb02a7fc69317ea53d2673",
+      "body": "## 1. 양자 암호의 개요\n- 정의: [[heisenberg-uncertainty-principle|불확정성 원리]]·[[no-cloning-theorem|복제 불가 정리]] 등 양자역학 원리를 이용하여 프로토콜·장비 가정 아래 오류 통계 등을 평가하며 암호키를 안전하게 분배하는 기술([[quantum-key-distribution|QKD]])과 이를 적용한 양자암호통신\n- 필요성: [[quantum-computer|양자컴퓨터]]의 [[shor-algorithm|Shor 알고리즘]]으로 [[rsa|RSA]]·[[elliptic-curve-cryptography|ECC]] 등 공개키 암호 붕괴 위협 → 양자 안전 키분배 수단 요구\n\n## 2. 양자암호통신의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"송신자(Alice)\"] -->|양자 채널: 단일 광자 편광| B[\"수신자(Bob)\"]\n  A <-->|인증된 공개 채널: 기저 비교·오류 검증| B\n  E[도청자 Eve] -.->|측정 교란 가능; 오류 통계 평가| A\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[single-photon-source|단일 광자 광원]] | [[qubit|큐비트]]를 광자 편광으로 부호화·송신 |\n| [[single-photon-detector|단일 광자 검출기]] | 랜덤 기저로 측정 |\n| [[quantum-random-number-generator|양자 난수생성기]] | 비트·기저 선택용 진성 난수 |\n| 양자키 관리 시스템 | 후처리·키 관리 기능을 포함하는 설명 예: 키 정제·증폭 후 암호장비에 공급 |\n\n## 3. QKD와 PQC 비교\n| 구분 | QKD | [[post-quantum-cryptography|PQC]] |\n|---|---|---|\n| 안전성 근거 | 양자 원리와 보안 증명·인증·장비 가정 | 수학적 난제([[lattice-based-cryptography|격자]]·코드·해시) |\n| 구현 | 광섬유·자유공간용 전용 장비, 손실·키 생성률 제약 | 소프트웨어, 기존 인터넷 인프라 호환 |\n| 기능 | 키분배만 가능 | 키교환·서명·암호화 전반 |\n| 표준 | ITU-T Y.3800 계열, ETSI | NIST FIPS 203/204/205(2024) |\n\n## 4. 고려사항 및 발전방향\n- 취약점: 장비 구현 결함([[photon-number-splitting-attack|광자수 분할]], [[detector-blinding-attack|검출기 블라인딩]]), 중계 노드 신뢰 문제, 인증 미제공\n- QKD+PQC 하이브리드, [[quantum-repeater|양자 중계기]]·위성 QKD, [[crypto-agility|암호 민첩성]] 기반 전환 로드맵",
+      "sources": [
+        {
+          "title": "NSA QKD/QC 기술적 한계",
+          "url": "https://www.nsa.gov/Cybersecurity/Quantum-Key-Distribution-QKD-and-Quantum-Cryptography-QC/",
+          "scope": "출처 인증 부재, 구현·전용 장비·신뢰 중계·서비스 거부 한계; 페이지의 과거 PQC 선정 상태는 현재 상태로 사용하지 않음"
+        },
+        {
+          "title": "Shor·Preskill BB84 보안 증명",
+          "url": "https://arxiv.org/pdf/quant-ph/0003004",
+          "scope": "BB84의 이상적 보안 증명과 오류율 조건; 모든 장비에 공통인 도청 판정값이 아님"
+        },
+        {
+          "title": "NIST IR 8547(2026.10)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "현재 PQC 표준과 미국의 전환 일정·범위, 대칭암호와 공개키암호 위험 구분"
+        },
+        {
+          "title": "NIST PQC FAQ",
+          "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/faqs",
+          "scope": "Grover 키 탐색의 제곱근 개선과 실용 비용·병렬화 한계"
+        },
+        {
+          "title": "KpqC 최종 선정 발표",
+          "url": "https://kpqc.or.kr/competition_02.html",
+          "scope": "2025.1.16 AIMer·HAETAE, NTRU+·SMAUG-T 최종 선정"
+        },
+        {
+          "title": "ETSI GR QKD 003 V2.1.1(2018)",
+          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
+          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
+        },
+        {
+          "title": "ETSI GR QKD 003 V2.1.1(2018)",
+          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
+          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 인증 채널·오류 평가·구현 가정, 고정 거리 한계·Grover 단정·국내 선정 연도 교정.",
+      "unresolved": [
+        "COW·DPS·B92·E91·MDI의 개별 장비와 보안 증명 전체, 위성·중계기 실증 및 국내 KCMVP PQC 절차는 완전 대조하지 않음. 특정 망의 QKD 도입 권고나 보안 인증을 의미하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "11ec795178dd4e045e33e10d42d6ce201888b0d89913e77e7da93183aa3fc4b3",
+      "body": "## 1. 양자 암호의 개요\n### 가. 정의\n- 양자역학의 [[heisenberg-uncertainty-principle|불확정성 원리]], [[no-cloning-theorem|복제 불가 정리]], [[quantum-entanglement|양자 얽힘]]을 이용하여 프로토콜·장비 가정 아래 도청에 따른 정보 노출을 제한하는 [[quantum-key-distribution|양자키분배(QKD)]] 기술과, 분배된 키로 데이터를 암호화하는 양자암호통신 체계\n\n### 나. 등장배경\n| 배경 | 내용 |\n|---|---|\n| 양자컴퓨터 위협 | [[quantum-computer|양자컴퓨터]]의 [[shor-algorithm|Shor 알고리즘]]으로 충분한 규모의 오류정정 양자컴퓨터에서 소인수분해·이산대수 기반 [[rsa|RSA]]·[[elliptic-curve-cryptography|ECC]] 공격 가능, [[grover-algorithm|Grover 알고리즘]]으로 이상적 키 탐색 질의 수의 제곱근 개선(실제 비용·병렬화 제약 별도) |\n| [[harvest-now-decrypt-later|선 수집 후 해독]] | 현재 도청·저장된 암호문이 미래 양자컴퓨터로 해독될 위험 |\n| 국가 인프라 | 국방·금융·행정망의 장기 기밀성 요구, 각국 양자통신 국가망 구축 경쟁 |\n\n### 다. 핵심 원리\n| 원리 | 내용 | 역할 |\n|---|---|---|\n| 불확정성 원리 | 서로 비직교인 미지의 양자상태를 단일 측정으로 완벽히 구별할 수 없음 | 도청 측정에 따른 교란·정보 노출을 보안 분석으로 평가; 잡음과 구분 없이 도청 확정 불가 |\n| 복제 불가 정리 | 임의의 미지 양자상태를 항상 완벽 복제하는 장치 불가 | 도청자가 광자를 복사해 두고 전달 불가 |\n| 양자 얽힘 | 얽힌 광자쌍은 거리 무관하게 측정 결과 상관 | E91 프로토콜, 양자 중계 기반 |\n\n## 2. 양자암호통신의 구성도 및 암호키 분배방식\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph TX[\"송신 노드(Alice)\"]\n    QRNG1[양자 난수생성기] --> ENC[\"단일 광자 광원 + 편광 변조기\"]\n    KMS1[양자키 관리 시스템]\n  end\n  subgraph RX[\"수신 노드(Bob)\"]\n    DET[\"기저 선택기 + 단일 광자 검출기\"] --> KMS2[양자키 관리 시스템]\n  end\n  ENC ==>|양자 채널: 광섬유·자유공간| DET\n  KMS1 <-->|인증된 공개 채널: 기저 공개·오류정정·비밀성 증폭| KMS2\n  KMS1 --> ENC1[\"암호장비(AES·OTP)\"] <-->|암호화 데이터 채널| ENC2[\"암호장비\"]\n  KMS2 --> ENC2\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[quantum-random-number-generator|양자 난수생성기]] | 비트값·기저 선택용 예측 불가 난수 | 광자 분기·진공 요동 측정 |\n| [[single-photon-source|단일 광자 광원]] | 단일광자 또는 약한 코히런트 펄스 등으로 부호화(실제 광원 모델 고려) | 감쇄 레이저, [[decoy-state|디코이 상태]] |\n| 양자 채널 | 양자상태 전송 | 저손실 광섬유, 자유공간(위성) |\n| [[single-photon-detector|단일 광자 검출기]] | 랜덤 기저로 광자 측정 | APD, 초전도 나노와이어(SNSPD) |\n| 양자키 관리 시스템 | 후처리·키 관리 기능을 포함하는 설명 예: 키 정제(Sifting), 오류정정, 비밀성 증폭, 키 저장·분배 | 후처리 프로토콜, ETSI QKD API |\n| 암호장비 | 분배된 키로 데이터 암호화 | [[aes|AES]]-256, [[one-time-pad|OTP]] |\n\n### 다. 암호키 분배방식(BB84 프로토콜 절차)\n| 단계 | Alice | Bob |\n|---|---|---|\n| 1. 송신 | 랜덤 비트와 랜덤 기저(직선 +, 대각 ×)로 광자 편광 송신 | - |\n| 2. 측정 | - | 랜덤 기저로 측정, 결과 기록 |\n| 3. 기저 비교 | 인증된 공개 채널로 사용 기저 공개 | 기저 공개, 불일치 비트 폐기(Sifting) |\n| 4. 오류 검증 | 샘플로 QBER 추정; 공개된 샘플은 키에서 제외 | 보안 증명·유한키·장비 조건에 따른 한도 초과 시 중단; 오류만으로 도청 확정 불가 |\n| 5. 후처리 | 오류정정·비밀성 증폭으로 최종 비밀키 생성 | 동일 키 공유 |\n- [[bb84-protocol|BB84]](단일 광자 편광), [[e91-protocol|E91]](얽힘 기반), B92, COW(시간빈·펄스 존재/부재), DPS(상대 위상), [[measurement-device-independent-qkd|MDI-QKD]](보안 증명 가정 아래 측정장치 측채널 의존 완화; 광원·인증 별도) 등으로 분류\n\n## 3. 양자내성암호(PQC) 및 QKD와의 비교\n### 가. 양자내성암호(PQC)\n- [[post-quantum-cryptography|PQC]]: 양자컴퓨터로도 효율적 풀이가 알려지지 않은 수학 난제에 기반하여 기존 컴퓨터·네트워크에서 소프트웨어로 동작하는 공개키 암호\n| 계열 | 기반 문제 | 대표 알고리즘 |\n|---|---|---|\n| [[lattice-based-cryptography|격자 기반]] | LWE·SIS 문제 | [[ml-kem|ML-KEM]](Kyber, FIPS 203), [[ml-dsa|ML-DSA]](Dilithium, FIPS 204), Falcon |\n| [[hash-based-signature|해시 기반]] | 해시 함수 일방향성 | [[slh-dsa|SLH-DSA]](SPHINCS+, FIPS 205), XMSS |\n| [[code-based-cryptography|코드 기반]] | 오류정정 부호 복호 난제 | Classic McEliece, HQC |\n| [[multivariate-cryptography|다변수 다항식]] | 다변수 2차 방정식 풀이 | Rainbow(해독됨), UOV |\n| [[isogeny-based-cryptography|아이소제니]] | 타원곡선 동형사상 | SIKE(해독됨) |\n- 국내: KpqC 공모전으로 HAETAE, AIMer, SMAUG-T, NTRU+ 최종 선정(2025.1.16)\n\n### 나. QKD와 PQC 비교\n| 구분 | QKD | PQC |\n|---|---|---|\n| 안전성 근거 | 보안 증명과 장비·인증 가정 아래 정보이론적 안전성 | 계산 복잡도(수학적 난제, 미래 해독 가능성 존재) |\n| 제공 기능 | 대칭키 분배만 | 키 교환, 전자서명, 암호화 전반 |\n| 인프라 | 전용 양자 채널·고가 장비, 점대점 | 기존 인터넷·소프트웨어 업데이트로 적용 |\n| 거리·확장성 | 매질·장비·프로토콜별 거리·키 생성률 상이; 신뢰 중계 시 노드 신뢰 필요 | 일반 네트워크 적용 가능; 구현·프로토콜 비용 존재 |\n| 인증 | 자체 제공 불가(사전 공유키·PQC 서명 필요) | 서명으로 인증 제공 |\n| 취약점 | 장비 구현 결함(사이드채널) | 알고리즘 수학적 취약점 발견 가능(SIKE·Rainbow 사례) |\n| 표준·적용 | ITU-T Y.3800, ETSI GS QKD, 국가망·금융 백본 | NIST FIPS 203/204/205, TLS·VPN·브라우저 하이브리드 적용 |\n\n## 4. 양자암호통신의 취약점 및 발전방향\n| 구분 | 내용 |\n|---|---|\n| 광원 취약점 | 다광자 방출 시 [[photon-number-splitting-attack|광자수 분할 공격]] → 디코이 상태 프로토콜로 대응 |\n| 검출기 취약점 | [[detector-blinding-attack|검출기 블라인딩 공격]](강한 빛으로 검출기 제어), 시간 이동 공격 → MDI-QKD, 검출기 감시 |\n| 채널·거리 | 광 손실로 키 생성률 저하, 신뢰 중계 노드가 공격 지점 → [[quantum-repeater|양자 중계기]]·위성 QKD 개발 |\n| 인증 부재 | 공개 채널 [[adversary-in-the-middle|중간자 공격]] 방지를 위한 별도 인증 필요 → PQC 서명 결합 |\n| 비용·운영 | 고가 장비, 장애 시 키 고갈 → 키 버퍼링, 하이브리드(QKD+PQC) 운영 |\n| 발전방향 | [[crypto-agility|암호 민첩성]] 기반 단계적 PQC 전환(국가·기관별 적용 일정 구분; NIST IR 8547은 미국 지침 적용 범위), 양자 인터넷·양자 네트워크, KCMVP PQC 검증체계 정비 |\n\n## 5. 결론\n- 양자 암호는 물리 법칙 기반의 QKD와 수학 기반의 PQC가 상호 보완적 관계로, QKD 적용은 링크·장비·인증·비용 조건을 평가하고 PQC 전환과 하이브리드 구성도 별도 검증해야 하며, 암호 민첩성을 확보할 필요",
+      "sources": [
+        {
+          "title": "NSA QKD/QC 기술적 한계",
+          "url": "https://www.nsa.gov/Cybersecurity/Quantum-Key-Distribution-QKD-and-Quantum-Cryptography-QC/",
+          "scope": "출처 인증 부재, 구현·전용 장비·신뢰 중계·서비스 거부 한계; 페이지의 과거 PQC 선정 상태는 현재 상태로 사용하지 않음"
+        },
+        {
+          "title": "Shor·Preskill BB84 보안 증명",
+          "url": "https://arxiv.org/pdf/quant-ph/0003004",
+          "scope": "BB84의 이상적 보안 증명과 오류율 조건; 모든 장비에 공통인 도청 판정값이 아님"
+        },
+        {
+          "title": "NIST IR 8547(2026.10)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "현재 PQC 표준과 미국의 전환 일정·범위, 대칭암호와 공개키암호 위험 구분"
+        },
+        {
+          "title": "NIST PQC FAQ",
+          "url": "https://csrc.nist.gov/Projects/Post-Quantum-Cryptography/faqs",
+          "scope": "Grover 키 탐색의 제곱근 개선과 실용 비용·병렬화 한계"
+        },
+        {
+          "title": "KpqC 최종 선정 발표",
+          "url": "https://kpqc.or.kr/competition_02.html",
+          "scope": "2025.1.16 AIMer·HAETAE, NTRU+·SMAUG-T 최종 선정"
+        },
+        {
+          "title": "ETSI GR QKD 003 V2.1.1(2018)",
+          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
+          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
+        },
+        {
+          "title": "ETSI GR QKD 003 V2.1.1(2018)",
+          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
+          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 인증 채널·오류 평가·구현 가정, 고정 거리 한계·Grover 단정·국내 선정 연도 교정.",
+      "unresolved": [
+        "COW·DPS·B92·E91·MDI의 개별 장비와 보안 증명 전체, 위성·중계기 실증 및 국내 KCMVP PQC 절차는 완전 대조하지 않음. 특정 망의 QKD 도입 권고나 보안 인증을 의미하지 않음."
+      ]
+    }
+  },
+  "t-5bc055f2": {
+    "short": {
+      "source_sha256": "9af54080635497b957bb75f967c4523414e9e2e47f141e7e1d265def4a7e0640",
+      "body": "## 1. 동형암호의 개요\n- 정의: 암호문을 복호화하지 않고도 암호화된 상태에서 연산을 수행하고, 그 결과를 복호화하면 지원하는 평문 연산의 결과를 얻는(정확 방식 또는 CKKS 같은 근사 방식) [[encryption|암호]] 기술\n- 필요성: [[cloud-computing|클라우드]]·외부위탁 환경에서 데이터를 복호화 없이 처리해 [[data-in-use|이용 중 데이터]] 기밀성 보호(키·파라미터·구현 가정 및 출력 누출 별도)\n\n## 2. 동형암호의 개념도 및 동작원리\n```mermaid\nflowchart LR\n  P[평문] -->|암호화| C[암호문]\n  C -->|\"암호문 상태 연산 f(C)\"| C2[연산된 암호문]\n  C2 -->|복호화| R[\"지원 연산 결과(정확/근사)\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 키 생성 | [[public-key-cryptography|공개키]]·비밀키·평가키 생성 |\n| 암호화/복호화 | 평문 암호화, 결과 복호화 |\n| 동형 연산 | 암호문 간 덧셈·곱셈 수행 |\n| [[bootstrapping|부트스트래핑]] | 암호문을 갱신하여 잡음을 낮추고 연산 여유 확보 |\n\n## 3. 동형암호의 유형\n| 유형 | 지원 연산 |\n|---|---|\n| [[partially-homomorphic-encryption|부분 동형(PHE)]] | 정해진 대수적 연산 지원(모듈러 평문 공간 등 조건 내) |\n| [[somewhat-homomorphic-encryption|부분수준 동형(SWHE)]] | 제한된 횟수의 덧셈·곱셈 |\n| [[fully-homomorphic-encryption|완전 동형(FHE)]] | 임의의 유한 회로 평가; 실제 자원·보안 파라미터 제약 |\n\n## 4. 고려사항\n- 연산 중 [[noise-growth|잡음 증가]]와 큰 연산량으로 성능 부담, 가속 여부는 목표 처리량·비용에 따라 판단\n- [[secure-computation|비밀 연산]]·[[privacy-preserving-machine-learning|프라이버시 보존 머신러닝]]에 활용, 표준화 진행 중",
+      "sources": [
+        {
+          "title": "Microsoft SEAL 공식 문서",
+          "url": "https://github.com/microsoft/SEAL",
+          "scope": "BFV/BGV 모듈러 정수·CKKS 근사 연산, 계산 제약·성능 비용·출력 및 키 소유자"
+        },
+        {
+          "title": "Craig Gentry FHE 논문·학위논문",
+          "url": "https://crypto.stanford.edu/craig/",
+          "scope": "2009년 FHE 구성과 부트스트래핑 연구"
+        },
+        {
+          "title": "TFHE 공식 파라미터 설명",
+          "url": "https://tfhe.github.io/tfhe/security_and_params.html",
+          "scope": "부트스트래핑의 잡음·키 파라미터, 기기별 처리 비용과 안전성 재평가 필요"
+        },
+        {
+          "title": "NIST PEC",
+          "url": "https://csrc.nist.gov/projects/pec",
+          "scope": "FHE·MPC·ZKP 구분과 표준화 활동"
+        },
+        {
+          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
+          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
+          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
+        },
+        {
+          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
+          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
+          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. CKKS 근사성과 암호문 등식 오류, 모듈러 평문 공간, 부트스트래핑·깊이·성능·양자내성의 조건 교정.",
+      "unresolved": [
+        "스킴별 수학적 안전성 증명과 최신 공격 추정 전체, 개별 ML·의료·금융 활용 제품 성능은 미검증. ISO 전체 유료 본문을 대조하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "58d45a26f5300fd3430f59d56d383c7101ff3c3e28b51064e01d3ee718b045da",
+      "body": "## 1. 동형암호의 개요\n### 가. 정의\n- 암호문을 복호화하지 않고 암호화된 상태 그대로 연산을 수행하며, 그 연산 결과를 복호화하면 정의된 평문 연산에 대응하는 결과를 얻는(정확/근사 방식 구분) [[encryption|암호]] 기술. 정확 방식의 올바름은 Dec(sk, Eval(evk,f,Enc(m)))=f(m)로 표현하며, 확률적 암호문 자체의 바이트 동일성을 뜻하지 않음\n\n### 나. 등장배경 및 필요성\n- 기존 암호는 저장([[data-at-rest|저장 데이터]])·전송([[data-in-transit|전송 데이터]])은 보호하나 연산 시 복호화가 불가피해 [[data-in-use|이용 중 데이터]] 노출\n- 클라우드·외부 분석 위탁 확산으로 데이터를 맡기되 내용은 숨긴 채 처리할 필요\n- 2009년 Gentry가 최초의 [[fully-homomorphic-encryption|완전 동형암호]] 이론을 제시해 실용화 연구 가속\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 동형성 | 암호문 공간의 연산이 평문 공간 연산에 대응 |\n| 잡음 | 격자기반 암호문에 포함된 오류항, 연산에 따라 변화하며 특히 곱셈의 영향 관리 |\n| 부트스트래핑 | 복호화 회로 등을 동형 평가하여 낮은 잡음의 암호문으로 갱신; 평문 공개나 잡음 0을 뜻하지 않음 |\n\n## 2. 동형암호의 구성도 및 동작원리\n### 가. 구성도\n```mermaid\nflowchart TB\n  KG[\"키생성: 공개키·비밀키·평가키\"] --> ENC[\"암호화 Enc(pk, m)\"]\n  ENC --> C[\"암호문 C\"]\n  C --> EVAL[\"동형연산 Eval(evk, f, C)\"]\n  EVAL --> BS[\"필요 시 부트스트래핑(잡음 갱신)\"]\n  BS --> EVAL\n  EVAL --> DEC[\"복호화 Dec(sk)\"]\n  DEC --> R[\"f(m) 또는 근사 결과\"]\n```\n\n### 나. 동작 원리 (절차)\n1. 키 생성: 공개키(암호화), 비밀키(복호화), 평가키(동형연산용) 생성\n2. 암호화: 데이터 소유자가 공개키로 평문을 암호화, 격자기반 암호에서는 의도적 잡음 포함\n3. 위탁: 암호문을 연산 주체(클라우드)에 전달\n4. 동형연산: 연산 주체가 비밀키 없이 암호문 간 덧셈·곱셈 수행, 연산별 잡음·스케일 변화 관리\n5. 부트스트래핑: 지원 구현에서 잡음 예산을 넘기기 전에 암호문 갱신; 고정 깊이의 leveled 방식은 부트스트래핑 없이 구성 가능\n6. 복호화: 데이터 소유자가 비밀키로 결과 복호화 → 해당 스킴의 정확/근사 연산 결과 획득\n\n### 다. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 키 체계 | 암호화·복호화·연산 키 | [[public-key-cryptography|공개키 암호]], 격자 |\n| 암호화 방식 | 평문→암호문, 잡음 삽입 | [[learning-with-errors|LWE]]·RLWE |\n| 동형 연산 | 암호문 간 가감승 | 다항식 연산 |\n| 부트스트래핑 | 잡음 관리로 연산 횟수 확장 | 재암호화 |\n\n## 3. 동형암호의 상세\n### 가. 유형 분류\n| 유형 | 지원 연산 | 특징 |\n|---|---|---|\n| [[partially-homomorphic-encryption|부분 동형(PHE)]] | 정해진 대수적 연산 지원(모듈러 평문 공간 등 조건 내) | 교과서적 RSA(곱셈 성질, 안전한 RSA-OAEP와 구분), Paillier(모듈러 덧셈), 효율적이나 제한적 |\n| [[somewhat-homomorphic-encryption|부분수준 동형(SWHE)]] | 덧셈·곱셈 모두 지원하나 제한된 횟수 | 잡음 누적으로 연산 깊이 제약 |\n| [[fully-homomorphic-encryption|완전 동형(FHE)]] | 임의의 유한 회로에 대응하는 연산 | 부트스트래핑 등으로 깊이 확장; 실제 계산·메모리 비용 존재 |\n\n### 나. 주요 FHE 스킴\n| 스킴 | 특징 |\n|---|---|\n| BGV / BFV | 모듈러 정수 연산, 배치 처리 지원(파라미터·구현에 의존) |\n| [[ckks|CKKS]] | 실수·근사 연산 지원, AI·통계 분석에 적합(국내 연구진 기여) |\n| TFHE | 불리언 회로·빠른 부트스트래핑 |\n\n### 다. 활용 분야\n| 분야 | 활용 |\n|---|---|\n| 클라우드 분석 | 암호화 데이터를 맡겨 통계·검색 수행 |\n| [[privacy-preserving-machine-learning|프라이버시 보존 ML]] | 암호화 상태 모델 추론·학습 |\n| 의료·금융 | 평문 입력 공개를 줄이는 분석; 다중 소유자 키 관리·결과 공개 범위 별도 설계 |\n| [[secure-computation|비밀 연산]] | [[multi-party-computation|다자간 연산]]과 결합한 안전한 협업 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 성능 | 지원 연산·깊이·파라미터·장비별 비용 측정, GPU·FPGA·ASIC 가속의 적합성 평가 |\n| 잡음 관리 | 연산 깊이 설계, 부트스트래핑 빈도 최적화 |\n| 정확도 | CKKS는 근사연산으로 오차 관리 필요 |\n| 표준화 | ISO/IEC·HomomorphicEncryption.org 표준화 진행 |\n| 발전방향 | 스킴별 가정·파라미터에 따른 [[post-quantum-cryptography|양자내성]] 평가, 하드웨어 가속으로 실시간 처리 실용화 |\n\n## 5. 결론\n- 동형암호는 지원 연산의 입력 기밀성을 보호하는 기술로, 성능 한계를 하드웨어 가속과 효율적 스킴으로 극복하며 프라이버시 보존 분석의 핵심 기반으로 부상",
+      "sources": [
+        {
+          "title": "Microsoft SEAL 공식 문서",
+          "url": "https://github.com/microsoft/SEAL",
+          "scope": "BFV/BGV 모듈러 정수·CKKS 근사 연산, 계산 제약·성능 비용·출력 및 키 소유자"
+        },
+        {
+          "title": "Craig Gentry FHE 논문·학위논문",
+          "url": "https://crypto.stanford.edu/craig/",
+          "scope": "2009년 FHE 구성과 부트스트래핑 연구"
+        },
+        {
+          "title": "TFHE 공식 파라미터 설명",
+          "url": "https://tfhe.github.io/tfhe/security_and_params.html",
+          "scope": "부트스트래핑의 잡음·키 파라미터, 기기별 처리 비용과 안전성 재평가 필요"
+        },
+        {
+          "title": "NIST PEC",
+          "url": "https://csrc.nist.gov/projects/pec",
+          "scope": "FHE·MPC·ZKP 구분과 표준화 활동"
+        },
+        {
+          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
+          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
+          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
+        },
+        {
+          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
+          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
+          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. CKKS 근사성과 암호문 등식 오류, 모듈러 평문 공간, 부트스트래핑·깊이·성능·양자내성의 조건 교정.",
+      "unresolved": [
+        "스킴별 수학적 안전성 증명과 최신 공격 추정 전체, 개별 ML·의료·금융 활용 제품 성능은 미검증. ISO 전체 유료 본문을 대조하지 않음."
+      ]
+    }
+  },
+  "t-ecad7490": {
+    "short": {
+      "source_sha256": "67fa85cacba516917232633d7d81bc073324e2e19f1282280e1024eb86028df8",
+      "body": "## 1. 다자간 계산(MPC)의 개요\n- 정의: 서로 신뢰하지 않는 다수의 참여자가 각자의 입력값을 공개하지 않은 채 공동으로 함수를 계산하여 정해진 수신자가 허용된 결과를 얻는 암호 프로토콜(공격자·결탁 가정 명시)([[privacy-enhancing-technologies|프라이버시 강화기술]])\n- 필요성: 데이터 결합·분석 수요 증가와 개인정보보호 요구의 충돌 해소, 신뢰된 제3자 없는 안전한 연산\n\n## 2. MPC의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"참여자 A: 입력 x1\"] -->|\"비밀분산 조각\"| P[\"MPC 프로토콜\"]\n  B[\"참여자 B: 입력 x2\"] -->|\"비밀분산 조각\"| P\n  C[\"참여자 C: 입력 x3\"] -->|\"비밀분산 조각\"| P\n  P --> R[\"지정 수신자에게 허용된 결과 공개\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[secret-sharing|비밀분산]] | 입력을 조각으로 나누어 분배, 임계치 이상 모여야 복원 |\n| [[garbled-circuit|가블드 서킷]] | 함수를 암호화된 불리언 회로로 변환하여 평가 |\n| [[oblivious-transfer|불확정 전송]] | 수신자가 선택한 값만 받고 송신자는 선택을 모름 |\n\n## 3. MPC의 기술 종류 및 특징\n| 구분 | 내용 |\n|---|---|\n| 가블드 서킷(Yao) | 2자간, 상수 라운드, 회로 크기 비례 통신량 |\n| 비밀분산 기반(BGW·SPDZ) | 산술 회로 등; 정직 과반·악의적 보안 조건과 통신 비용은 프로토콜별 상이 |\n| [[homomorphic-encryption|동형암호]] 기반 | 암호문 상태 연산, 계산비용 높음 |\n| 보안 모델 | 준정직(Semi-honest) vs 악의적(Malicious) 공격자 가정 |\n\n## 4. MPC 기반 인증서비스 및 고려사항\n- [[threshold-signature|임계 서명]]·키 분산 보관으로 개인키의 단일 노출 위험 완화; 임계수 이상 결탁·복구 경로 침해 별도, 암호화폐 지갑·[[fido|FIDO]] 연계 인증\n- 통신·계산 오버헤드, 참여자 이탈 대응, [[zero-knowledge-proof|영지식 증명]]과 결합한 입력 검증 필요",
+      "sources": [
+        {
+          "title": "MP-SPDZ 공식 문서",
+          "url": "https://mp-spdz.readthedocs.io/en/latest/readme.html",
+          "scope": "정직/악의적, 정직/부정직 과반, 2자 지원 및 산술·불리언·가블드 회로 구분"
+        },
+        {
+          "title": "MP-SPDZ 전처리",
+          "url": "https://mp-spdz.readthedocs.io/en/latest/preprocessing.html",
+          "scope": "입력과 독립인 전처리 조각·triple, 프로토콜별 검증·비용"
+        },
+        {
+          "title": "Ishai·Katz·Kushilevitz·Lindell·Petrank MPC 논문",
+          "url": "https://www.cs.umd.edu/~jkatz/papers/bobw.pdf",
+          "scope": "공정성·결과 전달 보장의 공격자 가정 및 일반 함수에서의 한계"
+        },
+        {
+          "title": "NIST 다자간 임계 암호",
+          "url": "https://csrc.nist.gov/projects/threshold-cryptography",
+          "scope": "서명·키 생성·암호 연산의 신뢰 분산과 보안 임계치"
+        },
+        {
+          "title": "ISO/IEC 4922-1:2023",
+          "url": "https://www.iso.org/standard/80508.html",
+          "scope": "정의·용어·참여자·프로세스 분류 범위"
+        },
+        {
+          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
+          "url": "https://eprint.iacr.org/2020/1175",
+          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
+        },
+        {
+          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
+          "url": "https://eprint.iacr.org/2020/1175",
+          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 공정성·결과 전달·사전공격 방지의 무조건적 보장, 2자 지원·분산 복원 방식·GMW 분류·도식 조각 수 교정.",
+      "unresolved": [
+        "Yao 1982 원문·개별 GMW/BGW/SPDZ 증명 전체, 생체·FIDO/DID 연계 제품과 지갑 운영은 실행 검증하지 않음. ISO 유료 본문 미열람."
+      ]
+    },
+    "long": {
+      "source_sha256": "3b02413d00fc1f1e6bdb2e32b356ea1ecddee5168c6e51e09914c5c82a541681",
+      "body": "## 1. 다자간 계산(MPC)의 개요\n### 가. 정의\n- 상호 신뢰하지 않는 n명의 참여자가 각자의 비밀 입력 x1…xn을 공개하지 않으면서 공동으로 함수 f(x1…xn)을 계산하고, 정해진 공격자·결탁·누출 모델 아래 입력과 허용 출력으로부터 추론 가능한 정보 외의 노출을 제한하는 암호 프로토콜\n### 나. 등장배경 및 필요성\n- 1982년 Yao의 백만장자 문제(두 사람이 재산을 공개하지 않고 누가 더 부유한지 비교)에서 출발\n- 의료·금융 데이터 결합 분석 수요와 개인정보보호법·GDPR의 최소 수집 요구를 지원; 적법한 처리 근거는 별도\n- 신뢰된 제3자(TTP) 없이 연산 가능하여 단일 신뢰 집중을 줄임; 결탁·이탈·운영 침해 위험 별도, 대표적 [[privacy-enhancing-technologies|프라이버시 강화기술]]\n### 다. 원리와 특징\n| 구분 | 내용 |\n|---|---|\n| 원리 | 입력을 조각·암호화하여 분산 처리, 개별 조각·중간값의 노출 한계를 증명하고 지정 수신자에게 결과 복원 |\n| 정확성(Correctness) | 정의된 결과 수신자에 대한 올바름; 중단 허용·결과 전달 보장은 별도 |\n| 프라이버시(Privacy) | 결과로부터 추론 가능한 것 외 입력 정보 비노출 |\n| 입력 독립성·공정성 | 입력 고정과 공정성은 별도 속성; 일반 MPC가 공정성·결과 전달을 항상 보장하지 않음 |\n| 보안 모델 | 준정직(프로토콜 준수하나 추론 시도) vs 악의적(임의 이탈) 공격자 |\n\n## 2. MPC의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph IN[\"입력 단계\"]\n    A[\"참여자 A: x1\"] --> SA[\"두 노드 예: 조각 a1,a2\"]\n    B[\"참여자 B: x2\"] --> SB[\"두 노드 예: 조각 b1,b2\"]\n  end\n  SA --> N1[\"노드1: 지역 연산\"]\n  SA --> N2[\"노드2: 지역 연산\"]\n  SB --> N1\n  SB --> N2\n  N1 <-->|\"해당 프로토콜의 곱셈·검증 통신\"| N2\n  N1 --> OUT[\"결과 조각 결합: f(x1,x2)\"]\n  N2 --> OUT\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[secret-sharing|비밀분산]] | 입력을 n개 조각으로 분배, t개 이상 결합 시 복원 | Shamir (t,n) 임계 비밀분산, 가법적 분산 |\n| [[garbled-circuit|가블드 서킷]] | 함수의 불리언 회로를 암호화 테이블로 변환 | Yao 프로토콜, Free-XOR 최적화 |\n| [[oblivious-transfer|불확정 전송]] | 수신자가 선택한 값만 수신, 송신자는 선택 비인지 | 1-out-of-2 OT, OT Extension |\n| [[homomorphic-encryption|동형암호]] | 암호문 상태에서 덧셈·곱셈 수행 | Paillier(가법), BFV·CKKS(깊이·부트스트래핑 지원 조건 확인) |\n| 커밋먼트·[[zero-knowledge-proof|영지식 증명]] | 입력 고정, 악의적 참여자의 부정행위 검증 | Pedersen 커밋먼트, Σ-프로토콜 |\n### 다. 동작 절차(비밀분산 기반)\n1. 설정: 참여자·임계치(t,n)·연산 함수 합의, 전처리(Beaver Triple 생성)\n2. 입력 분산: 각 참여자가 자신의 입력을 조각으로 나누어 타 노드에 분배\n3. 지역 연산: 덧셈은 각 노드가 조각끼리 독립 수행, Beaver triple 방식 곱셈은 차이값 공개 등 통신; 전체 라운드는 검증·동기화·회로 깊이에 의존\n4. 결과 복원: 승인된 수신자가 결과 조각 복원(Shamir는 보간, 가법 분산은 합산 등 방식별 상이)\n5. 검증: 선택한 악의적 보안 프로토콜의 MAC·증명·검사 절차로 변조 검증; 준정직 방식에 자동 포함되지 않음\n\n## 3. MPC 기술 종류 및 MPC 기반 인증서비스\n### 가. MPC 기술 종류 비교\n| 구분 | 가블드 서킷 | 비밀분산 기반 | 동형암호 기반 |\n|---|---|---|---|\n| 대표 프로토콜 | Yao 계열(GMW는 비밀분산 기반의 별도 계열) | BGW, SPDZ, Sharemind | Paillier, CKKS 혼합 |\n| 참여자 수 | 주로 2자 | 2자 이상 가능; 프로토콜별 최소 인원·결탁 한계 확인 | 2자·외주 연산 |\n| 회로 | 불리언 회로 | 산술 회로 | 산술 회로 |\n| 라운드 | 상수 라운드 | 회로 깊이 비례 | 비대화형 가능 |\n| 비용 | 통신량 큼 | 통신 라운드 많음 | 계산량 매우 큼 |\n| 적용 | 비교·검색 | 통계·머신러닝 | 클라우드 외주 연산 |\n### 나. MPC 기반 인증서비스\n| 구분 | 내용 |\n|---|---|\n| 임계 서명 지갑 | 개인키를 생성 시점부터 조각으로 분산, [[threshold-signature|임계 서명]](TSS)으로 키 전체 복원 없이 서명, 암호화폐 수탁·거래소 적용 |\n| 분산 키 관리 | 사용자 단말·서버·HSM에 키 조각 분산, 단일 키 노출 위험 완화; 임계수 이상 결탁·복구 경로 침해 별도, [[hsm|HSM]] 대체·보완 |\n| 패스워드 인증 | 분산 패스워드 인증 프로토콜로 단일 서버 유출 위험 완화; 단순 해시 분할만으로 사전공격 방지 불가 |\n| 생체 인증 | 생체 템플릿을 분산 보관하고 MPC로 매칭, 원본 템플릿 비노출 |\n| [[fido|FIDO]]·[[decentralized-identifier|DID]] 연계 | 인증기 개인키를 MPC로 보호하여 기기 분실·교체 시 복구 지원 |\n\n## 4. MPC 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 성능 | 통신 라운드·대역폭 오버헤드, 전처리 단계 분리와 OT Extension으로 최적화 |\n| 보안 모델 | 악의적 공격자·결탁(Collusion) 가정에 따른 임계치 설정, 참여자 이탈 시 복구 |\n| 신뢰 구조 | 노드 운영 주체 분리(멀티클라우드·다기관), 운영 거버넌스 |\n| 발전방향 | [[differential-privacy|차분 프라이버시]]·[[trusted-execution-environment|TEE]]와 결합, 연합학습 집계 보호, ISO/IEC 4922-1:2023의 용어·프로세스 분류(모든 구현의 보안 인증 아님) |\n\n## 5. 결론\n- MPC는 데이터 활용과 프라이버시 보호를 동시에 달성하는 핵심 기술로, 임계 서명 기반 인증·키 관리 서비스에서 실용화가 진행 중이며 성능 최적화와 표준화가 확산의 관건",
+      "sources": [
+        {
+          "title": "MP-SPDZ 공식 문서",
+          "url": "https://mp-spdz.readthedocs.io/en/latest/readme.html",
+          "scope": "정직/악의적, 정직/부정직 과반, 2자 지원 및 산술·불리언·가블드 회로 구분"
+        },
+        {
+          "title": "MP-SPDZ 전처리",
+          "url": "https://mp-spdz.readthedocs.io/en/latest/preprocessing.html",
+          "scope": "입력과 독립인 전처리 조각·triple, 프로토콜별 검증·비용"
+        },
+        {
+          "title": "Ishai·Katz·Kushilevitz·Lindell·Petrank MPC 논문",
+          "url": "https://www.cs.umd.edu/~jkatz/papers/bobw.pdf",
+          "scope": "공정성·결과 전달 보장의 공격자 가정 및 일반 함수에서의 한계"
+        },
+        {
+          "title": "NIST 다자간 임계 암호",
+          "url": "https://csrc.nist.gov/projects/threshold-cryptography",
+          "scope": "서명·키 생성·암호 연산의 신뢰 분산과 보안 임계치"
+        },
+        {
+          "title": "ISO/IEC 4922-1:2023",
+          "url": "https://www.iso.org/standard/80508.html",
+          "scope": "정의·용어·참여자·프로세스 분류 범위"
+        },
+        {
+          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
+          "url": "https://eprint.iacr.org/2020/1175",
+          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
+        },
+        {
+          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
+          "url": "https://eprint.iacr.org/2020/1175",
+          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 공정성·결과 전달·사전공격 방지의 무조건적 보장, 2자 지원·분산 복원 방식·GMW 분류·도식 조각 수 교정.",
+      "unresolved": [
+        "Yao 1982 원문·개별 GMW/BGW/SPDZ 증명 전체, 생체·FIDO/DID 연계 제품과 지갑 운영은 실행 검증하지 않음. ISO 유료 본문 미열람."
+      ]
+    }
   }
 }
