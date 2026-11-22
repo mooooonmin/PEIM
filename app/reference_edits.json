@@ -784,5 +784,525 @@
         "산업별 기본 활성화 여부·제품 버전과 국내 전환 정책의 상세 기한은 미확인."
       ]
     }
+  },
+  "t-52d76d55": {
+    "short": {
+      "source_sha256": "51bbed155eeeff387bf6c06a08007b443f2e3bf75e0210c41fb6d01df1be8b81",
+      "body": "## 1. 블록 암호 운용 모드의 개요\n- 정의: 고정 길이(64·128비트) 블록 단위로 동작하는 [[block-cipher|블록 암호]]([[aes|AES]]·[[des|DES]])로 임의 길이 메시지를 안전하게 암호화하기 위해 블록 간 연결·[[initialization-vector|초기화 벡터]]·피드백 방식을 정의한 운용 규칙(ECB·CBC·CFB·OFB·CTR, NIST SP 800-38A)\n- 필요성: 동일 평문 블록이 동일 암호문으로 노출되는 패턴 유출 방지, 블록 길이 미만 데이터 처리, 오류 전파·병렬성 등 응용 요구 충족\n\n## 2. 블록 암호 운용 모드의 개념도 및 구성요소\n아래 도식은 CBC 예시이며 모든 모드가 IV나 이전 암호문을 사용하는 것은 아니다.\n```mermaid\nflowchart LR\n  P1[\"평문 블록 P1\"] --> X1[\"XOR\"]\n  IV[\"IV\"] --> X1\n  X1 --> E1[\"E_K\"] --> C1[\"암호문 C1\"]\n  P2[\"평문 블록 P2\"] --> X2[\"XOR\"]\n  C1 --> X2\n  X2 --> E2[\"E_K\"] --> C2[\"암호문 C2\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 블록 암호 E_K | 키 K로 한 블록 변환(암호화 함수 E, 복호 함수 D) |\n| 초기화 벡터(IV) | 첫 블록 입력 무작위화, 동일 평문의 암호문 상이화 |\n| [[xor|XOR]] 연산 | 평문·이전 암호문 또는 키스트림 결합 |\n| [[padding|패딩]] | 블록 길이 배수로 맞춤(ECB·CBC), 스트림 모드는 불필요 |\n\n## 3. 운용 모드 비교 (ECB·CBC·CFB·OFB)\nCFB 식·오류 전파는 전체 블록 CFB 기준이다. s비트 CFB의 피드백 구간은 별도로 계산한다.\n| 구분 | 수식 | 특징 | 오류 전파 |\n|---|---|---|---|\n| ECB | C_i = E_K(P_i) | 블록 독립, 병렬, 동일 평문→동일 암호문(패턴 노출) | 해당 블록만 |\n| CBC | C_i = E_K(P_i ⊕ C_i-1), C_0 = IV | 연쇄로 패턴 은닉, 암호화 순차·복호 병렬, [[padding-oracle-attack|패딩 오라클]] 주의 | 해당 블록 전체+다음 블록 1비트 |\n| CFB | C_i = P_i ⊕ E_K(C_i-1) | 암호문 피드백 [[stream-cipher|스트림]] 방식, 선택한 CFB 세그먼트 단위 정렬 필요, 암호화 함수만 사용, 자기 동기화 | 해당 비트+다음 블록 전체 |\n| OFB | O_i = E_K(O_i-1), C_i = P_i ⊕ O_i | 출력 피드백 [[keystream|키스트림]], 사전 계산 가능, IV 재사용 치명적 | 해당 비트만(전파 없음) |\n\n## 4. 고려사항 및 발전방향\n- ECB는 다중 블록 데이터에 사용 금지, CBC·CFB는 예측 불가·OFB·[[ctr-mode|CTR]]은 재사용 금지 IV 관리\n- 기밀성만 제공하는 모드는 [[bit-flipping-attack|비트 플리핑]]에 취약, [[message-authentication-code|MAC]] 결합 또는 [[authenticated-encryption|인증 암호]]([[galois-counter-mode|GCM]]·CCM) 채택\n- 고속·병렬 환경은 CTR·GCM, 디스크 암호화는 XTS 등 용도별 모드 선택\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 식·IV·카운터 요건·오류 전파 및 CFB 세그먼트 조건"
+        },
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "TLS 1.3 AEAD cipher suite 목록(AES-CCM 포함)"
+        },
+        {
+          "title": "NIST SP 800-38D",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/d/final",
+          "scope": "GCM의 AEAD와 GMAC 인증 기능 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 모드별 수식·CFB 블록 전제·IV 요건·CBC 오류 전파·TLS 스위트 범위 대조.",
+      "unresolved": [
+        "위성·무선 등의 대표 적용 예는 특정 제품 채택 증거를 뜻하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "dc54933a72775e6c50d702f2ca05402729a1ab363192f3790be6a376900217f9",
+      "body": "## 1. 블록 암호 운용 모드의 개요\n### 가. 정의\n- 고정 길이 블록만 처리하는 [[block-cipher|블록 암호]] 알고리즘([[aes|AES]]·[[des|DES]]·SEED)을 반복 적용하여 임의 길이 메시지를 암호화할 때, 블록 간 연결 방식·[[initialization-vector|초기화 벡터]](IV) 사용·피드백 구조를 규정한 운용 방식(NIST SP 800-38A: ECB·CBC·CFB·OFB·CTR)\n\n### 나. 등장배경 / 필요성\n- 블록 독립 암호화(ECB)는 동일 평문 블록이 동일 암호문으로 노출되어 데이터 패턴·구조 유출\n- 블록 길이 미만 데이터, 실시간 스트림 데이터, 전송 오류 환경 등 응용별 요구 상이\n- 병렬 처리·임의 접근·오류 복구·무결성 결합 등 성능·보안 요구를 모드 선택으로 충족\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 연쇄(Chaining) | 이전 암호문을 다음 블록 입력에 결합하여 블록 간 의존성 부여 |\n| 초기화 벡터(IV) | 첫 블록을 무작위화하는 비밀 아닌 값, 모드별 예측 불가성·유일성 요건 상이 |\n| 스트림 모드 | 블록 암호로 [[keystream|키스트림]]을 생성하여 [[xor|XOR]], [[stream-cipher|스트림 암호]]처럼 동작(CFB·OFB·CTR) |\n\n## 2. 블록 암호 운용 모드의 구성도 및 구성요소\n### 가. 구성도 (4개 모드 구조)\n```mermaid\nflowchart TB\n  subgraph SG1[\"ECB\"]\n    P1[\"P_i\"] --> E1[\"E_K\"] --> C1[\"C_i\"]\n  end\n  subgraph SG2[\"CBC\"]\n    P2[\"P_i\"] --> X2[\"XOR\"] --> E2[\"E_K\"] --> C2[\"C_i\"]\n    C2p[\"C_i-1 (C_0=IV)\"] --> X2\n  end\n  subgraph SG3[\"CFB\"]\n    C3p[\"C_i-1 (C_0=IV)\"] --> E3[\"E_K\"] --> X3[\"XOR\"] --> C3[\"C_i\"]\n    P3[\"P_i\"] --> X3\n  end\n  subgraph SG4[\"OFB\"]\n    O4p[\"O_i-1 (O_0=IV)\"] --> E4[\"E_K\"] --> O4[\"O_i\"] --> X4[\"XOR\"] --> C4[\"C_i\"]\n    P4[\"P_i\"] --> X4\n  end\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 블록 암호 E_K / D_K | 비밀키 K로 n비트 블록 암호화·복호화 | AES(128비트 블록), DES(64비트), SEED·ARIA |\n| 초기화 벡터 IV | 첫 블록 입력 무작위화, 동일 평문·동일 키의 암호문 상이화 | 난수 생성기, 논스 |\n| XOR 결합기 | 평문과 이전 암호문·키스트림 결합 | 비트 단위 배타적 논리합 |\n| 피드백 레지스터 | CFB·OFB에서 이전 출력을 다음 입력으로 이동 | 시프트 레지스터(s비트 CFB) |\n| [[padding|패딩]] | 마지막 블록을 블록 길이 배수로 맞춤 | PKCS#7, ANSI X.923 |\n| 카운터 | CTR 모드에서 논스+카운터로 입력 생성 | 증가 카운터, 병렬 처리 |\n\n### 다. 동작 절차 (CBC 기준)\n1. 초기화: 예측 불가 IV 생성, 평문을 n비트 블록으로 분할 및 패딩\n2. 첫 블록: C_1 = E_K(P_1 ⊕ IV)\n3. 연쇄: C_i = E_K(P_i ⊕ C_i-1), 모든 블록 순차 처리\n4. 전송: IV와 암호문 C_1..C_n 전송(IV는 비밀일 필요가 없지만 CBC에서는 무결성 보호 필요)\n5. 복호: P_i = D_K(C_i) ⊕ C_i-1, 블록별 병렬 복호 가능\n\n## 3. 운용 모드별 상세\n### 가. ECB(Electronic CodeBook) 모드\n| 항목 | 내용 |\n|---|---|\n| 암호화·복호화 | C_i = E_K(P_i), P_i = D_K(C_i) |\n| 특징 | 블록 독립 처리, 암·복호 모두 병렬, 임의 접근 가능, 구현 단순 |\n| 보안 | 동일 평문→동일 암호문으로 패턴 노출(이미지 윤곽 잔존), 블록 재배열·교체 공격 |\n| 오류 전파 | 암호문 1비트 오류 시 해당 블록만 손상 |\n| 용도 | 패턴 노출 때문에 일반 메시지 암호화에 부적합. 키 보호에는 임의 ECB 사용 대신 승인된 키 래핑 방식 적용 |\n\n### 나. CBC(Cipher Block Chaining) 모드\n| 항목 | 내용 |\n|---|---|\n| 암호화·복호화 | C_i = E_K(P_i ⊕ C_i-1), C_0 = IV / P_i = D_K(C_i) ⊕ C_i-1 |\n| 특징 | 이전 암호문 연쇄로 패턴 은닉, 암호화 순차·복호화 병렬, 패딩 필요 |\n| 보안 | IV 예측 가능 시 선택 평문 공격, [[padding-oracle-attack|패딩 오라클 공격]](POODLE), 암호문 변조 시 다음 블록 [[bit-flipping-attack|비트 플리핑]] |\n| 오류 전파 | 암호문 C_i 1비트 오류 → P_i 전체 손상, P_i+1 해당 비트만 오류(자기 복구) |\n| 용도 | 파일·메시지 암호화, TLS 1.2까지의 일부 레거시 스위트, CBC-MAC 기반 |\n\n### 다. CFB(Cipher FeedBack) 모드\n아래 식은 전체 블록 CFB 기준이며 s비트 CFB는 시프트 레지스터·부분 출력 규칙을 적용한다.\n| 항목 | 내용 |\n|---|---|\n| 암호화·복호화 | O_i = E_K(C_i-1), C_i = P_i ⊕ O_i, C_0 = IV / P_i = C_i ⊕ E_K(C_i-1) |\n| 특징 | 암호문을 피드백하는 스트림 모드, s비트(1·8비트) 단위 처리 가능, 선택한 CFB 세그먼트 단위 정렬 필요, 복호화도 E_K만 사용 |\n| 보안 | CFB는 예측 불가능한 IV 필요(SP 800-38A). 유일성만으로 충분하지 않으며 무결성도 미제공 |\n| 오류 전파 | C_i 1비트 오류 → P_i 해당 비트 + 다음 블록(시프트 레지스터 통과 구간) 전체 손상, 이후 자기 동기화 |\n| 용도 | 문자 단위 전송·실시간 통신, 비트 삽입·삭제 환경 |\n\n### 라. OFB(Output FeedBack) 모드\n| 항목 | 내용 |\n|---|---|\n| 암호화·복호화 | O_i = E_K(O_i-1), O_0 = IV, C_i = P_i ⊕ O_i / P_i = C_i ⊕ O_i |\n| 특징 | 암호 함수 출력만 피드백하는 동기식 스트림 모드, 키스트림 사전 계산 가능, 암·복호 동일 연산 |\n| 보안 | 동일 키·IV 재사용 시 키스트림 동일로 평문 XOR 노출, 비트 플리핑 취약, 주기 짧아질 가능성 |\n| 오류 전파 | 전파 없음, 암호문 오류 비트만 평문 오류(비트 삽입·삭제 시 동기 상실) |\n| 용도 | 위성·무선 등 잡음 많은 채널, 오류 전파 회피 필요 응용 |\n\n### 마. 모드 종합 비교\n| 구분 | ECB | CBC | CFB | OFB | [[ctr-mode|CTR]] |\n|---|---|---|---|---|---|\n| 동작 방식 | 블록 독립 | 연쇄 | 암호문 피드백 스트림 | 출력 피드백 스트림 | 카운터 스트림 |\n| IV·카운터 요건 | 불필요 | 예측 불가 | 예측 불가 | 동일 키에서 유일 | 동일 키의 모든 카운터 블록이 유일 |\n| 패딩·길이 정렬 | 블록 정렬 | 블록 정렬 | s비트 세그먼트 정렬 | 부분 마지막 블록 가능 | 부분 마지막 블록 가능 |\n| 암호화 병렬 | 가능 | 불가 | 불가 | 불가(사전 계산 가능) | 가능 |\n| 복호화 병렬 | 가능 | 가능 | 가능 | 불가(사전 계산 가능) | 가능 |\n| 오류 전파 | 해당 블록 | 1블록+1비트 | 1비트+1블록 | 해당 비트 | 해당 비트 |\n| 복호 시 함수 | D_K | D_K | E_K | E_K | E_K |\n| 임의 접근 | 가능 | 복호만 | 복호만 | 불가 | 가능 |\n\n## 4. 블록 암호 운용 모드 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| IV 관리 | CBC·CFB는 예측 불가 IV, OFB는 IV 유일성, CTR은 메시지 사이를 포함한 전체 카운터 블록 유일성 필요, IV 전송·저장 설계 |\n| 무결성 | 네 모드 모두 기밀성만 제공, [[message-authentication-code|MAC]](HMAC, Encrypt-then-MAC) 결합 또는 [[authenticated-encryption|인증 암호]] 채택 |\n| 패딩 공격 | CBC 패딩 검증 오류 메시지·타이밍 차이 노출 금지, 인증 암호로 대체 |\n| 성능 | 고속·다코어 환경은 CTR·GCM, 하드웨어 자원 제약은 E_K만 쓰는 CFB·OFB·CTR 유리 |\n| 표준 준수 | NIST SP 800-38 시리즈, KCMVP 검증 모드, TLS 1.3의 RFC 8446 스위트에는 [[galois-counter-mode|GCM]]·ChaCha20-Poly1305 외에 AES-CCM·CCM_8도 포함 |\n| 발전방향 | AEAD(GCM·CCM·SIV) 표준화, 디스크 암호화 XTS, 형태보존암호(FPE), 경량 암호 모드 |\n\n## 5. 결론\n- 블록 암호 운용 모드는 동일 알고리즘이라도 보안성·오류 특성·성능을 결정하는 핵심 요소로, ECB 사용 배제와 모드별 IV 요건 준수를 전제로 무결성이 결합된 인증 암호 모드(GCM 등)로 전환 필요\n",
+      "sources": [
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 식·IV·카운터 요건·오류 전파 및 CFB 세그먼트 조건"
+        },
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "TLS 1.3 AEAD cipher suite 목록(AES-CCM 포함)"
+        },
+        {
+          "title": "NIST SP 800-38D",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/d/final",
+          "scope": "GCM의 AEAD와 GMAC 인증 기능 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 모드별 수식·CFB 블록 전제·IV 요건·CBC 오류 전파·TLS 스위트 범위 대조.",
+      "unresolved": [
+        "위성·무선 등의 대표 적용 예는 특정 제품 채택 증거를 뜻하지 않음."
+      ]
+    }
+  },
+  "t-03c5ae8d": {
+    "short": {
+      "source_sha256": "6a2ed9ff8a2cb12d5559e4003f05f2358da09a4975f32509a15ac7205d289163",
+      "body": "## 1. 블록 암호의 개요\n- 정의: 평문을 고정 길이(예: 64·128비트) 블록으로 나누어 동일한 비밀키로 [[round-function|라운드 함수]]를 반복 적용, 각 블록을 같은 길이의 암호문 블록으로 변환하는 [[symmetric-key-cryptography|대칭키 암호]] 알고리즘\n- 필요성: 대용량 데이터의 고속 암호화, [[confusion-and-diffusion|혼돈·확산]] 원리로 통계적 분석 저항, 운용 모드 결합으로 다양한 응용 지원\n\n## 2. 블록 암호의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  P[\"평문 블록(n비트)\"] --> R1[\"라운드 1\"] --> R2[\"라운드 2..r\"] --> C[\"암호문 블록(n비트)\"]\n  K[\"비밀키\"] --> KS[\"키 스케줄\"]\n  KS -->|\"라운드 키\"| R1\n  KS -->|\"라운드 키\"| R2\n```\n| 구성요소 | 역할 |\n|---|---|\n| 라운드 함수 | 치환·전치·키 결합을 수행하는 반복 단위 |\n| [[s-box|S-박스]] | 비선형 치환으로 혼돈(Confusion) 제공 |\n| P-박스·확산층 | 비트 전치·선형 변환으로 확산(Diffusion), [[avalanche-effect|쇄도 효과]] |\n| [[key-schedule|키 스케줄]] | 비밀키에서 라운드별 부분키 생성 |\n\n## 3. 블록 암호의 구조 및 주요 알고리즘\n| 구분 | 내용 |\n|---|---|\n| [[feistel-structure|Feistel 구조]] | 블록을 좌우 분할, 한쪽에 F함수 적용 후 XOR·교환, 암·복호 동일 구조([[des|DES]], [[seed|SEED]]) |\n| [[spn-structure|SPN 구조]] | 전체 블록에 S-박스 치환·전치를 병렬 적용, 라운드 효율 우수, 복호화 역함수 필요([[aes|AES]], [[aria|ARIA]]) |\n| ARX 구조 | 덧셈·회전·XOR만 사용, 경량·고속([[lea|LEA]]) |\n| 국제 알고리즘 | DES(64/56비트, 16라운드), [[triple-des|3DES]], AES(128블록, 128·192·256키, 10·12·14라운드) |\n| 국산 알고리즘 | SEED(128/128, 16라운드), ARIA(128블록, 12·14·16라운드), LEA(128블록, 24·28·32라운드), [[hight|HIGHT]](64/128, 경량) |\n\n## 4. 고려사항 및 발전방향\n- [[differential-cryptanalysis|차분 분석]]·[[linear-cryptanalysis|선형 분석]]·[[brute-force-attack|전수 조사]] 저항을 위한 충분한 라운드·키 길이(128비트 이상), DES 단독 사용 금지\n- 단일 블록 처리 한계는 [[block-cipher-mode-of-operation|운용 모드]](CBC·CTR·GCM)로 보완, [[side-channel-attack|부채널 공격]] 대응 구현\n- 적용 기준에 맞는 알고리즘과 [[kcmvp|KCMVP]] 검증 모듈·운영 조건 확인, [[stream-cipher|스트림 암호]] 대비 구현 유연성, 경량·양자내성 환경 대응\n",
+      "sources": [
+        {
+          "title": "NIST FIPS 197",
+          "url": "https://csrc.nist.gov/pubs/fips/197/final",
+          "scope": "AES의 블록·키 길이와 알고리즘(2023 편집 개정)"
+        },
+        {
+          "title": "RFC 4269",
+          "url": "https://www.rfc-editor.org/rfc/rfc4269.html",
+          "scope": "SEED 128비트 키·블록과 16라운드 Feistel"
+        },
+        {
+          "title": "RFC 5794",
+          "url": "https://www.rfc-editor.org/rfc/rfc5794.html",
+          "scope": "ARIA 키 길이별 12·14·16라운드"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "패딩·오류 전파의 운용 모드별 조건"
+        },
+        {
+          "title": "NIST TDEA 전환 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "TDEA 신규 보호 적용 종료"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. AES·SEED·ARIA 파라미터, 블록/운용 모드 구분, 구조별 효율·스트림 오류 일반화 교정.",
+      "unresolved": [
+        "LEA·HIGHT의 원 규격 라운드 수·연도 및 KCMVP 최신 대상 목록은 추가 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "1ca1cbce3f309d99378f8ce1fdf447a180748c20c04cd7d1fce08c40c0b77e65",
+      "body": "## 1. 블록 암호의 개요\n### 가. 정의\n- 평문을 고정 길이(예: 64·128비트)의 블록으로 분할하고, 비밀키로부터 생성된 라운드 키를 사용하는 [[round-function|라운드 함수]]를 수 회 반복 적용하여 각 블록을 동일 길이의 암호문 블록으로 변환하는 [[symmetric-key-cryptography|대칭키 암호]] 알고리즘\n\n### 나. 등장배경 / 필요성\n- 1970년대 상업용 표준 암호 요구로 [[des|DES]](1977, FIPS 46) 제정, 키 길이 56비트 한계로 1990년대 [[brute-force-attack|전수 조사]]에 노출\n- 2001년 [[aes|AES]](FIPS 197) 선정, 국내는 SEED(1999)·ARIA(2004)·LEA(2013) 등 국산 표준 개발\n- 대용량 데이터 고속 암호화와 기밀성 보장, 하드웨어·소프트웨어 구현 유연성 요구\n\n### 다. 핵심 개념 (Shannon의 설계 원리)\n| 개념 | 내용 |\n|---|---|\n| 혼돈(Confusion) | 키와 암호문의 관계를 복잡하게 하여 통계적 추론 차단, [[s-box|S-박스]] 비선형 치환 |\n| 확산(Diffusion) | 평문 1비트 변화가 암호문 전체에 영향([[avalanche-effect|쇄도 효과]]), 전치·선형 변환 |\n| 반복 라운드 | 단순 변환을 여러 라운드 반복하여 [[confusion-and-diffusion|혼돈·확산]] 누적 |\n\n## 2. 블록 암호의 구성도 및 구성요소\n### 가. 구성도 (DES형 F함수를 사용하는 Feistel 1라운드 예)\n```mermaid\nflowchart TB\n  L0[\"L_i-1 (좌측 n/2비트)\"]\n  R0[\"R_i-1 (우측 n/2비트)\"]\n  F[\"F 함수: 확장-키 XOR-S박스-P박스\"]\n  K[\"라운드 키 K_i\"] --> F\n  R0 --> F\n  F --> X[\"XOR\"]\n  L0 --> X\n  X --> R1[\"R_i = L_i-1 XOR F(R_i-1, K_i)\"]\n  R0 --> L1[\"L_i = R_i-1\"]\n  KEY[\"비밀키 K\"] --> KS[\"키 스케줄\"] --> K\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 운용 모드의 블록 분할·[[padding|패딩]] | 필요 여부는 모드별로 다르며 블록 암호 자체의 필수 구성은 아님 | PKCS#7, 운용 모드 연계 |\n| 라운드 함수 | 치환·전치·키 결합 반복 단위 | F함수, SubBytes·ShiftRows·MixColumns |\n| S-박스 | 비선형 치환으로 혼돈 제공 | 룩업 테이블, GF(2^8) 역원 기반(AES) |\n| P-박스·확산층 | 비트 전치·선형 변환으로 확산 | 순열, MDS 행렬 |\n| [[key-schedule|키 스케줄]] | 비밀키에서 라운드별 부분키 생성 | 키 확장, 회전·상수 결합 |\n| 키 결합 | 라운드 키와 중간 상태 XOR | AddRoundKey |\n\n### 다. 동작 절차 (AES-128 기준)\n1. 키 확장: 128비트 키에서 11개 라운드 키 생성\n2. 초기 라운드: 평문 상태(4×4 바이트)에 라운드 키 0 XOR\n3. 메인 라운드(9회): SubBytes(S-박스 치환) → ShiftRows(행 이동) → MixColumns(열 혼합) → AddRoundKey\n4. 최종 라운드: MixColumns 제외한 3단계 수행\n5. 출력: 128비트 암호문 블록, 복호화는 역변환을 역순 적용\n\n## 3. 블록 암호의 상세\n### 가. 구조 비교\n| 구분 | [[feistel-structure|Feistel 구조]] | [[spn-structure|SPN 구조]] | ARX 구조 |\n|---|---|---|---|\n| 원리 | 블록 좌우 분할, 한쪽에 F함수 적용 후 XOR·교환 | 전체 블록에 S-박스 치환·전치 병렬 적용 | 모듈러 덧셈·회전·XOR 조합 |\n| 암·복호 | 동일 구조(라운드 키 역순) | 역함수(InvSubBytes 등) 별도 구현 | 역연산 간단 |\n| 라운드 특성 | 한쪽에 F함수 적용(일반형) | 전체 상태에 치환·확산 | 덧셈·회전·XOR 조합; 필요 라운드 수는 알고리즘별 설계 |\n| 장점 | F함수 가역성 불필요, 구현 단순 | 병렬·고속, 확산 빠름 | S-박스 없어 경량, 캐시 타이밍 공격 저항 |\n| 대표 | DES, [[seed|SEED]], Blowfish, Camellia | AES, [[aria|ARIA]], PRESENT | [[lea|LEA]], Speck, ChaCha(스트림) |\n\n### 나. 주요 알고리즘 비교\n| 알고리즘 | 블록(비트) | 키(비트) | 라운드 | 구조 | 비고 |\n|---|---|---|---|---|---|\n| DES | 64 | 56 | 16 | Feistel | 1977 FIPS 46, 전수 조사 취약으로 폐기 |\n| [[triple-des|3DES]] | 64 | 112·168 | 48 | Feistel | DES 3회(EDE), NIST는 2024년부터 신규 보호 적용 금지(레거시 처리 구분) |\n| AES | 128 | 128·192·256 | 10·12·14 | SPN | 2001 FIPS 197, Rijndael, 사실상 세계 표준 |\n| SEED | 128 | 128 | 16 | Feistel | 1999 KISA, 국내 전자상거래·금융 표준 |\n| ARIA | 128 | 128·192·256 | 12·14·16 | SPN | 2004 국가정보원·학계, KS X 1213 |\n| LEA | 128 | 128·192·256 | 24·28·32 | ARX | 2013 NSR, 경량·고속, ISO/IEC 29192-2 |\n| [[hight|HIGHT]] | 64 | 128 | 32 | 일반화 Feistel | 2005, RFID·센서용 경량 |\n\n### 다. 블록 암호 공격 기법과 대응\n| 공격 | 내용 | 대응 |\n|---|---|---|\n| 전수 조사 | 모든 키 후보 대입 | 128비트 이상 키 길이 |\n| [[differential-cryptanalysis|차분 분석]] | 평문 차분과 암호문 차분의 확률 편향 이용 | S-박스 차분 균일성, 충분한 라운드 |\n| [[linear-cryptanalysis|선형 분석]] | 평문·암호문·키 비트의 선형 근사 이용 | S-박스 비선형도 극대화 |\n| 관련 키 공격 | 관련된 키 간 암호문 관계 분석 | 비선형 키 스케줄 |\n| [[side-channel-attack|부채널 공격]] | 전력·시간·전자파 분석으로 키 추출 | 마스킹, 상수 시간 구현, 하드웨어 보호 |\n| 운용 모드 공격 | ECB 패턴 노출, 패딩 오라클 | [[block-cipher-mode-of-operation|운용 모드]] 적절 선택, 인증 암호 |\n\n### 라. 스트림 암호와 비교\n| 구분 | 블록 암호 | [[stream-cipher|스트림 암호]] |\n|---|---|---|\n| 처리 단위 | 고정 길이 블록 | 비트·바이트 단위 |\n| 속도·자원 | 하드웨어 가속·모드·구현에 따라 다름 | 알고리즘·구현에 따라 다르며 유형만으로 우열 판정 불가 |\n| 오류 전파 | 운용 모드별로 다름 | 동기식 XOR 스트림은 해당 비트, 자기 동기식은 전파 구간 존재 |\n| 응용 | 파일·DB·전자문서, 운용 모드로 스트림화 가능 | 실시간 음성·무선 통신 |\n| 대표 | AES, SEED, ARIA | ChaCha20, A5/1, RC4(폐기) |\n\n## 4. 블록 암호 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘 선택 | [[kcmvp|KCMVP]] 검증 알고리즘(AES·SEED·ARIA·LEA), DES·3DES·RC4 사용 금지 |\n| 키 관리 | 안전한 키 생성·분배·폐기, HSM 보관, 키 수명 주기 |\n| 운용 모드 | 단일 블록 한계는 모드로 보완, 기밀성+무결성 위해 GCM 등 인증 암호 |\n| 구현 안전성 | 부채널 대응 상수 시간 구현, 하드웨어 가속(AES-NI) 활용 |\n| 발전방향 | 경량 암호(IoT) 표준화, 형태보존암호(FPE), 양자 공격 자원과 목표 보안강도를 고려한 키 길이 선택 |\n\n## 5. 결론\n- 블록 암호는 혼돈·확산 원리를 라운드 반복으로 구현한 대칭키 암호의 핵심으로, 검증된 알고리즘(AES·ARIA·LEA)과 충분한 키 길이, 인증 암호 운용 모드 및 부채널 안전 구현을 결합하여 적용 필요\n",
+      "sources": [
+        {
+          "title": "NIST FIPS 197",
+          "url": "https://csrc.nist.gov/pubs/fips/197/final",
+          "scope": "AES의 블록·키 길이와 알고리즘(2023 편집 개정)"
+        },
+        {
+          "title": "RFC 4269",
+          "url": "https://www.rfc-editor.org/rfc/rfc4269.html",
+          "scope": "SEED 128비트 키·블록과 16라운드 Feistel"
+        },
+        {
+          "title": "RFC 5794",
+          "url": "https://www.rfc-editor.org/rfc/rfc5794.html",
+          "scope": "ARIA 키 길이별 12·14·16라운드"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "패딩·오류 전파의 운용 모드별 조건"
+        },
+        {
+          "title": "NIST TDEA 전환 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "TDEA 신규 보호 적용 종료"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. AES·SEED·ARIA 파라미터, 블록/운용 모드 구분, 구조별 효율·스트림 오류 일반화 교정.",
+      "unresolved": [
+        "LEA·HIGHT의 원 규격 라운드 수·연도 및 KCMVP 최신 대상 목록은 추가 대조 필요."
+      ]
+    }
+  },
+  "t-2bf42272": {
+    "short": {
+      "source_sha256": "3942768ab6bb5b6f23404304bd80996da8f70d2e00790de17ac5ee8fa4497d25",
+      "body": "## 1. 메시지 인증 코드(MAC)의 개요\n- 정의: 송·수신자가 공유한 비밀키와 메시지를 입력으로 고정 길이 태그를 생성하여 메시지의 [[integrity|무결성]]과 발신자 [[message-authentication|인증]]을 동시에 제공하는 [[symmetric-key-cryptography|대칭키]] 기반 암호 기법\n- 필요성: [[hash-function|해시]]만으로는 공격자가 메시지와 해시를 함께 위조 가능, 키 개입으로 위변조 탐지\n\n## 2. MAC의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  M[\"메시지 M\"] --> F[\"MAC 함수(K)\"]\n  K[\"공유 비밀키 K\"] --> F\n  F --> T[\"태그 T\"]\n  M --> R[\"수신자: MAC(K,M) 재계산\"]\n  T --> R\n  R --> V{\"태그 일치?\"}\n```\n| 구성요소 | 역할 |\n|---|---|\n| 공유 비밀키 | 사전 안전 분배, 태그 생성·검증에 공용 |\n| MAC 알고리즘 | 해시 또는 블록암호 기반 태그 생성 |\n| 태그(Tag) | 메시지에 첨부되는 고정 길이 인증값 |\n\n## 3. MAC의 유형 및 비교\n| 구분 | 내용 |\n|---|---|\n| [[hmac|HMAC]] | 해시 기반, H((K0⊕opad) ∥ H((K0⊕ipad) ∥ M)), K0는 블록 크기에 맞게 전처리한 키, [[length-extension-attack|길이 확장 공격]] 방지 |\n| [[cbc-mac|CBC-MAC]]·[[cmac|CMAC]] | 블록암호 CBC 모드 최종 블록 사용, CMAC은 가변 길이 안전 |\n| [[galois-counter-mode|GCM]]·[[aead|AEAD]] | AES-GCM·ChaCha20-Poly1305는 암호화와 인증 결합. GMAC·Poly1305 자체는 인증이며 기밀성을 제공하지 않음 |\n| MAC vs [[digital-signature|전자서명]] | MAC은 대칭키·고속·[[non-repudiation|부인방지]] 불가, 서명은 공개키·부인방지 가능 |\n\n## 4. 고려사항\n- 키 관리·분배 안전성, 태그 비교 시 상수시간 비교로 타이밍 공격 방지\n- [[replay-attack|재전송 공격]] 대응 위한 인증 범위에 순서번호·타임스탬프를 넣고 수신 측 허용 범위·중복 검사, Encrypt-then-MAC 순서 적용",
+      "sources": [
+        {
+          "title": "RFC 2104",
+          "url": "https://www.rfc-editor.org/rfc/rfc2104.html",
+          "scope": "HMAC의 공유키·전처리·출력"
+        },
+        {
+          "title": "NIST SP 800-38B",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/b/upd1/final",
+          "scope": "CMAC의 인증·무결성 목적"
+        },
+        {
+          "title": "NIST SP 800-38D",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/d/final",
+          "scope": "GCM은 AEAD, GMAC은 암호화 없는 인증"
+        },
+        {
+          "title": "RFC 8439",
+          "url": "https://www.rfc-editor.org/rfc/rfc8439.html",
+          "scope": "Poly1305 일회성 키와 ChaCha20-Poly1305 결합"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. MAC·AEAD 구분, K0·태그 길이·키별 충돌 단정·논스 재사용 효과·재전송 검증 조건 대조.",
+      "unresolved": []
+    },
+    "long": {
+      "source_sha256": "07ed1cd84bc4feeead305c140e5a12006b0cb987362e2980da5ca9b39db4dbaa",
+      "body": "## 1. 메시지 인증 코드(MAC)의 개요\n### 가. 정의\n- 송·수신자가 사전에 공유한 비밀키 K와 메시지 M을 입력으로 고정 길이의 인증 태그 T = MAC(K, M)를 생성·첨부하고, 수신자가 동일 키로 재계산하여 비교함으로써 메시지의 [[integrity|무결성]]과 발신자 [[message-authentication|인증]]을 동시에 보장하는 [[symmetric-key-cryptography|대칭키]] 기반 암호 기법\n### 나. 등장배경 및 필요성\n- 단순 [[hash-function|해시]] 첨부는 공격자가 메시지 변조 후 해시를 재계산하여 첨부 가능, 비밀키 개입으로 위조 방지\n- 암호화만으로는 무결성 보장 불가(비트 플리핑), 인증·무결성 전용 기법 필요\n- [[tls|TLS]]·[[ipsec|IPsec]]·SSH·금융 거래 등 통신 보안의 핵심 구성요소\n### 다. 핵심 개념 및 보안 요구사항\n| 구분 | 내용 |\n|---|---|\n| 위조 불가능성 | 키를 모르는 공격자가 새 메시지에 대한 유효 태그 생성 불가(선택 메시지 공격 하에서도) |\n| 키 의존성 | 태그가 비밀키에 의존. 서로 다른 키의 태그가 반드시 다르다는 충돌 불가능성 보장은 아님 |\n| 태그 길이 | HMAC·CMAC 등은 선택한 설정에 따라 고정 길이, KMAC은 지정한 출력 길이 사용 |\n| 제공 서비스 | 무결성·인증 제공, 기밀성·[[non-repudiation|부인방지]] 미제공 |\n\n## 2. MAC의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph S[\"송신자\"]\n    M1[\"메시지 M\"] --> G[\"MAC 생성: T = MAC(K, M)\"]\n    K1[\"비밀키 K\"] --> G\n  end\n  G -->|\"M 과 T 전송\"| CH[\"전송 채널(공격자 변조 시도)\"]\n  subgraph R[\"수신자\"]\n    CH --> M2[\"수신 메시지 M'\"]\n    CH --> T2[\"수신 태그 T\"]\n    M2 --> C[\"재계산: T' = MAC(K, M')\"]\n    K2[\"비밀키 K\"] --> C\n    C --> V{\"T' == T ?\"}\n    T2 --> V\n    V -->|\"일치\"| OK[\"무결성·인증 확인\"]\n    V -->|\"불일치\"| NG[\"변조·위조 탐지, 폐기\"]\n  end\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 비밀키 | 태그 생성·검증 공용 키 | 안전한 [[key-management|키 관리]]·분배(KDF, 키 교환) |\n| MAC 알고리즘 | 키·메시지로 태그 산출 | 해시 기반([[hmac|HMAC]]), 블록암호 기반([[cmac|CMAC]]), 범용 해시 기반(Poly1305·GMAC) |\n| 태그 | 메시지 첨부 인증값 | 길이·절단 허용은 알고리즘·프로토콜·허용 위조 확률에 따라 결정. 보편 최소값으로 단정하지 않음 |\n| 검증 로직 | 재계산·비교 | 상수시간 비교, 실패 시 폐기·로그 |\n### 다. 동작 절차\n1. 키 공유: 사전 분배 또는 키 교환 프로토콜로 비밀키 K 공유\n2. 태그 생성: 송신자가 T = MAC(K, M) 계산\n3. 전송: 메시지 M과 태그 T를 함께 전송(암호화 시 Encrypt-then-MAC)\n4. 재계산: 수신자가 수신 M'으로 T' = MAC(K, M') 계산\n5. 검증: T'와 T 상수시간 비교, 일치 시 수락·불일치 시 폐기\n\n## 3. MAC의 유형 및 비교\n### 가. 주요 MAC 알고리즘\n| 구분 | 알고리즘 | 원리 | 특징 |\n|---|---|---|---|\n| 해시 기반 | HMAC | HMAC(K,M) = H((K0⊕opad) ∥ H((K0⊕ipad) ∥ M)), K0는 블록 크기에 맞게 전처리한 키 | RFC 2104, 내부 해시 안전성 의존, [[length-extension-attack|길이 확장 공격]] 방지, 범용 |\n| 해시 기반 | KMAC | SHA-3(Keccak) 기반 키드 해시 | 구조 단순, 가변 출력 길이 |\n| 블록암호 기반 | [[cbc-mac|CBC-MAC]] | CBC 모드 암호화 후 최종 블록을 태그로 사용 | 기본 CBC-MAC은 고정 메시지 길이·고정 IV 등 조건 필요 |\n| 블록암호 기반 | CMAC | CBC-MAC에 서브키(K1·K2)로 최종 블록 처리 | NIST SP 800-38B, 가변 길이 안전, [[aes|AES]]-CMAC |\n| 범용 해시 기반 | GMAC, Poly1305 | GMAC의 nonce와 Poly1305 일회성 인증키 조건 구분 | 재사용 시 위조 안전성 붕괴 위험; 장기 암호화 키가 항상 복구된다는 뜻은 아님 |\n| [[aead|AEAD]] | AES-[[galois-counter-mode|GCM]], ChaCha20-Poly1305 | 암호화와 MAC 통합 | TLS 1.3 표준 스위트, 단일 패스 |\n### 나. MAC vs 해시 vs 전자서명 비교\n| 구분 | 해시 | MAC | [[digital-signature|전자서명]] |\n|---|---|---|---|\n| 키 | 없음 | 대칭 비밀키 | 공개키 쌍 |\n| 무결성 | 제공(위조 가능) | 제공 | 제공 |\n| 인증 | 미제공 | 제공(송·수신자 간) | 제공(제3자 검증 가능) |\n| 부인방지 | 미제공 | 미제공(키 공유로 송신자 특정 불가) | 제공 |\n| 속도 | 매우 빠름 | 빠름 | 느림(공개키 연산) |\n| 용도 | 무결성 확인, 저장 | 통신 세션 인증, API 요청 서명 | 문서·코드 서명, 인증서 |\n### 다. 암호화와 MAC 결합 순서\n| 방식 | 내용 | 평가 |\n|---|---|---|\n| Encrypt-then-MAC | 암호문에 MAC 적용 | 권고, 복호화 전 위조 탐지(IPsec ESP) |\n| MAC-then-Encrypt | MAC 후 전체 암호화 | 구성·오류 처리에 따라 패딩 오라클 위험(일부 구 TLS) |\n| Encrypt-and-MAC | 평문 MAC과 암호문 병렬 | 평문 정보 노출 가능(SSH 초기) |\n\n## 4. MAC 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 관리 | 키 분배·저장·교체 주기, 암호화 키와 MAC 키 분리 사용 |\n| 구현 | 태그 비교 상수시간 구현(타이밍 [[side-channel-attack|부채널 공격]] 방지), 태그 절단 최소 길이 |\n| 프로토콜 | [[replay-attack|재전송 공격]] 방지 위한 순서번호·논스·타임스탬프 포함, AEAD 방식별 논스 요건 준수 및 수신 측 중복·순서 검사 |\n| 알고리즘 | MD5·SHA-1 기반 HMAC 신규 사용 지양, SHA-256 이상·AES-CMAC·AEAD 권고 |\n| 발전방향 | TLS 1.3 등 AEAD 전면 전환, 양자내성 환경에서도 대칭 MAC은 키 길이 확대로 대응 |\n\n## 5. 결론\n- MAC은 공유 비밀키로 메시지 무결성과 인증을 고속으로 보장하는 핵심 기법이며, 부인방지가 필요하면 전자서명을, 기밀성 통합이 필요하면 AEAD를 선택하고 키 관리·재전송 방지·상수시간 구현을 병행해야 안전",
+      "sources": [
+        {
+          "title": "RFC 2104",
+          "url": "https://www.rfc-editor.org/rfc/rfc2104.html",
+          "scope": "HMAC의 공유키·전처리·출력"
+        },
+        {
+          "title": "NIST SP 800-38B",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/b/upd1/final",
+          "scope": "CMAC의 인증·무결성 목적"
+        },
+        {
+          "title": "NIST SP 800-38D",
+          "url": "https://csrc.nist.gov/pubs/sp/800/38/d/final",
+          "scope": "GCM은 AEAD, GMAC은 암호화 없는 인증"
+        },
+        {
+          "title": "RFC 8439",
+          "url": "https://www.rfc-editor.org/rfc/rfc8439.html",
+          "scope": "Poly1305 일회성 키와 ChaCha20-Poly1305 결합"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. MAC·AEAD 구분, K0·태그 길이·키별 충돌 단정·논스 재사용 효과·재전송 검증 조건 대조.",
+      "unresolved": []
+    }
+  },
+  "t-85a2ead0": {
+    "short": {
+      "source_sha256": "ec032181ff8cbb0c2fccac5681afc0ee0e2f9690a638c2042ef18136033853b5",
+      "body": "## 1. 암호 알고리즘 보안강도의 개요\n- 정의: 암호 알고리즘이나 시스템을 깨기 위해 필요한 연산량을 [[brute-force-attack|전수조사]] 기준 2^n 연산으로 환산하여 n비트로 표현한 안전성 척도(Security Strength, bits of security)\n- 필요성: 알고리즘별 안전성을 동일 척도로 비교하고 [[key-length|키 길이]] 선정·암호 전환 시기 결정의 근거 제공\n\n## 2. 보안강도의 개념도 및 산정 기준\n```mermaid\nflowchart LR\n  S[대칭키: 키 길이 n] --> B[보안강도 n비트]\n  H[해시: 출력 길이 n] -->|충돌저항성 n/2| B\n  P[공개키: 수학적 난제] -->|최적 알고리즘 복잡도 환산| B\n  B --> T[전환 시점·사용기간 결정]\n```\n| 암호 유형 | 보안강도 산정 기준 |\n|---|---|\n| [[symmetric-key-cryptography|대칭키]] | 키 길이와 동일(AES-128 = 128비트), 알려진 지름길 공격 없을 때 |\n| [[hash-function|해시함수]] | 충돌저항성은 출력길이의 1/2([[birthday-attack|생일 공격]]), 역상저항성은 출력길이 |\n| [[public-key-cryptography|공개키]] | 소인수분해·이산대수 난제별 공격 알고리즘(소인수분해 GNFS, 일반 타원곡선 Pollard rho 등)의 복잡도를 비트로 환산 |\n\n표의 강도는 고전 공격에 대한 추정 비교이며 현재 사용 허가가 아니다. TDEA는 NIST 신규 보호 적용이 2024년부터 금지되고 DSA는 FIPS 186-5에서 새 서명 생성에 허용되지 않는다. SHA-1의 80비트는 이상적 상한으로 실제 충돌 저항성은 그보다 낮다.\n\n## 3. 보안강도별 알고리즘 및 키 길이 (NIST SP 800-57, KISA 안내서)\n| 보안강도 | 대칭키 | [[rsa|RSA]]·DH | [[elliptic-curve-cryptography|ECC]] | 해시(충돌) | 안전 사용기간 |\n|---|---|---|---|---|---|\n| 80비트 | 2TDEA | 1024 | 160 | SHA-1 | 2010년 이전 |\n| 112비트 | 3TDEA | 2048 | 224 | SHA-224 | 2030년까지 |\n| 128비트 | [[aes|AES]]-128, SEED, ARIA-128 | 3072 | 256 | SHA-256 | 2030년 이후 |\n| 192비트 | AES-192 | 7680 | 384 | SHA-384 | 장기 |\n| 256비트 | AES-256 | 15360 | 512 | SHA-512 | 장기 |\n\n## 4. 고려사항\n- 시스템 전체 보안강도는 가장 약한 구성요소에 의해 결정, 알고리즘·키·해시·프로토콜 일관 적용\n- [[quantum-computer|양자컴퓨터]]의 [[grover-algorithm|Grover]] 알고리즘은 이상적 비구조 탐색의 지수 부분을 절반으로, [[shor-algorithm|Shor]] 알고리즘은 RSA·ECC를 무력화하므로 [[post-quantum-cryptography|양자내성암호]] 전환 준비",
+      "sources": [
+        {
+          "title": "NIST SP 800-57 Part 1 Rev.5",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf",
+          "scope": "표 2·3의 고전 보안강도 추정·FFC 부분군·SHA-1 예외"
+        },
+        {
+          "title": "NIST TDEA 종료 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "2024 신규 보호 적용 금지"
+        },
+        {
+          "title": "NIST FIPS 186-5 공지",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "DSA 신규 서명 생성 제외"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 강도 표와 사용 허가 구분, 타원곡선 강도 식·SHA-1·TDEA·DSA 예외 대조.",
+      "unresolved": [
+        "국내 KISA/KCMVP 현행 알고리즘·사용 기한 표는 원문 대조 미완료.",
+        "DES 해독 시간과 보안 여유도에 관한 역사·정량 근거는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "239b0c4f0a6c42ed9f1e2f083c988c22e0333c54bbabce42c578d1c5ab33e761",
+      "body": "## 1. 암호 알고리즘 보안강도의 개요\n### 가. 정의\n- 암호 알고리즘 또는 암호 시스템을 공격하여 키를 찾거나 평문을 복원하는 데 필요한 작업량(연산 횟수)을 n비트 키에 대한 [[brute-force-attack|전수조사]] 공격의 복잡도 2^n과 동일한 수준으로 환산하여 n비트로 표현한 안전성 척도\n\n### 나. 등장배경 / 필요성\n- 대칭키·공개키·해시 등 구조가 다른 알고리즘의 안전성을 동일한 척도로 비교할 필요\n- 컴퓨팅 성능 향상([[moores-law|무어의 법칙]])과 암호해독 기법 발전으로 안전한 [[key-length|키 길이]]가 시간에 따라 변화, 전환 시점 판단 기준 필요\n- 1999년 DES 56비트가 22시간에 해독, 2017년 SHA-1 충돌 실증 등 약화된 알고리즘의 퇴출 근거\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 보안강도(Security Strength) | 최선의 공격 알고리즘으로 깨기 위한 연산량 log2 값(비트) |\n| 안전 사용기간 | 해당 보안강도가 유효하다고 판단되는 기간(NIST SP 800-57, KISA 암호 알고리즘 및 키 길이 이용 안내서) |\n| 보안 평가 | 공격 모델·데이터량·계산량·메모리와 구현을 함께 평가; 전수조사와의 차이 하나로 전환 시점을 결정하지 않음 |\n\n## 2. 보안강도의 산정 구조 및 구성요소\n### 가. 산정 구조도\n```mermaid\nflowchart TB\n  subgraph 입력\n    S[\"대칭키 알고리즘(키 길이)\"]\n    H[\"해시함수(출력 길이)\"]\n    P[\"공개키 알고리즘(모듈러스·곡선 크기)\"]\n  end\n  S -->|전수조사 2^n| C[최선 공격 복잡도 산출]\n  H -->|생일공격 2^(n/2)| C\n  P -->|GNFS·Pollard rho 복잡도| C\n  C --> B[보안강도 n비트]\n  B --> D[사용 가능 기간·전환 시점 결정]\n  Q[양자 알고리즘 Shor·Grover] -.강도 재평가.-> C\n```\n\n### 나. 암호 유형별 보안강도 산정 기준\n| 암호 유형 | 산정 기준 | 핵심 공격 | 예시 |\n|---|---|---|---|\n| [[symmetric-key-cryptography|대칭키 암호]] | 키 길이 = 보안강도(지름길 공격 없을 때) | 전수조사, [[differential-cryptanalysis|차분]]·[[linear-cryptanalysis|선형 분석]] | [[aes|AES]]-128 → 128비트, 3TDEA → 추정 112비트(meet-in-the-middle 분석 고려, 통신 중간자 공격과 구분) |\n| [[hash-function|해시함수]] | 충돌저항성 = 출력길이/2, 이상적 역상저항성 = 출력길이; 제2역상은 함수 구조·메시지 길이 조건 확인 | [[birthday-attack|생일 공격]] | SHA-256 → 충돌 128비트, 역상 256비트 |\n| [[public-key-cryptography|공개키 암호]](소인수분해) | 일반 수체 체(GNFS) 준지수 복잡도 환산 | 소인수분해 | [[rsa|RSA]]-2048 → 112비트, RSA-3072 → 128비트 |\n| 공개키 암호(이산대수) | 유한체 이산대수 GNFS 환산 | 지수계산법 | [[diffie-hellman|DH]]·DSA 2048비트 → 112비트 |\n| [[elliptic-curve-cryptography|타원곡선 암호]] | 큰 소수 부분군 차수 r에 대해 약 sqrt(r) 연산, 즉 log2(r)/2비트(Pollard rho) | 타원곡선 이산대수 | ECC P-256 → 128비트 |\n| [[message-authentication-code|MAC]] | min(키 길이, 태그 길이) | 위조 공격 | HMAC-SHA256 128비트 키 → 128비트 |\n\n### 다. 보안강도 결정 절차\n1. 보호 대상 정보의 중요도와 보호 필요 기간 산정\n2. 요구 기간 동안 유효한 보안강도 수준 선정(KISA 권고: 2030년까지 112비트 이상, 이후 128비트 이상)\n3. 선정 강도를 만족하는 알고리즘·키 길이·해시·MAC 조합 결정\n4. 가장 약한 구성요소 기준으로 시스템 전체 강도 검증\n5. 주기적 재평가 및 전환 계획 수립\n\n표의 강도는 고전 공격에 대한 추정 비교이며 현재 사용 허가가 아니다. TDEA는 NIST 신규 보호 적용이 2024년부터 금지되고 DSA는 FIPS 186-5에서 새 서명 생성에 허용되지 않는다. SHA-1의 80비트는 이상적 상한으로 실제 충돌 저항성은 그보다 낮다.\n\n## 3. 보안강도별 알고리즘·키 길이 및 국내 권고\n### 가. 보안강도별 동등 키 길이(NIST SP 800-57 Part 1)\n| 보안강도 | 대칭키 | RSA·DH·DSA(모듈러스) | ECC(키 길이) | 해시(충돌저항성) | 안전 사용기간 |\n|---|---|---|---|---|---|\n| 80비트 | 2TDEA, SKIPJACK | 1024 | 160~223 | SHA-1 | 2010년까지(사용 중단) |\n| 112비트 | 3TDEA | 2048 | 224~255 | SHA-224, SHA-512/224 | 2030년까지 |\n| 128비트 | AES-128, SEED, ARIA-128, LEA-128 | 3072 | 256~383 | SHA-256, SHA3-256 | 2030년 이후 |\n| 192비트 | AES-192, ARIA-192, LEA-192 | 7680 | 384~511 | SHA-384, SHA3-384 | 2030년 이후 |\n| 256비트 | AES-256, ARIA-256, LEA-256 | 15360 | 512 이상 | SHA-512, SHA3-512 | 2030년 이후 |\n\n아래 국내 목록·기한은 현행 국내 원문 대조가 미완료이며 현재 의무·허용 목록으로 사용하지 않는다.\n\n### 나. 국내 권고 알고리즘(KISA 암호 알고리즘 및 키 길이 이용 안내서, [[kcmvp|KCMVP]] 검증 대상)\n| 분류 | 권고 알고리즘 | 비고 |\n|---|---|---|\n| 블록암호 | [[seed|SEED]], [[aria|ARIA]], [[lea|LEA]], HIGHT, AES | DES·2TDEA 사용 금지, NIST의 TDEA 신규 보호 적용은 2024년부터 금지; 국내 적용 기준은 별도 확인 |\n| 해시함수 | SHA-224/256/384/512, SHA-3, LSH | MD5·SHA-1 사용 금지 |\n| 공개키 암호 | RSAES-OAEP 2048 이상 | RSAES-PKCS1-v1.5 사용 금지 |\n| 전자서명 | RSA-PSS, [[kcdsa|KCDSA]], ECDSA, EC-KCDSA | 2048·224비트 이상 |\n| 키 교환 | DH 2048 이상, ECDH 224 이상 | |\n\n### 다. 양자컴퓨팅 환경의 보안강도 변화\n| 구분 | 영향 | 결과 |\n|---|---|---|\n| [[grover-algorithm|Grover 알고리즘]] | 대칭키·해시 전수조사 복잡도를 2^(n/2)로 감소 | 이상화한 탐색 계산이며 실제 회로·병렬화 비용과 용도별 요구를 함께 평가 |\n| [[shor-algorithm|Shor 알고리즘]] | 소인수분해·이산대수를 다항시간에 해결 | 충분한 오류 보정 양자컴퓨터에서 기존 난제의 안전성 상실; 현재 장비가 즉시 해독한다는 뜻은 아님 |\n| 대응 | [[post-quantum-cryptography|양자내성암호]](ML-KEM, ML-DSA) 전환, 하이브리드 키 교환 | NIST FIPS 203·204·205(2024년) |\n\n## 4. 보안강도 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 최약 고리 원칙 | 알고리즘·키·해시·난수생성기·프로토콜 중 가장 낮은 강도가 전체 강도, 일관된 수준 적용 |\n| 구현 안전성 | 이론적 강도와 별개로 [[side-channel-attack|부채널 공격]]·구현 결함 대비, 검증된 암호모듈 사용 |\n| 성능 균형 | 강도 상승 시 연산·키 관리 비용 증가, IoT 등 제약 환경은 경량암호(LEA, HIGHT) 고려 |\n| 수명 관리 | 데이터 보호 기간이 알고리즘 수명을 초과하면 선제 전환, [[crypto-agility|암호 민첩성]] 설계 |\n| 발전방향 | 양자내성암호 단계적 전환 로드맵, 암호 인벤토리 기반 자동 점검, 국제 표준 변화 모니터링 |\n\n## 5. 결론\n- 보안강도는 서로 다른 암호 알고리즘을 동일 척도로 비교·선정하는 핵심 기준이며, 알고리즘별 현행 허용 여부와 적용 기관 정책을 준수하면서 양자컴퓨팅 위협에 대비한 128비트 이상 및 양자내성암호 전환을 계획적으로 추진해야 함",
+      "sources": [
+        {
+          "title": "NIST SP 800-57 Part 1 Rev.5",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf",
+          "scope": "표 2·3의 고전 보안강도 추정·FFC 부분군·SHA-1 예외"
+        },
+        {
+          "title": "NIST TDEA 종료 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "2024 신규 보호 적용 금지"
+        },
+        {
+          "title": "NIST FIPS 186-5 공지",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "DSA 신규 서명 생성 제외"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 강도 표와 사용 허가 구분, 타원곡선 강도 식·SHA-1·TDEA·DSA 예외 대조.",
+      "unresolved": [
+        "국내 KISA/KCMVP 현행 알고리즘·사용 기한 표는 원문 대조 미완료.",
+        "DES 해독 시간과 보안 여유도에 관한 역사·정량 근거는 미확인."
+      ]
+    }
+  },
+  "t-ffae4cfb": {
+    "short": {
+      "source_sha256": "7456400c0a4a7275694be4681544937daac432bdc1accc9bfb135eef4d5e429b",
+      "body": "## 1. 암호 알고리즘의 개요\n- 정의: 평문을 제3자가 이해할 수 없는 암호문으로 변환(암호화)하고 정당한 키 소유자만 복원(복호화)할 수 있도록 하는 수학적 변환 규칙\n- 필요성: 전송·저장 정보의 [[confidentiality|기밀성]]·[[integrity|무결성]]·인증·[[non-repudiation|부인방지]] 확보\n\n암호화는 기밀성 수단이며 무결성·인증은 MAC/AEAD, 서명은 별도 기능이다. DH는 키 합의이며 암·복호화 알고리즘이 아니고 ECC는 알고리즘 계열이다. DES·TDEA·RC4 등은 역사적 분류 예시이며 현재 사용 권고가 아니다.\n\n## 2. 암호 알고리즘의 분류 체계\n```mermaid\nflowchart LR\n  C[암호 알고리즘] --> U[정보단위]\n  C --> K[키 적용 방식]\n  C --> T[암호화 기술]\n  U --> U1[블록 암호·스트림 암호]\n  K --> K1[대칭키·비대칭키·키 없는 해시]\n  T --> T1[치환·전치·곱·수학적 난제 기반]\n```\n| 분류 기준 | 유형 | 대표 알고리즘 |\n|---|---|---|\n| 정보단위 | [[block-cipher|블록 암호]] | [[des|DES]], [[aes|AES]], [[seed|SEED]], [[aria|ARIA]], [[lea|LEA]] |\n| | [[stream-cipher|스트림 암호]] | [[rc4|RC4]], A5/1, ChaCha20, [[one-time-pad|OTP(일회용 패드)]] |\n| 키 적용 방식 | [[symmetric-key-cryptography|대칭키]] | AES, SEED, 3DES |\n| | [[public-key-cryptography|비대칭키]] | [[rsa|RSA]], [[elgamal|ElGamal]], [[elliptic-curve-cryptography|ECC]], [[diffie-hellman|DH]] |\n| | 키 없음 | [[hash-function|해시]](SHA-256, SHA-3) |\n| 암호화 기술 | [[substitution-cipher|치환]]·[[transposition-cipher|전치]]·곱 암호 | 시저, 레일펜스, [[feistel-structure|Feistel]]·[[spn-structure|SPN]] |\n| | 수학적 난제 | 소인수분해(RSA), 이산대수(DH), 타원곡선(ECC) |\n\n## 3. 주요 분류 비교\n| 구분 | 블록 vs 스트림 | 대칭 vs 비대칭 |\n|---|---|---|\n| 처리 | 고정 블록(예: AES 128비트) vs 비트·바이트 단위 | 동일 키 vs 공개키·개인키 쌍 |\n| 속도 | 구현·하드웨어·모드에 따라 다름 | 빠름 vs 비용은 알고리즘·연산·구현별 측정 |\n| 용도 | 파일·DB 암호화 vs 실시간 통신 | 대량 데이터 vs 키 교환·[[digital-signature|전자서명]] |\n\n## 4. 고려사항\n- 블록 암호는 [[block-cipher-mode-of-operation|운영 모드]](CBC·CTR·GCM) 선택과 IV 관리가 안전성 결정\n- 실무는 비대칭키로 세션키 교환, 대칭키로 데이터 암호화하는 [[hybrid-encryption|하이브리드 암호]] 적용",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호화와 서명 스킴·키 용도 구분"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합의 하이브리드 암호"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 블록 정렬·오류 전파 조건"
+        },
+        {
+          "title": "RFC 7465",
+          "url": "https://www.rfc-editor.org/rfc/rfc7465.html",
+          "scope": "TLS의 RC4 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 암호화·키 합의·서명·해시 구분, 속도·키 개수 전제·패딩·오류 전파·레거시 알고리즘 범위 교정.",
+      "unresolved": [
+        "국내 검증 모듈 목록과 고전 암호 역사·개별 LEA/HIGHT 구현 성능은 별도 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "f62750850885928c4665e89b0f6ad0bdcbf39f25287cb48ef76ef693f69dd1c6",
+      "body": "## 1. 암호 알고리즘의 개요\n### 가. 정의\n- 평문(Plaintext)을 키(Key)를 이용하여 제3자가 의미를 알 수 없는 암호문(Ciphertext)으로 변환하고, 정당한 키 소유자만 평문으로 복원할 수 있도록 설계된 수학적 변환 함수와 절차\n\n### 나. 등장배경 / 필요성\n- 개방형 네트워크에서 도청·위변조·위장 위협 상존, 전송·저장 정보의 [[confidentiality|기밀성]]·[[integrity|무결성]]·인증·[[non-repudiation|부인방지]] 확보 필요\n- 응용 환경(실시간 통신, 대용량 저장, 키 분배, 전자서명)에 따라 요구되는 성능·보안 특성이 달라 다양한 알고리즘 분류와 선택 기준 필요\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[kerckhoffs-principle|케르크호프스 원리]] | 알고리즘은 공개되어도 키만 비밀이면 안전해야 함 |\n| [[confusion-and-diffusion|혼돈과 확산]] | 혼돈: 키와 암호문 관계 복잡화(치환), 확산: 입력 통계 구조를 출력 전반에 분산(단순 문자 전치가 비트 눈사태 효과를 보장하지 않음) |\n| 보안강도 | 키 길이·수학적 난제 복잡도에 따른 안전성 비트 수(적용 정책·보호 기간에 맞는 강도와 허용 알고리즘 확인) |\n\n암호화는 기밀성 수단이며 무결성·인증은 MAC/AEAD, 서명은 별도 기능이다. DH는 키 합의이며 암·복호화 알고리즘이 아니고 ECC는 알고리즘 계열이다. DES·TDEA·RC4 등은 역사적 분류 예시이며 현재 사용 권고가 아니다.\n\n## 2. 암호 알고리즘의 분류 체계 및 구성요소\n### 가. 분류 체계도\n```mermaid\nflowchart TB\n  C[암호 알고리즘] --> U[1. 정보단위 기준]\n  C --> K[2. 키 적용 방식 기준]\n  C --> T[3. 암호화 기술 기준]\n  U --> U1[\"블록 암호(DES·AES·SEED·ARIA·LEA)\"]\n  U --> U2[\"스트림 암호(RC4·A5/1·ChaCha20)\"]\n  K --> K1[\"대칭키(비밀키) 암호\"]\n  K --> K2[\"비대칭키(공개키) 암호: RSA·ElGamal·ECC\"]\n  K --> K3[\"키 없는 해시(암·복호화와 구분): 해시함수 SHA-2·SHA-3\"]\n  T --> T1[\"고전: 치환·전치\"]\n  T --> T2[\"현대 대칭: 곱 암호 Feistel·SPN\"]\n  T --> T3[\"현대 공개키: 소인수분해·이산대수·타원곡선\"]\n```\n\n### 나. 암호 시스템 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 평문·암호문 | 입력·출력 데이터 | 블록·스트림 단위 처리 |\n| 암호화·복호화 함수 | 키 기반 가역 변환 | 치환·전치·모듈러 연산 |\n| 키 | 변환을 결정하는 매개변수(공개키는 공개) | 대칭키·공개키 쌍, [[key-distribution|키 분배]]·관리 |\n| 운영 모드 | 블록 암호의 메시지 확장 처리 | [[block-cipher-mode-of-operation|ECB·CBC·CTR·GCM]], 초기화 벡터(IV) |\n| 난수생성기 | 키·IV·논스 생성 | 암호학적 안전 난수(CSPRNG) |\n\n### 다. 암호 통신 절차\n1. 키 생성(대칭키 또는 공개키·개인키 쌍)\n2. 키 분배: 대칭키는 안전 채널 또는 공개키 암호로 전달, 공개키는 인증서로 공개\n3. 송신자가 평문을 키·운영모드로 암호화하여 전송\n4. 수신자가 대응 키로 복호화, 필요 시 [[message-authentication-code|MAC]]·[[digital-signature|전자서명]]으로 무결성·출처 검증\n\n## 3. 분류 기준별 암호 알고리즘 상세\n### 가. 정보단위에 따른 분류\n| 구분 | [[block-cipher|블록 암호]] | [[stream-cipher|스트림 암호]] |\n|---|---|---|\n| 처리 단위 | 고정 길이 블록(64·128비트) | 비트·바이트 단위 연속 처리 |\n| 원리 | 라운드 함수 반복(치환·전치) | 키스트림과 평문 XOR |\n| 구조 | [[feistel-structure|Feistel]](DES, SEED), [[spn-structure|SPN]](AES, ARIA) | [[lfsr|LFSR]], 비선형 결합, 동기식·자기동기식 |\n| 대표 알고리즘 | [[des|DES]](64/56), [[aes|AES]](128/128·192·256), [[seed|SEED]](128/128), [[aria|ARIA]], [[lea|LEA]], HIGHT | [[rc4|RC4]], A5/1(GSM), ChaCha20, [[one-time-pad|일회용 패드]] |\n| 장점 | 확산 효과 우수, 운영모드로 다양한 활용 | 구현에 따라 효율적; 동기식 XOR은 비트 오류 국소화, 자기 동기식은 전파 가능 |\n| 단점 | 모드에 따라 패딩 필요, 운영모드 오용 위험 | 키스트림 재사용 시 평문 노출 |\n| 용도 | 파일·DB·디스크 암호화, TLS | 음성·영상 실시간 통신, 무선 |\n\n### 나. 키 적용 방식에 따른 분류\n| 구분 | [[symmetric-key-cryptography|대칭키(비밀키) 암호]] | [[public-key-cryptography|비대칭키(공개키) 암호]] | 키 없는 해시(암·복호화와 구분)([[hash-function|해시함수]]) |\n|---|---|---|---|\n| 키 | 암·복호화 동일 키 | 공개키·개인키 쌍 | 키 없음(일방향) |\n| 키 개수(n명) | n(n-1)/2(모든 쌍에 독립 공유키 가정) | 2n(인당 키 쌍 하나 가정) | 없음 |\n| 속도 | 빠름 | 비용은 알고리즘·연산·구현별 측정 | 매우 빠름 |\n| 키 분배 | 사전 안전 채널 필요 | 공개키 진위 확인 후 배포, 개인키 보호 | 불필요 |\n| 제공 서비스 | 기밀성 | 기밀성, 키 교환, 전자서명·부인방지 | 신뢰한 기준값과 비교하는 무결성; HMAC 인증은 별도 비밀키 필요 |\n| 대표 알고리즘 | AES, SEED, ARIA, 3DES | [[rsa|RSA]], [[elgamal|ElGamal]], [[elliptic-curve-cryptography|ECC]], [[diffie-hellman|DH]] | SHA-2, SHA-3, LSH |\n| 활용 | 대용량 데이터 암호화 | 세션키 교환, 인증서, 서명 | 무결성 비교; 패스워드는 일반 해시 단독 대신 솔트·전용 KDF 사용 |\n\n### 다. 암호화 기술에 따른 분류\n| 구분 | 기술 | 원리 | 대표 알고리즘 |\n|---|---|---|---|\n| 고전 암호 | [[substitution-cipher|치환 암호]] | 문자를 다른 문자로 대체(혼돈) | 시저, 단일·다중 치환(비즈네르) |\n| | [[transposition-cipher|전치 암호]] | 문자 위치를 재배열(확산) | 스키테일, 레일펜스 |\n| 현대 대칭 암호 | 곱(Product) 암호 | 치환·전치를 라운드마다 반복 | Feistel(DES), SPN(AES) |\n| 현대 공개키 암호 | 소인수분해 문제 | 큰 합성수의 소인수분해 난해성 | RSA, Rabin |\n| | [[discrete-logarithm-problem|이산대수 문제]] | 유한체에서 지수의 역산 난해성 | DH, ElGamal, DSA, [[kcdsa|KCDSA]] |\n| | 타원곡선 이산대수 | 타원곡선 군에서 스칼라 곱 역산 난해성 | ECC(ECDSA, ECDH), 짧은 키로 동등 강도 |\n| 신기술 | 격자·동형·양자 | 격자 문제, 암호문 상태 연산, 양자역학 | [[post-quantum-cryptography|양자내성암호]], [[homomorphic-encryption|동형암호]], QKD |\n\n## 4. 암호 알고리즘 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘 선정 | 표준 알고리즘과 적용 기준에 맞는 KCMVP 검증 모듈 사용, 독자 개발 금지, 보안강도 112비트 이상 |\n| 운영 모드·IV | ECB 사용 금지, IV·논스 재사용 금지, 인증 암호(GCM, CCM) 우선 |\n| 키 관리 | 생성·분배·저장·폐기 생명주기 관리, HSM 활용, 주기적 교체 |\n| 구조 선택 | 대칭키로 데이터, 공개키로 키 교환하는 [[hybrid-encryption|하이브리드 암호]] 구성 |\n| 발전방향 | 양자컴퓨팅 대비 양자내성암호 전환, 경량암호(IoT), 동형암호·프라이버시 보존 연산 확대 |\n\n## 5. 결론\n- 암호 알고리즘은 정보단위·키 방식·암호화 기술 관점에서 체계적으로 분류되며, 응용 요구사항에 맞춰 검증된 알고리즘·충분한 키 길이·안전한 운영 모드를 조합하고 양자 시대를 대비한 암호 민첩성을 확보하는 것이 핵심",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호화와 서명 스킴·키 용도 구분"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합의 하이브리드 암호"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 블록 정렬·오류 전파 조건"
+        },
+        {
+          "title": "RFC 7465",
+          "url": "https://www.rfc-editor.org/rfc/rfc7465.html",
+          "scope": "TLS의 RC4 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 암호화·키 합의·서명·해시 구분, 속도·키 개수 전제·패딩·오류 전파·레거시 알고리즘 범위 교정.",
+      "unresolved": [
+        "국내 검증 모듈 목록과 고전 암호 역사·개별 LEA/HIGHT 구현 성능은 별도 확인 필요."
+      ]
+    }
+  },
+  "t-faa3c0f3": {
+    "short": {
+      "source_sha256": "96171c7cd8166506ef206f340a30f42328122bf0bd070f4e761e94dec23eca60",
+      "body": "## 1. 대칭·비대칭 암호화의 개요\n- 정의: [[symmetric-key-cryptography|대칭 암호화]]는 암·복호화에 동일한 비밀키를 사용하는 방식, [[public-key-cryptography|비대칭 암호화]]는 수학적으로 연관된 공개키·개인키 쌍을 사용하여 공개키로 암호화하고 대응 개인키로 복호화하는 방식(서명·검증을 반대 방향 암호화로 정의하지 않음)\n- 필요성: 대칭키의 [[key-distribution|키 분배]] 문제를 비대칭키가 해결하고, 비대칭키의 속도 한계를 대칭키가 보완\n\nDH는 키 합의, DSA는 서명, ECC는 계열이므로 모두를 암·복호화 알고리즘으로 취급하지 않는다. DES·TDEA는 역사적 예이며 신규 사용 권고가 아니다.\n\n## 2. 암호화 방식의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  subgraph 대칭\n    P1[평문] -->|비밀키 K| C1[암호문] -->|비밀키 K| P2[평문]\n  end\n  subgraph 비대칭\n    P3[평문] -->|수신자 공개키| C2[암호문] -->|수신자 개인키| P4[평문]\n  end\n```\n| 구성요소 | 대칭 | 비대칭 |\n|---|---|---|\n| 키 | 단일 비밀키(사전 공유) | 공개키(공개)·개인키(비밀) 쌍 |\n| 알고리즘 | [[aes|AES]], SEED, ARIA, 3DES | [[rsa|RSA]], [[elliptic-curve-cryptography|ECC]], [[elgamal|ElGamal]], [[diffie-hellman|DH]] |\n| 기반 원리 | 치환·전치 반복(Feistel, SPN) | 소인수분해·이산대수 등 수학적 난제 |\n\n## 3. 대칭 암호화와 비대칭 암호화 비교\n| 구분 | 대칭 암호화 | 비대칭 암호화 |\n|---|---|---|\n| 속도 | 빠름 | 비용은 알고리즘·연산·구현별 측정 |\n| 키 개수(n명) | n(n-1)/2(모든 쌍에 독립 공유키 가정) | 2n(인당 키 쌍 하나 가정) |\n| 키 분배 | 안전한 사전 공유 필요 | 공개키 공개, 개인키만 보관 |\n| 키 길이(128비트 강도) | 128비트 | RSA 3072, ECC 256비트 |\n| 제공 서비스 | [[confidentiality|기밀성]] | 기밀성, 키 교환, [[digital-signature|전자서명]]·[[non-repudiation|부인방지]] |\n| 용도 | 대용량 데이터·저장 암호화 | 세션키 교환, 인증서, 서명 |\n\n## 4. 고려사항\n- 비대칭키로 [[session-key|세션키]]를 교환하고 대칭키로 데이터를 암호화하는 [[hybrid-encryption|하이브리드 방식]]([[tls|TLS]], PGP)이 실무 표준\n- 공개키 진위 보증을 위한 [[pki|PKI]] 인증서 체계와 양자컴퓨팅 대비 [[post-quantum-cryptography|양자내성암호]] 전환 준비",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호화와 서명 스킴·키 용도 구분"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합의 하이브리드 암호"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 블록 정렬·오류 전파 조건"
+        },
+        {
+          "title": "RFC 7465",
+          "url": "https://www.rfc-editor.org/rfc/rfc7465.html",
+          "scope": "TLS의 RC4 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 비대칭 방향·서명 구별, 쌍별 키 개수 전제, 성능 일반화, 하이브리드 운반/합의 차이·부인방지 조건 대조.",
+      "unresolved": [
+        "국내 최신 키 길이 정책과 1976·1977년 역사적 선후 원 논문은 대조하지 못함."
+      ]
+    },
+    "long": {
+      "source_sha256": "6b7358544108c53249b00306e0aebb0e08ad68b8276cbb021f1efcbcb4963658",
+      "body": "## 1. 대칭 암호화와 비대칭 암호화의 개요\n### 가. 정의\n| 구분 | 정의 |\n|---|---|\n| [[symmetric-key-cryptography|대칭 암호화(Symmetric Encryption)]] | 송·수신자가 동일한 비밀키를 공유하여 암호화와 복호화에 같은 키를 사용하는 방식(비밀키·관용 암호) |\n| [[public-key-cryptography|비대칭 암호화(Asymmetric Encryption)]] | 수학적으로 연관된 공개키·개인키 쌍을 생성하여 공개키 암호화·개인키 복호화 방식이며 서명은 별도 서명·검증 스킴(공개키 암호) |\n\n### 나. 등장배경 / 필요성\n- 대칭 암호는 통신 상대마다 비밀키를 사전에 안전하게 공유해야 하는 [[key-distribution|키 분배]] 문제와 n명 간 n(n-1)/2개의 키 관리 부담 존재\n- 1976년 Diffie-Hellman이 공개키 개념을 제안하고 1977년 RSA가 실현되어 키 분배·[[digital-signature|전자서명]] 문제 해결\n- 공개키 암호는 연산 비용이 커 대용량 데이터에 부적합하므로 두 방식을 결합한 운용 필요\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 비밀키(Secret Key) | 대칭 암호의 단일 키, 노출 시 기밀성 완전 상실 |\n| 공개키·개인키 | 공개키는 공개 배포, 개인키는 소유자만 보관, 적절한 파라미터·가정에서 공개키로 개인키를 계산하기 어려움 |\n| [[trapdoor-one-way-function|트랩도어 일방향 함수]] | 순방향 계산은 쉽고 역방향은 비밀 정보(트랩도어) 없이는 어려운 함수, 공개키 암호의 수학적 기반 |\n\nDH는 키 합의, DSA는 서명, ECC는 계열이므로 모두를 암·복호화 알고리즘으로 취급하지 않는다. DES·TDEA는 역사적 예이며 신규 사용 권고가 아니다.\n\n## 2. 암호화 방식의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph SYM[대칭 암호화]\n    K[비밀키 K 사전 공유] --> E1[암호화 E_K]\n    K --> D1[복호화 D_K]\n    P1[평문] --> E1 --> C1[암호문] --> D1 --> P2[평문]\n  end\n  subgraph ASYM[비대칭 암호화]\n    G[키 쌍 생성] --> PK[공개키: 공개 디렉터리·인증서]\n    G --> SK[개인키: 수신자 보관]\n    P3[평문] --> E2[공개키로 암호화] --> C2[암호문] --> D2[개인키로 복호화] --> P4[평문]\n    PK --> E2\n    SK --> D2\n  end\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 대칭 알고리즘 | 비밀키 기반 고속 데이터 암호화 | [[block-cipher|블록 암호]]([[aes|AES]], [[seed|SEED]], [[aria|ARIA]], LEA), [[stream-cipher|스트림 암호]](ChaCha20) |\n| 비대칭 알고리즘 | 키 교환·서명·소량 데이터 암호화 | [[rsa|RSA]](소인수분해), [[elgamal|ElGamal]]·[[diffie-hellman|DH]](이산대수), [[elliptic-curve-cryptography|ECC]](타원곡선) |\n| 키 관리 | 키 생성·분배·저장·폐기 | 대칭: KDC, 키 래핑, HSM / 비대칭: [[pki|PKI]] 인증서, CA |\n| 운영 모드·패딩 | 블록 처리·안전성 보장 | CBC·CTR·GCM, RSA-[[oaep|OAEP]] |\n| 난수 생성기 | 키·IV·논스 생성 | CSPRNG |\n\n### 다. 동작 절차 비교\n| 단계 | 대칭 암호화 | 비대칭 암호화 |\n|---|---|---|\n| 1. 키 준비 | 비밀키 생성 후 안전 채널로 공유 | 수신자가 키 쌍 생성, 공개키 공개 |\n| 2. 암호화 | 송신자가 비밀키로 평문 암호화 | 송신자가 수신자 공개키로 암호화 |\n| 3. 전송 | 암호문 전송 | 암호문 전송 |\n| 4. 복호화 | 수신자가 동일 비밀키로 복호화 | 수신자가 자신의 개인키로 복호화 |\n| 5. 인증(선택) | MAC으로 무결성 확인 | 송신자 개인키 서명 → 송신자 공개키 검증 |\n\n## 3. 대칭 암호화와 비대칭 암호화의 상세 비교\n### 가. 특성 비교\n| 비교 항목 | 대칭 암호화 | 비대칭 암호화 |\n|---|---|---|\n| 키 관계 | 암·복호화 키 동일 | 공개키·개인키 상이, 수학적 연관 |\n| 키 개수(n명 통신) | n(n-1)/2(모든 쌍에 독립 공유키 가정) | 2n(인당 키 쌍 하나 가정) |\n| 키 분배 | 사전 비밀 공유 필수(가장 큰 약점) | 공개키 공개, 진위 보증 필요 |\n| 처리 속도 | 빠름(하드웨어 가속) | 비용은 알고리즘·연산·구현별 측정 |\n| 키 길이(128비트 강도) | 128비트 | RSA 3072비트, ECC 256비트 |\n| 알고리즘 구조 | 치환·전치 라운드 반복 | 모듈러 지수·타원곡선 연산 |\n| 제공 보안 서비스 | [[confidentiality|기밀성]], (MAC으로) 무결성 | 기밀성, 인증, 전자서명, [[non-repudiation|부인방지]], 키 교환 |\n| 부인방지 | 불가(키 공유로 송신자 특정 불가) | 서명·신원 결합·키 관리·검증 기록 등이 충족될 때 지원; 암호화만으로 보장되지 않음 |\n| 대표 알고리즘 | DES, 3DES, AES, SEED, ARIA, LEA | RSA, ElGamal, ECC, DH, DSA, KCDSA |\n| 주요 용도 | 파일·DB·디스크·대량 통신 데이터 | 세션키 교환, 인증서, 코드 서명, 전자문서 서명 |\n\n### 나. 장단점\n| 구분 | 장점 | 단점 |\n|---|---|---|\n| 대칭 | 고속, 짧은 키로 높은 강도, 구현 단순 | 키 분배 어려움, 키 수 증가, 부인방지 불가 |\n| 비대칭 | 키 분배 용이, 서명·부인방지, 확장성 | 느린 속도, 긴 키, 공개키 위장 위험([[adversary-in-the-middle|중간자 공격]]) |\n\n### 다. 하이브리드 암호화(실무 적용)\n아래 그림은 세션키 운반 예다. ECDHE는 세션키를 암호화해 전달하지 않고 공유 비밀에서 키를 유도하며 HPKE는 KEM·KDF·AEAD를 조합한다.\n```mermaid\nflowchart LR\n  S[송신자] -->|1. 세션키 생성| SK[세션키]\n  SK -->|2. 대칭 암호화| D[데이터 암호문]\n  SK -->|3. 수신자 공개키로 암호화| EK[암호화된 세션키]\n  D --> R[수신자]\n  EK --> R\n  R -->|4. 개인키로 세션키 복호| SK2[세션키]\n  SK2 -->|5. 대칭 복호화| P[평문]\n```\n- 비대칭키로 [[session-key|세션키]]를 안전하게 전달하고 대칭키로 대량 데이터를 암호화하여 두 방식의 장점 결합([[hybrid-encryption|하이브리드 암호]])\n- 적용 사례: [[tls|TLS]] 핸드셰이크(ECDHE 키 교환 + AES-GCM), PGP·S/MIME 이메일, 디지털 봉투(Digital Envelope)\n\n## 4. 암호화 방식 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘·키 길이 | 보안강도 112비트 이상(AES-128, RSA 2048 이상, ECC 224 이상), DES·RSA 1024 사용 금지 |\n| 키 관리 | 대칭키는 HSM·KMS 보관과 주기적 교체, 개인키는 소유자 단독 보관, 공개키는 인증서로 진위 보증 |\n| 운영 모드 | ECB 금지, 인증 암호(GCM) 적용, IV·논스 재사용 금지 |\n| 전방향 안전성 | 세션마다 임시 키 교환(ECDHE)으로 개인키 유출 시 과거 통신 보호 |\n| 발전방향 | 양자컴퓨터의 Shor 알고리즘에 취약한 RSA·ECC를 [[post-quantum-cryptography|양자내성암호]](ML-KEM)로 전환, 대칭키는 AES-256으로 상향 |\n\n## 5. 결론\n- 대칭 암호화는 속도, 비대칭 암호화는 키 분배와 부인방지에 강점이 있어 상호 보완적이며, 하이브리드 구조로 결합하고 PKI 기반 키 관리와 양자내성 전환을 고려한 설계가 핵심",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호화와 서명 스킴·키 용도 구분"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합의 하이브리드 암호"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "모드별 블록 정렬·오류 전파 조건"
+        },
+        {
+          "title": "RFC 7465",
+          "url": "https://www.rfc-editor.org/rfc/rfc7465.html",
+          "scope": "TLS의 RC4 금지"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 비대칭 방향·서명 구별, 쌍별 키 개수 전제, 성능 일반화, 하이브리드 운반/합의 차이·부인방지 조건 대조.",
+      "unresolved": [
+        "국내 최신 키 길이 정책과 1976·1977년 역사적 선후 원 논문은 대조하지 못함."
+      ]
+    }
+  },
+  "t-680a266f": {
+    "short": {
+      "source_sha256": "e3de597c722946621d3bdcb2247e6c7ad89d340e92141c22b48c7fb2ff82de17",
+      "body": "## 1. 암호문 공격의 개요\n- 정의: 공격자가 획득 가능한 정보(암호문, 평문 쌍, 선택 입력)의 수준에 따라 암호 알고리즘의 키 또는 평문을 복원하려는 [[cryptanalysis|암호해독]] 공격 모델\n- 필요성: [[kerckhoffs-principle|케르크호프스 원리]]에 따라 알고리즘은 공개된 것으로 가정하므로, 각 공격 모델에서의 안전성 입증이 암호 설계·평가의 기준\n\n## 2. 암호문 공격의 개념도 및 유형\n```mermaid\nflowchart LR\n  A[공격자 능력 증가] --> C1[암호문 단독 공격 COA]\n  C1 --> C2[알려진 평문 공격 KPA]\n  C2 --> C3[선택 평문 공격 CPA]\n  C3 --> C4[선택 암호문 공격 CCA1]\n  C4 --> C5[적응적 선택 암호문 공격 CCA2]\n```\n| 유형 | 공격자 보유 정보 | 사례 |\n|---|---|---|\n| [[ciphertext-only-attack|암호문 단독 공격]] | 암호문만 | [[frequency-analysis|빈도 분석]], [[brute-force-attack|전수조사]] |\n| [[known-plaintext-attack|알려진 평문 공격]] | 평문·암호문 쌍 | 헤더·고정 포맷 이용, 에니그마 해독 |\n| [[chosen-plaintext-attack|선택 평문 공격]] | 원하는 평문의 암호문 획득 | [[differential-cryptanalysis|차분 분석]], 공개키 암호 기본 모델 |\n| [[chosen-ciphertext-attack|선택 암호문 공격]] | 원하는 암호문의 복호 결과 획득 | [[padding-oracle-attack|패딩 오라클]], Bleichenbacher(RSA PKCS#1 v1.5) |\n\n## 3. 공격 모델별 안전성 기준\n| 구분 | 내용 |\n|---|---|\n| 공격 강도 | COA < KPA < CPA < CCA1 < CCA2(같은 모델 가정에서 비교), 강한 모델에서 안전하면 약한 모델에서도 안전 |\n| 안전성 정의 | [[semantic-security|의미론적 안전성]]·IND-CPA(구별 불가), IND-CCA2가 공개키 암호의 사실상 표준 |\n| 보조 기법 | [[linear-cryptanalysis|선형 분석]], [[side-channel-attack|부채널 공격]], [[adversary-in-the-middle|중간자 공격]] |\n\n## 4. 고려사항\n- 확률적 암호화(난수·[[initialization-vector|IV]]), [[oaep|OAEP]] 패딩, [[authenticated-encryption|인증 암호]](AES-GCM)로 CCA 내성 확보\n- 복호 오류 메시지·응답 시간 균일화로 오라클 정보 노출 차단",
+      "sources": [
+        {
+          "title": "RFC 8017 §7.1",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "CCA1/CCA2 도전 이후 질의 차이와 RSAES-OAEP 증명 범위"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "CBC·CTR IV/카운터 요건"
+        },
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "TLS 1.3의 인증 암호"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. CCA1/2 경계·도전 질의 제외, 모드별 전제와 패딩 스킴 구분·오라클 질의 추정 조건 교정.",
+      "unresolved": [
+        "NM-CCA2 동치 정리와 Cramer-Shoup·ElGamal의 원 증명 및 공격 역사 사례는 전문 대조 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "890f9d5a0caefa383641de3d2c854b30c6574192f91b8b41bd3c3b4ed3012cb9",
+      "body": "## 1. 암호문 공격의 개요\n### 가. 정의\n- 공격자가 접근할 수 있는 정보의 종류와 양(암호문, 평문·암호문 쌍, 선택한 입력에 대한 출력)을 기준으로 분류한 [[cryptanalysis|암호해독]] 공격 모델로, 키 복원 또는 암호문에 대응하는 평문 획득을 목표로 함\n\n### 나. 등장배경 / 필요성\n- [[kerckhoffs-principle|케르크호프스 원리]]: 알고리즘은 공개되고 키만 비밀이라고 가정하므로 공격자 능력을 모델링한 안전성 평가 필요\n- 공개키 암호는 누구나 암호화할 수 있어 선택 평문 공격이 기본 전제, 네트워크 프로토콜은 복호 오류 응답을 통해 선택 암호문 공격에 노출\n- 암호 알고리즘·프로토콜 표준화 시 공격 모델별 증명 가능 안전성(Provable Security) 요구\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 수동적 공격 | 암호문 관찰만 가능(COA, KPA) |\n| 능동적 공격 | 암호화·복호화 오라클에 질의 가능(CPA, CCA) |\n| 적응적 공격 | 이전 질의 결과를 보고 다음 질의를 선택(적응적 CPA, CCA2; CCA1/2 구분은 도전 이후 복호 질의 허용 여부) |\n| 구별 불가성(IND) | 두 평문 중 어느 것의 암호문인지 1/2보다 유의하게 높은 확률로 구별 불가 |\n\n## 2. 암호문 공격의 구성도 및 공격 모델\n### 가. 공격 모델 구성도\n```mermaid\nflowchart TB\n  subgraph 수동적 공격\n    COA[\"암호문 단독 공격(COA): 암호문만 관찰\"]\n    KPA[\"알려진 평문 공격(KPA): 평문·암호문 쌍 보유\"]\n  end\n  subgraph 능동적 공격\n    CPA[\"선택 평문 공격(CPA): 암호화 오라클 질의\"]\n    CCA[\"CCA1: 도전 암호문 제시 이전 복호 질의\"]\n    CCA2[\"CCA2: 도전 이후도 질의 허용, 도전 암호문 자체 제외\"]\n  end\n  COA --> KPA --> CPA --> CCA --> CCA2\n  CCA2 -->|가장 강한 공격자| S[IND-CCA2 안전성 요구]\n```\n\n### 나. 공격 모델별 상세\n| 공격 모델 | 공격자 보유 정보·능력 | 목표 | 대표 기법·사례 |\n|---|---|---|---|\n| [[ciphertext-only-attack|암호문 단독 공격(COA)]] | 도청한 암호문만 보유 | 평문·키 복원 | [[frequency-analysis|빈도 분석]](고전 치환암호), [[brute-force-attack|전수조사]], WEP RC4 키스트림 통계 공격 |\n| [[known-plaintext-attack|알려진 평문 공격(KPA)]] | 일부 평문과 대응 암호문 쌍 | 키 복원 | 프로토콜 헤더·파일 시그니처 이용, 2차대전 에니그마 crib 공격, [[linear-cryptanalysis|선형 분석]] |\n| [[chosen-plaintext-attack|선택 평문 공격(CPA)]] | 원하는 평문을 암호화하여 암호문 획득 | 키·구조 분석 | [[differential-cryptanalysis|차분 분석]](DES), 공개키 암호는 항상 CPA 환경 |\n| [[chosen-ciphertext-attack|선택 암호문 공격(CCA)]] | 원하는 암호문을 복호화하여 평문(또는 오류 여부) 획득 | 목표 암호문의 평문 복원 | RSA 승법적 성질 이용, Bleichenbacher 공격(PKCS#1 v1.5) |\n| [[adaptive-chosen-ciphertext-attack|적응적 선택 암호문 공격(CCA2)]] | 복호 결과를 보고 다음 암호문을 적응적으로 선택 | 목표 암호문 평문 복원 | [[padding-oracle-attack|패딩 오라클 공격]](CBC, POODLE), Lucky 13 |\n\n### 다. 선택 암호문 공격 절차(패딩 오라클 예)\n1. 공격자가 목표 암호문 블록 C를 획득\n2. 직전 블록 일부를 변조한 암호문을 서버에 전송\n3. 서버의 패딩 오류·정상 응답(오라클) 관찰\n4. 응답 차이로 평문 마지막 바이트 결정, 반복하여 블록 전체 복원\n5. 16바이트 블록을 바이트별 탐색하는 단순 예에서는 약 128×16회 규모로 추정하나 오라클·패딩 모호성·잡음 등에 따라 달라짐\n\n## 3. 공격 모델별 안전성 정의 및 대응 기법\n### 가. 안전성 수준 비교\n| 안전성 정의 | 의미 | 만족 알고리즘·방식 |\n|---|---|---|\n| [[semantic-security|의미론적 안전성]]·IND-CPA | 선택 평문 공격자가 암호문에서 평문 정보를 얻을 수 없음 | 확률적 암호화, CBC의 예측 불가 IV, CTR의 키별 전체 카운터 블록 유일성 등 각 조건 필요; ElGamal은 적절한 군의 DDH 가정 필요 |\n| IND-CCA1 | 도전 암호문 제시 이전까지만 복호 오라클을 허용하는 모델의 구별 불가 | 일부 하이브리드 구조 |\n| IND-CCA2 | 적응적 선택 암호문 공격에도 구별 불가(도전 암호문 자체 복호 질의 제외) | RSA-[[oaep|OAEP]], Cramer-Shoup, AES-GCM 등 [[authenticated-encryption|인증 암호]] |\n| NM-CCA2 | 암호문 변조로 관련 평문의 암호문 생성 불가(비가변성) | IND-CCA2와 동치 |\n\n### 나. 보조 암호해독 기법\n| 기법 | 내용 | 대응 |\n|---|---|---|\n| 차분·선형 분석 | 입력 차분·선형 근사식의 확률 편향 이용 | 충분한 라운드 수, 비선형 S-box 설계 |\n| [[side-channel-attack|부채널 공격]] | 전력·시간·전자파 등 구현 특성 분석 | 상수 시간 구현, 마스킹 |\n| [[adversary-in-the-middle|중간자 공격]] | 키 교환 중 개입하여 양측 키 조작 | 인증된 키 교환, 인증서 검증 |\n| [[replay-attack|재전송 공격]] | 유효 암호문 재사용 | 인증된 논스·타임스탬프·시퀀스 번호와 수신 측 중복·허용 범위 검사 |\n\n### 다. 대응 설계 원칙\n| 원칙 | 내용 |\n|---|---|\n| 확률적 암호화 | 동일 평문도 매번 다른 암호문 생성, IV·논스 재사용 금지 |\n| 안전한 패딩 | RSA 암호화는 RSAES-OAEP 등 적용 표준 사용. RSAES-PKCS1-v1_5 암호화와 RSASSA-PKCS1-v1_5 서명은 구분 |\n| 인증 암호 적용 | 암호화 후 [[message-authentication-code|MAC]](Encrypt-then-MAC) 또는 AEAD(GCM, ChaCha20-Poly1305)로 변조 암호문 복호 거부 |\n| 오라클 차단 | 오류 유형·응답 시간 균일화, 복호 실패 정보 미노출 |\n| 키 길이·강도 | 전수조사 대비 112비트 이상 보안강도 |\n\n## 4. 암호 시스템 설계·운영 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 설계 | 목표 용도에 맞는 CCA2 등 공격 모델 기준 안전성 증명된 표준 알고리즘·모드 선택 |\n| 구현 | 검증된 라이브러리 사용, 부채널 대응, 패딩 검증 로직 상수 시간 처리 |\n| 운영 | 폐기된 SSL 3.0·TLS 1.0/1.1 비활성화, 레거시 TLS CBC 스위트 전환(CBC 자체와 취약 프로토콜·구현 구분), TLS 1.3 전환 |\n| 발전방향 | 양자컴퓨터 공격 모델 반영한 양자내성암호, 형식 검증 기반 프로토콜 안전성 증명 |\n\n## 5. 결론\n- 암호문 공격은 공격자 능력에 따라 COA·KPA·CPA·CCA·CCA2로 구분되며, 현대 암호 시스템은 도전 전후 복호 질의를 허용하는 CCA2 모델에서의 구별 불가성을 기준으로 설계하고 인증 암호·안전한 패딩·오라클 차단으로 실제 환경의 공격을 방어해야 함",
+      "sources": [
+        {
+          "title": "RFC 8017 §7.1",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "CCA1/CCA2 도전 이후 질의 차이와 RSAES-OAEP 증명 범위"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "CBC·CTR IV/카운터 요건"
+        },
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "TLS 1.3의 인증 암호"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. CCA1/2 경계·도전 질의 제외, 모드별 전제와 패딩 스킴 구분·오라클 질의 추정 조건 교정.",
+      "unresolved": [
+        "NM-CCA2 동치 정리와 Cramer-Shoup·ElGamal의 원 증명 및 공격 역사 사례는 전문 대조 미완료."
+      ]
+    }
+  },
+  "t-9b2816b8": {
+    "short": {
+      "source_sha256": "bbf442135485dcbf9fa77bbb40d93d11c0eda9a5018be2646f48aee0a242a2b1",
+      "body": "## 1. 엘가말의 개요\n- 정의: 1985년 Taher ElGamal이 [[diffie-hellman|Diffie-Hellman]] 키 교환을 확장하여 제안한, 유한체 [[discrete-logarithm-problem|이산대수 문제]]의 난해성에 기반한 [[public-key-cryptography|공개키]] 암호·[[digital-signature|전자서명]] 알고리즘\n- 필요성: 소인수분해 기반 [[rsa|RSA]]와 다른 수학적 난제로 다양성 확보, 매번 다른 암호문을 생성하는 [[probabilistic-encryption|확률적 암호화]]로 안전성 강화\n\n암호화의 IND-CPA 주장은 DDH가 어려운 군을 전제로 한다. 전체 Z_p*에서 이산대수가 어렵다는 사실만으로 DDH를 보장하지 않으며, 아래 작은 수 예는 산술 설명용이다. 원형 서명(mod p-1)과 소수 차수 부분군 암호화의 파라미터를 혼용하지 않는다.\n\n## 2. 엘가말의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  K[\"키 생성: p, g, 개인키 x, 공개키 y=g^x mod p\"] --> E[\"암호화: 난수 k, c1=g^k, c2=m·y^k mod p\"]\n  E --> D[\"복호화: m = c2·(c1^x)^-1 mod p\"]\n```\n| 구성요소 | 내용 |\n|---|---|\n| 공개 파라미터 | 큰 소수 p(2048비트 이상), [[cyclic-group|순환군]] [[generator|생성원]] g |\n| 개인키 x | 0 < x < p-1(전체 군 예; 부분군이면 해당 차수 범위)인 난수, 소유자만 보관 |\n| 공개키 y | y = g^x mod p, 이산대수 난해성으로 x 유도 불가 |\n| 임시 난수 k | 암호화마다 새로 선택, 암호화 재사용은 평문 관계·알려진 평문 노출, 서명 재사용은 개인키 복구 위험 |\n\n## 3. 엘가말의 특징 (RSA와 비교)\n| 구분 | ElGamal | RSA |\n|---|---|---|\n| 수학적 기반 | 이산대수 문제 | 소인수분해 문제 |\n| 암호화 방식 | 확률적(동일 평문 → 다른 암호문) | 결정적(패딩 없을 시) |\n| 암호문 길이 | 군 원소 2개(c1, c2), 임의 길이 원문 대비 정확히 2배는 아님 | RSA 모듈러스 바이트 길이 |\n| 연산 | 암호화 2회 지수승, 복호화 1회 | 공개 지수 작아 암호화 빠름 |\n| 특수 성질 | 승법 [[homomorphic-encryption|동형성]], 서명은 [[dsa|DSA]]·[[kcdsa|KCDSA]]의 기반 | 암·복호화 동일 구조 |\n| 활용 | 과거 GnuPG(PGP) 사용 사례, 전자투표, EC-ElGamal | TLS 인증서, 전자서명 |\n\n## 4. 고려사항\n- 난수 k는 암호학적 안전 [[random-number-generator|난수생성기]]로 매번 고유하게 생성, 안전한 군 선택과 공개키·암호문 원소 검증으로 소부분군 공격 대응\n- 가변성(Malleability)으로 [[chosen-ciphertext-attack|선택 암호문 공격]]에 취약하므로 Cramer-Shoup 등 CCA 안전 변형 또는 하이브리드 구성 적용",
+      "sources": [
+        {
+          "title": "RFC 9580 §5.1.4·12.6",
+          "url": "https://www.rfc-editor.org/rfc/rfc9580.html",
+          "scope": "ElGamal 암호문 구성 및 현행 OpenPGP 사용 종료"
+        },
+        {
+          "title": "RFC 6979",
+          "url": "https://www.rfc-editor.org/rfc/rfc6979.html",
+          "scope": "결정적 nonce 규격의 DSA/ECDSA 적용 범위"
+        },
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호문·서명 길이와 스킴"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. OpenPGP 상태·암호문 크기·암호화/서명 nonce 효과·군 전제 교정. Python 모듈러 계산으로 예시 8,10,14,6,4,10 확인.",
+      "unresolved": [
+        "1985 원 논문 PDF 텍스트 추출 및 DDH·Cramer-Shoup 원 증명 대조 미완료. KCDSA 계보·전자투표 구현 세부는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "4f6d75aa5da50c75ef6d1a88ae35fa0d54c816d2e39f6496f53f509a2f4bc312",
+      "body": "## 1. 엘가말의 개요\n### 가. 정의\n- 1985년 Taher ElGamal이 [[diffie-hellman|Diffie-Hellman]] 키 교환 프로토콜을 암호화·서명에 적용할 수 있도록 확장한 [[public-key-cryptography|공개키 암호]] 알고리즘으로, 유한체 Z_p* 상의 [[discrete-logarithm-problem|이산대수 문제(DLP)]]의 계산적 난해성에 안전성을 두며 암호화와 [[digital-signature|전자서명]] 체계를 모두 제공\n\n### 나. 등장배경 / 필요성\n- 1976년 DH 키 교환은 키 합의만 가능하고 메시지 암호화·서명 기능 부재, 이를 보완하는 공개키 암호 체계 필요\n- [[rsa|RSA]]와 다른 수학적 난제에 기반하여 특정 난제가 해결될 때의 위험 분산\n- 매번 다른 난수를 사용하는 [[probabilistic-encryption|확률적 암호화]]로 동일 평문의 암호문 비교 공격을 차단, [[semantic-security|의미론적 안전성]] 제공\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 이산대수 문제 | y = g^x mod p에서 y, g, p로부터 x를 구하는 것은 p가 크면 계산적으로 불가능 |\n| [[cyclic-group|순환군]]과 [[generator|생성원]] | Z_p*의 모든 원소가 g의 거듭제곱으로 표현되는 g를 생성원이라 하며, 안전 소수 p = 2q+1 사용 권장 |\n| 결정적 DH 가정(DDH) | (g^a, g^b, g^ab)와 (g^a, g^b, g^c)의 구별 불가, ElGamal의 IND-CPA 안전성 근거 |\n\n암호화의 IND-CPA 주장은 DDH가 어려운 군을 전제로 한다. 전체 Z_p*에서 이산대수가 어렵다는 사실만으로 DDH를 보장하지 않으며, 아래 작은 수 예는 산술 설명용이다. 원형 서명(mod p-1)과 소수 차수 부분군 암호화의 파라미터를 혼용하지 않는다.\n\n## 2. 엘가말의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph 키생성[\"수신자 B: 키 생성\"]\n    P[\"공개 파라미터: 큰 소수 p, 생성원 g\"] --> X[\"개인키 x 선택 (0 < x < p-1(전체 군 예; 부분군이면 해당 차수 범위))\"]\n    X --> Y[\"공개키 y = g^x mod p 공개\"]\n  end\n  subgraph 암호화[\"송신자 A: 암호화\"]\n    Y --> K[\"임시 난수 k 선택 (0 < k < p-1(전체 군 예; 부분군이면 해당 차수 범위))\"]\n    K --> C1[\"c1 = g^k mod p\"]\n    K --> C2[\"c2 = m · y^k mod p\"]\n  end\n  subgraph 복호화[\"수신자 B: 복호화\"]\n    C1 --> S[\"공유 비밀 s = c1^x = g^xk mod p\"]\n    C2 --> M[\"m = c2 · s^-1 mod p\"]\n    S --> M\n  end\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 소수 p | 유한체 Z_p* 정의, 보안강도 결정 | 2048비트 이상(112비트 강도), 소수·부분군 차수·생성원·입력 원소의 유효성 검사를 함께 적용 |\n| 생성원 g | 순환군의 모든 원소 생성 | 차수 q인 부분군 생성원 선택 |\n| 개인키 x | 복호화·서명 생성 비밀값 | 암호학적 안전 [[random-number-generator|난수생성기]] |\n| 공개키 y = g^x mod p | 암호화·서명 검증 공개값 | 인증서로 진위 보증 |\n| 임시 난수 k | 암호문·서명마다 고유한 세션 비밀 | 매회 새로 생성, gcd(k, p-1) = 1(서명 시) |\n| 암호문 (c1, c2) | c1은 임시 공개값, c2는 마스킹된 평문 | 길이 군 원소 2개(원문 인코딩·직렬화 별도) |\n\n### 다. 동작 절차\n| 단계 | 암호화 체계 | 서명 체계 |\n|---|---|---|\n| 1. 키 생성 | p, g 선택, 개인키 x, 공개키 y = g^x mod p | 동일 |\n| 2. 생성 | 난수 k 선택, c1 = g^k mod p, c2 = m·y^k mod p 계산 후 (c1, c2) 전송 | 난수 k(gcd(k, p-1)=1), r = g^k mod p, s = k^-1·(H(m) - x·r) mod (p-1), 서명 (r, s) |\n| 3. 검증·복원 | s = c1^x mod p, m = c2·s^-1 mod p | y^r · r^s ≡ g^H(m) (mod p) 성립 시 유효 |\n| 4. 원리 | c2·(g^xk)^-1 = m·g^xk·g^-xk = m | g^xr · g^(H(m)-xr) = g^H(m) |\n- 수치 예: p=23, g=5, x=6 → y=5^6 mod 23=8, m=10, k=3 → c1=5^3 mod 23=10, c2=10·8^3 mod 23=10·6=60 mod 23=14, 복호: s=10^6 mod 23=6, 6^-1 mod 23=4, m=14·4 mod 23=56 mod 23=10\n\n## 3. 엘가말의 특징 및 비교\n### 가. RSA와의 비교\n| 비교 항목 | ElGamal | RSA |\n|---|---|---|\n| 수학적 기반 | 이산대수 문제 | 소인수분해 문제 |\n| 암호화 성질 | 확률적(난수 k, 동일 평문도 다른 암호문) | 결정적(OAEP 패딩으로 확률성 부여) |\n| 암호문 확장 | 군 원소 2개(원문 인코딩·직렬화 별도) | RSA 모듈러스 바이트 길이(평문 길이와 다름) |\n| 암호화 연산 | 모듈러 지수승 2회(y^k 사전계산 가능) | 지수승 1회, 작은 공개지수(65537)로 고속 |\n| 복호화 연산 | 지수승 1회 + 역원 계산 | 지수승 1회(CRT로 가속) |\n| 동형성 | 승법 [[homomorphic-encryption|동형암호]]: E(m1)·E(m2) = E(m1·m2) | 승법 동형(패딩 없을 시) |\n| 안전성 수준 | IND-CPA(DDH 가정), CCA에는 가변성으로 취약 | 패딩 없으면 결정적, OAEP 적용 시 IND-CCA2 |\n| 서명 | ElGamal 서명 → [[dsa|DSA]]·[[kcdsa|KCDSA]]·[[schnorr-signature|Schnorr]]로 발전 | RSA-PSS |\n| 키·서명 길이 | 서명 (r, s) 2개 값, 대략 두 개의 p 크기 정수 인코딩 | 서명 1개 값, RSA 모듈러스 n의 바이트 길이 |\n\n### 나. 파생 알고리즘\n| 알고리즘 | 내용 |\n|---|---|\n| DSA(FIPS 186) | ElGamal 서명을 부분군 차수 q로 축소하여 서명 길이 단축, NIST 표준 |\n| KCDSA | 국내 전자서명 표준, ElGamal 변형, EC-KCDSA로 확장 |\n| EC-ElGamal·ECDSA | [[elliptic-curve-cryptography|타원곡선]] 군에 적용하여 256비트 키로 RSA 3072 동등 강도 |\n| Cramer-Shoup | ElGamal 확장으로 IND-CCA2 안전성 증명 |\n| 하이브리드(ECIES, DHIES) | ElGamal 구조로 세션키 교환 후 대칭 암호·MAC 결합 |\n\n### 다. 활용 분야\n| 분야 | 내용 |\n|---|---|\n| 이메일·파일 암호화 | 과거 OpenPGP 사용 사례. RFC 9580 §12.6은 ElGamal 키 생성·암호화를 금지하고 레거시 복호에는 경고 권고 |\n| 전자투표·전자화폐 | 승법 동형성과 재암호화(Re-encryption) 성질로 믹스넷·영지식 증명 구성 |\n| 전자서명 | DSA·KCDSA·ECDSA 등 서명 표준의 이론적 기반 |\n| 키 교환 | DH 기반 세션키 전달, 하이브리드 암호 시스템 |\n\n## 4. 엘가말 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 난수 k 관리 | 암호화 난수 재사용은 c2 비율로 평문 관계를 노출하며 개인키가 항상 복구되는 것은 아님. 서명 난수 재사용은 키 복구 위험. RFC 6979는 DSA/ECDSA용이며 ElGamal 암호화에 그대로 적용하지 않음 |\n| 파라미터 선택 | 안전 소수 p(2048비트 이상), 부분군 공격 방지, 공개키 유효성 검증 |\n| CCA 대응 | 암호문 가변성으로 [[chosen-ciphertext-attack|선택 암호문 공격]] 취약, Cramer-Shoup·ECIES 등 인증 암호 구조 적용 |\n| 평문 인코딩 | 평문을 생성원 g의 부분군 원소로 매핑, 메시지는 해시 후 서명 |\n| 양자 위협 | Shor 알고리즘으로 이산대수 해결 가능, [[post-quantum-cryptography|양자내성암호]](ML-KEM, ML-DSA) 전환 계획 |\n| 발전방향 | 타원곡선 기반 EC-ElGamal로 효율화, 동형성 활용한 프라이버시 보존 연산, 임계 암호(Threshold ElGamal) |\n\n## 5. 결론\n- ElGamal은 이산대수 문제 기반의 확률적 공개키 암호로 RSA와 함께 공개키 암호의 양대 축을 이루며 DSA·KCDSA·ECDSA의 모체이나, 난수 관리와 CCA 안전성 보완이 필수이고 장기적으로 양자내성암호 전환을 고려해야 함",
+      "sources": [
+        {
+          "title": "RFC 9580 §5.1.4·12.6",
+          "url": "https://www.rfc-editor.org/rfc/rfc9580.html",
+          "scope": "ElGamal 암호문 구성 및 현행 OpenPGP 사용 종료"
+        },
+        {
+          "title": "RFC 6979",
+          "url": "https://www.rfc-editor.org/rfc/rfc6979.html",
+          "scope": "결정적 nonce 규격의 DSA/ECDSA 적용 범위"
+        },
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 암호문·서명 길이와 스킴"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. OpenPGP 상태·암호문 크기·암호화/서명 nonce 효과·군 전제 교정. Python 모듈러 계산으로 예시 8,10,14,6,4,10 확인.",
+      "unresolved": [
+        "1985 원 논문 PDF 텍스트 추출 및 DDH·Cramer-Shoup 원 증명 대조 미완료. KCDSA 계보·전자투표 구현 세부는 미확인."
+      ]
+    }
+  },
+  "t-37112f38": {
+    "short": {
+      "source_sha256": "91042fe5a5fd7ccd2d259c44156c7735a1c4b0a1eefea35bbc377eaefc3af7b2",
+      "body": "## 1. 디지털 봉투의 개요\n- 정의: 대용량 데이터를 [[symmetric-key-cryptography|대칭키]]로 암호화하고, 그 대칭키(세션키)를 수신자의 [[public-key-cryptography|공개키]]로 암호화해 함께 전달하는 [[hybrid-encryption|하이브리드 암호]] 기법\n- 배경: 대칭키의 빠른 속도와 공개키의 안전한 키 분배 장점을 결합, [[key-distribution-problem|키 분배 문제]] 해결\n\n아래 그림은 공개키 키 운반의 대표 예다. CMS EnvelopedData는 키 합의·사전 공유 키·패스워드 방식 등도 표현하며, 암호화만으로 송신자 인증을 제공하지 않는다.\n\n## 2. 디지털 봉투의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  M[평문] -->|세션키 암호화| EM[암호문]\n  SK[세션키] -->|수신자 공개키 암호화| ESK[암호화된 세션키]\n  EM --> ENV[디지털 봉투]\n  ESK --> ENV\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[session-key|세션키]] | 데이터 암호화용 임시 대칭키 |\n| 공개키 암호화 | 세션키를 수신자 공개키로 보호 |\n| 디지털 봉투 | 암호문+암호화된 세션키 결합 |\n\n## 3. 생성·개봉 절차\n| 구분 | 절차 |\n|---|---|\n| 생성 | ①세션키 생성 ②평문을 세션키로 암호화 ③세션키를 수신자 공개키로 암호화 ④둘을 묶어 봉투 생성 |\n| 개봉 | ①수신자 [[private-key|개인키]]로 세션키 복호화 ②세션키로 암호문 복호화 ③평문 획득 |\n\n## 4. 고려사항\n- 콘텐츠 암호화 키는 메시지 단위로 안전하게 생성·관리, [[digital-signature|전자서명]] 결합 시 기밀성·무결성·인증 동시 달성\n- [[pkcs|PKCS#7]]·[[cms|CMS]]·[[s-mime|S/MIME]] 표준으로 구현",
+      "sources": [
+        {
+          "title": "RFC 5652 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5652.html",
+          "scope": "EnvelopedData·RecipientInfo의 키 운반/합의/공유키 방식"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합과 인증 모드 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 대표 키 운반 도식과 CMS 전체 지원 범위, 이중 암호화 오해·인증 및 키 재사용 조건 교정.",
+      "unresolved": []
+    },
+    "long": {
+      "source_sha256": "92298365b0ba24e58be458a60addb1f6f7653efe88efc5dbca9e8f4ff00ef909",
+      "body": "## 1. 디지털 봉투의 개요\n### 가. 정의\n- 전송할 데이터는 빠른 [[symmetric-key-cryptography|대칭키 암호]]로 암호화하고, 그에 사용한 대칭키([[session-key|세션키]])는 수신자의 [[public-key-cryptography|공개키]]로 암호화해 암호문과 함께 전달하는 [[hybrid-encryption|하이브리드 암호]] 기법\n\n### 나. 등장배경 및 필요성\n- 대칭키 암호는 속도는 빠르나 다수 사용자 간 [[key-distribution-problem|키 분배]]가 어렵고, 공개키 암호는 안전하나 대용량 데이터 암호화에 느림\n- 두 방식을 결합하되 공개키 진위·키 보호·인증 처리 필요: 데이터는 대칭키로 빠르게, 키는 공개키로 안전하게 전달\n- 전자문서 교환, 보안 이메일([[s-mime|S/MIME]]), 전자결제 등에서 표준적으로 사용\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 하이브리드 구조 | 데이터=대칭키, 키=공개키 등으로 보호(동일 데이터를 두 번 암호화한다는 뜻은 아님) |\n| 세션키 1회성 | 메시지별 키 생성과 모드별 IV/논스 요건을 함께 준수 |\n| 봉투 메타포 | 암호화된 세션키가 '봉투', 수신자만 개봉 가능 |\n\n아래 그림은 공개키 키 운반의 대표 예다. CMS EnvelopedData는 키 합의·사전 공유 키·패스워드 방식 등도 표현하며, 암호화만으로 송신자 인증을 제공하지 않는다.\n\n## 2. 디지털 봉투의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph 송신자\n    M[평문] --> ENC1[\"대칭 암호화(세션키)\"]\n    SK[세션키 생성] --> ENC1\n    SK --> ENC2[\"공개키 암호화(수신자 공개키)\"]\n  end\n  ENC1 --> EM[암호문]\n  ENC2 --> ESK[암호화된 세션키]\n  EM --> ENV[\"디지털 봉투(암호문+암호화된 세션키)\"]\n  ESK --> ENV\n  ENV --> RX[수신자]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 세션키 | 데이터 암호화용 1회성 대칭키 | AES 등 [[symmetric-key-cryptography|대칭키]] |\n| 데이터 암호문 | 세션키로 암호화된 본문 | 블록·스트림 암호 |\n| 암호화된 세션키 | 공개키로 보호된 세션키 | [[rsa|RSA]], ECC |\n| 수신자 키쌍 | 세션키 복호화 | [[public-key-cryptography|공개키]]/[[private-key|개인키]] |\n\n### 다. 전자서명 결합 (확장)\n- 디지털 봉투에 송신자 [[digital-signature|전자서명]]을 추가하면 기밀성(봉투)+무결성·부인방지(서명)를 동시에 제공\n\n## 3. 디지털 봉투의 상세\n### 가. 생성 절차 (송신자)\n1. 임의의 [[session-key|세션키]](대칭키) 생성\n2. 전송할 평문을 세션키로 대칭 암호화 → 데이터 암호문\n3. 세션키를 수신자의 공개키로 암호화 → 암호화된 세션키\n4. (선택) 평문 [[hash-function|해시]]에 송신자 개인키로 서명\n5. 데이터 암호문 + 암호화된 세션키 (+서명)를 묶어 디지털 봉투 생성·전송\n\n### 나. 개봉 절차 (수신자)\n1. 수신한 봉투에서 암호화된 세션키 분리\n2. 수신자 자신의 [[private-key|개인키]]로 세션키 복호화\n3. 복호화한 세션키로 데이터 암호문 복호화 → 평문 획득\n4. (서명 포함 시) 송신자 공개키로 서명 검증, 선택한 서명 스킴과 인증서 신뢰를 검증하여 무결성·인증 확인\n\n### 다. 보안 서비스 제공 범위\n| 보안 서비스 | 제공 방식 |\n|---|---|\n| 기밀성 | 데이터는 콘텐츠 키로 암호화하고 그 키는 별도로 보호 |\n| 무결성 | 결합된 전자서명·해시로 위변조 탐지 |\n| 인증·부인방지 | 서명 검증·신원과 키의 신뢰 연결·키 보호·기록 등이 충족될 때 지원 |\n| 효율성 | 대용량 데이터는 대칭키로 고속 처리 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 관리 | 수신자 공개키 진위 검증([[pki|PKI]]·[[digital-certificate|인증서]]), 세션키 안전한 난수 생성 |\n| 표준 준수 | [[pkcs|PKCS#7]]/[[cms|CMS]], S/MIME 등 상호운용 표준 적용 |\n| 알고리즘 | 취약 알고리즘 배제, 충분한 키 길이 사용 |\n| 발전방향 | [[post-quantum-cryptography|양자내성암호]] 기반 키 캡슐화(KEM)로 세션키 보호 전환 |\n\n## 5. 결론\n- 디지털 봉투는 대칭키의 효율성과 공개키의 안전한 키 분배를 결합한 실용적 하이브리드 기법으로, 전자서명과 결합해 기밀성·무결성·인증을 모두 제공하는 전자문서 보안의 기본 구조",
+      "sources": [
+        {
+          "title": "RFC 5652 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5652.html",
+          "scope": "EnvelopedData·RecipientInfo의 키 운반/합의/공유키 방식"
+        },
+        {
+          "title": "RFC 9180",
+          "url": "https://www.rfc-editor.org/rfc/rfc9180.html",
+          "scope": "KEM·KDF·AEAD 조합과 인증 모드 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 대표 키 운반 도식과 CMS 전체 지원 범위, 이중 암호화 오해·인증 및 키 재사용 조건 교정.",
+      "unresolved": []
+    }
   }
 }
