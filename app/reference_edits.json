@@ -14520,5 +14520,343 @@
         "Z-Wave 국내 주파수·출력, Matter 최신판의 추가 등록 방식·DAC 세부 절차와 브리지 지원 범위는 별도 확인 필요입니다."
       ]
     }
+  },
+  "t-6a576804": {
+    "short": {
+      "source_sha256": "e5f43f8726e4fa0c979b34255131bac5d20bb6122a89124a2f48bafcb808c933",
+      "body": "## 1. 랜섬웨어의 개요\n- 정의: 사용자 시스템에 침투하여 파일을 암호화하거나 접근을 차단한 뒤 복구 대가로 금전(암호화폐)을 요구하는 [[malware|악성코드]]\n- 등장배경: [[ransomware-as-a-service|RaaS]] 등장으로 공격 진입장벽 하락, [[double-extortion|이중 갈취]] 등 수익 모델 고도화로 피해 위험 지속(기간별 증감 통계는 별도 확인)\n\n## 2. 랜섬웨어의 감염 경로 및 동작 원리\n```mermaid\nflowchart LR\n  A[유입: 피싱·RDP·취약점] --> B[실행·권한상승] --> C[\"변종별 키 생성·내장키 또는 C&C\"] --> D[파일 암호화] --> E[랜섬노트·협박]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 유포 경로 | [[phishing|피싱]] 메일 첨부파일, [[drive-by-download|드라이브 바이 다운로드]], [[remote-desktop-protocol|RDP]] 무차별 대입, [[exploit-kit|익스플로잇 킷]] |\n| 암호화 모듈 | 구현 예인 [[hybrid-encryption|하이브리드 암호]]: 파일은 [[aes|AES]] 대칭키, 대칭키는 공격자 [[rsa|RSA]] 공개키로 재암호화 |\n| [[command-and-control|C&C]] 서버 | 변종에 따라 키·감염 정보 관리 및 통신; 오프라인 암호화도 가능 |\n\n## 3. RaaS와 랜섬웨어 비교\n| 구분 | 전통적 랜섬웨어 | RaaS |\n|---|---|---|\n| 공격 주체 | 직접 개발·유포하는 경우 | 개발자(운영자)와 유포자(제휴자) 분업 |\n| 수익 모델 | 공격자 전액 | 수익 분배(구독·수수료) |\n| 진입 장벽 | 직접 제작 시 개발 역량 필요 | 다크웹 구매로 비전문가도 가능 |\n\n## 4. 대응방안\n- 사전: [[three-two-one-backup-rule|3-2-1 백업]]·오프라인 백업, [[patch-management|패치 관리]], 메일 필터링, [[endpoint-detection-and-response|EDR]], 최소 권한, 보안 인식 교육\n- 사후: 네트워크 격리 → 증거 보존 → 변종 식별·복구도구 확인 → 백업 복구 → KISA 신고(118), 금전 지불 지양",
+      "sources": [
+        {
+          "title": "Microsoft Incident Response ransomware approach",
+          "url": "https://learn.microsoft.com/en-us/security/ransomware/incident-response-playbook-dart-ransomware-approach",
+          "scope": "격리·증거 보존·침해 범위 확인·계정 및 백업 복구; 제품별 구현 예와 일반 대응 구분"
+        },
+        {
+          "title": "No More Ransom Decryption Tools",
+          "url": "https://www.nomoreransom.org/en/decryption-tools.html",
+          "scope": "변종별 복호화 도구 존재와 악성코드 제거 후 도구별 지침 적용"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문을 읽고 침투·암호화 예·RaaS 비교·대응·복구를 대조. AES/RSA·온라인 C&C 필수 단정, 고정 수익 배분, 무조건 복호화 불가를 교정.",
+      "unresolved": [
+        "변종별 AES/RSA·키 저장·Petya 구현과 사례의 현재 활동 여부를 모두 원 분석보고서로 대조하지 못함. 표와 절차는 구현 예로 한정.",
+        "CISA 공식 가이드 직접 열람은 403으로 실패. 전원 조치는 실제 열람한 Microsoft 격리·증거 보존 지침 범위로 반영.",
+        "국내 KISA 신고 경로와 개인정보 통지·신고의 현행 법적 적용 조건은 별도 원문 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "280faf6212cb9b440a057fe46fcf29f5b1c25fee2cac7e07114a15fcc70fcf24",
+      "body": "## 1. 랜섬웨어의 개요\n### 가. 정의\n- Ransom(몸값)+Software의 합성어로, 시스템 침투 후 파일 암호화 또는 화면 잠금으로 사용을 불가능하게 하고 복구 대가로 암호화폐를 요구하는 [[malware|악성코드]]\n\n### 나. 등장배경 및 위협 동향\n- 암호화폐 결제·[[tor|Tor]] 통신 인프라(완전한 익명성 보장 아님) 확산, 재택근무 확대로 [[remote-desktop-protocol|RDP]]·[[vpn|VPN]] 노출 증가\n- [[ransomware-as-a-service|RaaS]] 모델로 비전문가도 공격 가능, 데이터 유출 협박을 병행하는 [[double-extortion|이중 갈취]]·삼중 갈취로 진화\n\n### 다. 랜섬웨어와 RaaS 비교\n| 구분 | 랜섬웨어 | RaaS(Ransomware as a Service) |\n|---|---|---|\n| 개념 | 암호화·잠금으로 금전 요구하는 악성코드 자체 | 랜섬웨어를 서비스 형태로 임대·판매하는 범죄 비즈니스 모델 |\n| 주체 | 직접 개발·유포하는 경우(필수 조건 아님) | 운영자(개발·인프라·협상)와 제휴자(침투·유포) 분업 |\n| 수익 구조 | 공격자 독식 | 월 구독, 수익 배분(비율은 범죄 조직·계약별 상이) |\n| 제공 요소 | 악성코드 | 빌더, 유출 사이트, 협상 포털, 고객지원 |\n| 역사적 사례(현행 활동 여부 별도 확인) | WannaCry, CryptoLocker | LockBit, Conti, REvil, BlackCat |\n\n## 2. 랜섬웨어의 감염 경로 및 암호화 동작 원리\n### 가. 공격 흐름도(일부 하이브리드 암호화 변종의 예)\n```mermaid\nflowchart TB\n  A[\"1. 초기 침투: 피싱 메일, RDP 무차별 대입, 취약점(VPN·SMB)\"] --> B[\"2. 실행·지속성: 매크로·스크립트, 권한 상승, 보안 솔루션 종료\"]\n  B --> C[\"3. 내부 확산: 측면 이동, AD 장악, 백업·VSS 삭제\"]\n  C --> D[\"4. C&C 통신: RSA 공개키 수신, 데이터 유출(이중 갈취)\"]\n  D --> E[\"5. 암호화: AES로 파일 암호화, 키는 RSA로 봉인\"]\n  E --> F[\"6. 랜섬노트 게시, 협상·금전 요구\"]\n```\n\n### 나. 주요 감염 경로\n| 경로 | 설명 |\n|---|---|\n| [[phishing|피싱]]·[[spear-phishing|스피어 피싱]] 메일 | 첨부 문서 매크로, 악성 링크로 다운로더 실행 |\n| [[drive-by-download|드라이브 바이 다운로드]] | 취약 브라우저·플러그인 방문만으로 감염, [[malvertising|악성 광고]] 활용 |\n| 원격접속 취약점 | RDP·VPN 계정 [[brute-force-attack|무차별 대입]], 유출 크리덴셜 재사용 |\n| 소프트웨어 취약점 | [[server-message-block|SMB]] 취약점(WannaCry의 EternalBlue), [[zero-day-attack|제로데이]] 악용 |\n| [[supply-chain-attack|공급망 공격]] | 업데이트 서버·MSP 관리도구 변조로 다수 고객 동시 감염 |\n\n### 다. 암호화 동작 원리([[hybrid-encryption|하이브리드 암호화]] 예; 알고리즘·키 저장은 변종별 상이)\n1. 공격자는 사전에 [[rsa|RSA]] 마스터 키쌍 생성, 공개키만 악성코드에 내장 또는 [[command-and-control|C&C]]에서 수신\n2. 감염 PC에서 파일별 [[aes|AES]] 세션키 생성 후 문서·이미지·DB 파일 암호화, 확장자 변경\n3. 세션키를 RSA 공개키로 암호화하여 파일 헤더에 저장, 원본 키 메모리 삭제\n4. 정상 구현된 암호의 키 없이 복호화하기는 어렵지만, 구현 결함·확보된 키·공개 도구로 복구 가능한 변종도 있음\n5. 볼륨 섀도 복사본·백업 삭제, [[master-boot-record|MBR]] 변조형(Petya)은 부팅 자체 차단\n\n### 라. 파밍(Pharming)과 비교\n- [[pharming|파밍]]: [[dns-spoofing|DNS 변조]]·[[hosts-file|hosts 파일]] 조작으로 정상 URL 입력에도 가짜 사이트로 유도, 금융정보 탈취 목적\n- 랜섬웨어는 가용성 침해·금전 요구 외 유출 협박도 병행할 수 있고, 파밍은 가짜 사이트 유도로 정보 탈취 등을 시도\n\n## 3. 랜섬웨어 피해 예방 및 침해사고 대응 절차\n### 가. 사전 대응방안\n| 관점 | 대응방안 |\n|---|---|\n| 기술적 | [[three-two-one-backup-rule|3-2-1 백업]](오프라인·불변 백업), [[patch-management|패치 관리]], [[endpoint-detection-and-response|EDR]]·행위 기반 안티랜섬웨어, 메일 보안(첨부 샌드박스), RDP 차단·[[multi-factor-authentication|MFA]], [[network-segmentation|망 분리·세분화]], [[application-whitelisting|응용프로그램 화이트리스트]] |\n| 관리적 | 보안 인식 교육·모의 피싱 훈련, [[least-privilege|최소 권한]] 계정 관리, 사고 대응 절차·[[business-continuity-plan|BCP]] 기반 복구 훈련, 백업 복구 테스트, 랜섬웨어 보험 검토 |\n\n### 나. 침해사고 발생 시 대응 절차\n| 단계 | 조치 |\n|---|---|\n| 1. 식별·격리 | 감염 단말 네트워크 분리(랜선 분리, 공유폴더 차단), 네트워크 격리 후 전원 유지로 메모리 증거 보존; 격리 불가능·피해 확산 상황의 전원 조치는 대응 담당자가 판단 |\n| 2. 신고·보존 | KISA 보호나라(118) 신고, 랜섬노트·암호화 샘플·로그 보존, [[digital-forensics|디지털 포렌식]] |\n| 3. 분석 | 변종 식별(ID Ransomware), 감염 경로·확산 범위 파악, 유출 여부 확인 |\n| 4. 복구 | 복호화 도구(No More Ransom) 확인, 깨끗한 백업으로 재설치·복원, 패치 후 재연결 |\n| 5. 사후 | 원인 제거·취약점 보완, 재발 방지 대책, 유출 시 적용 법령의 통지·신고 대상과 기한 확인 |\n- 금전 지불은 복구를 보장하지 않으며 범죄 수익을 제공하고 추가 피해·적용 법령상 위험이 있을 수 있음 → 원칙적 지양\n\n## 4. 랜섬웨어 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 백업 | 백업 서버도 감염 대상이므로 네트워크 분리·불변 스토리지, 주기적 복구 훈련 |\n| 탐지 | 대량 파일 변경·엔트로피 급증 등 행위 기반 탐지, 미끼 파일(Canary) 운영 |\n| 협력 | 랜섬웨어 대응 협의체, [[threat-intelligence|위협 인텔리전스]] 공유, 복호화 도구 공동 개발 |\n| 발전방향 | [[zero-trust|제로 트러스트]] 기반 접근통제, AI 기반 선제 탐지, 공급망 보안 강화 |\n\n## 5. 결론\n- 랜섬웨어는 RaaS로 산업화되어 단일 솔루션으로 방어 불가하며, 백업·패치·인식교육의 기본 대책과 EDR·제로 트러스트 등 다층 방어, 신속한 사고 대응 체계의 결합이 피해 최소화의 핵심",
+      "sources": [
+        {
+          "title": "Microsoft Incident Response ransomware approach",
+          "url": "https://learn.microsoft.com/en-us/security/ransomware/incident-response-playbook-dart-ransomware-approach",
+          "scope": "격리·증거 보존·침해 범위 확인·계정 및 백업 복구; 제품별 구현 예와 일반 대응 구분"
+        },
+        {
+          "title": "No More Ransom Decryption Tools",
+          "url": "https://www.nomoreransom.org/en/decryption-tools.html",
+          "scope": "변종별 복호화 도구 존재와 악성코드 제거 후 도구별 지침 적용"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문을 읽고 침투·암호화 예·RaaS 비교·대응·복구를 대조. AES/RSA·온라인 C&C 필수 단정, 고정 수익 배분, 무조건 복호화 불가를 교정.",
+      "unresolved": [
+        "변종별 AES/RSA·키 저장·Petya 구현과 사례의 현재 활동 여부를 모두 원 분석보고서로 대조하지 못함. 표와 절차는 구현 예로 한정.",
+        "CISA 공식 가이드 직접 열람은 403으로 실패. 전원 조치는 실제 열람한 Microsoft 격리·증거 보존 지침 범위로 반영.",
+        "국내 KISA 신고 경로와 개인정보 통지·신고의 현행 법적 적용 조건은 별도 원문 확인 필요."
+      ]
+    }
+  },
+  "t-5129faf6": {
+    "short": {
+      "source_sha256": "1020d96d01b2a96e3c77c05fe684b88f784896c5614185dd86f6ae973325e6e2",
+      "body": "## 1. 지능형 지속 위협(APT)의 개요\n- 정의: 특정 조직을 목표로 [[zero-day-attack|제로데이]]·[[social-engineering|사회공학]] 등 다양한 기법을 결합하여 장기간 목표를 반복 추구하고 방어에 적응하며 침투·잠복하여 정보 탈취·시스템 파괴를 수행하는 조직적 표적 공격\n- 특징: 명확한 표적(Targeted), 고도화(Advanced), 지속성(Persistent), 국가·범죄조직 등 자원 풍부한 공격 주체\n\n## 2. APT의 공격 과정(대표 시나리오; 고정 필수 순서 아님)\n```mermaid\nflowchart LR\n  A[1. 정찰·표적 선정] --> B[2. 초기 침투: 스피어피싱·워터링홀] --> C[\"3. 거점 확보: 백도어·C&C\"] --> D[4. 권한상승·내부 확산] --> E[5. 정보 수집·유출] --> F[6. 흔적 제거·잠복]\n```\n| 단계 | 주요 기법 |\n|---|---|\n| 침투 | [[spear-phishing|스피어 피싱]], [[watering-hole-attack|워터링홀]], [[supply-chain-attack|공급망 공격]], 제로데이 익스플로잇 |\n| 잠복·확산 | [[backdoor|백도어]]·[[rootkit|루트킷]], [[command-and-control|C&C]] 통신, [[lateral-movement|측면 이동]], [[privilege-escalation|권한 상승]] |\n| 유출 | 암호화·분할 전송, 정상 트래픽 위장(DNS·HTTPS) |\n\n## 3. APT 대응방안\n| 구분 | 대응 |\n|---|---|\n| 관리적 | 보안 인식 교육·모의 피싱, 자산·계정 관리, 사고 대응 체계, [[threat-intelligence|위협 인텔리전스]] 공유 |\n| 기술적(침투 차단) | 메일 [[sandbox|샌드박스]], [[patch-management|패치 관리]], [[application-whitelisting|화이트리스트]], [[multi-factor-authentication|MFA]] |\n| 기술적(탐지·대응) | [[endpoint-detection-and-response|EDR]], [[siem|SIEM]] 상관분석, [[network-segmentation|망 분리]], [[data-loss-prevention|DLP]], 이상행위 탐지 |\n\n## 4. 고려사항 및 발전방향\n- 단일 솔루션 불가 → [[cyber-kill-chain|킬체인]] 단계별 다층 방어, 침해를 전제한 탐지·대응 중심 전환\n- [[zero-trust|제로 트러스트]], [[mitre-attack|MITRE ATT&CK]] 기반 위협 헌팅, AI 기반 행위 분석·[[xdr|XDR]]",
+      "sources": [
+        {
+          "title": "NIST CSRC Advanced Persistent Threat",
+          "url": "https://csrc.nist.gov/glossary/term/advanced_persistent_threat",
+          "scope": "높은 전문성·자원, 다양한 공격 벡터, 방어에 적응하는 장기 반복 목표 추구"
+        },
+        {
+          "title": "MITRE ATT&CK T1027.011 Fileless Storage",
+          "url": "https://attack.mitre.org/techniques/T1027/011/",
+          "scope": "레지스트리·WMI 등에 파일시스템 증적이 남을 수 있음"
+        },
+        {
+          "title": "ISIS Stuxnet Malware and Natanz Update (2011)",
+          "url": "https://isis-online.org/isis-reports/stuxnet-malware-and-natanz-update-of-isis-december-22-2010-reportsupa-href1/",
+          "scope": "공격 대상은 원전이 아닌 Natanz 우라늄 농축시설 원심분리기라는 당시 분석"
+        },
+        {
+          "title": "Microsoft Incident Response ransomware approach",
+          "url": "https://learn.microsoft.com/en-us/security/ransomware/incident-response-playbook-dart-ransomware-approach",
+          "scope": "격리·증거 보존·침해 범위 확인·계정 및 백업 복구; 제품별 구현 예와 일반 대응 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. NIST APT 정의, 장기 적응·반복 성격, MITRE 파일리스 증적 및 Stuxnet 대상의 원 분석을 대조. 제로데이 필수·흔적 없음·일반 공격과 배타적 비교를 교정.",
+      "unresolved": [
+        "3.20·한수원·SolarWinds·3CX 사례별 귀속과 세부 경위는 이번 원자료 대조 범위 밖. 도식은 대표 공격 시나리오.",
+        "각 탐지 제품·통제의 효과와 사고별 일괄 봉쇄 타이밍은 환경별 검증 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "394ea498b98125e0003d72fbb9e30530fbc94cb745cea011ae2b6b8c166b6be1",
+      "body": "## 1. 지능형 지속 위협(APT)의 개요\n### 가. 정의\n- 국가·범죄조직 등 자원이 풍부한 공격자가 특정 조직·시스템을 목표로 정하고, [[zero-day-attack|제로데이]] 취약점·[[social-engineering|사회공학]]·맞춤형 악성코드 등 다양한 기법을 결합하여 장기간에 걸쳐 은밀히 침투·잠복하면서 기밀 정보 탈취나 기반시설 파괴를 수행하는 지능적·지속적 표적 공격\n\n### 나. 특징\n| 특징 | 내용 |\n|---|---|\n| 표적성(Targeted) | 불특정 다수가 아닌 특정 조직·인물 대상, 사전 정찰로 맞춤 공격 |\n| 지능성(Advanced) | 알려진 취약점·계정 악용도 가능하며 제로데이는 필수 아님; 변종·[[polymorphic-malware|다형성 악성코드]], 정상 도구 악용 등 탐지 회피 |\n| 지속성(Persistent) | 수개월~수년 잠복, 거점 유지, 차단 시 재침투 |\n| 은밀성 | 정상 트래픽 위장, 로그 삭제, [[fileless-malware|파일리스]] 기법 |\n| 사례 | Stuxnet(2010 발견, 우라늄 농축시설 원심분리기 제어 PLC), 3.20 사이버테러(2013), 한수원(2014), SolarWinds(2020) |\n\n### 다. 일반 공격과 비교(전형적 경향이며 배타적 분류 아님)\n| 구분 | 일반 악성코드 공격 | APT |\n|---|---|---|\n| 대상 | 불특정 다수 또는 표적 | 특정 목표·조직 |\n| 기간 | 단기 또는 장기 | 장기 목표 반복 추구 |\n| 기법 | 알려진 취약점·계정 악용, 자동화 등 | 알려진 기법과 맞춤형·제로데이·수동 조작 등을 목적에 따라 결합 |\n| 목적 | 금전·과시 | 기밀 탈취, 파괴, 국가 목적 |\n| 탐지 | 알려진 시그니처 및 행위 분석 | 시그니처·행위·캠페인 정보 결합 |\n\n## 2. APT의 공격 과정(대표 시나리오; 고정 필수 순서 아님) 및 공격기법\n### 가. 공격 단계 구성도([[cyber-kill-chain|사이버 킬체인]] 기반)\n```mermaid\nflowchart TB\n  S1[\"1. 정찰(Reconnaissance): SNS·공개정보로 조직·인물·시스템 파악\"] --> S2[\"2. 무기화(Weaponization): 문서 취약점·악성코드 결합\"]\n  S2 --> S3[\"3. 전달(Delivery): 스피어피싱, 워터링홀, USB, 공급망\"]\n  S3 --> S4[\"4. 익스플로잇(Exploitation): 제로데이·매크로 실행\"]\n  S4 --> S5[\"5. 설치(Installation): 백도어·RAT·루트킷, 지속성 확보\"]\n  S5 --> S6[\"6. C&C(Command and Control): 암호화·정상 위장 통신\"]\n  S6 --> S7[\"7. 목표 수행(Actions): 권한상승·측면이동·정보수집·유출·파괴\"]\n  S7 -.->|흔적 제거·재잠복| S5\n```\n\n### 나. 단계별 공격기법\n| 단계 | 공격기법 | 설명 |\n|---|---|---|\n| 정찰 | OSINT, 포트 스캔, 조직도·메일 형식 수집 | 공격 대상 인물·취약 시스템 식별 |\n| 침투 | [[spear-phishing|스피어 피싱]] | 표적 맞춤 메일(업무 문서 위장) 첨부파일·링크 |\n| 침투 | [[watering-hole-attack|워터링홀]] | 표적이 자주 방문하는 사이트에 악성코드 삽입 |\n| 침투 | [[supply-chain-attack|공급망 공격]] | SW 업데이트·협력사 경유 침투(SolarWinds, 3CX) |\n| 침투 | [[drive-by-download|드라이브 바이 다운로드]], USB·이동매체 | 브라우저 취약점, 폐쇄망 침투(Stuxnet) |\n| 거점 | [[backdoor|백도어]]·RAT, [[rootkit|루트킷]] | 원격 제어 채널, 커널 수준 은닉 |\n| 거점 | [[command-and-control|C&C]] 통신 | HTTPS·DNS 터널링·클라우드 서비스 위장, 도메인 생성 알고리즘(DGA) |\n| 확산 | [[privilege-escalation|권한 상승]], 크리덴셜 덤프(Mimikatz) | 관리자 권한 획득, Pass-the-Hash |\n| 확산 | [[lateral-movement|측면 이동]] | RDP·SMB·PsExec 등 정상 도구 악용(Living off the Land) |\n| 수행 | 정보 수집·유출, 파괴 | 압축·암호화 분할 전송, 와이퍼·MBR 파괴 |\n| 은닉 | 로그 삭제, 타임스탬프 조작, [[anti-forensics|안티 포렌식]] | 탐지·조사 방해 |\n\n### 다. APT에 활용되는 악성코드\n| 유형 | 특징 | APT 활용 |\n|---|---|---|\n| [[trojan-horse|트로이목마]]·RAT | 정상 프로그램 위장, 원격 제어 | 거점 확보·C&C |\n| 백도어·루트킷 | 인증 우회 통로, 커널 은닉 | 지속성·은닉 |\n| [[worm|웜]] | 자가 복제·전파 | 내부 확산(Stuxnet) |\n| 다운로더·드로퍼 | 추가 악성코드 단계적 설치 | 탐지 회피, 모듈화 |\n| 다형성·변종 악성코드 | 암호화·패킹으로 시그니처 변경 | 안티바이러스 우회 |\n| 파일리스 악성코드 | 메모리·PowerShell·WMI 상주 | 실행 파일이 없어도 레지스트리·WMI·로그 등 증적이 남을 수 있음 |\n| 키로거·스파이웨어 | 입력·화면 수집 | 크리덴셜·기밀 탈취 |\n\n## 3. APT 대응방안(관리적·기술적 관점)\n### 가. 관리적 대응방안\n| 구분 | 대응방안 |\n|---|---|\n| 인식·교육 | 임직원 보안 인식 교육, 정기 모의 스피어피싱 훈련, 경영진·핵심 인력 특별 관리 |\n| 자산·접근 관리 | 중요 자산 식별·등급화, 계정·권한 최소화([[least-privilege|최소 권한]]), 퇴직자 계정 즉시 회수 |\n| 정책·절차 | 이동매체·외부 메일 정책, 협력사·공급망 보안 요구사항, 패치 정책 |\n| 사고 대응 | CERT 조직·절차, 침해 가정(Assume Breach) 대응 훈련, [[digital-forensics|포렌식]] 준비도 |\n| 협력 | [[threat-intelligence|위협 인텔리전스]] 공유(KISA·ISAC), 침해지표(IoC) 교환 |\n\n### 나. 기술적 대응방안(단계별 다층 방어)\n| 킬체인 단계 | 기술적 대응 |\n|---|---|\n| 정찰·전달 | 공개정보 최소화, 메일 보안(SPF·DKIM·DMARC), 첨부파일 [[sandbox|샌드박스]]·CDR(콘텐츠 무해화), 웹 필터링 |\n| 익스플로잇·설치 | [[patch-management|패치 관리]], [[application-whitelisting|응용프로그램 화이트리스트]], 매크로 차단, [[endpoint-detection-and-response|EDR]], 메모리 보호 |\n| C&C | DNS 싱크홀·평판 기반 차단, 아웃바운드 프록시·SSL 가시성, 이상 통신 탐지 |\n| 확산 | [[network-segmentation|망 분리·세분화]], [[multi-factor-authentication|MFA]]·특권계정 관리(PAM), [[network-access-control|NAC]], 내부 이동 탐지(허니토큰) |\n| 유출·수행 | [[data-loss-prevention|DLP]], DB 암호화, 대용량 전송 탐지, 백업·무결성 검증 |\n| 통합 탐지 | [[siem|SIEM]] 상관분석, UEBA 이상행위 분석, [[mitre-attack|MITRE ATT&CK]] 기반 위협 헌팅, [[xdr|XDR]] |\n\n### 다. 대응 절차\n1. 탐지(EDR·SIEM 경보, 위협 헌팅) → 2. 범위 분석(침해 호스트·계정·C&C 식별) → 3. 봉쇄(격리·계정 차단·C&C 차단, 피해 확산과 증거 보존을 고려한 조율된 조치) → 4. 제거(악성코드·백도어·지속성 메커니즘 제거, 크리덴셜 전면 재설정) → 5. 복구·검증 → 6. 교훈 반영(IoC 공유, 통제 강화)\n\n## 4. APT 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 접근 방식 | 100% 차단 불가 → 침해 전제 하에 탐지·대응 시간(MTTD·MTTR) 단축 중심 |\n| 가시성 | 엔드포인트·네트워크·클라우드 로그 통합, 암호화 트래픽 분석, 장기 보관 |\n| 정상 도구 악용 | PowerShell·RDP 등 합법 도구 행위 기준선 설정, 이상 탐지 |\n| 공급망 | 협력사·SW 공급망 보안 평가, SBOM, 코드서명 검증 |\n| 발전방향 | [[zero-trust|제로 트러스트]] 아키텍처, AI 기반 행위 분석·자동 대응([[soar|SOAR]]), 기만 기술(Deception), 국가 차원 위협 정보 공유 체계 |\n\n## 5. 결론\n- APT는 기술·사람·프로세스를 동시에 노리는 장기 표적 공격이므로, 킬체인 단계별 다층 방어와 침해 전제의 신속한 탐지·대응 역량, 임직원 인식과 위협 정보 공유를 결합한 종합 대응 체계가 필수",
+      "sources": [
+        {
+          "title": "NIST CSRC Advanced Persistent Threat",
+          "url": "https://csrc.nist.gov/glossary/term/advanced_persistent_threat",
+          "scope": "높은 전문성·자원, 다양한 공격 벡터, 방어에 적응하는 장기 반복 목표 추구"
+        },
+        {
+          "title": "MITRE ATT&CK T1027.011 Fileless Storage",
+          "url": "https://attack.mitre.org/techniques/T1027/011/",
+          "scope": "레지스트리·WMI 등에 파일시스템 증적이 남을 수 있음"
+        },
+        {
+          "title": "ISIS Stuxnet Malware and Natanz Update (2011)",
+          "url": "https://isis-online.org/isis-reports/stuxnet-malware-and-natanz-update-of-isis-december-22-2010-reportsupa-href1/",
+          "scope": "공격 대상은 원전이 아닌 Natanz 우라늄 농축시설 원심분리기라는 당시 분석"
+        },
+        {
+          "title": "Microsoft Incident Response ransomware approach",
+          "url": "https://learn.microsoft.com/en-us/security/ransomware/incident-response-playbook-dart-ransomware-approach",
+          "scope": "격리·증거 보존·침해 범위 확인·계정 및 백업 복구; 제품별 구현 예와 일반 대응 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. NIST APT 정의, 장기 적응·반복 성격, MITRE 파일리스 증적 및 Stuxnet 대상의 원 분석을 대조. 제로데이 필수·흔적 없음·일반 공격과 배타적 비교를 교정.",
+      "unresolved": [
+        "3.20·한수원·SolarWinds·3CX 사례별 귀속과 세부 경위는 이번 원자료 대조 범위 밖. 도식은 대표 공격 시나리오.",
+        "각 탐지 제품·통제의 효과와 사고별 일괄 봉쇄 타이밍은 환경별 검증 필요."
+      ]
+    }
+  },
+  "t-a1c3a5f8": {
+    "short": {
+      "source_sha256": "7b28d8936ab325636ce83ebfaeb9b3da35c60f0e74fbdfd8648a1c3c4e7d57ec",
+      "body": "## 1. 사이버 킬 체인의 개요\n- 정의: 록히드마틴(2011)이 군사 용어 킬 체인을 차용하여 [[apt|APT]] 공격을 7단계로 모델링하고, 각 단계에서 공격을 탐지·차단하여 공격 사슬을 끊는 지능형 위협 대응 프레임워크\n- 등장배경: 시그니처 기반 단일 방어의 한계, 공격자 관점(TTP)에서의 단계별 [[defense-in-depth|심층 방어]] 체계 필요\n\n## 2. 사이버 킬 체인의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"1.정찰\"] --> B[\"2.무기화\"] --> C[\"3.전달\"] --> D[\"4.익스플로잇\"] --> E[\"5.설치\"] --> F[\"6.C&C\"] --> G[\"7.목표행동\"]\n```\n| 단계 | 공격자 행위 | 방어 대응 |\n|---|---|---|\n| 정찰(Reconnaissance) | [[open-source-intelligence|OSINT]], 포트 스캔으로 표적 정보 수집 | 웹 로그 분석, 정보 노출 최소화 |\n| 무기화(Weaponization) | [[exploit|익스플로잇]]과 [[backdoor|백도어]] 결합, 악성 문서 제작 | [[cyber-threat-intelligence|위협 인텔리전스]] 기반 사전 탐지 |\n| 전달(Delivery) | [[spear-phishing|스피어 피싱]] 메일, USB, [[watering-hole-attack|워터링홀]] | 메일 게이트웨이, 매체 통제 |\n| 익스플로잇(Exploitation) | [[zero-day-vulnerability|제로데이]] 등 취약점 실행 | [[patch-management|패치 관리]], [[sandbox|샌드박스]] |\n| 설치(Installation) | [[rootkit|루트킷]], 지속성 확보 | [[endpoint-detection-and-response|EDR]], 화이트리스트 |\n| 명령제어(C&C) | [[command-and-control|C&C]] 서버와 원격 통신 채널 수립 | DNS·프록시 모니터링, C&C 차단 |\n| 목표행동(Actions on Objectives) | [[lateral-movement|내부 확산]], [[data-leakage|데이터 유출]] | [[data-loss-prevention|DLP]], [[network-segmentation|망 세분화]] |\n\n## 3. 사이버 킬 체인의 특징\n| 구분 | 내용 |\n|---|---|\n| 사슬 구조 | 해당 침입 시도의 필수 단계 차단으로 사슬 단절 지향; 재시도·다른 침입 경로는 별도 대응 |\n| 조기 대응 | 전달 단계 이전 차단 시 피해 비용 최소화 |\n| 한계 | 외부 침투 중심, 내부자·클라우드 위협 표현 부족 → [[mitre-attack|MITRE ATT&CK]]·[[unified-kill-chain|통합 킬 체인]]으로 보완 |\n\n## 4. 고려사항\n- 단계별 [[indicator-of-compromise|IoC]] 수집·공유 체계와 [[siem|SIEM]] 연계로 전 단계 가시성 확보\n- 수동 방어 넘어 [[threat-hunting|위협 헌팅]], [[zero-trust|제로 트러스트]]와 결합한 능동적 대응 체계 구축",
+      "sources": [
+        {
+          "title": "Lockheed Martin Cyber Kill Chain",
+          "url": "https://lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html",
+          "scope": "7단계 침입 분석·방어 모델 개요"
+        },
+        {
+          "title": "MITRE ATT&CK Enterprise tactics",
+          "url": "https://attack.mitre.org/tactics/enterprise/",
+          "scope": "2026-11-22 열람 시 Enterprise 전술 15개; Stealth·Defense Impairment 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문을 읽고 개발사 7단계 모델과 현행 MITRE 전술 목록 대조. 단일 차단의 보장 범위·지표 성숙 순서·캠페인 귀속 단정을 완화.",
+      "unresolved": [
+        "원 논문 PDF 초록은 열람했으나 상세 본문 후속 요청이 timeout/403. 세부 조치 매트릭스는 학습 예이며 원 논문 표 일치 여부 미확인.",
+        "다이아몬드 모델·통합 킬 체인 18단계의 원 논문과 세부 한계 평가는 이번 대조 범위 밖."
+      ]
+    },
+    "long": {
+      "source_sha256": "5f2ff679e20e41aa6c002c4985330592c2de47a7f90b23085d504a29f51b6c2d",
+      "body": "## 1. 사이버 킬 체인의 개요\n### 가. 정의\n- 록히드마틴이 2011년 백서 \"Intelligence-Driven Computer Network Defense\"에서 제시한 모델로, [[apt|APT]] 공격의 생애주기를 정찰부터 목표 달성까지 7단계로 정형화하고 각 단계에서 탐지·거부·교란·저하·기만·파괴 조치를 매핑하는 위협 중심 방어 프레임워크\n\n### 나. 등장배경 / 필요성\n- 시그니처 기반 단일 경계 방어로는 장기간 은밀하게 진행되는 APT 대응 불가\n- 공격자 TTP(전술·기술·절차)를 단계별로 이해해야 침입 흔적을 조기 식별하고 [[defense-in-depth|심층 방어]] 투자 우선순위 결정 가능\n- 해당 침입 시도의 필수 단계를 끊는 모델로 공격 비용 증가 지향; 캠페인 전체 실패를 보장하지 않음\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 사슬(Chain) | 모델에서 단계는 종속 관계; 실제 캠페인은 반복·경로 변경 가능 |\n| 침입 분석 | 과거 침입을 단계별로 분해해 [[indicator-of-compromise|IoC]]와 공격자 패턴 도출 |\n| 행동 조치 매트릭스 | 단계 × 조치(Detect, Deny, Disrupt, Degrade, Deceive, Destroy) 매핑 |\n\n## 2. 사이버 킬 체인의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph PRE[\"침투 전 단계 (방어 최적 구간)\"]\n    A[\"1.정찰 Reconnaissance\"] --> B[\"2.무기화 Weaponization\"] --> C[\"3.전달 Delivery\"]\n  end\n  subgraph INT[\"침투 단계\"]\n    D[\"4.익스플로잇 Exploitation\"] --> E[\"5.설치 Installation\"]\n  end\n  subgraph POST[\"침투 후 단계\"]\n    F[\"6.명령 및 제어 C2\"] --> G[\"7.목표 행동 Actions on Objectives\"]\n  end\n  C --> D\n  E --> F\n  G -. 재정찰 .-> A\n```\n\n### 나. 구성요소\n| 단계 | 공격자 행위 | 핵심 기술·도구 |\n|---|---|---|\n| 정찰 | 표적 조직·인물·시스템 정보 수집 | [[open-source-intelligence|OSINT]], 포트 스캔, SNS 분석, DNS 조회 |\n| 무기화 | 전달 가능한 악성 페이로드 제작 | [[exploit|익스플로잇]] + [[backdoor|백도어]] 결합, 악성 매크로 문서, 패커 |\n| 전달 | 페이로드를 표적 환경으로 전송 | [[spear-phishing|스피어 피싱]], [[watering-hole-attack|워터링홀]], [[drive-by-download|드라이브 바이 다운로드]], USB |\n| 익스플로잇 | 취약점을 이용해 코드 실행 | [[zero-day-vulnerability|제로데이]], 버퍼 오버플로, 사용자 실행 유도 |\n| 설치 | 지속성 확보용 [[malware|악성코드]] 설치 | [[rootkit|루트킷]], 레지스트리 Run 키, 서비스 등록, 웹셸 |\n| 명령 및 제어 | 외부 서버와 양방향 채널 수립 | [[command-and-control|C&C]] 서버, HTTPS·DNS 터널링, 도메인 생성 알고리즘 |\n| 목표 행동 | 최종 목적 달성 | [[lateral-movement|내부 확산]], 권한 상승, [[data-leakage|데이터 유출]], 파괴·암호화 |\n\n### 다. 동작 절차 (방어자 관점 적용)\n1. 침입 시도 분석: 발생한 침입을 7단계로 분해하여 각 단계 IoC(해시, IP, 도메인, 행위) 추출\n2. 지표 성숙화: 원자(IP)·계산(해시)·행위 지표를 구분·결합하여 분석(단순한 필수 성숙 순서가 아님)\n3. 조치 매핑: 단계별 Detect·Deny·Disrupt·Degrade·Deceive·Destroy 통제 수단 배치\n4. 캠페인 분석: 복수 침입의 공통 지표로 캠페인 연관성 분석(동일 행위자 귀속은 추가 근거 필요), [[cyber-threat-intelligence|위협 인텔리전스]] 공유\n5. 지속 개선: 탐지 실패 단계를 측정해 통제 투자 우선순위 재조정\n\n## 3. 사이버 킬 체인의 상세\n### 가. 단계별 방어 통제 매트릭스(학습용 배치 예; 원 논문 표의 그대로 인용이 아님)\n| 단계 | 탐지(Detect) | 거부(Deny) | 교란(Disrupt) | 기만(Deceive) |\n|---|---|---|---|---|\n| 정찰 | 웹 로그·스캔 탐지 | 정보 노출 최소화 | 허위 정보 노출 | [[honeypot|허니팟]] |\n| 전달 | 메일 [[sandbox|샌드박스]] | 매체 통제, 첨부 차단 | 메일 큐 지연 검사 | 미끼 계정 |\n| 익스플로잇 | [[intrusion-detection-system|IDS]], [[endpoint-detection-and-response|EDR]] 행위 탐지 | [[patch-management|패치 관리]], DEP·ASLR | 메모리 보호 | - |\n| 설치 | EDR, 무결성 검사 | [[application-whitelisting|화이트리스트]] | 권한 분리 | - |\n| C&C | DNS·프록시 이상 탐지 | 아웃바운드 차단, 평판 DB | [[sinkhole|싱크홀]] | 가짜 C&C 응답 |\n| 목표 행동 | [[data-loss-prevention|DLP]], 감사 로그 | [[network-segmentation|망 세분화]], 암호화 | 세션 강제 종료 | 허니토큰 |\n\n### 나. 유사 모델과의 비교\n| 구분 | 사이버 킬 체인 | [[mitre-attack|MITRE ATT&CK]] | [[diamond-model|다이아몬드 모델]] | [[unified-kill-chain|통합 킬 체인]] |\n|---|---|---|---|---|\n| 관점 | 공격 생애주기 7단계 | 2026-11-22 공식 Enterprise 목록은 전술 15개(버전·도메인별 구분)와 기술 매트릭스 | 공격자·역량·인프라·피해자 4요소 관계 | 킬 체인 + ATT&CK 결합 18단계 |\n| 강점 | 직관적, 단계별 통제 설계 | 세부 TTP 기반 탐지 규칙 개발 | 침입 사건 간 연관 분석 | 내부 확산·내부자 위협 포괄 |\n| 한계 | 외부 침투 중심, 내부자·클라우드 위협 표현 부족 | 복잡도 높음 | 순서 표현 약함 | 단계 과다 |\n\n### 다. 적용 사례\n- 보안관제: [[siem|SIEM]] 상관분석 룰을 킬 체인 단계로 태깅하여 공격 진행도 시각화\n- 침해사고 대응: 사고 보고서를 7단계로 재구성하여 탐지 공백(Gap) 식별 후 통제 보강\n- 모의 침투: 레드팀이 킬 체인 순서로 공격 시나리오 수행, 블루팀 단계별 탐지율 측정\n\n## 4. 사이버 킬 체인 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 조기 차단 | 전달 단계 이전 차단에 자원 집중, 메일·웹 게이트웨이 강화 |\n| 가시성 | 엔드포인트·네트워크·클라우드 로그 통합, 단계별 탐지 공백 측정 |\n| 지표 공유 | IoC·TTP를 [[isac|ISAC]] 등 정보공유 체계로 교환, STIX/TAXII 표준 활용 |\n| 모델 한계 보완 | ATT&CK 매핑, 내부자 위협 모델, 클라우드·OT 환경 확장 |\n| 능동 대응 | [[threat-hunting|위협 헌팅]], [[deception-technology|기만 기술]], [[zero-trust|제로 트러스트]] 아키텍처 결합 |\n| 자동화 | [[soar|SOAR]]로 단계별 대응 플레이북 자동 실행 |\n\n## 5. 결론\n- 사이버 킬 체인은 공격자 관점의 단계 모델로 방어 통제의 공백을 체계적으로 식별하게 하며, ATT&CK 등 세부 TTP 모델과 결합하여 지능형 위협에 대한 선제적·능동적 방어 체계의 기반으로 활용 필요",
+      "sources": [
+        {
+          "title": "Lockheed Martin Cyber Kill Chain",
+          "url": "https://lockheedmartin.com/en-us/capabilities/cyber/cyber-kill-chain.html",
+          "scope": "7단계 침입 분석·방어 모델 개요"
+        },
+        {
+          "title": "MITRE ATT&CK Enterprise tactics",
+          "url": "https://attack.mitre.org/tactics/enterprise/",
+          "scope": "2026-11-22 열람 시 Enterprise 전술 15개; Stealth·Defense Impairment 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문을 읽고 개발사 7단계 모델과 현행 MITRE 전술 목록 대조. 단일 차단의 보장 범위·지표 성숙 순서·캠페인 귀속 단정을 완화.",
+      "unresolved": [
+        "원 논문 PDF 초록은 열람했으나 상세 본문 후속 요청이 timeout/403. 세부 조치 매트릭스는 학습 예이며 원 논문 표 일치 여부 미확인.",
+        "다이아몬드 모델·통합 킬 체인 18단계의 원 논문과 세부 한계 평가는 이번 대조 범위 밖."
+      ]
+    }
+  },
+  "t-9feb5c80": {
+    "short": {
+      "source_sha256": "fa4b0cc2285bdf1e3d316ae97742d54c6db834fa9808c24e34379bf86b50dfd9",
+      "body": "## 1. 악성코드의 개요\n- 정의: 사용자의 의사에 반하여 시스템에 침입·설치되어 정보 유출, 파괴, 자원 남용 등 악의적 기능을 수행하도록 제작된 소프트웨어의 총칭(Malicious Software)\n- 필요성: [[apt|APT]]·[[ransomware|랜섬웨어]] 등 공격 수단으로 악용되어 종류별 특징 분석과 탐지 기법 개발이 필수\n\n## 2. 악성코드의 개념도 및 종류\n```mermaid\nflowchart LR\n  M[악성코드] --> R[자기복제형]\n  M --> N[비복제형]\n  R --> V[바이러스: 숙주 필요]\n  R --> W[웜: 네트워크 자체 전파]\n  N --> T[트로이목마·백도어]\n  N --> S[스파이웨어·랜섬웨어·루트킷 등 기능 분류]\n  R -. 복제 기능과 결합 가능 .-> S\n```\n| 종류 | 특징 |\n|---|---|\n| [[computer-virus|바이러스]] | 숙주 파일에 기생, 실행 시 자기복제·감염 |\n| [[worm|웜]] | 숙주 없이 취약점·메일·이동매체 등으로 자체 전파 |\n| [[trojan-horse|트로이목마]] | 정상 프로그램 위장, 자기복제 없음 |\n| 랜섬웨어 | 파일 암호화 후 금전 요구 |\n| [[spyware|스파이웨어]]·[[keylogger|키로거]] | 사용자 정보·입력 수집 유출 |\n| [[rootkit|루트킷]] | 사용자·커널 등 수준에서 은닉, 탐지 회피 |\n| [[botnet|봇]] | C&C 서버 명령으로 [[ddos|DDoS]]·스팸 수행 |\n\n## 3. 악성코드 분석 방법 비교\n| 구분 | [[static-analysis|정적 분석]] | [[dynamic-analysis|동적 분석]] |\n|---|---|---|\n| 방법 | 실행 없이 코드·구조 분석 | 격리 환경에서 실행 후 행위 관찰 |\n| 기초 | 해시, 문자열, PE 헤더, [[packing|패킹]] 확인 | [[sandbox|샌드박스]], 프로세스·레지스트리·네트워크 모니터링 |\n| 고급 | [[disassembler|디스어셈블]]·디컴파일([[reverse-engineering|역공학]]) | [[debugger|디버거]]로 단계 실행 |\n| 장점 | 실행 위험을 줄이고 코드 경로 분석(완전성 보장 아님) | 난독화·패킹 우회, 실제 행위 확인 |\n| 단점 | 난독화 시 분석 난해 | 분석환경 탐지·조건부 실행 미관찰 |\n\n## 4. 고려사항\n- 분석 결과를 [[indicator-of-compromise|침해지표(IoC)]]·[[yara|YARA]] 규칙으로 변환하여 탐지 체계에 환류\n- [[fileless-malware|파일리스]]·다형성 악성코드 증가에 따라 [[signature-based-detection|시그니처 기반]]과 [[behavior-based-detection|행위 기반]]·AI 탐지 병행",
+      "sources": [
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        },
+        {
+          "title": "MITRE ATT&CK T1027.011 Fileless Storage",
+          "url": "https://attack.mitre.org/techniques/T1027/011/",
+          "scope": "레지스트리·WMI 등에 파일시스템 증적이 남을 수 있음"
+        },
+        {
+          "title": "Fred Cohen, Computer Viruses – Theory and Experiments (1984)",
+          "url": "https://web.eecs.umich.edu/~aprakash/eecs588/handouts/cohen-viruses.html",
+          "scope": "압축 바이러스의 공간 절약·복원 개념과 일반 바이러스 판정의 한계; 크기 보존·해시 우회 보장 모델 아님"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 전파·기능 분류의 중첩, 웜·봇/봇넷·루트킷, 파일리스 증적, 정적 분석의 비완전성을 교정.",
+      "unresolved": [
+        "신종 개수 통계의 기간·집계 근거와 도구별 현행 유지보수·효과는 미확인. 나열한 도구는 종류 설명용 사례.",
+        "키로거·광고 프로그램 등은 기능만으로 모두 악성이라고 분류할 수 없으며 사용 목적·동의·행위를 함께 판단."
+      ]
+    },
+    "long": {
+      "source_sha256": "75b378b9ed6fb09dd87e768bd49e9764d09df586e7918fd46b54e85c76f6c89d",
+      "body": "## 1. 악성코드의 개요\n### 가. 정의\n- 제작자가 의도적으로 사용자에게 피해를 주고자 만든 모든 악의적 목적의 소프트웨어 및 실행 가능한 코드의 총칭으로, 시스템 침입·정보 유출·파괴·자원 남용·금전 탈취 기능 수행\n\n### 나. 등장배경 / 필요성\n- 단순 과시형 바이러스에서 금전 목적의 [[ransomware|랜섬웨어]], 국가 배후 [[apt|APT]]로 진화하며 피해 규모 확대\n- 대량의 신종·변종 출현(하루 수십만 개 수치의 기간·집계 기준은 미확인)으로 자동화 탐지 기법 개발이 필요하며, 이를 위해 종류별 특징과 행위 분석이 선행되어야 함\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 감염 경로(Vector) | 이메일 첨부, 드라이브 바이 다운로드, 취약점 [[exploit|익스플로잇]], USB, [[social-engineering|사회공학]] |\n| 페이로드(Payload) | 감염 후 실행되는 실제 악성 기능(암호화, 유출, 파괴) |\n| 생명주기 예(필수 순서 아님) | 유포 → 감염 → 은닉·지속 → C&C 통신 → 악성 행위 → 확산 |\n\n## 2. 악성코드의 분류체계 및 종류\n### 가. 분류 구성도\n```mermaid\nflowchart TB\n  M[악성코드] --> A[전파 방식]\n  M --> B[목적·행위]\n  M --> C[은닉 기법]\n  A --> A1[자기복제: 바이러스·웜]\n  A --> A2[비복제: 트로이목마·드로퍼]\n  B --> B1[정보 유출: 스파이웨어·키로거]\n  B --> B2[금전: 랜섬웨어·뱅킹 트로이]\n  B --> B3[원격 제어: 백도어·봇]\n  C --> C1[루트킷·패킹·난독화·파일리스]\n```\n\n### 나. 악성코드의 종류\n| 종류 | 특징 | 핵심 기법·사례 |\n|---|---|---|\n| [[computer-virus|바이러스]] | 숙주 파일·부트섹터에 기생, 실행 시 자기복제 | 파일·부트·매크로 바이러스, [[polymorphic-virus|다형성 바이러스]] |\n| [[worm|웜]] | 숙주 없이 취약점·메일·이동매체 등으로 자체 전파, 급속 확산 | SQL Slammer, Conficker, WannaCry(랜섬웨어 웜) |\n| [[trojan-horse|트로이목마]] | 정상 프로그램 위장, 자기복제 없음, 백도어 설치 | 뱅킹 트로이(Emotet), 원격제어 RAT |\n| 랜섬웨어 | 파일·시스템 암호화 후 복호화 대가 요구 | 비대칭 암호화, 이중 협박(유출 위협), RaaS |\n| [[spyware|스파이웨어]]·[[keylogger|키로거]] | 사용자 활동·입력 정보 수집 유출 | 화면 캡처, 키 입력 후킹 |\n| [[adware|애드웨어]] | 광고 노출·브라우저 설정 변경(모든 광고 지원 SW가 악성인 것은 아님) | 번들 설치, 검색 하이재킹 |\n| [[rootkit|루트킷]] | 사용자·커널·펌웨어 등 수준에서 프로세스·파일 은닉 | SSDT 후킹, 부트킷 |\n| [[backdoor|백도어]] | 인증 우회 비밀 접근 경로 | 리버스 쉘, 웹셸 |\n| [[botnet|봇]] | 명령을 수행하는 감염 기기·프로그램; 그 집합은 봇넷 | [[ddos|DDoS]], 스팸, 암호화폐 채굴, Mirai |\n| [[fileless-malware|파일리스]] | 별도 실행 파일을 줄이고 메모리·레지스트리·PowerShell 등 활용(파일시스템 증적이 남을 수 있음) | LotL(Living off the Land) 기법 |\n\n### 다. 전파·감염 절차(원격제어형 예; C&C 등은 필수 아님)\n1. 유포: 피싱 메일, 악성 광고, 워터링 홀, 공급망 변조\n2. 침투: 취약점 익스플로잇 또는 사용자 실행 유도\n3. 설치·지속: 자동 실행 등록, 루트킷 은닉, 권한 상승\n4. C&C 통신: 명령 수신, 추가 모듈 다운로드\n5. 목적 수행 및 측면 이동(Lateral Movement)으로 확산\n\n## 3. 악성코드 분석 방법\n### 가. 정적 분석(Static Analysis)\n| 단계 | 내용 | 도구 |\n|---|---|---|\n| 기초 정적 분석 | [[hash-function|해시]] 값 비교, 문자열 추출, PE 헤더·임포트 함수 확인, [[packing|패킹]] 여부 식별 | VirusTotal, strings, PEview, PEiD |\n| 고급 정적 분석 | [[disassembler|디스어셈블]]·디컴파일로 어셈블리 코드 분석, 제어 흐름 파악([[reverse-engineering|역공학]]) | IDA Pro, Ghidra |\n| 장점 | 실행 위험을 줄이고 코드 경로를 분석하나 난독화·생성 코드·도구 한계로 완전성 보장 불가 | |\n| 단점 | 패킹·[[obfuscation|난독화]] 시 분석 난해, 시간 소요 | |\n\n### 나. 동적 분석(Dynamic Analysis)\n| 단계 | 내용 | 도구 |\n|---|---|---|\n| 기초 동적 분석 | 격리된 [[sandbox|샌드박스]]에서 실행, 프로세스·파일·레지스트리·네트워크 변화 모니터링 | Cuckoo Sandbox, Process Monitor, Wireshark, Regshot |\n| 고급 동적 분석 | [[debugger|디버거]]로 단계 실행, 메모리 덤프에서 언패킹된 코드 추출 | x64dbg, OllyDbg, Volatility(메모리 포렌식) |\n| 장점 | 패킹·난독화 우회, 실제 행위 직접 확인 | |\n| 단점 | 분석환경(VM) 탐지 시 행위 중단, 특정 조건·시간에만 동작하는 코드 미관찰 | |\n\n### 다. 정적·동적 분석 비교 및 탐지 기법 연계\n| 구분 | 정적 분석 | 동적 분석 |\n|---|---|---|\n| 실행 여부 | 미실행 | 격리 실행 |\n| 분석 범위 | 확보·해석 가능한 코드 | 관찰한 실행 경로 |\n| 회피 기법 영향 | 패킹·난독화에 취약 | 안티 VM·안티 디버깅에 취약 |\n| 산출물 | 시그니처, 코드 구조 | 행위 패턴, 네트워크 [[indicator-of-compromise|IoC]] |\n| 연계 탐지 | [[signature-based-detection|시그니처 기반]], [[yara|YARA]] 규칙 | [[behavior-based-detection|행위 기반]], [[heuristic-detection|휴리스틱]], [[endpoint-detection-and-response|EDR]] |\n- 실무에서는 정적 분석으로 개요 파악 → 동적 분석으로 행위 확인 → 고급 분석으로 세부 로직 규명하는 하이브리드 분석 수행\n\n## 4. 악성코드 분석·대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 분석 환경 | 네트워크 격리, 스냅샷 복원, 실제 환경 유사 구성으로 안티 VM 우회 |\n| 자동화 | 샌드박스 자동 분석, 머신러닝 기반 분류로 대량 샘플 처리 |\n| 정보 공유 | STIX/TAXII 기반 위협 인텔리전스 공유, KISA·C-TAS 연계 |\n| 발전방향 | AI 기반 변종 탐지, 메모리 포렌식 강화로 파일리스 대응, [[zero-trust|제로 트러스트]]와 EDR·XDR 통합 |\n\n## 5. 결론\n- 악성코드는 전파 방식·목적·은닉 기법에 따라 다양하게 분류되며, 정적·동적 분석을 상호 보완적으로 적용하여 도출한 시그니처와 행위 패턴을 탐지 체계에 환류하는 선순환 구조가 효과적 대응의 핵심",
+      "sources": [
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        },
+        {
+          "title": "MITRE ATT&CK T1027.011 Fileless Storage",
+          "url": "https://attack.mitre.org/techniques/T1027/011/",
+          "scope": "레지스트리·WMI 등에 파일시스템 증적이 남을 수 있음"
+        },
+        {
+          "title": "Fred Cohen, Computer Viruses – Theory and Experiments (1984)",
+          "url": "https://web.eecs.umich.edu/~aprakash/eecs588/handouts/cohen-viruses.html",
+          "scope": "압축 바이러스의 공간 절약·복원 개념과 일반 바이러스 판정의 한계; 크기 보존·해시 우회 보장 모델 아님"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 전파·기능 분류의 중첩, 웜·봇/봇넷·루트킷, 파일리스 증적, 정적 분석의 비완전성을 교정.",
+      "unresolved": [
+        "신종 개수 통계의 기간·집계 근거와 도구별 현행 유지보수·효과는 미확인. 나열한 도구는 종류 설명용 사례.",
+        "키로거·광고 프로그램 등은 기능만으로 모두 악성이라고 분류할 수 없으며 사용 목적·동의·행위를 함께 판단."
+      ]
+    }
+  },
+  "t-97221508": {
+    "short": {
+      "source_sha256": "94fadf93383a26f09d09356e028ae8cc1b32d1e12297c57392a5f6b6f1dd2e12",
+      "body": "## 1. 웜의 개요\n- 정의: 숙주 파일 없이 독립적으로 실행되며 네트워크·시스템의 [[vulnerability|취약점]] 또는 메일·이동매체 등을 이용해 스스로 복제·전파하는 자기복제형 [[malware|악성코드]]\n- 등장배경: 1988년 모리스 웜으로 인터넷 6,000여 대 마비, 네트워크 연결 확대와 미패치 시스템 증가로 급속 확산 위협 현실화\n\n## 2. 웜의 개념도 및 동작 절차\n```mermaid\nflowchart LR\n  A[1. 탐색: 취약 호스트 스캐닝] --> B[2. 침투: 취약점 익스플로잇]\n  B --> C[3. 복제: 웜 본체 전송·실행]\n  C --> D[4. 페이로드: 백도어·DDoS·암호화]\n  C --> A\n```\n| 구성요소 | 역할 |\n|---|---|\n| 탐색 모듈 | IP 무작위·순차 [[port-scanning|스캐닝]]으로 감염 대상 발견 |\n| 전파 모듈 | [[buffer-overflow|버퍼 오버플로우]] 등 [[exploit|익스플로잇]], 이메일·공유폴더·USB 이용 |\n| 페이로드 | [[backdoor|백도어]] 설치, [[ddos|DDoS]] [[botnet|봇]] 구성, [[ransomware|랜섬웨어]] 실행 |\n\n## 3. 웜의 특징 (바이러스·트로이목마 비교)\n| 구분 | 웜 | [[computer-virus|바이러스]] | [[trojan-horse|트로이목마]] |\n|---|---|---|---|\n| 숙주 필요 | 불필요(독립 실행) | 필요(파일·부트섹터 기생) | 정상 프로그램 위장 |\n| 자기복제 | 자동 복제·전파 | 자기복제(숙주 실행 시) | 없음 |\n| 전파 매개 | 네트워크 취약점·메일·이동매체 등 | 사용자 파일 실행·공유 | 사용자 설치 유도 |\n| 확산 속도 | 취약 호스트·연결·전파 방식에 따라 빠른 확산 가능 | 숙주 실행·공유 조건에 따라 다름 | 해당 없음 |\n| 사례 | SQL Slammer, Conficker, WannaCry | CIH, 미켈란젤로 | Emotet, RAT |\n\n## 4. 고려사항\n- 신속한 [[patch-management|패치 관리]]와 불필요 포트 차단, [[network-segmentation|네트워크 분리]]로 확산 범위 제한\n- [[intrusion-detection-system|IDS/IPS]]·[[endpoint-detection-and-response|EDR]]의 트래픽 급증·스캐닝 [[anomaly-detection|이상 탐지]]로 조기 격리, [[zero-day-attack|제로데이]] 대비 가상 패치",
+      "sources": [
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        },
+        {
+          "title": "CERT-EU Security Advisory 2017-012",
+          "url": "https://cert.europa.eu/publications/security-advisories/2017-012/",
+          "scope": "2017년 WannaCry SMB 침투·킬 스위치 선확인·당시 피해 보고 및 변종별 복구 조건"
+        },
+        {
+          "title": "FBI Morris Worm",
+          "url": "https://www.fbi.gov/history/cases-and-criminals/morris-worm",
+          "scope": "1988년 사건 회고와 약 6천 대 피해 추정"
+        },
+        {
+          "title": "CAIDA The Spread of the Sapphire/Slammer Worm (2003)",
+          "url": "https://www.caida.org/catalog/papers/2003_sapphire/",
+          "scope": "Slammer 확산 관측 연구와 약 10분의 전 세계 확산"
+        },
+        {
+          "title": "Microsoft Alert on Macro Virus Issues (1999)",
+          "url": "https://news.microsoft.com/source/1999/03/30/alert-on-macro-virus-issues/",
+          "scope": "Melissa의 Word 매크로 바이러스 분류"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 웜 전파 매개, Melissa 분류, Morris 표현, WannaCry 킬 스위치 순서와 피해 집계 시점을 교정.",
+      "unresolved": [
+        "Conficker·Kelvir·Koobface·Mirai 등 모든 사례의 변종별 세부 구현은 원 분석보고서 추가 대조 필요.",
+        "확산 속도·자동 격리 효과·가상 패치 보호율은 모든 환경에 보장되지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "f78fa5a953a89382325b06575297c68a86e6336d7639d1689e648c6257ea5de9",
+      "body": "## 1. 웜의 개요\n### 가. 정의\n- 다른 프로그램(숙주)에 기생하지 않고 독립적으로 실행되며, 운영체제·응용 프로그램·네트워크 서비스의 [[vulnerability|취약점]]이나 사용자 행위를 이용하여 자신의 복사본을 다른 시스템으로 자동 전파하는 자기복제형 [[malware|악성코드]]\n\n### 나. 등장배경 / 필요성\n| 배경 | 내용 |\n|---|---|\n| 1988년 모리스 웜 | 초기 대규모 인터넷 웜 사건, sendmail 기능 악용·finger [[buffer-overflow|버퍼 오버플로우]] 등 이용, 당시 인터넷의 약 10%(6,000여 대) 마비 |\n| 상시 연결 환경 | 초고속 인터넷·무선·IoT로 항상 연결된 미패치 기기 급증 |\n| 자동화 공격 | 사용자 개입 없이 수분 내 전 세계 확산(SQL Slammer 10분 내 7만 5천 대) |\n| 복합 위협 | [[ransomware|랜섬웨어]]·[[botnet|봇넷]]과 결합하여 금전·DDoS 목적의 웜으로 진화(WannaCry) |\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 자기복제(Self-replication) | 자신의 코드를 복사하여 다른 호스트에 설치·실행 |\n| 전파 벡터 | 네트워크 서비스 취약점, 이메일 첨부, IM·P2P, 공유 폴더, 이동식 매체 |\n| 페이로드(Payload) | 전파 외에 수행하는 악성 행위(백도어·DDoS·파괴·암호화), 페이로드 없이 트래픽 폭주만으로도 서비스 마비 |\n\n## 2. 웜의 구성도 및 구성요소\n### 가. 구성도(스캔형 웜의 예; C&C·별도 페이로드는 필수 아님)\n```mermaid\nflowchart TB\n  S[감염 호스트] --> T[1. 탐색 모듈: IP 스캐닝·대상 선정]\n  T --> E[2. 침투 모듈: 취약점 익스플로잇·인증 우회]\n  E --> R[3. 전파 모듈: 웜 본체 전송·원격 실행]\n  R --> N[신규 감염 호스트]\n  N --> T\n  R --> P[4. 페이로드: 백도어·봇·랜섬웨어·파괴]\n  P --> C[C&C 서버 통신]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 탐색 모듈 | 감염 가능한 대상 호스트 탐색 | 무작위·순차·로컬 우선 [[port-scanning|포트 스캐닝]], 히트리스트, 주소록·ARP 캐시 수집 |\n| 침투 모듈 | 대상 시스템에 코드 실행 권한 획득 | [[exploit|익스플로잇]](버퍼 오버플로우, RCE), 기본·취약 패스워드 [[brute-force-attack|무차별 대입]], [[social-engineering|사회공학]] 메일 |\n| 전파 모듈 | 웜 본체 전송·실행·지속성 확보 | 자체 TFTP·HTTP 서버, 메일 엔진(SMTP), SMB·RPC, 자동 실행 등록 |\n| 페이로드 | 공격 목적 수행 | [[backdoor|백도어]], [[ddos|DDoS]] 봇, 랜섬웨어 암호화, 정보 유출 |\n| 은닉·회피 모듈 | 탐지 회피 | 패킹·[[polymorphic-virus|다형성]], 루트킷, 방화벽·백신 무력화 |\n\n### 다. 동작 절차(WannaCry 사례)\n킬 스위치가 있는 드로퍼는 먼저 해당 도메인 연결을 검사하며 성공하면 확산·랜섬웨어 실행을 중단한다. 다음은 검사에 실패한 경로의 개략이다.\n1. 탐색: 감염 PC가 내부망·인터넷 IP의 TCP 445(SMB) 포트 스캔\n2. 침투: SMBv1 취약점(MS17-010, EternalBlue) 익스플로잇으로 커널 권한 코드 실행\n3. 전파: DoublePulsar 백도어로 웜 본체 전송·실행, 신규 호스트가 다시 스캔 시작\n4. 페이로드: 파일 암호화 후 비트코인 요구(킬 스위치는 앞선 드로퍼 검사이며 변종별 상이)\n5. 결과: CERT-EU 2017-05-22 보고 기준 전 세계 20만 대 이상 영향, 영국 NHS 등 피해(집계 시점별 수치 구분)\n\n## 3. 웜의 유형 및 바이러스·트로이목마와의 비교\n### 가. 전파 방식에 따른 유형\n| 유형 | 전파 방식 | 사례 |\n|---|---|---|\n| 네트워크 웜 | 네트워크 서비스 취약점 자동 공격, 사용자 개입 없음 | 모리스(1988), Code Red(2001, IIS), SQL Slammer(2003, MS SQL UDP 1434), Blaster(2003, RPC DCOM), Conficker(2008), WannaCry(2017, SMB) |\n| 이메일 웜(매스 메일러) | 주소록 수집 후 자신을 첨부하여 대량 발송 | ILOVEYOU(2000), Mydoom(2004); Melissa(1999)는 대량 메일 전파를 하는 매크로 바이러스로 구별 |\n| IM·P2P 웜 | 메신저 링크, 공유 파일로 위장 | Kelvir, 소셜 네트워크 웜 Koobface |\n| 이동식 매체 웜 | USB 자동실행(autorun.inf)·LNK 취약점 | Conficker 변종, Stuxnet(2010) |\n| IoT 웜 | 기본 패스워드·펌웨어 취약점 | Mirai(2016, DDoS 봇넷) |\n\n### 나. 바이러스·트로이목마와의 비교\n| 비교 항목 | 웜(Worm) | [[computer-virus|바이러스(Virus)]] | [[trojan-horse|트로이목마(Trojan)]] |\n|---|---|---|---|\n| 숙주 필요 여부 | 불필요, 독립 실행 파일 | 필요, 실행 파일·문서·부트섹터에 기생 | 정상 프로그램으로 위장한 독립 파일 |\n| 자기복제 | 자동 복제·원격 전파 | 숙주 실행 시 복제, 사용자 매개 전파 | 자기복제 없음 |\n| 사용자 개입 | 불필요(취약점형) | 감염 파일 실행 필요 | 설치·실행 유도 필요 |\n| 전파 범위·속도 | 연결·감염 가능 호스트·전파 방식에 따름 | 숙주 실행·공유 조건에 따름 | 전파 기능 없음 |\n| 주요 피해 | 네트워크 대역폭 고갈, 대규모 서비스 마비 | 파일 손상·시스템 파괴 | 정보 유출, 원격 제어 |\n| 탐지 | 트래픽 급증·스캐닝 이상 | 파일 시그니처·무결성 | 행위 분석, C&C 통신 |\n\n### 다. 웜 대응 체계\n| 단계 | 대응 방안 |\n|---|---|\n| 예방 | [[patch-management|패치 관리]] 자동화, 불필요 서비스·포트(135, 139, 445, 1434) 차단, SMBv1 등 취약 프로토콜 비활성화, [[network-segmentation|네트워크 분리]]·VLAN |\n| 탐지 | [[intrusion-detection-system|IDS/IPS]] 시그니처·[[anomaly-detection|이상 탐지]](스캔 트래픽·연결 시도 급증), 허니팟, [[endpoint-detection-and-response|EDR]] 행위 탐지 |\n| 차단·격리 | 감염 호스트 [[network-access-control|NAC]] 격리, 방화벽 긴급 룰, 메일 게이트웨이 첨부 필터링 |\n| 복구 | 백신 전용 치료, 백업 복원, 재감염 방지 패치 후 재연결 |\n| 제로데이 대응 | [[zero-day-attack|제로데이]] 취약점에 가상 패치(IPS), 최소 권한·애플리케이션 화이트리스트 |\n\n## 4. 웜 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 패치 지연 자산 | 레거시·OT·의료장비 등 패치 불가 시스템은 망 분리·가상 패치로 위험 완화(미지 공격 차단 보장 아님) |\n| 초기 대응 속도 | 확산이 분 단위이므로 자동 격리·SOAR 플레이북으로 탐지 즉시 차단 |\n| 내부 확산 | 외부 경계 방어만으로 불충분, 내부망 측면 이동 탐지·[[zero-trust|제로 트러스트]] 세분화 |\n| 정보 공유 | KISA·C-TAS 위협정보 연계, 킬 스위치·IoC 신속 반영 |\n| 발전방향 | AI 기반 트래픽 이상 탐지, IoT·클라우드 워크로드 웜 대비 마이크로 세그멘테이션, 공급망 패치 검증 |\n\n## 5. 결론\n- 웜은 숙주 없이 다양한 경로로 복제·전파하며 조건에 따라 수분 내 대규모 피해도 유발할 수 있으므로, 패치·포트 차단·망 분리의 예방과 이상 트래픽 기반 자동 격리의 탐지·대응을 결합한 다계층 방어가 핵심",
+      "sources": [
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        },
+        {
+          "title": "CERT-EU Security Advisory 2017-012",
+          "url": "https://cert.europa.eu/publications/security-advisories/2017-012/",
+          "scope": "2017년 WannaCry SMB 침투·킬 스위치 선확인·당시 피해 보고 및 변종별 복구 조건"
+        },
+        {
+          "title": "FBI Morris Worm",
+          "url": "https://www.fbi.gov/history/cases-and-criminals/morris-worm",
+          "scope": "1988년 사건 회고와 약 6천 대 피해 추정"
+        },
+        {
+          "title": "CAIDA The Spread of the Sapphire/Slammer Worm (2003)",
+          "url": "https://www.caida.org/catalog/papers/2003_sapphire/",
+          "scope": "Slammer 확산 관측 연구와 약 10분의 전 세계 확산"
+        },
+        {
+          "title": "Microsoft Alert on Macro Virus Issues (1999)",
+          "url": "https://news.microsoft.com/source/1999/03/30/alert-on-macro-virus-issues/",
+          "scope": "Melissa의 Word 매크로 바이러스 분류"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 웜 전파 매개, Melissa 분류, Morris 표현, WannaCry 킬 스위치 순서와 피해 집계 시점을 교정.",
+      "unresolved": [
+        "Conficker·Kelvir·Koobface·Mirai 등 모든 사례의 변종별 세부 구현은 원 분석보고서 추가 대조 필요.",
+        "확산 속도·자동 격리 효과·가상 패치 보호율은 모든 환경에 보장되지 않음."
+      ]
+    }
+  },
+  "t-4b8df3ed": {
+    "short": {
+      "source_sha256": "2769821b8a5be4df06e1355015d7f6bca5d89513e3523b7ea74a35bb2d9ee175",
+      "body": "## 1. 컴퓨터 바이러스(Computer Virus)의 개요\n- 정의: 숙주 프로그램에 자신의 코드를 삽입하여 실행 시 다른 프로그램으로 자기 복제하며 전파되는 [[malware|악성코드]]로, 감염 사실을 숨기기 위해 압축·암호화 등 은닉 기법 사용\n- 등장배경: 파일 크기 변화·고정 코드 패턴을 비교하는 [[signature-based-detection|시그니처 기반 탐지]]와 무결성 검사를 회피할 필요\n\n## 2. 바이러스 감염 은닉 개념도\n```mermaid\nflowchart LR\n  A[\"원본 숙주(크기 N)\"] --> B[\"압축 기법: 숙주 압축 + 바이러스 삽입(공간 확보 시 크기 N 유지 가능)\"]\n  A --> C[\"암호화 기법: 바이러스 본체 암호화 + 복호화 루틴\"]\n  B --> D[\"실행 시 바이러스 동작 후 숙주 복원·실행\"]\n  C --> D\n```\n| 구성요소 | 역할 |\n|---|---|\n| 감염 루틴 | 대상 파일 탐색·코드 삽입, 진입점 변경 |\n| 은닉 루틴 | 압축·암호화로 크기·패턴 변화 숨김 |\n| 복원 루틴 | 실행 시 숙주 압축해제 또는 본체 복호화 |\n| 페이로드 | 실제 악성 행위, 조건 발생 시 수행 |\n\n## 3. 압축 기법과 암호화 기법의 동작원리\n| 구분 | 압축(Compression) 기법 | 암호화(Encrypted) 기법 |\n|---|---|---|\n| 목적 | 감염 후 파일 크기 증가 은닉 | 바이러스 코드 패턴(시그니처) 은닉 |\n| 감염 시 | 숙주를 압축해 공간 확보 후 바이러스 코드 부착, 확보 공간이 충분하면 원래 크기 유지 가능 | 바이러스 본체를 키로 암호화하여 저장, 복호화 루틴만 평문 |\n| 실행 시 | 바이러스 먼저 실행 → 숙주 압축해제 → 제어 이전 | 복호화 루틴이 본체 복원 → 실행 → 감염 시 새 키로 재암호화 |\n| 회피 대상 | 파일 크기 비교(암호학적 해시 무결성 검사는 별개) | 고정 패턴 스캔 |\n| 한계 | 압축 루틴 자체는 패턴 노출 | 복호화 루틴은 고정, 다형성 바이러스로 발전 |\n\n## 4. 고려사항(탐지 측면)\n- 복호화 루틴·압축 해제 스텁을 시그니처로 탐지하거나 [[code-emulation|에뮬레이션]]으로 메모리 복원 후 스캔\n- [[polymorphic-virus|다형성]]·[[metamorphic-virus|메타모픽]] 바이러스는 [[heuristic-analysis|휴리스틱]]·행위 기반 탐지 병행 필요\n",
+      "sources": [
+        {
+          "title": "Fred Cohen, Computer Viruses – Theory and Experiments (1984)",
+          "url": "https://web.eecs.umich.edu/~aprakash/eecs588/handouts/cohen-viruses.html",
+          "scope": "압축 바이러스의 공간 절약·복원 개념과 일반 바이러스 판정의 한계; 크기 보존·해시 우회 보장 모델 아님"
+        },
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문과 Cohen 압축 바이러스 원 논문 대조. 원래 공간 절약 모델과 조건부 크기 보존 예를 구분하고 크기 동일=무결성 우회 및 시그니처 탐지 불가 단정을 교정.",
+      "unresolved": [
+        "Cascade 1987 세부 구현, X-ray 탐지의 원 명세와 모든 백신 구현은 대조하지 못함. 일반 에뮬레이션과 동의어라는 표현은 제거.",
+        "코드 압축·암호화는 설명 모델이며 모든 바이러스가 사용하는 필수 은닉 방식은 아님."
+      ]
+    },
+    "long": {
+      "source_sha256": "ee9898cb4ebee37f7c5b97821881092315f412014608b7ca8302b29470a3b733",
+      "body": "## 1. 컴퓨터 바이러스(Computer Virus)의 개요\n### 가. 정의\n- 숙주 프로그램이나 문서에 자신의 코드를 삽입하여 숙주 실행 시 함께 실행되고 다른 파일로 자기 복제하며 전파되는 [[malware|악성코드]]로, 자립 실행되는 웜과 달리 숙주에 기생\n\n### 나. 은닉 기법의 등장배경\n- 초기 백신은 파일 크기 변화, 체크섬, 고정 코드 패턴([[signature-based-detection|시그니처]])으로 감염을 탐지\n- 바이러스 제작자는 크기 변화를 숨기는 압축 기법, 코드 패턴을 숨기는 암호화 기법으로 대응, 이후 다형성·메타모픽으로 진화\n\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| 숙주(Host) | 바이러스가 삽입되는 실행 파일·문서, 감염 후에도 정상 동작해야 은닉 유지 |\n| 진입점 변경 | 파일 헤더의 실행 시작 주소를 바이러스 코드로 변경, 수행 후 원래 진입점으로 복귀 |\n| 스텁(Stub) | 압축 해제 또는 복호화를 담당하는 평문 코드 조각 |\n\n## 2. 바이러스 감염 은닉의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph CMP[\"압축 기법 감염 파일(공간 확보 시 크기 N 유지 가능)\"]\n    V1[\"바이러스 코드 + 압축해제 스텁\"] --> H1[\"압축된 숙주 프로그램\"]\n  end\n  subgraph ENC[\"암호화 기법 감염 파일\"]\n    D2[\"복호화 루틴(평문) + 키\"] --> V2[\"암호화된 바이러스 본체\"] --> H2[\"숙주 프로그램\"]\n  end\n  EXE[\"파일 실행(진입점이 바이러스로 변경됨)\"] --> V1\n  EXE --> D2\n  V1 -->|\"다른 파일 감염 후 숙주 압축해제·실행\"| RUN[\"정상 숙주 동작\"]\n  D2 -->|\"본체 복호화 → 감염·페이로드 → 숙주 실행\"| RUN\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 비고 |\n|---|---|---|\n| 탐색·감염 루틴 | 감염 대상 파일 탐색, 기감염 여부(마커) 확인, 코드 삽입 및 진입점 변경 | 중복 감염 방지 |\n| 은닉 루틴 | 숙주 압축 또는 본체 암호화, 파일 크기·시간 정보 보존 | 탐지 회피 핵심 |\n| 복원 루틴(스텁) | 실행 시 압축해제 또는 복호화 수행 | 예제별 평문 부분(압축형은 바이러스 본체도 노출 가능) |\n| 트리거·페이로드 | 특정 날짜·횟수 조건에서 악성 행위 수행 | 파일 삭제, 데이터 유출 등 |\n\n### 다. 일반 감염·실행 절차\n1. 감염 파일 실행 시 변경된 진입점에 의해 바이러스 코드 선실행\n2. 은닉 해제(압축해제 또는 복호화) 후 메모리에 본체 적재\n3. 새 대상 파일 탐색·감염, 조건 충족 시 페이로드 수행\n4. 숙주 프로그램 복원 후 제어 이전으로 사용자는 정상 실행으로 인식\n\n## 3. 압축 기법과 암호화 기법의 동작원리\n### 가. 압축(Compression) 기법\n- Cohen의 원 논문은 압축 후 코드를 덧붙이고 실행 시 복원하는 공간 절약 예를 제시한다. 아래 크기 보존 설명은 압축으로 확보한 공간 K가 추가 코드·스텁 이상인 경우의 조건부 학습 예다\n| 단계 | 동작 |\n|---|---|\n| 감염 | 대상 숙주 P(크기 N)를 무손실 압축하여 N-K 크기로 축소, 확보된 K 바이트 공간에 바이러스 코드와 압축해제 스텁 삽입, 진입점을 바이러스로 변경 |\n| 실행 | 바이러스 코드가 먼저 실행되어 다른 파일 감염 시도 |\n| 복원 | 압축된 숙주를 메모리 또는 임시 영역에 압축해제 |\n| 제어 이전 | 복원된 숙주의 원래 진입점으로 점프, 정상 동작 |\n| 특징 | 공간이 충분하면 파일 크기 유지 가능하나 바이트 내용은 변경됨, 실행 시간 약간 증가, 압축해제 스텁은 고정 패턴으로 노출 |\n\n### 나. 암호화(Encrypted) 기법\n- 바이러스 본체를 암호화하여 저장함으로써 파일 내에 고정 코드 패턴이 남지 않게 하여 시그니처 스캔을 회피\n| 단계 | 동작 |\n|---|---|\n| 구조 | 평문 복호화 루틴(Decryptor) + 암호화 키 + 암호화된 바이러스 본체 |\n| 실행 | 복호화 루틴이 키로 본체를 메모리에서 복호화(XOR·가산 등 단순 연산) |\n| 감염 | 복호화된 본체가 감염 루틴 수행, 새 파일 감염 시 난수 키를 생성하여 본체를 재암호화하여 삽입 |\n| 결과 | 키가 달라지면 본체 바이트열이 바뀌지만 복호화 루틴·구조 등 다른 시그니처 탐지는 가능 |\n| 한계 | 고정 복호화 루틴을 쓰는 구현에서는 해당 부분이 시그니처가 됨, Cascade(1987) 등 |\n\n### 다. 두 기법 비교 및 발전\n| 구분 | 압축 기법 | 암호화 기법 |\n|---|---|---|\n| 은닉 대상 | 파일 크기 증가 | 코드 패턴 |\n| 회피하는 탐지 | 크기 비교(해시 기반 무결성은 별개) | 시그니처 스캔 |\n| 평문 노출 부분 | 바이러스 코드 전체 + 스텁 | 복호화 루틴만 |\n| 실행 부담 | 압축해제 시간 | 복호화 시간(경미) |\n| 발전 | 실행 압축 [[executable-packer|패커]]로 일반화 | 복호화 루틴을 매번 변형하는 [[polymorphic-virus|다형성 바이러스]], 본체 코드 자체를 재작성하는 [[metamorphic-virus|메타모픽 바이러스]] |\n\n## 4. 탐지·대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 스텁 탐지 | 압축해제·복호화 루틴을 시그니처로 등록, 다형성 시 와일드카드·알고리즘 스캔 |\n| [[code-emulation|에뮬레이션]] | 가상 CPU에서 일정 명령 수행 후 복원된 메모리 이미지를 스캔(일반 에뮬레이션과 X-ray 명칭을 동일시하지 않음) |\n| [[heuristic-analysis|휴리스틱 분석]] | 진입점 이상, 쓰기 가능 코드 섹션, 자기 수정 코드 등 구조적 의심 징후 평가 |\n| 행위 기반 | [[sandbox|샌드박스]] 실행으로 파일 감염·레지스트리 변경 등 행위 탐지, EDR 연계 |\n| 무결성 관리 | 신뢰 기준선 해시 비교, 코드 서명 검증으로 변경 자체 탐지 |\n| 발전방향 | 머신러닝 기반 정적·동적 분류, 메모리 포렌식, 위협 인텔리전스 공유 |\n\n## 5. 결론\n- 압축 기법은 조건부로 크기 증가를, 암호화 기법은 본체 패턴을 숨기지만 암호학적 해시 무결성·스텁 기반 탐지를 자동 우회하지는 않으며, 백신은 스텁 탐지와 에뮬레이션·휴리스틱·행위 기반 분석을 결합하여 대응함\n",
+      "sources": [
+        {
+          "title": "Fred Cohen, Computer Viruses – Theory and Experiments (1984)",
+          "url": "https://web.eecs.umich.edu/~aprakash/eecs588/handouts/cohen-viruses.html",
+          "scope": "압축 바이러스의 공간 절약·복원 개념과 일반 바이러스 판정의 한계; 크기 보존·해시 우회 보장 모델 아님"
+        },
+        {
+          "title": "NIST SP 800-83 Rev.1 (2013)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-83r1.pdf",
+          "scope": "바이러스·웜·트로이목마·혼합 공격 분류와 격리·분석; 당시 도구 목록을 현행 권고로 사용하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문과 Cohen 압축 바이러스 원 논문 대조. 원래 공간 절약 모델과 조건부 크기 보존 예를 구분하고 크기 동일=무결성 우회 및 시그니처 탐지 불가 단정을 교정.",
+      "unresolved": [
+        "Cascade 1987 세부 구현, X-ray 탐지의 원 명세와 모든 백신 구현은 대조하지 못함. 일반 에뮬레이션과 동의어라는 표현은 제거.",
+        "코드 압축·암호화는 설명 모델이며 모든 바이러스가 사용하는 필수 은닉 방식은 아님."
+      ]
+    }
   }
 }
