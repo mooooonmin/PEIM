@@ -1780,5 +1780,299 @@
         "검색 순위·브라우저별 최신 정책 및 HTTP/2 평문 배포 실태의 정량 대조는 미완료."
       ]
     }
+  },
+  "t-ca818f95": {
+    "short": {
+      "source_sha256": "4ff22680e9f09dd30b5cb438d3cbe3a072c66e44f509e9ad7a1ca24aaad8137b",
+      "body": "## 1. IPSec의 개요\n- 정의: IP 계층(3계층)에서 [[authentication-header|AH]]·[[encapsulating-security-payload|ESP]] 프로토콜과 [[ike|IKE]] 키 교환으로 패킷 단위 인증·암호화·무결성을 제공하는 IETF 표준 보안 프레임워크(RFC 4301)\n- 필요성: IP 자체는 보안 기능 부재 → 상위 응용 수정 없이 모든 트래픽을 투명하게 보호, [[vpn|VPN]] 구축의 표준 기반\n\n## 2. IPSec의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[호스트/게이트웨이 A] -->|\"IKE: SA 협상(UDP 500)\"| B[호스트/게이트웨이 B]\n  A -->|\"AH/ESP 보호 패킷\"| B\n  SPD[(SPD 정책 DB)] --- A\n  SAD[(SAD SA DB)] --- A\n```\n| 구성요소 | 역할 |\n|---|---|\n| AH(프로토콜 51) | 패킷 [[integrity|무결성]]·발신지 인증·[[replay-attack|재전송 공격]] 방지, 암호화 없음 |\n| ESP(프로토콜 50) | [[confidentiality|기밀성]] 암호화 + 인증(AEAD), 가장 널리 사용 |\n| IKE(v2) | [[diffie-hellman|DH]] 기반 키 합의, 상호 인증, [[security-association|SA]] 생성 |\n| SPD/SAD | 보호 정책 결정, 협상된 SA(알고리즘·키·SPI) 저장 |\n\nESP의 기밀성·무결성은 SA 설정에 따라 선택되며 둘 다 NULL은 불가하다. 재전송 방지는 무결성과 수신 측 윈도우 검사에 의존한다. 아래 표는 두 보호를 함께 쓰는 일반 구성이다.\n\n## 3. IPSec의 보안기능 및 모드\n| 구분 | 내용 |\n|---|---|\n| 보안기능 | 기밀성([[aes|AES]]-GCM), 무결성([[hmac|HMAC]]-SHA2), 인증(PSK·[[digital-certificate|인증서]]), 재전송 방지(순서번호·윈도우), 접근제어(SPD) |\n| 전송 모드 | 원 IP 헤더 유지; ESP는 상위 페이로드, AH는 IP 불변 필드도 인증 → 호스트 간 종단 보안 |\n| 터널 모드 | 원 패킷 전체를 새 IP 헤더로 캡슐화 → 게이트웨이 간 VPN, ESP 암호화 시 내부 주소 은닉(외부 터널 주소는 노출) |\n\n## 4. VPN 구축 활용 및 고려사항\n- 사이트 간 VPN: 본사·지사 게이트웨이 간 ESP 터널 모드, 라우팅 기반(VTI) 구성\n- 원격접속 VPN: IKEv2+EAP로 사용자 인증, [[nat-traversal|NAT-T]](UDP 4500)는 NAT 등 경로 조건에 따라 사용\n- 고려사항: 처리 성능(하드웨어 가속), MTU·단편화, 키 수명·PFS, [[tls|SSL]] VPN과의 선택",
+      "sources": [
+        {
+          "title": "RFC 4301",
+          "url": "https://www.rfc-editor.org/rfc/rfc4301.html",
+          "scope": "IPsec 정책·SA·전송/터널 적용 범위"
+        },
+        {
+          "title": "RFC 4303",
+          "url": "https://www.rfc-editor.org/rfc/rfc4303.html",
+          "scope": "ESP 선택 서비스·재전송 조건·SPI 조회"
+        },
+        {
+          "title": "RFC 7296",
+          "url": "https://www.rfc-editor.org/rfc/rfc7296.html",
+          "scope": "IKEv2 교환과 NAT 탐지·UDP 캡슐화"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. IPsec/IKE SA 구분, NAT-T 조건·AH/ESP 보호 범위·ESP 선택 서비스·정책과 라우팅 구별.",
+      "unresolved": [
+        "최신 필수 암호 목록과 RFC 9370 PQC 결합 세부·제품 성능은 추가 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "39bfd17d80dadd61a9aab369e71f125b7ce9afae70de2ce57639bf3b2e04282b",
+      "body": "## 1. IPSec의 개요\n### 가. 정의\n- IP 계층(OSI 3계층)에서 [[authentication-header|AH]]·[[encapsulating-security-payload|ESP]] 보호 프로토콜과 [[ike|IKE]] 키 관리 프로토콜을 통해 패킷 단위로 인증·암호화·무결성·재전송 방지를 제공하는 IETF 표준 보안 아키텍처(RFC 4301~4309, IKEv2 RFC 7296)\n\n### 나. 등장배경 / 필요성\n- IPv4는 설계 시 보안 미고려 → [[ip-spoofing|IP 스푸핑]], [[sniffing|스니핑]], 세션 변조에 취약\n- 응용별 보안([[tls|SSL/TLS]], S/MIME)은 해당 응용만 보호 → 네트워크 계층에서 모든 상위 트래픽을 투명하게 보호할 범용 방식 필요\n- 전용선 대체 수단으로 공중망 위에 암호화 터널을 구성하는 [[vpn|VPN]] 수요 증가\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[security-association|SA(Security Association)]] | IPsec SA는 단방향. 수신 SAD 조회는 유니캐스트 SPI 단독/프로토콜 조합 등과 멀티캐스트 주소 조합 구분(IKE SA는 양방향) |\n| SPD / SAD | 보호 정책 DB(보호·우회·폐기 결정) / 협상된 SA 파라미터 DB |\n| 모드 | 전송 모드(종단 간) / 터널 모드(게이트웨이 간) |\n\n## 2. IPSec의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph A[IPSec 피어 A]\n    IKEa[IKE 데몬] --- SADa[(SAD)]\n    SPDa[(SPD)] --- IPa[IP 스택 AH/ESP 처리]\n    SADa --- IPa\n  end\n  subgraph B[IPSec 피어 B]\n    IKEb[IKE 데몬] --- SADb[(SAD)]\n    SPDb[(SPD)] --- IPb[IP 스택 AH/ESP 처리]\n    SADb --- IPb\n  end\n  IKEa <-->|\"IKE_SA_INIT / IKE_AUTH (UDP 500/4500)\"| IKEb\n  IPa <-->|\"ESP(50) / AH(51) 보호 패킷\"| IPb\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| AH(RFC 4302) | IP 헤더 불변 필드+페이로드 [[integrity|무결성]]·발신지 인증, 재전송 방지 | [[hmac|HMAC]]-SHA-256, 순서번호 |\n| ESP(RFC 4303) | 페이로드 [[confidentiality|기밀성]]+무결성·인증, 제한적 트래픽 흐름 기밀성 | [[aes|AES]]-GCM/CBC, ChaCha20-Poly1305 |\n| IKEv2 | 피어 상호 인증, [[diffie-hellman|DH]] 키 합의, SA 생성·재협상·삭제 | PSK, [[digital-certificate|X.509 인증서]], EAP, [[pki|PKI]] |\n| SPD | 트래픽 선택자(주소·포트·프로토콜)별 처리 정책 | BYPASS·DISCARD·PROTECT와 트래픽 선택자(라우팅 정책과 구분) |\n| SAD | SPI·알고리즘·키·수명·재전송 윈도우 저장 | 키 수명 관리 |\n\n### 다. 동작 절차 (IKEv2 기준)\n1. IKE_SA_INIT: 암호스위트 협상, DH 공개값·Nonce 교환 → IKE SA 키 유도\n2. IKE_AUTH: 인증서·PSK·EAP로 상호 인증, 첫 Child SA(IPSec SA) 생성\n3. CREATE_CHILD_SA: 추가 SA 생성 또는 Rekey(PFS 적용 시 새 DH)\n4. 데이터 전송: SPD 조회 → SAD의 SA로 ESP/AH 처리 → 수신측 SPI로 SA 검색·검증·복호화\n5. 수명 만료·장애 감지(DPD) 시 재협상 또는 SA 삭제\n\nESP의 기밀성·무결성은 SA 설정에 따라 선택되며 둘 다 NULL은 불가하다. 재전송 방지는 무결성과 수신 측 윈도우 검사에 의존한다. 아래 표는 두 보호를 함께 쓰는 일반 구성이다.\n\n## 3. IPSec의 보안기능과 VPN 구축\n### 가. 보안기능 중심 상세\n| 보안기능 | 제공 방법 | AH | ESP |\n|---|---|---|---|\n| 기밀성 | 대칭키 암호화(AES-GCM 등) | 미제공 | 제공 |\n| 무결성 | HMAC 또는 AEAD 태그 | IP 헤더 포함 | 페이로드·ESP 헤더 |\n| 발신지 인증 | SA 공유키 기반 MAC/AEAD; 인증서는 IKE 피어 인증에 사용 | 제공 | 제공 |\n| [[replay-attack|재전송 공격]] 방지 | 32/64비트 순서번호, 슬라이딩 윈도우 | 제공 | 제공 |\n| 접근제어 | SPD 정책으로 허용·폐기 결정 | 제공 | 제공 |\n| 트래픽 흐름 기밀성 | 터널 모드 캡슐화로 내부 주소·구조 은닉 | 미제공 | ESP 암호화·패딩·트래픽 조건 아래 제한적으로 제공; 캡슐화만으로 완전한 은닉 아님 |\n- AH는 IP 헤더까지 보호해 [[nat|NAT]] 통과가 불가하므로 실무는 ESP 중심, 인증은 ESP 자체 인증으로 대체\n\n### 나. 전송 모드와 터널 모드 비교\n| 구분 | 전송 모드 | 터널 모드 |\n|---|---|---|\n| 캡슐화 | 원 IP 헤더 유지, 페이로드 보호 | 원 패킷 전체 캡슐화 + 새 IP 헤더 |\n| 적용 대상 | 호스트 ↔ 호스트 | 게이트웨이 ↔ 게이트웨이, 호스트 ↔ 게이트웨이 |\n| 주소 은닉 | 불가 | ESP 암호화 시 내부 주소 은닉(외부 터널 주소는 노출) |\n| 오버헤드 | 작음 | 큼(새 헤더 20/40B) |\n| 용도 | 서버 간 종단 암호화 | 사이트 간·원격접속 VPN |\n\n### 다. VPN 구축에서의 IPSec 활용\n```mermaid\nflowchart LR\n  HQ[본사 LAN] --- GW1[VPN 게이트웨이 A]\n  GW1 ==>|\"ESP 터널 모드(인터넷)\"| GW2[VPN 게이트웨이 B]\n  GW2 --- BR[지사 LAN]\n  RU[재택 사용자] -.->|\"IKEv2+EAP, NAT-T\"| GW1\n```\n| VPN 유형 | 구성 방식 | 핵심 요소 |\n|---|---|---|\n| 사이트 간(Site-to-Site) | 양측 게이트웨이 간 ESP 터널 모드, 정책 기반 또는 라우팅 기반(VTI/GRE over IPSec) | 인증서·PSK, 경로 재분배, 이중화(DPD, 다중 터널) |\n| 원격접속(Remote Access) | 단말 클라이언트 ↔ 게이트웨이, IKEv2 EAP·MOBIKE | 사용자 인증([[multi-factor-authentication|MFA]]), 내부 IP 할당, 스플릿 터널링 정책 |\n| 호스트 간 | 전송 모드로 서버 간 직접 보호 | 서버 인증서, 자동 키 관리 |\n| 클라우드 연결 | 온프레미스 ↔ VPC 게이트웨이 IPSec 터널 | BGP 연동, 터널 이중화 |\n- NAT 환경: [[nat-traversal|NAT-T]]로 ESP를 UDP 4500에 캡슐화, IKE 메시지로 NAT 감지\n- SSL VPN과 비교: IPsec은 정책에 선택된 IP 트래픽 보호; TLS VPN도 전체 터널/포털 방식이 있고 설치·성능은 구현별로 다름\n\n## 4. IPSec 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 암호 | 취약 알고리즘(DES, 3DES, MD5, DH 1024) 배제, AES-GCM·SHA-2·ECDH(그룹 19~21) 채택 |\n| 키 관리 | IKEv1 Aggressive 모드 금지, SA 수명 적정화, PFS 활성화, 인증서 수명·폐기 관리 |\n| 성능 | 암호 가속 하드웨어, MTU 축소·TCP MSS 조정으로 단편화 방지 |\n| 운영 | 터널 이중화·DPD, 로그·[[siem|SIEM]] 연동, 정책 변경 관리 |\n| 정책 | 스플릿 터널링 범위 통제, 접속 단말 보안 점검([[network-access-control|NAC]]) |\n| 발전방향 | [[post-quantum-cryptography|양자내성암호]] 하이브리드 키교환(RFC 9370), SD-WAN·[[zero-trust|제로 트러스트]](ZTNA)와 연계 |\n\n## 5. 결론\n- IPSec은 IP 계층에서 응용 독립적으로 기밀성·무결성·인증·재전송 방지를 제공하는 범용 보안 방법론으로, ESP 터널 모드와 IKEv2를 중심으로 사이트 간·원격접속 VPN 구축의 표준 기반이며, 양자내성 키교환과 제로 트러스트 접근제어로 진화 중",
+      "sources": [
+        {
+          "title": "RFC 4301",
+          "url": "https://www.rfc-editor.org/rfc/rfc4301.html",
+          "scope": "IPsec 정책·SA·전송/터널 적용 범위"
+        },
+        {
+          "title": "RFC 4303",
+          "url": "https://www.rfc-editor.org/rfc/rfc4303.html",
+          "scope": "ESP 선택 서비스·재전송 조건·SPI 조회"
+        },
+        {
+          "title": "RFC 7296",
+          "url": "https://www.rfc-editor.org/rfc/rfc7296.html",
+          "scope": "IKEv2 교환과 NAT 탐지·UDP 캡슐화"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. IPsec/IKE SA 구분, NAT-T 조건·AH/ESP 보호 범위·ESP 선택 서비스·정책과 라우팅 구별.",
+      "unresolved": [
+        "최신 필수 암호 목록과 RFC 9370 PQC 결합 세부·제품 성능은 추가 대조 필요."
+      ]
+    }
+  },
+  "t-dbee7777": {
+    "short": {
+      "source_sha256": "90a1ce6c417163f70e495627613cfed47e78914d0bc27299a2e907d3ff1afe1e",
+      "body": "## 1. 가상사설망(VPN)의 개요\n- 정의: 인터넷 등 공중망 위에 [[tunneling|터널링]]·암호화·인증 기술로 전용선과 같은 보안 통신 채널을 구성하는 가상의 사설 네트워크\n- 필요성: 전용선의 고비용 대체, 재택·출장 원격근무, 본사-지사 연결 시 기밀성·무결성 확보\n\n암호화 VPN은 VPN의 한 유형이다. BGP/MPLS VPN의 논리적 분리나 GRE/L2TP 캡슐화만으로 기밀성이 생기지 않으며 별도 암호화가 필요할 수 있다. PPTP는 역사적 예시이며 신규 설계 권고가 아니다.\n\n## 2. VPN의 개념도 및 기술요소\n```mermaid\nflowchart LR\n  A[본사 LAN] --- G1[VPN 게이트웨이] ===|암호화 터널| G2[VPN 게이트웨이] --- B[지사 LAN]\n  G1 -.-> I((인터넷)) -.-> G2\n  R[원격 사용자 VPN 클라이언트] ===|암호화 터널| G1\n```\n| 기술요소 | 역할 |\n|---|---|\n| 터널링 | 원 패킷을 새 헤더로 캡슐화([[ipsec|IPSec]], [[l2tp|L2TP]], [[pptp|PPTP]], [[gre|GRE]]) |\n| 암호화 | [[aes|AES]] 등 대칭키로 기밀성 |\n| 인증 | [[digital-certificate|인증서]]·사전공유키·[[ike|IKE]]로 상호 인증, [[hmac|HMAC]] 무결성 |\n| 키 관리 | [[diffie-hellman|Diffie-Hellman]] 교환, 세션키 주기적 갱신 |\n\n## 3. IPSec VPN과 SSL VPN 비교\n| 구분 | IPSec VPN | [[tls|SSL]] VPN |\n|---|---|---|\n| 계층 | 3계층(네트워크) | 4~7계층(전송·응용) |\n| 클라이언트 | OS 내장 또는 별도 클라이언트/게이트웨이 | 포털은 브라우저, 전체 터널은 별도 클라이언트가 필요할 수 있음 |\n| 용도 | 사이트 간(Site-to-Site) 연결 | 원격 사용자 접속, 특정 애플리케이션 |\n| 접근 범위 | 선택자·ACL로 자원 범위 제한 가능 | 포털/터널과 정책에 따라 범위 결정 |\n| 보안 프로토콜 | [[authentication-header|AH]]·[[encapsulating-security-payload|ESP]], IKE | TLS 핸드셰이크·레코드 |\n\n## 4. 고려사항 및 발전방향\n- 성능(암호화 오버헤드), [[nat-traversal|NAT 통과]], [[split-tunneling|스플릿 터널링]] 정책, VPN 장비 취약점 패치\n- 경계 기반 VPN의 한계 → [[zero-trust-network-access|ZTNA]]·[[software-defined-perimeter|SDP]]·[[sase|SASE]]로 발전",
+      "sources": [
+        {
+          "title": "RFC 4364 §1.6·13",
+          "url": "https://www.rfc-editor.org/rfc/rfc4364.html",
+          "scope": "MPLS VPN 분리와 암호화·무결성의 별개성"
+        },
+        {
+          "title": "RFC 4301",
+          "url": "https://www.rfc-editor.org/rfc/rfc4301.html",
+          "scope": "IPsec 트래픽 선택·정책별 보호"
+        },
+        {
+          "title": "Tor Project",
+          "url": "https://support.torproject.org/about-tor/introduction/what-is-tor/",
+          "scope": "릴레이 기반 익명성 목적과 구성"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. VPN=암호화 일반화·MPLS QoS 전제·클라이언트/접근 범위 비교의 구현 조건·Tor 절대 익명성 교정.",
+      "unresolved": [
+        "VPN 제품별 성능 우열·ZTNA/SASE 전환 속도와 Tor 상관분석 정량 수치는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "a9c02a6c2d6eeba5ab491016b7623864ccd1e491506824df205a8f43a2b234c4",
+      "body": "## 1. 가상사설망(VPN)의 개요\n### 가. 정의\n- 공중망(인터넷) 위에 [[tunneling|터널링]]·암호화·인증 기술을 적용하여 논리적으로 분리된 사설 통신망처럼 안전하게 데이터를 전송하는 가상 네트워크 기술\n\n### 나. 필요성\n| 구분 | 내용 |\n|---|---|\n| 비용 | 전용선 임차 대비 저비용으로 광역 사설망 구성 |\n| 보안 | 공중망 구간 도청·변조·위장 방지(기밀성·무결성·인증) |\n| 업무 환경 | 재택근무·모바일 오피스·클라우드 연결 등 원격 접속 수요 |\n\n### 다. VPN의 특징 및 유형\n| 유형 | 설명 |\n|---|---|\n| [[remote-access-vpn|원격접속 VPN]] | 개별 사용자 단말 ↔ 사내 게이트웨이, 이동 근무자 |\n| [[site-to-site-vpn|사이트 간 VPN]] | 본사-지사 게이트웨이 간 상시 터널(인트라넷·엑스트라넷 VPN) |\n| [[mpls|MPLS]] VPN | 통신사 백본에서 VRF·라우팅 정책·라벨로 분리; QoS는 별도 자원·정책·서비스 계약 조건이며 암호화는 기본 제공하지 않음 |\n\n암호화 VPN은 VPN의 한 유형이다. BGP/MPLS VPN의 논리적 분리나 GRE/L2TP 캡슐화만으로 기밀성이 생기지 않으며 별도 암호화가 필요할 수 있다. PPTP는 역사적 예시이며 신규 설계 권고가 아니다.\n\n## 2. VPN의 구성도 및 기술요소\n### 가. 구성도\n```mermaid\nflowchart LR\n  subgraph HQ[본사]\n    L1[내부 서버·LAN] --- GW1[VPN 게이트웨이]\n  end\n  subgraph BR[지사]\n    GW2[VPN 게이트웨이] --- L2[지사 LAN]\n  end\n  GW1 ===|IPSec 터널 Site-to-Site| GW2\n  RU[원격 사용자 클라이언트] ===|SSL 또는 IPSec 터널| GW1\n  GW1 -.- INET((인터넷)) -.- GW2\n  INET -.- RU\n  AAA[인증 서버 RADIUS·PKI] --- GW1\n```\n\n### 나. 기술요소\n| 기술요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 터널링 | 원본 패킷을 캡슐화하여 공중망 통과 | [[pptp|PPTP]]·[[l2tp|L2TP]](2계층), [[ipsec|IPSec]]·[[gre|GRE]](3계층), [[tls|SSL/TLS]](4계층 이상) |\n| 암호화 | 전송 데이터 기밀성 | [[aes|AES]]-GCM, ChaCha20, 국산 ARIA·SEED |\n| 인증 | 사용자·장비 신원 확인 | 사전공유키(PSK), [[digital-certificate|X.509 인증서]], [[pki|PKI]], [[multi-factor-authentication|MFA]], RADIUS |\n| 무결성 | 변조 탐지 | [[hmac|HMAC]]-SHA-256, AEAD |\n| 키 관리 | 세션키 협상·갱신 | [[ike|IKEv2]], [[diffie-hellman|Diffie-Hellman]], 완전 순방향 비밀성(PFS) |\n| 접근통제 | 터널 내 자원 접근 제한 | 정책 기반 ACL, [[split-tunneling|스플릿 터널링]] |\n\n### 다. 동작 절차(IPSec IKEv2 기준)\n1. IKE_SA_INIT: DH 교환으로 IKE SA 수립, 암호 알고리즘 협상\n2. IKE_AUTH: 인증서·PSK로 상호 인증, 자식 SA(IPSec SA) 생성\n3. 데이터 전송: ESP로 패킷 암호화·인증, [[security-association|SA]]의 SPI로 식별\n4. 키 갱신: 수명 만료 시 CREATE_CHILD_SA로 재협상, 종료 시 SA 삭제\n\n## 3. VPN 기술 비교\n### 가. IPSec VPN과 SSL VPN\n| 구분 | IPSec VPN | SSL VPN |\n|---|---|---|\n| 동작 계층 | 3계층(IP) | 4~7계층(TLS 세션) |\n| 프로토콜 | [[authentication-header|AH]](인증·무결성), [[encapsulating-security-payload|ESP]](암호화+인증), IKE | TLS 핸드셰이크·레코드 프로토콜 |\n| 모드 | [[transport-mode|전송 모드]](페이로드만 보호), [[tunnel-mode|터널 모드]](IP 헤더 포함 전체 보호) | 포털 방식, 터널 방식(가상 어댑터) |\n| 클라이언트 | OS 내장·별도 구현 등 | 포털/전체 터널에 따라 브라우저 또는 클라이언트 사용 |\n| 적용 대상 | 사이트 간 연결, 모든 IP 애플리케이션 | 원격 사용자, 웹·특정 애플리케이션 |\n| 접근 통제 | 정책·ACL로 제한 | 포털/터널 방식·정책별 통제 |\n| [[nat-traversal|NAT 통과]] | NAT-T(UDP 4500) 필요 | TCP 443 사용으로 방화벽 친화적 |\n| 성능 | 하드웨어 가속, 대용량 유리 | TLS 오버헤드, 사용자 단위 |\n\n### 나. VPN과 Tor 비교\n| 구분 | VPN | [[tor|Tor]] |\n|---|---|---|\n| 목적 | 기업 사설망 보안 접속, 전송 구간 암호화 | 익명성 강화·검열 우회(절대 보장 아님) |\n| 구조 | 사용자 ↔ 단일 VPN 서버(사업자 신뢰 필요) | [[onion-routing|어니언 라우팅]]: 진입·중간·출구 3개 이상 자원봉사 노드 경유, 계층 암호화 |\n| 신뢰 모델 | VPN 사업자가 트래픽·로그 확보 가능 | 단일 정상 릴레이가 직접 양 끝을 모두 보지 않도록 설계하나 복수 위치 관찰·상관분석 가능 |\n| 속도 | 비교적 빠름 | 다중 홉으로 느림 |\n| 보안 한계 | 사업자 로그, 장비 취약점 | 출구 노드 도청(종단 암호화 필요), 트래픽 상관분석 |\n| 활용 | 원격근무, 지사 연결 | 익명 제보, [[dark-web|다크웹]](.onion) 접근 |\n\n## 4. VPN 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 보안 | VPN 장비 취약점(SSL VPN 원격코드실행 사례) 즉시 패치, MFA 필수, 암호 스위트 최신화 |\n| 성능·가용성 | 암호화 오버헤드, 하드웨어 가속, 이중화, 동시 접속 용량 |\n| 정책 | 스플릿 터널링 허용 범위, 단말 보안 상태 점검(NAC 연계), 접속 로그 보존 |\n| 한계 | 접속 후 내부 자원을 과도하게 허용하면 [[lateral-movement|측면 이동]] 위험, 경계 보안 모델의 한계 |\n| 발전방향 | [[zero-trust|제로 트러스트]] 기반 [[zero-trust-network-access|ZTNA]]·[[software-defined-perimeter|SDP]], 클라우드 통합 보안 [[sase|SASE]], [[wireguard|WireGuard]] 등 경량 프로토콜, 양자내성 키교환 도입 |\n\n## 5. 결론\n- VPN은 공중망 위 보안 통신의 표준 수단이나 과도한 접근권한을 부여한 배포의 한계로, 사용자·단말·애플리케이션 단위로 지속 검증하는 ZTNA·SASE로의 전환이 가속되는 추세",
+      "sources": [
+        {
+          "title": "RFC 4364 §1.6·13",
+          "url": "https://www.rfc-editor.org/rfc/rfc4364.html",
+          "scope": "MPLS VPN 분리와 암호화·무결성의 별개성"
+        },
+        {
+          "title": "RFC 4301",
+          "url": "https://www.rfc-editor.org/rfc/rfc4301.html",
+          "scope": "IPsec 트래픽 선택·정책별 보호"
+        },
+        {
+          "title": "Tor Project",
+          "url": "https://support.torproject.org/about-tor/introduction/what-is-tor/",
+          "scope": "릴레이 기반 익명성 목적과 구성"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. VPN=암호화 일반화·MPLS QoS 전제·클라이언트/접근 범위 비교의 구현 조건·Tor 절대 익명성 교정.",
+      "unresolved": [
+        "VPN 제품별 성능 우열·ZTNA/SASE 전환 속도와 Tor 상관분석 정량 수치는 미확인."
+      ]
+    }
+  },
+  "t-6109cf41": {
+    "short": {
+      "source_sha256": "29c110fe136e5c0ef1d0148e449e33aa853bcd4758899eea0b509eba0a87f709",
+      "body": "## 1. 무선 LAN 보안의 개요\n- 정의: [[wireless-lan|무선 LAN]](Wi-Fi) 환경에서 전파의 개방성으로 발생하는 도청·위장·침입 위협으로부터 인증·암호화·접근통제를 통해 데이터와 네트워크를 보호하는 기술\n- 필요성: 유선과 달리 물리적 경계 없이 전파 도달 범위 내 누구나 접근 가능, [[smart-office|스마트 오피스]]·[[fmc|FMC]] 확산으로 중요도 증가\n\n아래 RADIUS/802.1X 도식은 기업 모드 예다. Personal 모드에는 동일 인증서버가 필수인 것은 아니다. WPA3 모드와 장비 세대별 암호·PMF 요구사항을 확인한다.\n\n## 2. 무선 LAN 보안의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  STA[단말] -->|\"인증(802.1X)\"| AP[액세스포인트]\n  AP -->|\"암호화(WPA2/WPA3)\"| STA\n  AP --> AUTH[\"인증서버(RADIUS)\"]\n  WIPS[\"WIPS\"] -.모니터링.-> AP\n```\n| 구성요소 | 역할 |\n|---|---|\n| 인증 | [[ieee-802-1x|802.1X]]·[[eap|EAP]], [[radius|RADIUS]] 사용자 인증 |\n| 암호화 | [[wpa2|WPA2]]·[[wpa3|WPA3]], AES-CCMP |\n| 접근통제 | 인증·인가·망 분리 중심(MAC 필터링·SSID 숨김만으로 보안 확보 불가) |\n| [[wips|WIPS]] | [[rogue-ap|불법 AP]]·침입 탐지·차단 |\n\n## 3. 침해 유형 및 대책\n| 침해 유형 | 대책 |\n|---|---|\n| 도청·스니핑 | WPA2/WPA3 강한 암호화 |\n| [[rogue-ap|Rogue AP]]·[[evil-twin|Evil Twin]] | 서버 인증서·신뢰 CA 검증을 포함한 안전한 EAP 설정과 WIPS 탐지·대응 |\n| 인증 우회·크래킹 | 802.1X 기업모드, 강한 패스프레이즈 |\n| [[wireless-dos|무선 DoS]]·전파방해 | 모니터링, 채널 관리 |\n\n## 4. 고려사항\n- 개인(PSK)보다 기업(802.1X) 모드 적용, [[wpa3|WPA3]] 도입 검토와 함께 [[krack-attack|KRACK]] 영향을 받는 AP·단말 패치\n- 게스트망 분리, [[network-access-control|NAC]] 연계 단말 보안상태 점검",
+      "sources": [
+        {
+          "title": "Cisco WPA3 Deployment Guide",
+          "url": "https://www.cisco.com/c/en/us/td/docs/wireless/controller/9800/technical-reference/wpa3-dg.html",
+          "scope": "Personal/Enterprise·세대별 AKM·CCMP/GCMP 조합"
+        },
+        {
+          "title": "KRACK 원 연구자 안내",
+          "url": "https://www.krackattacks.com/",
+          "scope": "키 재설치 원인과 호환 패치 대응"
+        },
+        {
+          "title": "NIST SP 800-153",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-153.pdf",
+          "scope": "WLAN 구성·모니터링·운영 관리(2012 자료, WPA3 규격 근거 아님)"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. WPA3=GCMP·SAE 전체 적용 일반화, KRACK 패치, 기업 인증 도식 범위·약한 접근통제 한계 교정.",
+      "unresolved": [
+        "Wi-Fi Alliance 원 규격 페이지 접근 실패. 상세 규격 대조는 Cisco 공식 제품 가이드 범위이며 모든 제조사·버전의 구현 적합성을 검증한 것은 아님."
+      ]
+    },
+    "long": {
+      "source_sha256": "ca42425e44f306d0228068d7b6aaa1a67e46bbe32f13c1f4fb3a107218542a15",
+      "body": "## 1. 무선 LAN 보안의 개요\n### 가. 정의\n- [[wireless-lan|무선 LAN]](IEEE 802.11, Wi-Fi) 환경에서 전파의 개방성·브로드캐스트 특성으로 인한 도청, AP 위장, 무단 접속, 서비스 방해 위협으로부터 인증·암호화·접근통제·모니터링으로 네트워크와 데이터를 보호하는 기술\n\n### 나. 등장배경 및 필요성\n- 유선망과 달리 물리적 매체 경계가 없어 전파 도달 범위 내에서 누구나 수동 도청·접속 시도 가능\n- 초기 [[wep|WEP]]의 암호 취약점, 기본 설정 AP 방치 등으로 침해 빈발\n- [[smart-office|스마트 오피스]], [[fmc|FMC]], BYOD 확산으로 업무 트래픽이 무선망에 집중되어 보안 중요도 급증\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 인증 | 접속 단말·사용자의 신원 검증([[ieee-802-1x|802.1X]]/[[eap|EAP]], PSK) |\n| 기밀성 | 전송 프레임 암호화([[wpa2|WPA2]] CCMP, [[wpa3|WPA3]]는 모드·세대에 따라 CCMP/GCMP 조합) |\n| 가용성·탐지 | [[wips|WIPS]]로 불법 AP·무선 공격 상시 탐지·차단 |\n\n아래 RADIUS/802.1X 도식은 기업 모드 예다. Personal 모드에는 동일 인증서버가 필수인 것은 아니다. WPA3 모드와 장비 세대별 암호·PMF 요구사항을 확인한다.\n\n## 2. 무선 LAN 보안의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  STA[무선 단말] -->|연결 요청| AP[액세스포인트]\n  AP -->|\"EAP 인증 중계\"| RAD[\"RADIUS 인증서버\"]\n  RAD -->|인증 결과| AP\n  AP -->|\"WPA2/WPA3 암호화 세션\"| STA\n  WIPS[\"WIPS 센서\"] -.불법 AP·공격 탐지.-> AP\n  NAC[\"NAC\"] -.단말 보안점검.-> STA\n  AP --> FW[\"방화벽·게스트망 분리\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 인증 체계 | 사용자·단말 신원 검증 | [[ieee-802-1x|802.1X]], [[eap|EAP-TLS/PEAP]], [[radius|RADIUS]] |\n| 암호화 | 무선구간 기밀성·무결성 | [[wpa2|WPA2]](AES-CCMP), [[wpa3|WPA3]] Personal의 SAE 인증과 CCMP/GCMP 암호를 구분 |\n| 접근통제 | 무단 접속 차단 | 인증·인가·[[network-access-control|NAC]] 중심; SSID 숨김·MAC 필터링은 강한 인증 대체 불가 |\n| 침입 방지 | 무선 위협 탐지·대응 | [[wips|WIPS]], [[rogue-ap|불법 AP]] 탐지 |\n| 망 분리 | 업무·게스트망 격리 | VLAN, 방화벽 |\n\n### 다. 접속 및 보호 절차 (기업 모드)\n1. 단말이 AP에 연결 요청, SSID·보안모드 확인\n2. 802.1X 기반 EAP 인증, AP가 RADIUS 서버로 중계\n3. 인증 성공 시 세션키 분배, 4-way handshake로 암호키 합의\n4. WPA2/WPA3로 암호화된 데이터 송수신\n5. WIPS가 불법 AP·공격을 상시 모니터링, NAC가 단말 보안상태 점검\n\n## 3. 무선 LAN 보안의 상세\n### 가. 보안 침해 유형\n| 유형 | 내용 |\n|---|---|\n| 도청·스니핑 | 암호화 미흡·취약 시 전송 데이터 수동 수집 |\n| [[rogue-ap|Rogue AP]] | 내부에 무단 설치된 AP로 우회 침입 경로 생성 |\n| [[evil-twin|Evil Twin]] | 정상 AP로 위장해 단말 접속 유도, 자격증명 탈취 |\n| 인증·암호 크래킹 | [[wep|WEP]]·약한 PSK 패스프레이즈 공격 |\n| [[krack-attack|KRACK]] | WPA2 4-way handshake 키 재설치 취약점 |\n| [[wireless-dos|무선 DoS]] | 디어소시에이션 프레임·전파방해로 서비스 방해 |\n| MAC 스푸핑 | 허용 단말 MAC 위장으로 접근통제 우회 |\n\n### 나. 보안 강화 방안 (기업 무선망 관점)\n| 구분 | 강화 방안 |\n|---|---|\n| 인증 강화 | 개인용 PSK 대신 [[ieee-802-1x|802.1X]] 기업모드, EAP-TLS 인증서 기반 |\n| 암호 강화 | [[wpa3|WPA3]] 전환(Personal SAE와 Enterprise EAP 조건을 구분), WEP·TKIP 폐지 |\n| 접근통제 | SSID·게스트망 분리, NAC로 단말 보안상태 점검 후 접속 허용 |\n| 침입 방지 | WIPS 상시 운영, Rogue AP·Evil Twin 탐지·정책에 따른 대응(탐지/차단 성공 보장 아님) |\n| 운영관리 | AP 펌웨어 패치, 관리자 계정·기본설정 변경, 전파 출력·채널 관리 |\n| 가시성 | 무선 트래픽 로그 수집, 이상행위 모니터링 |\n\n### 다. WLAN 보안 표준 비교\n| 표준 | 인증 | 암호 | 특징 |\n|---|---|---|---|\n| [[wep|WEP]] | 공유키 | RC4 | 취약, 폐기 |\n| WPA | PSK/802.1X | TKIP | 과도기 |\n| [[wpa2|WPA2]] | PSK/802.1X | AES-CCMP | KRACK은 패치로 대응 가능; 제품별 적용 확인 |\n| [[wpa3|WPA3]] | Personal SAE / Enterprise 802.1X | CCMP/GCMP는 모드·Wi-Fi 세대별 확인 | SAE의 오프라인 사전공격 저항 등; 모든 모드의 조건이 같지 않음 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 아키텍처 | 업무·게스트·IoT망 분리, [[zero-trust|제로트러스트]] 기반 접근통제 |\n| 인증 | 인증서 기반 기업모드 우선, 공용 무선망 이용 제한 정책 |\n| 운영 | 정기 전파 측정·WIPS 점검, 취약 단말 격리 |\n| 발전방향 | WPA3·Wi-Fi 6E/7 보안 적용, AI 기반 무선 이상탐지, SASE 통합 |\n\n## 5. 결론\n- 무선 LAN 보안은 전파 개방성이라는 본질적 취약점을 인증·암호화·침입방지·망분리의 다계층 통제로 보완해야 하며, WPA3와 802.1X 기업모드 전환 및 WIPS 상시 모니터링이 핵심",
+      "sources": [
+        {
+          "title": "Cisco WPA3 Deployment Guide",
+          "url": "https://www.cisco.com/c/en/us/td/docs/wireless/controller/9800/technical-reference/wpa3-dg.html",
+          "scope": "Personal/Enterprise·세대별 AKM·CCMP/GCMP 조합"
+        },
+        {
+          "title": "KRACK 원 연구자 안내",
+          "url": "https://www.krackattacks.com/",
+          "scope": "키 재설치 원인과 호환 패치 대응"
+        },
+        {
+          "title": "NIST SP 800-153",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-153.pdf",
+          "scope": "WLAN 구성·모니터링·운영 관리(2012 자료, WPA3 규격 근거 아님)"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. WPA3=GCMP·SAE 전체 적용 일반화, KRACK 패치, 기업 인증 도식 범위·약한 접근통제 한계 교정.",
+      "unresolved": [
+        "Wi-Fi Alliance 원 규격 페이지 접근 실패. 상세 규격 대조는 Cisco 공식 제품 가이드 범위이며 모든 제조사·버전의 구현 적합성을 검증한 것은 아님."
+      ]
+    }
+  },
+  "t-316908c3": {
+    "short": {
+      "source_sha256": "dd321a912eb352c85fe13f6b482722b209b2397600d0bd43852ceb8bf2f92f16",
+      "body": "## 1. 침입탐지시스템(IDS)의 개요\n- 정의: 네트워크 트래픽·시스템 로그를 실시간 수집·분석하여 비인가 접근, 오용, 이상행위 등 침입 징후를 탐지하고 관리자에게 경보하는 보안 시스템\n- 필요성: [[firewall|방화벽]]의 단순 포트·주소 필터만으로는 허용 세션 내부 공격 탐지가 제한됨(응용 검사·IPS 통합 제품은 별도) → 내부자 공격·우회 공격 탐지와 사고 분석 증거 확보 필요\n\n## 2. IDS의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[센서: 패킷·로그 수집] --> P[전처리·정규화] --> A[분석 엔진: 오용·이상 탐지] --> R[대응: 경보·로그·연동]\n  DB[시그니처·프로파일 DB] --> A\n```\n| 구성요소 | 역할 |\n|---|---|\n| 데이터 수집부 | [[port-mirroring|포트 미러링]]·[[network-tap|TAP]]으로 트래픽, 호스트 로그 수집 |\n| 분석 엔진 | [[attack-signature|시그니처]] 매칭, 통계·프로파일 비교 |\n| 대응·관리부 | 경보, 로그 저장, [[siem|SIEM]]·방화벽 연동 |\n\n## 3. IDS의 종류 및 IPS 비교\n| 구분 | 내용 |\n|---|---|\n| 위치별 | [[network-based-intrusion-detection|NIDS]](네트워크 구간), [[host-based-intrusion-detection|HIDS]](서버 내부 로그·파일 무결성) |\n| 탐지방식 | [[misuse-detection|오용 탐지]](지식 기반, 알려진 패턴, [[false-negative|미탐]] 多), [[anomaly-detection|이상 탐지]](행위 기반, 정상 프로파일 편차, [[false-positive|오탐]] 多) |\n| IDS vs [[intrusion-prevention-system|IPS]] | 네트워크 IDS는 주로 복사 트래픽 탐지·경보, IPS는 주로 인라인 차단. HIDS·호스트 IPS와 연동 대응은 별도 |\n\n## 4. 고려사항 및 발전방향\n- 오탐·미탐 균형(튜닝), 암호화 트래픽 가시성, 대용량 처리 성능, [[zero-day-attack|제로데이]] 대응 한계\n- AI 기반 이상 탐지, [[network-detection-and-response|NDR]]·[[xdr|XDR]]로 탐지·대응 통합, 클라우드 네이티브 IDS로 발전",
+      "sources": [
+        {
+          "title": "NIST SP 800-94",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-94.pdf",
+          "scope": "탐지 방식·배치·암호화 가시성 한계(2007 기본 개념 자료)"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 방화벽 기능·시그니처 제로데이·암호화 메타데이터·IDS/IPS 배치와 장애 정책의 일반화 교정.",
+      "unresolved": [
+        "개인정보 안전성 확보조치 의무와 상용 제품 주류·XDR 시장 동향은 최신 원문 대조 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "6eca9adef20dbe0e7a798e20e33ba13def5d16b20f1eddf9bba8b54137de4249",
+      "body": "## 1. 침입탐지시스템(IDS)의 개요\n### 가. 정의\n- 네트워크 패킷, 시스템·애플리케이션 로그, 파일 변경 등을 실시간 모니터링·분석하여 비인가 접근, 권한 오용, 악성 행위 등 보안 정책 위반 징후를 탐지하고 경보·기록하는 보안 시스템\n\n### 나. 목적 및 필요성\n| 구분 | 내용 |\n|---|---|\n| 방화벽 보완 | [[firewall|방화벽]]의 기능·배치에 따라 내부 공격 가시성이 제한되며 응용 검사/IPS 통합 기능 여부를 구분 |\n| 조기 경보 | 공격 초기 징후 탐지로 피해 확산 전 대응, 평균 탐지 시간 단축 |\n| 사고 분석 | 공격 로그·패킷 보존으로 [[digital-forensics|포렌식]]·책임 추적 근거 확보 |\n| 컴플라이언스 | 개인정보 안전성 확보조치의 접근통제·침입 탐지 요구 충족 |\n\n### 다. 주요 기능\n- 데이터 수집, 침입 분석·탐지, 경보·보고, 로그 저장, 대응 연동(방화벽 룰 추가·세션 차단), 정책·시그니처 관리\n\n## 2. IDS의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph NET[네트워크 구간]\n    INET((인터넷)) --> FW[방화벽] --> SW[스위치] --> SRV[내부 서버군]\n    SW -->|포트 미러링·TAP| NS[NIDS 센서]\n  end\n  SRV --> HS[HIDS 에이전트: 로그·파일 무결성]\n  NS --> COL[수집·전처리: 패킷 재조합·정규화]\n  HS --> COL\n  COL --> ENG[\"분석 엔진: 오용 탐지(시그니처) + 이상 탐지(프로파일)\"]\n  SIG[시그니처·정상 프로파일 DB] --> ENG\n  ENG --> RESP[\"대응·관리: 경보, 로그, 콘솔, SIEM·방화벽 연동\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 센서(수집부) | 트래픽·로그 원천 데이터 수집 | [[port-mirroring|포트 미러링(SPAN)]], [[network-tap|네트워크 TAP]], 호스트 에이전트, 패킷 캡처 |\n| 전처리부 | IP 단편 재조합, TCP 스트림 조립, 프로토콜 디코딩, 정규화 | [[deep-packet-inspection|DPI]], 회피 공격 대응(단편화·인코딩) |\n| 분석 엔진 | 침입 여부 판정 | [[attack-signature|시그니처]] 패턴 매칭, 통계 분석, 상태 기반 프로토콜 분석, 머신러닝 |\n| 지식 베이스 | 공격 패턴·정상 행위 프로파일 저장 | 시그니처 DB, 베이스라인 |\n| 대응·관리부 | 경보 생성, 로그 저장, 보고, 외부 연동 | 콘솔, Syslog, [[siem|SIEM]], 방화벽 API |\n\n### 다. 동작 절차\n1. 수집: 미러링된 패킷 또는 호스트 로그를 센서가 수집\n2. 전처리: 재조합·디코딩으로 분석 가능한 이벤트 생성\n3. 분석: 시그니처 매칭 및 정상 프로파일 편차 분석\n4. 판정·경보: 위험도 분류, 관리자 경보, 상세 로그 저장\n5. 대응·개선: 방화벽 연동 차단, 시그니처 업데이트, 오탐 튜닝\n\n## 3. IDS의 종류·구현 방식 및 IPS 비교\n### 가. 설치 위치(데이터 소스)별 분류\n| 구분 | [[network-based-intrusion-detection|NIDS]] | [[host-based-intrusion-detection|HIDS]] |\n|---|---|---|\n| 분석 대상 | 네트워크 세그먼트 패킷 | 시스템 로그, 프로세스, 파일 무결성, 레지스트리 |\n| 장점 | 다수 호스트 동시 감시, 호스트 성능 영향 없음 | 암호화 해제 후 내용 분석, 호스트 내부 행위 정밀 탐지 |\n| 단점 | 복호화 없는 페이로드 분석은 제한되나 연결·흐름 메타데이터 분석 가능, 고속망 패킷 유실 | 호스트 자원 소모, 호스트별 설치·관리 부담 |\n| 대표 도구 | [[snort|Snort]], Suricata, Zeek | OSSEC, Tripwire, Wazuh |\n\n### 나. 탐지 방식(구현 방식)별 분류\n| 구분 | [[misuse-detection|오용 탐지]](지식 기반) | [[anomaly-detection|이상 탐지]](행위 기반) |\n|---|---|---|\n| 원리 | 알려진 공격 패턴·시그니처와 비교 | 정상 행위 프로파일 학습 후 편차 탐지 |\n| 기법 | 패턴 매칭, 전문가 시스템, 상태 전이 분석, 페트리넷 | 통계 분석, 데이터 마이닝, 신경망·기계학습, 면역 시스템 |\n| [[zero-day-attack|제로데이]] | 정확한 미지 시그니처는 놓칠 수 있으나 일반 공격 패턴으로 일부 탐지 가능 | 일부 미지 위협 탐지 가능, 보장 아님 |\n| 오탐 | [[false-positive|오탐]] 적음 | 오탐 많음, 학습 기간 필요 |\n| 유지관리 | 시그니처 지속 업데이트 | 프로파일 재학습, 환경 변화 반영 |\n- 그 외: 상태 기반 프로토콜 분석(RFC 명세 기준 이탈 탐지), 하이브리드 방식이 상용 제품 주류\n\n### 다. IDS와 IPS 비교\n아래 배치는 네트워크 센서의 대표 예이며 모든 호스트 기반 제품에 동일 적용하지 않는다.\n| 구분 | IDS | [[intrusion-prevention-system|IPS]] |\n|---|---|---|\n| 배치 | 아웃오브패스(미러링·TAP), 트래픽 복사본 분석 | 인라인(트래픽 경로상), 실제 패킷 통과 |\n| 동작 | 탐지·경보·로그(수동, 사후) | 탐지 + 실시간 차단·세션 종료(능동, 사전) |\n| 지연·가용성 | 네트워크 지연 없음, 장애 시 통신 무영향 | 처리 지연 발생, 장애 시 통신 영향 가능; 가용성/보안 요구에 따라 fail-open 또는 fail-closed 선택 |\n| 오탐 영향 | 경보 노이즈 | 정상 트래픽 차단으로 서비스 장애 |\n| 활용 | 사고 분석, 내부 모니터링, 정책 검증 | 경계 보호, 알려진 공격 즉시 차단 |\n| 발전 | NIDS → [[network-detection-and-response|NDR]] | IPS → NGFW·[[unified-threat-management|UTM]], [[waf|WAF]] |\n\n## 4. IDS 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 정확도 | 오탐·미탐 균형 튜닝, 환경 맞춤 시그니처, 위험도 기반 경보 우선순위 |\n| 성능 | 고속망 패킷 유실 방지(하드웨어 가속, 분산 센서), 저장 용량 |\n| 가시성 | TLS 트래픽 비율 증가 → SSL 가시성 장비 연계, 호스트 기반 보완 |\n| 회피 대응 | 단편화·인코딩·다형성 회피 기법 대응, 시그니처 정규화 |\n| 운영 | 24시간 모니터링 인력(SOC), SIEM 상관분석, [[honeypot|허니팟]] 연계 |\n| 발전방향 | [[apt|APT]] 등 지능형 위협 대응을 위한 AI·행위 분석 기반 [[endpoint-detection-and-response|EDR]]·NDR·[[xdr|XDR]] 통합, 클라우드 네이티브·컨테이너 IDS, [[threat-intelligence|위협 인텔리전스]] 자동 연동 |\n\n## 5. 결론\n- IDS는 방화벽이 놓치는 공격을 탐지하는 심층 방어의 핵심 요소이며, 오용·이상 탐지의 결합과 IPS·SIEM·EDR 연동을 통해 탐지에서 대응까지 통합된 보안 운영 체계로 진화",
+      "sources": [
+        {
+          "title": "NIST SP 800-94",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-94.pdf",
+          "scope": "탐지 방식·배치·암호화 가시성 한계(2007 기본 개념 자료)"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 방화벽 기능·시그니처 제로데이·암호화 메타데이터·IDS/IPS 배치와 장애 정책의 일반화 교정.",
+      "unresolved": [
+        "개인정보 안전성 확보조치 의무와 상용 제품 주류·XDR 시장 동향은 최신 원문 대조 미완료."
+      ]
+    }
+  },
+  "t-ef8631f4": {
+    "short": {
+      "source_sha256": "1a06b8c57d3204d9528718204b4f10853aac6f366ce56680b034d9b0beb1a94b",
+      "body": "## 1. 분산 서비스 거부 공격(DDoS)의 개요\n- 정의: 다수의 분산 공격원(감염 봇넷·악용 서버 등)을 이용해 표적 시스템·네트워크에 대량 트래픽 또는 자원 고갈 요청을 동시에 발생시켜 정상 서비스를 불가능하게 하는 [[denial-of-service|서비스 거부]] 공격\n- 등장배경: IoT 기기 봇넷(Mirai)으로 Tbps급 대규모화, DDoS 대행 서비스로 공격 비용 하락, 금전 요구(RDoS)·사이버전 수단화\n\n## 2. DDoS의 공격 구조 및 유형\n```mermaid\nflowchart LR\n  A[공격자] --> C[\"C&C 서버\"] --> Z1[좀비 PC·IoT] & Z2[좀비 PC·IoT] & Z3[좀비 PC·IoT]\n  Z1 & Z2 & Z3 -->|대량 트래픽| T[표적 서버]\n  Z2 -.->|위조 출발지 요청| R[반사 서버 DNS·NTP] -.->|증폭 응답| T\n```\n| 유형 | 공격 기법 |\n|---|---|\n| 대역폭 소진(L3/4) | [[udp-flooding|UDP Flooding]], [[icmp-flooding|ICMP Flooding]], [[amplification-attack|DNS·NTP 증폭]] |\n| 자원 소진(L4) | [[syn-flooding|SYN Flooding]], ACK Flooding, 세션 고갈 |\n| 애플리케이션(L7) | [[http-flooding|HTTP GET/POST Flooding]], [[slowloris|Slowloris]]·Slow Read, DNS 질의 Flooding |\n\n## 3. DDoS 대응 방식 비교\n| 구분 | 전용 방어장비 | [[scrubbing-center|스크러빙 센터]] | [[content-delivery-network|CDN]] 기반 |\n|---|---|---|---|\n| 방법 | 인라인·아웃오브패스 트래픽 분석·차단 | BGP·DNS 우회로 세정 후 허용 트래픽 회송(오탐·미탐 가능) | [[anycast|애니캐스트]] 분산 엣지에서 흡수·캐싱 |\n| 규모 | 회선 대역폭 한계 | Tbps급 | 분산 대용량 |\n| 시점 | 상시 | 탐지 후 전환 또는 상시 | 상시 |\n\n## 4. 고려사항 및 발전방향\n- 다층 방어(ISP 협력·[[cyber-shelter|사이버 대피소]]·클라우드), [[ingress-filtering|출발지 주소 필터링(BCP38)]], 봇넷 근절(좀비 PC 치료)\n- 암호화 트래픽 L7 공격 대응, AI 기반 행위 분석, 서비스 가용성 설계(오토스케일링·이중화)",
+      "sources": [
+        {
+          "title": "RFC 2827 BCP38",
+          "url": "https://www.rfc-editor.org/rfc/rfc2827.html",
+          "scope": "출발지 위조 방지와 정상 prefix flood에 대한 한계"
+        },
+        {
+          "title": "Cloudflare DDoS 공식 문서",
+          "url": "https://developers.cloudflare.com/ddos-protection/",
+          "scope": "L3/4·L7·TCP/UDP 서비스별 보호 기능"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 분산원 정의·DoS 포함 관계·BCP38 범위·세정/복호화·서비스 용량 단정 교정.",
+      "unresolved": [
+        "국내 7.7 사건·사이버 대피소 현행 조건과 증폭률·용량·전환 시간 수치는 원자료 미확인. CISA 상세 페이지는 접근 차단."
+      ]
+    },
+    "long": {
+      "source_sha256": "620967474a605f253a910a6d1b89cd2a3f41154e18d7f9d95dc3f3d2f6d1a9a4",
+      "body": "## 1. 분산 서비스 거부 공격(DDoS)의 개요\n### 가. 정의\n- 공격자가 다수 공격원·봇넷·반사 서버 등을 이용하여 표적에 대량의 패킷·요청을 동시에 전송, 네트워크 대역폭·시스템 자원·애플리케이션 처리 능력을 고갈시켜 정상 사용자의 서비스 이용을 방해하는 [[denial-of-service|서비스 거부]] 공격의 분산 형태\n\n### 나. 등장배경 및 위협 동향\n| 구분 | 내용 |\n|---|---|\n| 대규모화 | IoT 봇넷(Mirai), 반사·증폭 기법으로 Tbps급 대규모 사례 존재(일반 공격의 규모라고 단정하지 않음) |\n| 상품화 | DDoS-for-hire(Booter) 서비스로 저비용 공격, 금전 협박형 RDoS |\n| 지능화 | 다중 벡터 혼합, 짧고 반복적인 공격, 정상 사용자 모방 L7 공격 |\n| 사회적 영향 | 7.7 DDoS(2009) 등 국가 주요 사이트 마비, 금융·게임·공공 서비스 중단 |\n\n### 다. DoS와 DDoS 비교\n| 구분 | DoS | DDoS |\n|---|---|---|\n| 공격원 | DoS는 서비스 거부의 상위 개념; 비교상 단일원 공격 예 | DDoS는 다수 분산원 형태이며 봇넷에 한정되지 않음 |\n| 추적 | 상대적 용이 | 출발지 위조·분산으로 추적 곤란 |\n| 규모 | 제한적 | 대규모, 차단 IP 기반 대응 어려움 |\n\n## 2. DDoS의 공격 구조 및 유형\n### 가. 공격 구조도\n```mermaid\nflowchart TB\n  AT[공격자] -->|명령| CC[\"C&C 서버(IRC·HTTP·P2P)\"]\n  CC --> H1[핸들러] & H2[핸들러]\n  H1 --> Z1[좀비 PC] & Z2[IoT 봇]\n  H2 --> Z3[좀비 PC] & Z4[IoT 봇]\n  Z1 & Z3 -->|직접 Flooding| T[표적 서버·네트워크]\n  Z2 & Z4 -->|출발지 IP를 표적으로 위조한 질의| RF[\"반사 서버(DNS·NTP·Memcached)\"]\n  RF -->|수십~수만 배 증폭 응답| T\n```\n\n### 나. 공격 유형 분류\n| 계층 | 유형 | 기법 | 특징 |\n|---|---|---|---|\n| 네트워크(L3/4) 대역폭 소진 | Flooding | [[udp-flooding|UDP Flooding]], [[icmp-flooding|ICMP Flooding]], [[smurf-attack|Smurf]] | 회선 대역폭 포화, 출발지 위조 |\n| 네트워크(L3/4) 대역폭 소진 | 반사·증폭 | [[amplification-attack|DNS·NTP·SSDP·Memcached 증폭]] | 소량 요청으로 대량 응답, 추적 곤란 |\n| 전송(L4) 자원 소진 | 프로토콜 악용 | [[syn-flooding|SYN Flooding]], ACK·FIN Flooding, [[land-attack|LAND]](역사적 IP/TCP 구현 공격); [[teardrop-attack|Teardrop]]은 IP 단편 재조립 공격으로 L4 연결 고갈과 구분 | 연결 테이블·세션 자원 고갈 |\n| 애플리케이션(L7) | HTTP Flooding | [[http-flooding|GET/POST Flooding]], Cache-Control(CC) 공격, 무작위 URL | 정상 요청 모방, 소량으로 서버 부하 |\n| 애플리케이션(L7) | Slow 공격 | [[slowloris|Slowloris]], RUDY(Slow POST), Slow Read | 연결 장기 점유, 저대역폭 |\n| 애플리케이션(L7) | DNS·TLS | DNS 질의 Flooding, TLS 핸드셰이크 재협상 | 인프라·암호 연산 부하 |\n\n### 다. 공격 절차\n1. 악성코드 유포로 좀비 확보(취약 IoT 기본 비밀번호, 피싱) → 2. [[command-and-control|C&C]] 등록·대기 → 3. 공격 명령(표적·유형·시간) 하달 → 4. 다중 벡터 동시 공격, 출발지 위조·반사 활용 → 5. 공격 유형 변경·반복, 협박 메일\n\n## 3. DDoS 대응방안 상세\n### 가. 전용 방어장비의 두 가지 방식\n| 구분 | 인라인(In-line) 방식 | 아웃오브패스(Out-of-Path) 방식 |\n|---|---|---|\n| 구성 | 트래픽 경로상 장비 설치, 모든 패킷 통과 | 미러링으로 탐지 장비 분석, 공격 시 BGP·정책 라우팅으로 차단 장비 우회 |\n| 대응 | 실시간 탐지·즉시 차단 | 탐지 후 전환, 평시 지연 없음 |\n| 장점 | 즉시성, 단순 구성 | 대용량 백본 적용, 장비 장애 시 서비스 무영향 |\n| 단점 | 장비 처리 용량·장애 시 단일 장애점(바이패스 필요) | 전환 지연, 구성 복잡 |\n| 탐지 기법 | 임계치(Rate Limit), [[attack-signature|시그니처]], 행위 분석, SYN 쿠키·프록시, 챌린지(CAPTCHA·JS) 인증 | 동일 |\n\n### 나. 스크러빙 센터와 CDN 기반 클라우드 대응 비교\n용량·전환 시간은 제품·계약·공격 유형에 따라 다르며 아래 규모 표현은 보장값이 아니다. 상용 서비스는 기능이 겹칠 수 있다.\n| 관점 | [[scrubbing-center|스크러빙 센터]] | [[content-delivery-network|CDN]] 기반 대응 |\n|---|---|---|\n| 대응방법 | 공격 시 BGP 경로 광고 또는 DNS 변경으로 트래픽을 세정 센터로 우회, 공격 트래픽 제거 후 GRE 터널·전용선으로 정상 트래픽 회송 | [[anycast|애니캐스트]] 기반 전 세계 엣지 노드가 요청을 분산 수용, 캐싱으로 원본 서버 부하 차단, 엣지에서 L7 필터링·[[waf|WAF]] |\n| 대응규모 | 센터 집중 용량(수 Tbps), 보호 대상 프로토콜·포트는 서비스 계약·구성별 확인 | 분산 총합 용량(수십 Tbps), 엣지 단위 흡수 |\n| 대응시점 | 온디맨드(탐지 후 전환, 수 분 지연) 또는 상시(Always-on) | 상시(Always-on), 전환 지연 없음 |\n| 암호화 트래픽 방어 | L3/4 중심, L7 본문 분석은 적절한 TLS 종단·키 처리 등이 필요하며 복호화 없는 메타데이터·속도 기반 완화와 구분 | 엣지에서 TLS 종단으로 HTTPS L7 공격 직접 분석·차단 가능 |\n| 기존 시스템 활용 | 기존 IP·인프라 유지, 계약·구성이 지원하는 웹·비웹 서비스 적용, 아키텍처 변경 최소 | DNS 변경·원본 IP 은닉 필요, 웹·HTTP 서비스 중심(비웹은 별도 프록시), 콘텐츠 캐싱 가능 구조 유리 |\n| 적합 환경 | 금융망·전용 서비스·비웹 프로토콜 | 공개 웹 서비스, 글로벌 사용자 |\n| 한계 | 전환 중 공백, 비용(상시 시 고가) | 원본 IP 노출 시 우회 공격, 동적 콘텐츠 효과 제한 |\n\n### 다. 공격 유형별 대응 기술\n| 공격 | 대응 |\n|---|---|\n| SYN Flooding | SYN 쿠키, SYN 프록시, 백로그 큐 확대, 타임아웃 단축 |\n| UDP·ICMP·증폭 | 불필요 서비스 차단, [[rate-limiting|임계치 기반 제한]], 반사 서버 측 응답 제한, [[ingress-filtering|출발지 주소 검증(BCP38)]] |\n| HTTP Flooding | 세션별 요청 제한, 챌린지 인증, 행위 기반 봇 탐지, 캐싱 |\n| Slow 공격 | 연결 타임아웃·동시 연결 수 제한, 리버스 프록시 |\n| DNS 공격 | DNS 이중화·애니캐스트, 응답 제한(RRL), 권한 DNS 분리 |\n\n## 4. DDoS 대응 시 고려사항 및 중장기 대책\n| 구분 | 내용 |\n|---|---|\n| 기술적 | 다층 방어(ISP 상단 필터링 → 전용장비 → 서버 튠닝), 가용성 설계(이중화·오토스케일링·[[sinkhole|싱크홀]]), 암호화 L7 가시성 |\n| 관리적 | DDoS 대응 절차·훈련, ISP·KISA 협력 체계, 서비스 우선순위 정의, SLA에 방어 조항 |\n| 국가·사회 | 봇넷 근절(좀비 PC 치료, IoT 보안 인증), 중소기업 대상 [[cyber-shelter|사이버 대피소]], 국제 공조(출발지 추적) |\n| 중장기 대책 | BCP38 출발지 위조 방지(정상 출발지의 공격까지 차단하는 것은 아님), 반사 가능 서버 점검·폐쇄, [[threat-intelligence|위협 인텔리전스]] 공유, AI 기반 행위 분석, 클라우드 네이티브 보안(스크러빙+CDN 하이브리드), IPv6·5G 환경 대응 |\n\n## 5. 결론\n- DDoS는 공격 비용은 낮고 방어 비용은 높은 비대칭 위협으로, 단일 장비가 아닌 ISP·클라우드·전용장비의 다층 방어와 봇넷 근절·출발지 검증 등 생태계 차원의 중장기 대책이 병행되어야 효과적 대응 가능",
+      "sources": [
+        {
+          "title": "RFC 2827 BCP38",
+          "url": "https://www.rfc-editor.org/rfc/rfc2827.html",
+          "scope": "출발지 위조 방지와 정상 prefix flood에 대한 한계"
+        },
+        {
+          "title": "Cloudflare DDoS 공식 문서",
+          "url": "https://developers.cloudflare.com/ddos-protection/",
+          "scope": "L3/4·L7·TCP/UDP 서비스별 보호 기능"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 분산원 정의·DoS 포함 관계·BCP38 범위·세정/복호화·서비스 용량 단정 교정.",
+      "unresolved": [
+        "국내 7.7 사건·사이버 대피소 현행 조건과 증폭률·용량·전환 시간 수치는 원자료 미확인. CISA 상세 페이지는 접근 차단."
+      ]
+    }
+  },
+  "t-af192ddb": {
+    "short": {
+      "source_sha256": "039e7d1ab8f3f62ef18c63e26b3711000f89519923786a1d233bdcc05c5bf4d7",
+      "body": "## 1. ARP 스푸핑의 개요\n- 정의: 인증 없이 동작하는 [[address-resolution-protocol|ARP]]의 취약점을 이용해 위조된 ARP 응답을 보내 피해자의 [[arp-cache|ARP 캐시]]를 공격자 [[mac-address|MAC 주소]]로 오염시키는 LAN 내부 공격\n- 위협: 트래픽 가로채기([[adversary-in-the-middle|중간자 공격]]), [[sniffing|스니핑]], [[session-hijacking|세션 하이재킹]], [[denial-of-service|서비스 거부]]\n\n## 2. ARP 스푸핑의 개념도 및 구성요소\n```mermaid\nsequenceDiagram\n  participant V as 피해자 PC\n  participant A as 공격자\n  participant G as 게이트웨이\n  A->>V: 위조 ARP Reply (게이트웨이 IP = 공격자 MAC)\n  A->>G: 위조 ARP Reply (피해자 IP = 공격자 MAC)\n  V->>A: 외부행 트래픽 (공격자 경유)\n  A->>G: 패킷 중계·변조\n```\n| 구성요소 | 역할 |\n|---|---|\n| 위조 ARP 응답 | 위조 ARP 요청·응답으로 매핑 오염 가능; Gratuitous ARP와 모든 unsolicited reply를 동일시하지 않음 |\n| ARP 캐시 | IP-MAC 매핑 테이블, 암호학적 인증 없이 갱신(캐시·운영체제 정책이라는 상태는 존재) |\n| 중계 기능 | IP 포워딩으로 정상 통신 유지하며 도청 |\n\n## 3. ARP 스푸핑 대처방안\n| 구분 | 내용 |\n|---|---|\n| 정적 설정 | 게이트웨이·서버 MAC을 정적 ARP(arp -s)로 고정 |\n| 스위치 보안 | [[dhcp-snooping|DHCP 스누핑]] 기반 [[dynamic-arp-inspection|DAI]], [[port-security|포트 보안]] |\n| 탐지 | ARPwatch·XArp로 MAC 변경 감시, [[intrusion-detection-system|IDS]] 연동 |\n| 암호화 | [[tls|TLS]]·[[vpn|VPN]]으로 도청 피해 최소화 |\n\n## 4. 고려사항\n- [[vlan|VLAN]] 분리로 브로드캐스트 도메인 축소, 공용 Wi-Fi 등 신뢰 불가 네트워크 주의\n- [[network-access-control|NAC]] 기반 단말 인증으로 비인가 단말 LAN 접속 차단",
+      "sources": [
+        {
+          "title": "RFC 826",
+          "url": "https://www.rfc-editor.org/rfc/rfc826.html",
+          "scope": "ARP 매핑·수신 처리 구조"
+        },
+        {
+          "title": "RFC 5227",
+          "url": "https://www.rfc-editor.org/rfc/rfc5227.html",
+          "scope": "ARP Announcement의 Request 형식과 응답 구분"
+        },
+        {
+          "title": "Cisco Dynamic ARP Inspection",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/sec-crypto/fhs-sisf/fhs-and-sisf-configuration-guide/dynamic-arp-inspection.html",
+          "scope": "DHCP binding·정적 ACL·신뢰 포트 조건"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. gratuitous/unsolicited 구분·스위치 도청 예외·MAC flooding 별개성·DAI 정적 IP/trust 조건 교정.",
+      "unresolved": [
+        "XArp·Cain and Abel 최신 지원 상태 및 SEND/RA Guard 구현 범위는 추가 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "e3d3b9c484b2500db595907d545690bf2d33cebaf03a58299e8dbf308c21bca7",
+      "body": "## 1. ARP 스푸핑의 개요\n### 가. 정의\n- IP 주소를 [[mac-address|MAC 주소]]로 변환하는 [[address-resolution-protocol|ARP]]가 인증·상태 검증 없이 응답을 수용하는 취약점을 이용하여, 위조된 ARP 응답으로 피해자의 [[arp-cache|ARP 캐시]]를 공격자 MAC으로 오염(ARP Cache Poisoning)시켜 트래픽을 가로채는 2계층 공격\n### 나. 등장배경 / 필요성\n- ARP는 1982년 RFC 826 설계 당시 신뢰된 LAN을 전제, 요청·응답의 송신자 매핑으로 캐시를 갱신할 수 있으며 수용 정책은 구현별 차이. RFC5227의 ARP Announcement는 Request 형식\n- 스위치 환경에서는 패킷이 목적지 포트로만 전달되어 다른 포트의 유니캐스트 [[sniffing|스니핑]]이 제한되므로(브로드캐스트·미러링·unknown unicast 등 예외) ARP 스푸핑으로 트래픽을 우회시킴\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| ARP 요청·응답 | 브로드캐스트 요청 후 유니캐스트 응답으로 IP-MAC 매핑 획득 |\n| ARP 캐시 | 매핑 결과를 일정 시간 저장하는 테이블, 새 응답으로 갱신 |\n| 캐시 오염 | 위조 응답으로 게이트웨이 IP에 공격자 MAC을 매핑 |\n\n## 2. ARP 스푸핑의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart LR\n  V[\"피해자 PC (IP 10.0.0.10)\"] -->|\"게이트웨이 IP = 공격자 MAC\"| A[\"공격자 (중계·도청)\"]\n  A -->|\"IP 포워딩\"| G[\"게이트웨이 (IP 10.0.0.1)\"]\n  G -->|\"피해자 IP = 공격자 MAC\"| A\n  A --> V\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 공격 도구 | 위조 ARP 패킷 주기적 전송 | arpspoof, Ettercap, Cain and Abel |\n| 위조 ARP 응답 | 피해자·게이트웨이 양방향 캐시 오염 | Gratuitous ARP, 브로드캐스트 응답 |\n| 중계 모듈 | 가로챈 패킷을 정상 목적지로 전달하여 탐지 회피 | IP 포워딩, [[adversary-in-the-middle|중간자 공격]] |\n| 분석 모듈 | 평문 자격증명·세션 쿠키 추출 | 패킷 스니퍼, SSL 스트립 |\n### 다. 공격 절차\n1. 정찰: 동일 LAN의 IP·MAC 스캔으로 게이트웨이와 피해자 식별\n2. 오염: 피해자에게 \"게이트웨이 IP는 공격자 MAC\", 게이트웨이에게 \"피해자 IP는 공격자 MAC\"인 위조 응답 반복 전송\n3. 가로채기: 양방향 트래픽이 공격자를 경유, IP 포워딩으로 정상 통신 유지\n4. 악용: 스니핑, [[session-hijacking|세션 하이재킹]], [[dns-spoofing|DNS 스푸핑]] 연계, 패킷 폐기 시 [[denial-of-service|서비스 거부]]\n\n## 3. ARP 스푸핑의 상세\n### 가. 공격 유형\n| 유형 | 설명 |\n|---|---|\n| 중간자 공격 | 양방향 중계로 통신 내용 도청·변조 |\n| 세션 하이재킹 | 가로챈 세션 토큰으로 인증 우회 |\n| 서비스 거부 | 존재하지 않는 MAC으로 오염시켜 통신 단절 |\n| 별개 공격: MAC flooding | 스위치 전달 테이블 고갈 공격이며 ARP 캐시 오염과 구분. unknown unicast 처리·대응은 장비 정책별 차이 |\n### 나. 대처방안\n| 구분 | 대처방안 | 설명 |\n|---|---|---|\n| 예방(호스트) | 정적 ARP 테이블 | 게이트웨이·주요 서버 MAC을 arp -s로 고정, 소규모 망에 적합 |\n| 예방(스위치) | [[dynamic-arp-inspection|DAI]] | [[dhcp-snooping|DHCP 스누핑]] 바인딩·ARP ACL과 비신뢰 포트 ARP를 대조. 정적 IP 환경은 ARP ACL 등 별도 구성, trust 포트 우회 범위 주의 |\n| 예방(스위치) | [[port-security|포트 보안]], IP Source Guard | 포트당 허용 MAC 수 제한, 위조 출발지 IP 차단 |\n| 탐지 | ARPwatch, XArp, [[intrusion-detection-system|IDS]] | IP-MAC 매핑 변경·중복 MAC 이벤트 경보 |\n| 완화 | [[tls|TLS]], [[vpn|VPN]], SSH, HSTS | 가로채더라도 평문 노출 방지, SSL 스트립 차단 |\n| 격리 | [[vlan|VLAN]] 세분화, [[network-access-control|NAC]] | 브로드캐스트 도메인 축소, 비인가 단말 접속 차단 |\n### 다. 유사 공격 비교\n| 구분 | ARP 스푸핑 | [[ip-spoofing|IP 스푸핑]] | DNS 스푸핑 |\n|---|---|---|---|\n| 계층 | 2계층 | 3계층 | 응용 계층 |\n| 위조 대상 | MAC 주소 매핑 | 출발지 IP | 도메인-IP 응답 |\n| 범위 | 동일 LAN | 인터넷 전 구간 | 리졸버·클라이언트 |\n\n## 4. ARP 스푸핑 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 운영 | 정적 ARP는 관리 부담이 크므로 핵심 장비 한정, DHCP 환경은 DAI 우선 |\n| 모니터링 | 스위치 ARP 로그·IDS 경보를 [[siem|SIEM]]에 통합 |\n| 사용자 | 공용 Wi-Fi에서 VPN 사용, HTTPS 경고 무시 금지 |\n| 발전방향 | IPv6 NDP에도 위조 위협 존재. SEND와 RA Guard의 보호 범위는 다르며 RA Guard만으로 모든 NDP 위조를 막지 못함, [[zero-trust|제로 트러스트]] 기반 전 구간 암호화 |\n\n## 5. 결론\n- ARP 스푸핑은 프로토콜 설계상 완전 제거가 어려우므로, 스위치 계층의 DAI·포트 보안으로 예방하고 전 구간 암호화로 피해를 최소화하는 다층 방어가 핵심",
+      "sources": [
+        {
+          "title": "RFC 826",
+          "url": "https://www.rfc-editor.org/rfc/rfc826.html",
+          "scope": "ARP 매핑·수신 처리 구조"
+        },
+        {
+          "title": "RFC 5227",
+          "url": "https://www.rfc-editor.org/rfc/rfc5227.html",
+          "scope": "ARP Announcement의 Request 형식과 응답 구분"
+        },
+        {
+          "title": "Cisco Dynamic ARP Inspection",
+          "url": "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/sec-crypto/fhs-sisf/fhs-and-sisf-configuration-guide/dynamic-arp-inspection.html",
+          "scope": "DHCP binding·정적 ACL·신뢰 포트 조건"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. gratuitous/unsolicited 구분·스위치 도청 예외·MAC flooding 별개성·DAI 정적 IP/trust 조건 교정.",
+      "unresolved": [
+        "XArp·Cain and Abel 최신 지원 상태 및 SEND/RA Guard 구현 범위는 추가 확인 필요."
+      ]
+    }
   }
 }
