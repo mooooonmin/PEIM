@@ -288,5 +288,501 @@
       "reviewed_on": "2026-11-22",
       "review_scope": "주소·헤더·보안·계산의 명시한 조건과 예외를 출처 대조. 전체 주장에 대한 전문가 검수나 공식 정답 인증이 아님."
     }
+  },
+  "t-5d48e35e": {
+    "short": {
+      "source_sha256": "8da7a77afb3b65d7337a030efedfa234ebf0eab6720a8fffb7a36149912ff703",
+      "body": "## 1. HMAC의 개요\n- 정의: 비밀키 K와 암호학적 [[hash-function|해시 함수]] H를 결합하여 HMAC(K, m) = H((K0 ⊕ opad) ‖ H((K0 ⊕ ipad) ‖ m))으로 메시지 [[integrity|무결성]]과 출처 인증을 제공하는 [[message-authentication-code|메시지 인증 코드]](RFC 2104, FIPS 198-1)\n- 필요성: 단순 H(K ‖ m)의 [[length-extension-attack|길이 확장 공격]] 취약점 해결, 해시 함수 교체 가능한 범용 MAC 구조\n\nK0는 긴 키를 먼저 해시한 뒤 블록 크기 B까지 0으로 패딩한 키다. 원래 키 K와 구분한다.\n\n## 2. HMAC의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  K[키 K] --> KP[\"블록 크기 B로 패딩 (B 초과 시 H(K))\"]\n  KP --> I[\"K0 ⊕ ipad(0x36)\"] --> H1[\"내부 해시 H(K0⊕ipad ‖ m)\"]\n  M[메시지 m] --> H1\n  KP --> O[\"K0 ⊕ opad(0x5C)\"] --> H2[\"외부 해시 H(K0⊕opad ‖ 내부 해시)\"]\n  H1 --> H2 --> T[태그 HMAC]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 해시 함수 H | [[sha-2|SHA-256]]·SHA-512·[[sha-3|SHA-3]] 등, 블록 크기 B는 함수별로 다름(SHA-256: 64, SHA-512: 128바이트; SHA-3는 해당 rate 사용) |\n| ipad·opad | 내부·외부 패딩 상수, 두 번의 해시로 키 분리 |\n| 비밀키 K | 송수신자 공유, 해시 출력 길이 이상 권고 |\n\n## 3. HMAC의 특징\n| 구분 | 내용 |\n|---|---|\n| 안전성 | 압축 함수가 [[pseudorandom-function|의사난수 함수]]이면 안전, [[md5|MD5]]·[[sha-1|SHA-1]] 충돌에도 HMAC은 즉시 붕괴 안 함 |\n| 성능 | 내부·외부 해시의 2단 구조(메시지 길이에 따라 압축 연산 횟수 증가), 내부·외부 초기 상태 사전 계산 가능(해당 상태도 비밀키처럼 보호), 하드웨어 구현 용이 |\n| 한계 | 대칭키 공유 필요, [[non-repudiation|부인방지]] 불가([[digital-signature|전자서명]]과 차이), [[replay-attack|재전송]] 방지 위해 [[nonce|난스]]·타임스탬프 필요 |\n\n## 4. 고려사항\n- [[tls|TLS]]·[[ipsec|IPsec]]·[[json-web-token|JWT]] HS256·[[totp|TOTP]]·[[hkdf|HKDF]]·[[pbkdf2|PBKDF2]]에 활용, 태그 비교는 상수 시간\n- 키 길이·주기적 교체, 대안으로 [[cmac|CMAC]]·[[gmac|GMAC]]·KMAC 고려",
+      "sources": [
+        {
+          "title": "RFC 2104",
+          "url": "https://www.rfc-editor.org/rfc/rfc2104.html",
+          "scope": "키 전처리·중첩식·태그 절단·사전 계산"
+        },
+        {
+          "title": "NIST SP 800-107 Rev.1",
+          "url": "https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-107r1.pdf",
+          "scope": "§5.3 HMAC 태그 길이·키·검증 실패 횟수 관계(2012 문서)"
+        },
+        {
+          "title": "RFC 6151",
+          "url": "https://www.rfc-editor.org/rfc/rfc6151.html",
+          "scope": "MD5 충돌과 HMAC-MD5 안전성의 구분"
+        },
+        {
+          "title": "NIST SP 800-224 초안",
+          "url": "https://csrc.nist.gov/pubs/sp/800/224/ipd",
+          "scope": "FIPS 198-1 후속 문서의 초안 상태; 확정 표준으로 표시하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 키 전처리, 식, 태그 길이·위조 확률, 해시 충돌과 HMAC의 차이 및 적용 조건 대조.",
+      "unresolved": [
+        "성능 비교는 구현·장비별 측정이 없어 정량 우열을 검증하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "571f0f6302dec338e7ffe19e8c96454181271e09dba04651ca3178828cbc4aa9",
+      "body": "## 1. HMAC의 개요\n### 가. 정의\n- 비밀키 K와 암호학적 [[hash-function|해시 함수]] H를 내부·외부 2단 해시 구조로 결합하여 메시지의 [[integrity|무결성]]과 송신자 인증을 보장하는 키 기반 [[message-authentication-code|메시지 인증 코드]] 알고리즘(Hash-based MAC, RFC 2104, 1997 / FIPS 198-1, 2008)\n- HMAC(K, m) = H((K0 ⊕ opad) ‖ H((K0 ⊕ ipad) ‖ m)), ipad = 0x36 반복, opad = 0x5C 반복\n### 나. 등장배경 / 필요성\n- 단순 키 접두 방식 H(K ‖ m)은 [[merkle-damgard-construction|머클-담고드 구조]] 해시의 [[length-extension-attack|길이 확장 공격]]에 취약하고, 키 접미 방식 H(m ‖ K)는 해시 충돌에 의존\n- 기존 해시 구현을 재사용하고 키와 메시지를 결합하는 표준 MAC 필요, 해시 함수를 교체 가능한 범용 구조 요구\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| MAC | 키를 아는 자만 생성·검증 가능한 고정 길이 태그, 무결성 + 출처 인증 |\n| 블록 크기 B | 해시 입력 블록 크기(SHA-256: 64바이트, SHA-512: 128바이트), 키를 B로 패딩 |\n| [[pseudorandom-function|PRF]] 가정 | 압축 함수가 PRF이면 HMAC도 PRF로 증명 가능(Bellare 2006) |\n\nK0는 긴 키를 먼저 해시한 뒤 블록 크기 B까지 0으로 패딩한 키다. 원래 키 K와 구분한다.\n\n## 2. HMAC의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  K[\"비밀키 K\"] --> KC{\"키 길이가 B 초과?\"}\n  KC -->|예| KH[\"K' = H(K)\"]\n  KC -->|아니오| KZ[\"K' = K\"]\n  KH --> KP[\"K0 = K'를 0x00으로 B바이트 패딩\"]\n  KZ --> KP\n  KP --> IX[\"Si = K0 ⊕ ipad (0x36...36)\"]\n  KP --> OX[\"So = K0 ⊕ opad (0x5C...5C)\"]\n  IX --> H1[\"내부 해시: H(Si ‖ m)\"]\n  M[\"메시지 m\"] --> H1\n  OX --> H2[\"외부 해시: H(So ‖ 내부 해시값)\"]\n  H1 --> H2\n  H2 --> T[\"HMAC 태그 (필요 시 좌측 t비트 절단)\"]\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 해시 함수 H | 압축·일방향 변환 | [[sha-2|SHA-256·384·512]], [[sha-3|SHA-3]], 국산 LSH |\n| 비밀키 K | 송수신자 사전 공유 비밀 | 키 교환(ECDH), [[key-derivation-function|키 유도 함수]] |\n| ipad·opad | 내부·외부 해시 입력을 서로 다른 키로 분리 | 상수 0x36, 0x5C, 해밍 거리 큰 값 선택 |\n| 태그 | 메시지에 첨부·전송되는 인증값 | 전체 또는 프로토콜이 지정한 길이로 절단. 짧은 태그는 허용 검증 실패 횟수·키 수명과 함께 제한하며 32비트를 보편 권고로 사용하지 않음 |\n### 다. 동작 절차\n1. 키 전처리: K가 B보다 길면 H(K), 짧으면 0x00 패딩으로 B바이트 K0 생성\n2. 내부 해시: (K0 ⊕ ipad) ‖ m을 해시\n3. 외부 해시: (K0 ⊕ opad) ‖ 내부 해시값을 해시하여 태그 생성\n4. 검증: 수신자가 동일 키로 태그를 재계산, 상수 시간 비교로 일치 확인\n\n## 3. HMAC의 상세\n### 가. 안전성 특성\n| 구분 | 내용 |\n|---|---|\n| 길이 확장 방어 | 외부 해시의 결과를 연장해도 유효한 중첩 HMAC 계산을 만족하지 않으므로 단순 접두 MAC의 길이 확장 위조를 방지 |\n| 충돌 내성 비의존 | 안전성은 [[collision-resistance|충돌 저항성]]이 아닌 압축 함수의 PRF 성질에 의존, HMAC-[[md5|MD5]]·HMAC-[[sha-1|SHA-1]]의 상태는 일반 해시 충돌과 구분. 신규 설계는 HMAC-SHA-256 등과 해당 프로토콜의 허용 목록 사용 |\n| 공격 복잡도 | t비트 태그의 무작위 추측 성공 확률은 1회당 약 2^(-t). 검증 시도 횟수·키 강도·해시 구조를 함께 평가하며 n/2비트로 단정하지 않음 |\n| 키 길이 | 해시 출력 길이 L 이상 권고, 짧은 키는 강도 저하, 긴 키는 추가 이득 없음 |\n| 구현 주의 | 태그 비교 시 타이밍 [[side-channel-attack|부채널]] 방지 위해 상수 시간 비교, 키 메모리 소거 |\n### 나. 유사 기술 비교\n| 구분 | HMAC | [[cbc-mac|CBC-MAC]] / [[cmac|CMAC]] | [[gmac|GMAC]] | [[digital-signature|전자서명]] |\n|---|---|---|---|---|\n| 기반 | 해시 함수 | 블록 암호(AES) | GHASH + AES-CTR | 공개키 암호 |\n| 키 | 대칭키 공유 | 대칭키 공유 | 대칭키 + 난스 | 개인키·공개키 |\n| 성능 | 빠름, SW 유리 | AES-NI 시 빠름 | 매우 빠름, 병렬 | 느림 |\n| [[non-repudiation|부인방지]] | 불가(양측 모두 생성 가능) | 불가 | 불가 | 가능 |\n| 비고 | 가변 길이 안전 | CBC-MAC은 가변 길이 취약, CMAC이 보완 | [[authenticated-encryption|인증 암호]] GCM 구성요소 | 키 관리 PKI 필요 |\n### 다. 활용 사례\n| 분야 | 활용 |\n|---|---|\n| 전송 보안 | [[tls|TLS]] 1.2의 비 AEAD 레코드 MAC·PRF, [[ipsec|IPsec]] AH·ESP 무결성(HMAC-SHA-256-128) |\n| 토큰 | [[json-web-token|JWT]] HS256 서명, API 요청 서명(AWS Signature v4) |\n| 인증 | [[otp|OTP]] 생성 HOTP(RFC 4226)·[[totp|TOTP]](RFC 6238), 챌린지-응답 인증 |\n| 키 유도 | [[hkdf|HKDF]](RFC 5869), [[pbkdf2|PBKDF2]] 패스워드 기반 키 유도, TLS 1.3 키 스케줄 |\n| 무결성 | 소프트웨어 배포·로그 변조 탐지, 쿠키 서명 |\n\n## 4. HMAC 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘 | SHA-256 이상 사용, 신규 설계는 MD5·SHA-1을 피하고 프로토콜별 허용 알고리즘·전환 정책 확인 |\n| 키 관리 | 안전한 생성·분배(KMS·HSM), 주기적 교체, 용도별 키 분리 |\n| 프로토콜 | [[replay-attack|재전송 공격]] 방지 위한 [[nonce|난스]]·시퀀스·타임스탬프 포함, Encrypt-then-MAC 순서 |\n| 발전방향 | KMAC(SP 800-185)은 cSHAKE 기반의 별도 MAC이며 HMAC의 ipad/opad 구조를 사용하지 않음, AEAD(GCM·ChaCha20-[[poly1305|Poly1305]])로 암호화·인증 통합 |\n\n## 5. 결론\n- HMAC은 2단 해시 구조로 길이 확장 공격을 방어하고 선택한 해시 함수에 대한 암호학적 가정 아래 분석되는 표준 MAC으로, 안전한 해시 선택·키 관리·재전송 방지와 결합할 때 무결성·인증의 핵심 기반이 됨",
+      "sources": [
+        {
+          "title": "RFC 2104",
+          "url": "https://www.rfc-editor.org/rfc/rfc2104.html",
+          "scope": "키 전처리·중첩식·태그 절단·사전 계산"
+        },
+        {
+          "title": "NIST SP 800-107 Rev.1",
+          "url": "https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-107r1.pdf",
+          "scope": "§5.3 HMAC 태그 길이·키·검증 실패 횟수 관계(2012 문서)"
+        },
+        {
+          "title": "RFC 6151",
+          "url": "https://www.rfc-editor.org/rfc/rfc6151.html",
+          "scope": "MD5 충돌과 HMAC-MD5 안전성의 구분"
+        },
+        {
+          "title": "NIST SP 800-224 초안",
+          "url": "https://csrc.nist.gov/pubs/sp/800/224/ipd",
+          "scope": "FIPS 198-1 후속 문서의 초안 상태; 확정 표준으로 표시하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 키 전처리, 식, 태그 길이·위조 확률, 해시 충돌과 HMAC의 차이 및 적용 조건 대조.",
+      "unresolved": [
+        "성능 비교는 구현·장비별 측정이 없어 정량 우열을 검증하지 않음."
+      ]
+    }
+  },
+  "t-92857b66": {
+    "short": {
+      "source_sha256": "140741575d9c5fd73eea981b4909f791ab919232fa2f860be53f26ff42918f16",
+      "body": "## 1. DSA의 개요\n- 정의: [[discrete-logarithm-problem|이산대수 문제]]의 어려움에 기반하여 메시지 [[hash-function|해시값]]에 서명(r, s)을 생성·검증하는 미국 연방 [[digital-signature|전자서명]] 표준 알고리즘([[fips|FIPS]] 186, 1994)\n- 배경: 서명 전용 DSS의 기존 알고리즘. 아래 생성 절차는 레거시 원리 학습용이며 신규 FIPS 서명 생성에는 사용하지 않는다\n\n이하 z는 Hash(m)의 왼쪽 min(N, 해시 출력 비트수)비트를 정수로 변환한 값이다.\n\n## 2. DSA의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  M[메시지] --> H[\"해시 z\"] --> S[\"서명 생성: r, s (개인키 x, 난수 k)\"]\n  S --> V[\"서명 검증: v == r ? (공개키 y)\"]\n  P[\"도메인 파라미터 p, q, g\"] --> S\n  P --> V\n```\n| 구성요소 | 역할 |\n|---|---|\n| 도메인 파라미터 | 소수 p(L비트), q(N비트, p-1의 약수), 생성원 g |\n| 키 쌍 | 개인키 x(0 < x < q), 공개키 y = g^x mod p |\n| 난수 k | 서명마다 새로 생성, 재사용 시 개인키 노출 |\n\n## 3. DSA의 특징\n| 구분 | 내용 |\n|---|---|\n| 서명 | r = (g^k mod p) mod q, s = k⁻¹(z + x·r) mod q |\n| 검증 | w = s⁻¹ mod q, v = ((g^(z·w) · y^(r·w)) mod p) mod q, v = r이면 유효 |\n| 키 길이 | (L, N) = (2048, 224), (2048, 256), (3072, 256), 해시는 [[sha-2|SHA-2]] |\n| 특성 | 서명 전용(암호화 불가), 서명 정수 쌍의 고정폭 표현은 2N비트이며 DER 등 전송 인코딩은 더 길 수 있음. 성능은 구현별 측정 |\n\n## 4. 고려사항\n- FIPS 186-5(2023)에서 신규 서명 생성 용도 DSA 제외, [[ecdsa|ECDSA]]·[[eddsa|EdDSA]]·[[rsa|RSA]] 사용\n- k는 [[random-number-generator|난수 생성기]] 품질 또는 결정적 생성(RFC 6979) 필수, 국내 [[kcdsa|KCDSA]] 비교",
+      "sources": [
+        {
+          "title": "FIPS 186-4 (폐지된 원리 자료)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "§4 DSA 파라미터·키 범위·해시 절단·생성·검증"
+        },
+        {
+          "title": "NIST DSS 개정 공지",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "FIPS 186-5에서 DSA는 기존 서명 검증만 유지"
+        },
+        {
+          "title": "RFC 6979",
+          "url": "https://www.rfc-editor.org/rfc/rfc6979.html",
+          "scope": "결정적 DSA·ECDSA nonce 생성"
+        },
+        {
+          "title": "RFC 8032",
+          "url": "https://www.rfc-editor.org/rfc/rfc8032.html",
+          "scope": "Ed25519 키·서명 인코딩과 결정적 서명"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. DSA 구표준 원리와 현행 허용 범위, 수식·범위·해시 절단, Ed25519 인코딩 및 난수 조건 대조.",
+      "unresolved": [
+        "KCDSA 비교 열은 국내 규격 전문 대조가 남아 있음."
+      ]
+    },
+    "long": {
+      "source_sha256": "43b041f46d19036f9f41eeb5b51ac52f1b8d293e722f6b149c82e97ddc888f34",
+      "body": "## 1. DSA의 개요\n### 가. 정의\n- 유한체 상의 [[discrete-logarithm-problem|이산대수 문제]]의 계산적 어려움에 안전성을 두고, 메시지 해시값에 대해 한 쌍의 정수(r, s)를 생성·검증하는 [[public-key-cryptography|공개키]] 기반 [[digital-signature|전자서명]] 알고리즘(Digital Signature Algorithm, FIPS 186 DSS, 1994)\n### 나. 등장배경 / 필요성\n- DSS의 기존 서명 알고리즘으로, FIPS 186-4의 원리를 학습하되 FIPS 186-5의 신규 생성 제외와 기존 서명 검증 허용을 구분한다\n- 전자문서·소프트웨어 배포의 [[integrity|무결성]]·인증·[[non-repudiation|부인방지]] 요구\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| 이산대수 문제 | y = g^x mod p에서 y, g, p로부터 x를 구하는 것이 계산적으로 어려움 |\n| 부분군 활용 | p-1의 소인수 q(160~256비트) 크기의 부분군에서 연산하여 서명 길이 축소 |\n| 해시 후 서명 | 메시지 전체가 아닌 [[hash-function|해시값]] z에 서명, 해시는 [[sha-2|SHA-2]] 계열 사용 |\n\n이하 z는 Hash(m)의 왼쪽 min(N, 해시 출력 비트수)비트를 정수로 변환한 값이다.\n\n## 2. DSA의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph GEN[\"파라미터·키 생성\"]\n    PQ[\"소수 p(L비트), q(N비트), q는 p-1의 약수\"] --> G[\"생성원 g = h^((p-1)/q) mod p\"]\n    G --> X[\"개인키 x: 0 < x < q 난수\"] --> Y[\"공개키 y = g^x mod p\"]\n  end\n  subgraph SIGN[\"서명 생성 (송신자)\"]\n    K[\"난수 k: 0 < k < q\"] --> R[\"r = (g^k mod p) mod q\"]\n    HM[\"z\"] --> S[\"s = k⁻¹ (z + x·r) mod q\"]\n    R --> S\n  end\n  subgraph VER[\"서명 검증 (수신자)\"]\n    W[\"w = s⁻¹ mod q\"] --> U[\"u1 = z·w mod q, u2 = r·w mod q\"]\n    U --> V[\"v = ((g^u1 · y^u2) mod p) mod q\"] --> CMP[\"v == r ?\"]\n  end\n  Y --> VER\n  SIGN -->|\"(r, s) 전송\"| VER\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 도메인 파라미터(p, q, g) | 그룹 공유 공개 값, 다수 사용자 공유 가능 | 소수 생성·검증(Miller-Rabin), 구 FIPS 186-4 부록 A |\n| 개인키 x | 서명 생성 비밀값 | 승인된 [[random-number-generator|난수 생성기]](DRBG) |\n| 공개키 y | 서명 검증 공개값, 인증서로 배포 | [[x-509|X.509]] 인증서, [[pki|PKI]] |\n| 서명용 난수 k | 서명마다 1회용 비밀값 | 결정적 생성 방식은 RFC 6979 참고(신규 FIPS DSA 허용을 뜻하지 않음) |\n| 해시 함수 | 메시지 축약, N비트 이상 출력 | SHA-224·256·384·512 |\n### 다. 동작 절차\n1. 파라미터 생성: 승인 길이의 p, q 선택, g 계산 후 공개\n2. 키 생성: x 난수 선택, y = g^x mod p 계산하여 인증서 발급\n3. 서명: k 생성, r = (g^k mod p) mod q, s = k⁻¹(z + x·r) mod q, r 또는 s가 0이면 k 재선택\n4. 검증: 0 < r, s < q 확인, w·u1·u2·v 계산 후 v = r이면 서명 유효\n\n## 3. DSA의 상세\n### 가. 키 길이와 안전성\n| (L, N) | 해시 | 보안 강도 | 비고 |\n|---|---|---|---|\n| (1024, 160) | [[sha-1|SHA-1]] | 80비트 | 구형 파라미터. 현재 FIPS 186-5에서 DSA는 기존 서명 검증만 허용 |\n| (2048, 224) | SHA-224 | 112비트 | 이론적 강도 비교이며 신규 DSA 생성 권고가 아님 |\n| (2048, 256) | SHA-256 | 112비트 | 기존 파라미터 비교 |\n| (3072, 256) | SHA-256 | 128비트 | 기존 파라미터 비교; 양자내성 아님 |\n### 나. 취약점과 대응\n| 취약점 | 내용 | 대응 |\n|---|---|---|\n| k 재사용 | 두 서명에서 같은 k 사용 시 x = (s1·k - z1)·r⁻¹ 계산 가능(mod q 연산; 다른 메시지 간 k 재사용 금지) | 서명마다 새 k, RFC 6979 결정적 k |\n| k 편향 | 난수의 일부 비트 편향만으로 격자 공격으로 x 복원 | 검증된 DRBG, 상수 시간 구현 |\n| 파라미터 조작 | 악의적 p, q, g로 트랩도어 삽입 | 구 FIPS 186-4 부록의 검증 가능 생성 절차(시드 공개) |\n| [[side-channel-attack|부채널]] | 모듈러 지수 연산 시간·전력 분석 | 블라인딩, 상수 시간 연산 |\n### 다. 서명 알고리즘 비교\n| 구분 | DSA | [[rsa|RSA]] 서명 | [[ecdsa|ECDSA]] | [[eddsa|EdDSA]] | [[kcdsa|KCDSA]] |\n|---|---|---|---|---|---|\n| 수학 기반 | 이산대수 | [[integer-factorization|소인수분해]] | [[elliptic-curve-cryptography|타원곡선]] 이산대수 | 타원곡선(Edwards) | 이산대수 |\n| 대표 파라미터(동일 강도 표 아님) | 2048비트 | 2048비트 | 224~256비트 | 공개키 인코딩 256비트(Ed25519) | 2048비트 |\n| 서명 길이 | 2N(448~512비트) | 2048비트 | 448~512비트 | 512비트 | 2N |\n| 암호화 겸용 | 불가 | 가능 | 불가 | 불가 | 불가 |\n| 난수 의존 | 높음 | 없음(PKCS#1 v1.5), PSS는 솔트 | 높음 | 서명은 결정적; 키 생성에는 난수 필요 | 높음 |\n| 표준 | FIPS 186-4까지 | FIPS 186-5, PKCS#1 | FIPS 186-5, ANSI X9.62 | FIPS 186-5, RFC 8032 | TTA 국내 표준 |\n\n## 4. DSA 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 표준 준수 | FIPS 186-5(2023)는 DSA를 신규 서명 생성에서 제외, 기존 서명 검증 용도로만 허용 |\n| 전환 | 신규 시스템은 ECDSA·EdDSA 채택, 레거시 DSA 인증서는 만료 시 교체 |\n| 구현 | k 생성 품질 검증, 해시 강도 및 z 절단 규칙 확인, 파라미터 검증 절차 수행 |\n| 발전방향 | [[post-quantum-cryptography|양자내성]] 서명 ML-DSA(FIPS 204)·SLH-DSA(FIPS 205)로 장기 전환, 하이브리드 서명 |\n\n## 5. 결론\n- DSA는 이산대수 기반 서명 전용 표준으로 전자서명 체계의 기초를 제공했으나 난수 의존성과 긴 키 길이로 ECDSA·EdDSA에 대체되었으며, 양자내성 서명으로의 민첩한 전환 설계가 요구됨",
+      "sources": [
+        {
+          "title": "FIPS 186-4 (폐지된 원리 자료)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "§4 DSA 파라미터·키 범위·해시 절단·생성·검증"
+        },
+        {
+          "title": "NIST DSS 개정 공지",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "FIPS 186-5에서 DSA는 기존 서명 검증만 유지"
+        },
+        {
+          "title": "RFC 6979",
+          "url": "https://www.rfc-editor.org/rfc/rfc6979.html",
+          "scope": "결정적 DSA·ECDSA nonce 생성"
+        },
+        {
+          "title": "RFC 8032",
+          "url": "https://www.rfc-editor.org/rfc/rfc8032.html",
+          "scope": "Ed25519 키·서명 인코딩과 결정적 서명"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. DSA 구표준 원리와 현행 허용 범위, 수식·범위·해시 절단, Ed25519 인코딩 및 난수 조건 대조.",
+      "unresolved": [
+        "KCDSA 비교 열은 국내 규격 전문 대조가 남아 있음."
+      ]
+    }
+  },
+  "t-d6be3334": {
+    "short": {
+      "source_sha256": "66406d6ba440c5db0bd6dda8deb874b842800ee54ffbc4386c5755e950d400d3",
+      "body": "## 1. 해시 함수의 개요\n- 정의: 임의 길이의 입력을 고정 길이의 [[message-digest|메시지 다이제스트]](해시값)로 변환하는 [[one-way-function|일방향 함수]]로, 키 없이 데이터의 해시를 신뢰할 수 있는 기준 해시와 비교하는 무결성 검증에 사용(해시 자체는 송신자 인증이 아님)\n- 필요성: [[digital-signature|전자서명]]·패스워드 저장·[[blockchain|블록체인]]·무결성 검증의 기반 요소\n\n## 2. 해시 함수의 개념도 및 요구 특성\n```mermaid\nflowchart LR\n  M[\"메시지 M (가변 길이)\"] --> H[\"해시 함수 H()\"] --> D[\"해시값 h = H(M) (고정 길이)\"]\n```\n| 특성 | 내용 |\n|---|---|\n| [[preimage-resistance|역상 저항성]] | h로부터 M을 찾기 계산적으로 불가능(일방향성) |\n| [[second-preimage-resistance|제2 역상 저항성]] | M과 H(M)=H(M') 인 다른 M' 탐색이 계산적으로 어려움 |\n| [[collision-resistance|충돌 저항성]] | H(M)=H(M')인 임의의 쌍 (M, M') 탐색이 계산적으로 어려움 |\n| [[avalanche-effect|쇄도 효과]] | 입력 1비트 변화가 출력에 넓게 확산되는 성질. 매번 절반 이상 바뀐다는 보장은 아님 |\n\n## 3. 해시 함수의 종류 및 용도\n| 구분 | 내용 |\n|---|---|\n| [[md5|MD5]](128bit) | 충돌 발견, 보안 용도 사용 금지 |\n| [[sha-1|SHA-1]](160bit) | 2017년 실제 충돌 공개, 폐기 권고 |\n| [[sha-2|SHA-2]](224~512bit) | [[merkle-damgard-construction|Merkle-Damgård]] 구조, 현재 표준 |\n| [[sha-3|SHA-3]](Keccak) | [[sponge-construction|스펀지 구조]], 길이 확장 공격 내성 |\n| 국산 | [[lsh|LSH]](대표 출력 224·256·384·512bit), HAS-160 |\n| 용도 | 무결성 검증, 전자서명, [[hmac|HMAC]], 패스워드 저장, 블록체인 [[proof-of-work|PoW]] |\n\n## 4. 고려사항\n- 단순 해시 패스워드 저장은 [[rainbow-table|레인보우 테이블]]에 취약 → [[salt|솔트]]와 [[key-stretching|키 스트레칭]]([[pbkdf2|PBKDF2]]·[[bcrypt|bcrypt]]·[[argon2|Argon2]]) 적용\n- [[birthday-attack|생일 공격]] 고려 시 이상적인 n비트 해시의 고전적 충돌 탐색 강도는 약 n/2비트(역상 강도와 구분) → 최소 SHA-256 이상 권고",
+      "sources": [
+        {
+          "title": "NIST SP 800-107 Rev.1",
+          "url": "https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-107r1.pdf",
+          "scope": "역상·제2역상·충돌 저항성 구분과 메시지 길이 조건"
+        },
+        {
+          "title": "FIPS 202",
+          "url": "https://csrc.nist.gov/pubs/fips/202/final",
+          "scope": "SHA-3 고정 출력 함수와 SHAKE XOF 구분"
+        },
+        {
+          "title": "OWASP Password Storage",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+          "scope": "솔트·패스워드 KDF 및 PBKDF2 내부 해시별 반복 횟수"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 암호학적 저항성 정의·공격 비용 조건·출력 길이·패스워드 저장과 정량 성능 일반화 교정.",
+      "unresolved": [
+        "HAS-160의 최신 국내 적합성은 별도 기준 확인 필요.",
+        "KISA LSH 상세 URL이 일반 안내 페이지로 이동하여 LSH 원 규격 전문은 대조하지 못함."
+      ]
+    },
+    "long": {
+      "source_sha256": "cce4a4a3c3d6e2848a0975017bfedc97b2825b38258f2a3f3be9c856f31e1add",
+      "body": "## 1. 해시 함수의 개요\n### 가. 정의\n- 임의 길이의 메시지를 고정 길이의 짧은 [[message-digest|메시지 다이제스트]](해시값)로 압축하는 [[one-way-function|일방향 함수]]로, 역상 탐색이 계산적으로 어려워야 하며 키를 사용하지 않는 암호학적 기본 요소\n\n### 나. 해시값과 해시함수의 구분\n| 구분 | 해시 함수 | 해시값 |\n|---|---|---|\n| 개념 | 변환 알고리즘(H) | 함수의 출력 결과(h = H(M)) |\n| 특성 | 결정적, 일방향, 충돌 저항 | 고정 길이(SHA-256은 256bit), 메시지의 지문 역할 |\n| 예 | SHA-256, SHA-3 | 64자리 16진수 문자열 |\n\n### 다. 요구 특성\n| 특성 | 내용 | 이상적 고전 공격 비용(n비트 출력, 메시지 길이 등 조건 확인) |\n|---|---|---|\n| [[preimage-resistance|역상 저항성]] | 해시값 h로부터 M 탐색이 계산적으로 어려움 | 2^n |\n| [[second-preimage-resistance|제2 역상 저항성]] | 주어진 M에 대해 H(M)=H(M') 인 M' 탐색이 계산적으로 어려움 | 2^n |\n| [[collision-resistance|충돌 저항성]] | 임의의 충돌 쌍 (M, M') 탐색이 계산적으로 어려움 | 2^(n/2), [[birthday-attack|생일 공격]] |\n| [[avalanche-effect|쇄도 효과]] | 입력 1비트 변화가 출력 전체에 확산 | - |\n| 효율성 | 계산 속도 빠름, 고정 길이 출력 | - |\n\n## 2. 해시 함수의 구조 및 종류\n### 가. 구조도(Merkle-Damgård 구조와 스펀지 구조)\n```mermaid\nflowchart LR\n  subgraph MD[\"Merkle-Damgård (MD5, SHA-1, SHA-2)\"]\n    IV[초기값 IV] --> f1[압축함수 f] --> f2[압축함수 f] --> f3[압축함수 f] --> OUT1[해시값]\n    M1[블록 M1] --> f1\n    M2[블록 M2] --> f2\n    M3[블록 Mn + 패딩] --> f3\n  end\n  subgraph SP[\"스펀지 (SHA-3)\"]\n    S0[상태 r+c bit] --> AB[\"흡수(Absorb): 블록 XOR 후 순열 f\"] --> SQ[\"압착(Squeeze): 원하는 길이 출력\"]\n  end\n```\n\n### 나. 종류 비교\n| 알고리즘 | 출력 길이 | 구조 | 안전성 현황 |\n|---|---|---|---|\n| [[md5|MD5]] | 128bit | [[merkle-damgard-construction|Merkle-Damgård]] | 충돌 공격 실용화, 사용 금지 |\n| [[sha-1|SHA-1]] | 160bit | Merkle-Damgård | 2017년 SHAttered 충돌, 인증서 사용 중단 |\n| [[sha-2|SHA-2]] | 224/256/384/512bit | Merkle-Damgård | 안전, 현행 표준(FIPS 180-4) |\n| [[sha-3|SHA-3]] | 224~512bit, SHAKE 가변 | [[sponge-construction|스펀지]](Keccak) | 안전, 길이 확장 공격 내성(FIPS 202) |\n| [[lsh|LSH]] | 224·256·384·512bit | Wide-pipe MD | 국산 표준; 성능은 구현·환경별 측정 |\n| HAS-160 | 160bit | MD 계열 | 국산, KCDSA 용도 |\n\n### 다. 해시 기반 파생 기법\n| 기법 | 설명 |\n|---|---|\n| [[hmac|HMAC]] | 비밀키와 해시 결합한 [[message-authentication-code|메시지 인증 코드]], 무결성+인증 제공 |\n| [[merkle-tree|머클 트리]] | 리프 해시를 반복 결합해 루트 해시로 대량 데이터 무결성 검증(블록체인) |\n| 해시 체인 | 이전 해시를 다음 입력에 포함하여 순서 무결성 보장(로그, 블록 연결) |\n\n## 3. 단방향 해시의 문제점과 보완 기술\n### 가. 단방향 해시 함수의 문제점(패스워드 저장 관점)\n| 문제점 | 설명 |\n|---|---|\n| 인식 가능성 | 동일 패스워드 → 동일 해시, 사용자 간 비교로 유추 |\n| 속도 | 설계상 빠른 연산 → 구현·장비에 따라 대량의 [[brute-force-attack|무차별 대입]]·[[dictionary-attack|사전 공격]] 시도 가능 |\n| 사전 계산 공격 | 해시값 사전 계산표로 즉시 역조회 |\n\n### 나. 레인보우 테이블\n- [[rainbow-table|레인보우 테이블]]: 해시값 → 환원 함수 → 평문 → 해시 ... 체인을 반복해 시작값·끝값만 저장하는 시간-메모리 트레이드오프 기법\n- 유출된 해시의 체인을 재계산하여 끝값 일치 시 체인 복원으로 원 패스워드 획득, 솔트 미적용 해시에 치명적\n\n### 다. 해시 솔트와 키 스트레칭\n| 기법 | 원리 | 효과 |\n|---|---|---|\n| [[salt|솔트]] | 사용자별 랜덤값을 패스워드에 결합 후 해시, 솔트는 해시와 함께 저장 | 동일 패스워드도 다른 해시, 레인보우 테이블 무력화 |\n| [[key-stretching|키 스트레칭]] | 해시를 수천~수십만 회 반복 또는 메모리 집약 연산 수행 | 단일 검증 시간 증가로 무차별 대입 비용 급증 |\n| [[pbkdf2|PBKDF2]] | OWASP의 HMAC-SHA-256 예: 60만 회 이상. 내부 해시별 권고치가 다름 | 승인된 구현·설정의 적합성은 별도 확인 |\n| [[bcrypt|bcrypt]] | Blowfish 기반, cost 파라미터 | 솔트 내장, 널리 사용 |\n| [[scrypt|scrypt]]·[[argon2|Argon2]] | 메모리 하드 함수 | GPU·ASIC 병렬 공격 저항, Argon2id 권고 |\n\n### 라. 해시 함수의 활용\n| 분야 | 활용 |\n|---|---|\n| 무결성 검증 | 파일 배포 체크섬, [[digital-forensics|포렌식]] 증거 동일성 입증 |\n| [[digital-signature|전자서명]] | 메시지 해시에 개인키 서명으로 효율성·무결성 확보 |\n| 인증 | 패스워드 저장, HMAC, [[challenge-response-authentication|시도-응답]] 인증 |\n| [[blockchain|블록체인]] | 블록 연결 해시, 머클 루트, [[proof-of-work|작업증명]] 난이도 |\n| 기타 | 중복 제거, 데이터 색인, 난수 생성, [[hash-based-signature|해시 기반 서명]](PQC) |\n\n## 4. 해시 함수 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘 선택 | MD5·SHA-1 금지, SHA-256 이상 또는 SHA-3 사용, 국내 KCMVP 검증 알고리즘(LSH) 고려 |\n| 패스워드 저장 | 솔트+키 스트레칭 필수, 반복 횟수 하드웨어 성능 따라 주기적 상향 |\n| 암호 민첩성 | 역상·충돌·양자 공격 모델별 목표 강도를 구분하고 알고리즘 교체 가능하게 설계. 모든 용도에 일률적으로 SHA-384 이상이 필요하다고 단정하지 않음 |\n| 구현 | 길이 확장 공격 방지(HMAC 사용), 타이밍 공격 방지 상수 시간 비교 |\n\n## 5. 결론\n- 해시 함수는 무결성·인증·서명의 토대로, 안전한 알고리즘 선택과 솔트·키 스트레칭 결합 적용, 양자 시대를 대비한 암호 민첩성 확보가 핵심",
+      "sources": [
+        {
+          "title": "NIST SP 800-107 Rev.1",
+          "url": "https://nvlpubs.nist.gov/nistpubs/legacy/sp/nistspecialpublication800-107r1.pdf",
+          "scope": "역상·제2역상·충돌 저항성 구분과 메시지 길이 조건"
+        },
+        {
+          "title": "FIPS 202",
+          "url": "https://csrc.nist.gov/pubs/fips/202/final",
+          "scope": "SHA-3 고정 출력 함수와 SHAKE XOF 구분"
+        },
+        {
+          "title": "OWASP Password Storage",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+          "scope": "솔트·패스워드 KDF 및 PBKDF2 내부 해시별 반복 횟수"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 암호학적 저항성 정의·공격 비용 조건·출력 길이·패스워드 저장과 정량 성능 일반화 교정.",
+      "unresolved": [
+        "HAS-160의 최신 국내 적합성은 별도 기준 확인 필요.",
+        "KISA LSH 상세 URL이 일반 안내 페이지로 이동하여 LSH 원 규격 전문은 대조하지 못함."
+      ]
+    }
+  },
+  "t-ed93afd1": {
+    "short": {
+      "source_sha256": "37581cf0b633679b95b3049df9b5d9e9e799a22b641bc46ecc4a0901a57e3b2d",
+      "body": "## 1. DES의 개요\n- 정의: 64비트 블록을 56비트 키로 16라운드 [[feistel-structure|Feistel 구조]]를 거쳐 암호화하는 [[symmetric-key-cryptography|대칭키]] [[block-cipher|블록 암호]], 1977년 미국 연방표준 [[fips|FIPS]] 46으로 채택\n- 배경: IBM Lucifer 기반, 상용 데이터 보호 표준 요구로 [[nist|NBS(현 NIST)]] 공모 채택, 짧은 키로 1990년대 말 안전성 상실\n\n## 2. DES의 개념도 및 구성요소\n```mermaid\nflowchart TB\n  P[평문 64비트] --> IP[초기 치환 IP]\n  IP --> R[\"16 라운드: L(i)=R(i-1), R(i)=L(i-1) XOR f(R(i-1), K(i))\"]\n  K[키 64비트: 패리티 포함] --> KS[\"키 스케줄: PC-1, 순환 이동, PC-2 → 48비트 라운드 키 16개\"]\n  KS --> R\n  R --> SW[좌우 교환] --> FP[\"최종 치환 IP 역\"] --> C[암호문 64비트]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 초기·최종 치환 | 비트 위치 재배열, 보안 기여 없음 |\n| f 함수 | 확장 E(32→48), 라운드 키 XOR, [[s-box|S-박스]] 8개(6→4), [[p-box|P-박스]] |\n| [[key-schedule|키 스케줄]] | 56비트 키에서 48비트 서브키 16개 생성 |\n\n## 3. DES의 특징\n| 구분 | 내용 |\n|---|---|\n| 설계 원리 | S-박스 [[confusion-and-diffusion|혼돈]], P-박스 확산, [[avalanche-effect|쇄도 효과]] |\n| 장점 | 하드웨어 구현 용이, 암·복호화 동일 구조 |\n| 취약점 | 56비트 키 [[brute-force-attack|전수 공격]](1998년 56시간), [[weak-key|취약키]] 존재, [[differential-cryptanalysis|차분]]·[[linear-cryptanalysis|선형 분석]] |\n\n## 4. 발전방향\n- [[triple-des|3DES]](FIPS 46-3)로 연장 사용, 2001년 [[aes|AES]](FIPS 197)로 대체, NIST는 2024년부터 TDEA의 신규 암호학적 보호 적용을 허용하지 않으며 기존 데이터 복호화 등 레거시 처리는 구분\n- [[block-cipher-mode-of-operation|운영모드]](CBC·CTR 등) 선택 및 국산 SEED·ARIA·LEA 고려",
+      "sources": [
+        {
+          "title": "FIPS 46-3 (폐지된 원리 자료)",
+          "url": "https://csrc.nist.gov/files/pubs/fips/46-3/final/docs/fips46-3.pdf",
+          "scope": "DES 블록·키·라운드·키 스케줄·마지막 교환"
+        },
+        {
+          "title": "NIST TDEA 전환 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "2024년 신규 보호 금지와 레거시 처리 구분"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "운용 모드와 CBC 오류 전파"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. DES 원리·도식·키 스케줄·TDEA 전환·CBC 오류 전파·성능 비교 조건 대조.",
+      "unresolved": [
+        "역사적 공격의 56시간·22시간 및 차분/선형 공격 데이터 복잡도는 원 논문 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "165478511633cbf63cddae6813721147881995cfa8b71ec4651886a2120e4817",
+      "body": "## 1. DES의 개요\n### 가. 정의\n- 64비트 평문 블록을 56비트 비밀키(64비트 중 8비트는 패리티)로 16라운드의 [[feistel-structure|Feistel 구조]] 변환을 수행하는 [[symmetric-key-cryptography|대칭키]] [[block-cipher|블록 암호]] 알고리즘(Data Encryption Standard, FIPS PUB 46, 1977)\n### 나. 등장배경 / 필요성\n- 1970년대 금융·정부의 전자 데이터 보호 표준 필요, 미 NBS(현 [[nist|NIST]]) 공모에 IBM Lucifer 개량안 채택, NSA가 S-박스 설계·키 길이 조정에 관여\n- 공개 블록 암호의 역사적 사례로 Feistel 구조와 암호 분석을 학습하는 데 활용\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| Feistel 구조 | 블록을 좌우로 나누어 한쪽에만 라운드 함수를 적용하고 교차, f 함수가 역함수가 아니어도 복호화 가능 |\n| [[confusion-and-diffusion|혼돈과 확산]] | S-박스로 키-암호문 관계를 복잡하게(혼돈), P-박스로 한 비트 영향을 전체로 퍼뜨림(확산) |\n| 라운드 키 | 56비트 키에서 유도한 48비트 서브키를 라운드마다 사용 |\n\n## 2. DES의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  P[\"평문 64비트\"] --> IP[\"초기 치환(IP)\"]\n  IP --> SPLIT[\"L0(32비트), R0(32비트)\"]\n  SPLIT --> RND[\"라운드 i (1~16): Li = Ri-1, Ri = Li-1 XOR f(Ri-1, Ki)\"]\n  RND --> SWAP[\"좌우 교환(32비트 Swap)\"]\n  SWAP --> FP[\"최종 치환(IP 역)\"] --> C[\"암호문 64비트\"]\n  K[\"키 64비트(패리티 8비트 포함)\"] --> PC1[\"PC-1: 56비트 선택, C0·D0 분할\"]\n  PC1 --> ROT[\"라운드별 좌순환 이동 1 또는 2비트\"]\n  ROT --> PC2[\"PC-2: 48비트 Ki 선택\"] --> RND\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 초기·최종 치환(IP, IP⁻¹) | 입력 비트 재배열 후 마지막에 복원 | 고정 치환표, 보안 강도에는 무관 |\n| 확장 치환 E | 32비트 Ri-1을 48비트로 확장 | 인접 비트 중복 선택 |\n| 라운드 키 결합 | 확장 출력과 48비트 Ki XOR | 배타적 논리합 |\n| [[s-box|S-박스]] 8개 | 6비트 입력을 4비트로 비선형 대치(총 48→32비트) | 비선형성·혼돈 제공, DES 안전성의 핵심 |\n| [[p-box|P-박스]] | 32비트 출력 재배열 | 확산 제공 |\n| [[key-schedule|키 스케줄]] | PC-1·순환 이동·PC-2로 서브키 16개 생성 | 라운드 1·2·9·16은 1비트, 나머지 2비트 이동 |\n### 다. 동작 절차\n1. 64비트 평문에 초기 치환 적용 후 L0·R0로 분할\n2. 각 라운드에서 Ri-1을 E로 확장, Ki와 XOR, S-박스 대치, P-박스 치환하여 f 출력 생성\n3. Li = Ri-1, Ri = Li-1 XOR f(Ri-1, Ki)를 16회 반복\n4. 좌우 교환 후 최종 치환으로 암호문 출력, 복호화는 서브키를 역순(K16~K1)으로 적용\n\n## 3. DES의 상세\n### 가. 특징 및 안전성\n| 구분 | 내용 |\n|---|---|\n| 설계 장점 | 암·복호화 동일 구조, 하드웨어 구현 효율, [[avalanche-effect|쇄도 효과]] 우수 |\n| 키 길이 취약 | 2의 56승 키 공간, 1998년 EFF Deep Crack 56시간, 1999년 분산 공격 22시간에 [[brute-force-attack|전수 공격]] 성공 |\n| [[weak-key|취약키]] | 서브키가 모두 동일한 취약키 4개, 서브키가 2종류인 준취약키 12개 |\n| 보수 특성 | C = E(K, P)이면 C의 보수 = E(K의 보수, P의 보수), 전수 공격 비용 절반 |\n| 분석 공격 | [[differential-cryptanalysis|차분 분석]](2의 47승 선택 평문), [[linear-cryptanalysis|선형 분석]](2의 43승 기지 평문)으로 이론적 공격 가능 |\n| 블록 크기 | 64비트 블록은 대량 데이터에서 [[birthday-attack|생일 공격]](Sweet32) 위험 |\n### 나. 3DES와 AES 비교\n| 구분 | DES | [[triple-des|3DES(TDEA)]] | [[aes|AES]] |\n|---|---|---|---|\n| 표준 | FIPS 46(1977) | FIPS 46-3(1999), SP 800-67 | FIPS 197(2001) |\n| 블록·키 | 64비트, 56비트 | 64비트, 112 또는 168비트(EDE) | 128비트, 128·192·256비트 |\n| 구조 | Feistel 16라운드 | DES 3회(암호화-복호화-암호화) | SPN 10·12·14라운드 |\n| 유효 강도(고전 공격) | 56비트 | 3키 TDEA는 최대 약 112비트이며 2키 TDEA와 구분 | 이상적인 키 탐색 기준 키 길이와 대응 |\n| 연산 비교 | DES 1회 | DES 연산 3회 | 구현·명령어 지원에 따라 성능 차이 |\n| 현황 | 폐기 | NIST 기준 2024년부터 신규 보호 적용 금지; 기존 데이터 처리 예외 구분 | 현행 표준 |\n- 3DES는 K1=K2=K3이면 단일 DES와 호환되어 전환기 운용에 활용\n\n### 다. 운영모드\n| [[block-cipher-mode-of-operation|운영모드]] | 특징 |\n|---|---|\n| ECB | 블록 독립 암호화, 동일 평문→동일 암호문으로 패턴 노출 |\n| CBC | 이전 암호문과 XOR, IV 필요, 암호문 한 비트 오류는 해당 평문 블록과 다음 블록의 같은 비트에 영향 |\n| CFB·OFB | 블록 암호를 [[stream-cipher|스트림 암호]]처럼 사용 |\n| CTR | 카운터 암호화 후 XOR, 병렬 처리·랜덤 접근 가능 |\n\n## 4. DES 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 레거시 | 금융 단말·HSM 등 잔존 3DES는 AES로 전환 계획 수립, 기존 데이터 재암호화 |\n| 국내 기준 | KISA 암호 알고리즘 권고에 따라 128비트 이상 [[seed|SEED]]·[[aria|ARIA]]·[[lea|LEA]]·AES 사용 |\n| 설계 교훈 | 키 길이는 계산 능력 증가를 고려하여 여유 있게, 알고리즘 민첩성(교체 가능 구조) 확보 |\n| 발전방향 | AES-GCM 등 인증 암호 모드, 장기 보호 요구와 적용 기준에 따라 대칭키 길이 결정(양자 공격 모델 포함) |\n\n## 5. 결론\n- DES는 Feistel 구조와 S-박스 설계로 현대 블록 암호의 기초를 확립했으나 56비트 키 한계로 폐기되었으며, 신규 시스템은 AES 또는 국산 표준 알고리즘과 안전한 운영모드를 적용하는 것이 원칙",
+      "sources": [
+        {
+          "title": "FIPS 46-3 (폐지된 원리 자료)",
+          "url": "https://csrc.nist.gov/files/pubs/fips/46-3/final/docs/fips46-3.pdf",
+          "scope": "DES 블록·키·라운드·키 스케줄·마지막 교환"
+        },
+        {
+          "title": "NIST TDEA 전환 공지",
+          "url": "https://csrc.nist.gov/news/2023/nist-to-withdraw-sp-800-67-rev-2",
+          "scope": "2024년 신규 보호 금지와 레거시 처리 구분"
+        },
+        {
+          "title": "NIST SP 800-38A",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+          "scope": "운용 모드와 CBC 오류 전파"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. DES 원리·도식·키 스케줄·TDEA 전환·CBC 오류 전파·성능 비교 조건 대조.",
+      "unresolved": [
+        "역사적 공격의 56시간·22시간 및 차분/선형 공격 데이터 복잡도는 원 논문 대조 필요."
+      ]
+    }
+  },
+  "t-2214329f": {
+    "short": {
+      "source_sha256": "e20b4c9c69ea9cd6cdf21235b2c87b9ebfd51adc9f6bbeb0d5387a47e6e3e78b",
+      "body": "## 1. FIPS 140-2의 개요\n- 정의: 암호 알고리즘을 구현한 [[cryptographic-module|암호모듈]](HW·SW·펌웨어)이 갖춰야 할 보안 요구사항을 11개 영역·4개 레벨로 규정한 미국 연방 표준(2001), [[cmvp|CMVP]]로 검증\n- 필요성: 민감 정보를 보호하는 암호모듈의 구현 오류·물리적 공격 방지, 조달 시 객관적 보증 수준 제시\n\n## 2. FIPS 140-2의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  V[벤더 암호모듈] --> L[공인 시험기관 CST]\n  L --> C[\"CMVP(NIST·CCCS) 검증\"] --> CERT[검증서 발급·목록 등재]\n  A[\"CAVP 알고리즘 검증(AES·SHA·RSA)\"] --> L\n```\n| 구성요소 | 역할 |\n|---|---|\n| 11개 보안 영역 | 모듈 명세, 포트·인터페이스, 역할·서비스·인증, 유한상태모델, 물리보안, 운영환경, 키 관리, [[electromagnetic-compatibility|EMI/EMC]], 자체시험, 설계보증, 기타 공격 완화 |\n| [[cavp|CAVP]] | 승인 알고리즘 구현 정확성 선행 검증 |\n| 보안 정책 문서 | 모듈의 역할·서비스·[[critical-security-parameter|CSP]] 공개 명세 |\n\n## 3. FIPS 140-2 레벨 분류\n| 레벨 | 물리 보안 | 인증 | 운영환경 |\n|---|---|---|---|\n| 1 | 상용 등급 부품 | 요구 없음 | 범용 OS 허용 |\n| 2 | 봉인·코팅 등 [[tamper-resistance|변조 흔적]] | 역할 기반 | [[common-criteria|CC]] EAL2 |\n| 3 | 변조 탐지·대응([[zeroization|키 소거]]) | 신원 기반 | 평가 OS 요구와 평문 키 입출력 경로 조건 확인 |\n| 4 | 완전 봉합, 환경 장애 보호 | 신원 기반 | EAL4 |\n\n## 4. 고려사항\n- [[fips-140-3|FIPS 140-3]]([[iso-iec-19790|ISO/IEC 19790]] 기반)로 전환, CMVP의 140-2 신규 시스템 사용 종료일은 2026-09-21. 이후 Historical 목록으로 전환하며 기존 시스템 사용과 신규 조달을 구분\n- 국내 적용은 [[kcmvp|KCMVP]] 대상·조달 요건을 별도로 확인하며 FIPS 검증과 혼동하지 않음, [[side-channel-attack|부채널]]·[[post-quantum-cryptography|양자내성]] 대응 설계",
+      "sources": [
+        {
+          "title": "FIPS 140-2",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-2.pdf",
+          "scope": "11개 요구 영역·4개 레벨·운영환경 평가·키 인터페이스 조건"
+        },
+        {
+          "title": "NIST CMVP",
+          "url": "https://csrc.nist.gov/projects/cryptographic-module-validation-program/",
+          "scope": "공인 시험기관과 검증, FIPS 140-2에서 140-3로의 전환 정책"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 보안 영역·레벨·CSP 입출력 조건·인증서 상태·전환 일정 및 국내 제도 일반화 교정.",
+      "unresolved": [
+        "국내 사업별 KCMVP 의무 적용 범위는 해당 최신 고시를 개별 확인해야 함."
+      ]
+    },
+    "long": {
+      "source_sha256": "353147bde5b68a5dd3d922fdbbee6ea957ce8e05c888cc2ec0c04feefac90303",
+      "body": "## 1. FIPS 140-2의 개요\n### 가. 정의\n- 미국 연방 정부가 민감 정보 보호에 사용하는 [[cryptographic-module|암호모듈]](하드웨어·소프트웨어·펌웨어·하이브리드)의 설계·구현이 충족해야 할 보안 요구사항을 11개 영역, 4개 보안 레벨로 규정한 연방정보처리표준(Security Requirements for Cryptographic Modules, 2001년 5월)\n### 나. 등장배경 / 필요성\n- 안전한 알고리즘도 구현 결함·키 노출·물리적 공격으로 무력화, 모듈 단위 보증 필요\n- 연방 조달 요건(FISMA)과 금융·의료 규제에서 검증 모듈 요구, 캐나다 CCCS와 공동 [[cmvp|CMVP]] 운영으로 국제 통용\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| 암호 경계(Cryptographic Boundary) | 모듈의 구성요소를 둘러싸는 명시적 물리·논리 경계, 검증 대상 범위 |\n| [[critical-security-parameter|CSP]] | 노출·변조 시 모듈 보안이 훼손되는 비밀키·패스워드 등 |\n| 승인 보안 기능 | [[cavp|CAVP]]로 검증된 [[aes|AES]]·[[sha-2|SHA-2]]·RSA·ECDSA·[[deterministic-random-bit-generator|DRBG]] 등 |\n\n## 2. FIPS 140-2의 구성도 및 구성요소\n### 가. 구성도(검증 체계)\n```mermaid\nflowchart TB\n  VEN[\"벤더: 암호모듈 + 보안정책 문서\"] --> CST[\"공인 시험기관(CST Lab, NVLAP 인정)\"]\n  CAVP[\"CAVP: 알고리즘 구현 정확성 시험\"] --> CST\n  CST -->|시험 보고서| CMVP[\"CMVP (NIST + 캐나다 CCCS)\"]\n  CMVP --> CERT[\"검증서 발급, 검증 모듈 목록 공개\"]\n  CERT --> USER[\"연방기관·금융·의료 조달\"]\n  subgraph REQ[\"11개 보안 요구 영역\"]\n    R1[모듈 명세·포트 인터페이스] --- R2[역할·서비스·인증·유한상태모델]\n    R3[물리보안·운영환경·키 관리] --- R4[EMI EMC·자체시험·설계보증·기타공격완화]\n  end\n  REQ --> CST\n```\n### 나. 구성요소(11개 보안 영역)\n| 영역 | 요구사항 | 핵심기술 |\n|---|---|---|\n| 모듈 명세 | 암호 경계, 승인 모드·비승인 모드 정의 | 보안 정책 문서 |\n| 포트·인터페이스 | 데이터 입출력·제어·상태 인터페이스 논리 분리 | 레벨 3 이상 평문 비밀·개인키 입력/출력의 분리 포트 또는 신뢰 경로 조건 |\n| 역할·서비스·인증 | 사용자·암호관리자 역할, 서비스별 접근 | 역할 기반(L2), 신원 기반(L3·4) 인증 |\n| 유한상태모델 | 전원 인가·자체시험·오류 상태 전이 명세 | 상태 전이도 |\n| 물리보안 | 변조 흔적·탐지·대응 | 봉인, 메시, [[zeroization|키 소거]], 환경 장애 보호 |\n| 운영환경 | 소프트웨어 모듈의 OS 요구 | 단일 운영자 모드, [[common-criteria|CC]] EAL |\n| 키 관리 | 생성·입출력·저장·소거 전 생애주기 | [[key-management|키 관리]], DRBG, 키 래핑 |\n| [[electromagnetic-compatibility|EMI/EMC]] | 전자파 방출·내성 | FCC Part 15 Class A(L1·2)·B(L3·4) |\n| 자체시험 | 전원 인가 시·조건부 시험 | 알려진 답 시험(KAT), 무결성 시험 |\n| 설계보증 | 형상관리·보안 설치·개발 문서 | 형상관리, 소스 주석 |\n| 기타 공격 완화 | 부채널 등 비표준 공격 대응 명세 | 전력·타이밍 분석 대책 |\n### 다. 검증 절차\n1. 벤더가 CAVP로 알고리즘 구현 검증 후 모듈·문서를 CST 시험기관에 제출\n2. 시험기관이 레벨별 요구사항 시험(DTR) 및 보고서 작성\n3. CMVP가 보고서 검토·조정 후 검증서 발급, 목록 공개. 유효 상태·만료일·Historical/Revoked 여부와 전환 정책을 인증서별 확인\n\n## 3. FIPS 140-2의 상세\n### 가. 보안 레벨 분류\n| 구분 | 레벨 1 | 레벨 2 | 레벨 3 | 레벨 4 |\n|---|---|---|---|---|\n| 물리 보안 | 상용 등급 부품, 추가 요구 없음 | [[tamper-resistance|변조 흔적]] 코팅·봉인·잠금 | 변조 탐지 시 CSP 자동 소거(커버 개방 감지) | 완전 봉합 보호, 전압·온도 환경 장애 보호·시험 |\n| 운영자 인증 | 요구 없음 | 역할 기반 인증 | 신원 기반 인증 | 신원 기반 인증 |\n| CSP 입출력 | 일반 포트 | 일반 포트 | 물리적 분리 포트 또는 신뢰 경로, 암호화 입출력 | 레벨 3과 동일 |\n| 운영환경 | 범용 OS(비평가) | 적용 PP·EAL2·접근통제·감사 조건 | 적용 PP·EAL3·신뢰 경로·보안정책 모델 | 적용 PP·EAL4·신뢰 경로 |\n| 적용 예 | 소프트웨어 암호 라이브러리 | 스마트카드 리더, 네트워크 장비 | [[hsm|HSM]], 금융 결제 모듈 | 무인 환경·극한 환경 HSM |\n### 나. 암호화 시스템 설계 시 고려사항\n| 구분 | 고려사항 |\n|---|---|\n| 알고리즘 | 승인 알고리즘·키 길이(AES-128 이상, SHA-2 이상), 비승인 알고리즘 분리, 알고리즘 민첩성([[crypto-agility|Crypto Agility]]) |\n| 키 관리 | 승인 DRBG 사용, 키 생성·분배·저장·백업·폐기 절차, 키 입출력은 해당 보안 레벨·승인 방식에 따라 보호 |\n| 경계·인터페이스 | 암호 경계 명확화, 데이터·제어·상태 포트 분리, 오류 상태에서 출력 차단 |\n| 인증·역할 | 암호관리자와 사용자 역할 분리, [[multi-factor-authentication|MFA]], 최소 권한 |\n| 물리·운영환경 | 요구 레벨에 맞는 변조 대응, OS 보안 설정, 자체시험·무결성 검증 |\n| 성능·가용성 | 처리량과 보안 레벨 균형, HSM 이중화, 키 백업 |\n### 다. 암호화 시스템의 보안 요소\n| 보안 요소 | 구현 수단 |\n|---|---|\n| [[confidentiality|기밀성]] | AES 등 대칭키 암호, 키 래핑 |\n| [[integrity|무결성]] | 해시, HMAC, 모듈 소프트웨어 무결성 시험 |\n| [[authentication|인증]] | 운영자 인증, 전자서명 기반 모듈 인증 |\n| [[non-repudiation|부인방지]] | 전자서명, 감사 로그 |\n| [[availability|가용성]] | 이중화, 키 백업·복구, 오류 상태 복구 절차 |\n| 키 안전성 | 키 소거, 안전한 난수, 키 분리 보관 |\n### 라. 보안 위협 대응 전략\n| 위협 | 대응 전략 |\n|---|---|\n| 물리적 변조·키 추출 | 변조 탐지 메시·센서, 즉시 키 소거, 에폭시 봉합, [[trusted-platform-module|TPM]]·보안 요소 활용 |\n| [[side-channel-attack|부채널 공격]](전력·타이밍·전자파) | 마스킹, 상수 시간 연산, 노이즈 주입, 차폐 |\n| [[fault-injection-attack|오류 주입 공격]] | 연산 중복·검증, 전압·클럭 감시, 오류 시 출력 차단 |\n| 난수 취약 | 승인 DRBG, 엔트로피 소스 건강성 시험(SP 800-90B) |\n| 알고리즘 노후화 | 승인 목록 추적(SP 800-131A), [[post-quantum-cryptography|양자내성암호]](FIPS 203·204·205) 전환 설계 |\n| 구현 결함 | CAVP·CMVP 검증, 코드 검토, 형상관리 |\n\n## 4. FIPS 140-2 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 표준 전환 | [[fips-140-3|FIPS 140-3]](2019 발표, [[iso-iec-19790|ISO/IEC 19790:2012]]·24759 기반)로 신규 검증 일원화, 140-2 신규 시스템 사용 종료일 2026-09-21 이후 Historical 전환(현재 인증서 상태는 CMVP에서 확인) |\n| 국내 제도 | [[kcmvp|KCMVP]]와 FIPS·CC는 목적·대상이 다른 제도이므로 적용 기관·제품·사업의 요구사항을 개별 확인 |\n| 운영 | 검증 모듈도 승인 모드로 운영해야 효력, 버전 변경 시 재검증 범위 확인 |\n| 발전방향 | 클라우드 HSM·소프트웨어 모듈 검증 확대, 자동화 시험(ACVP), 부채널 비침투 시험(ISO/IEC 17825) 강화 |\n\n## 5. 결론\n- FIPS 140-2는 암호모듈 보증의 사실상 국제 기준으로 레벨별 요구사항에 맞는 키 관리·물리보안·부채널 대응 설계가 핵심이며, 140-3 및 KCMVP 요구사항과 양자내성 전환을 반영한 암호 민첩성 확보가 필요",
+      "sources": [
+        {
+          "title": "FIPS 140-2",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.140-2.pdf",
+          "scope": "11개 요구 영역·4개 레벨·운영환경 평가·키 인터페이스 조건"
+        },
+        {
+          "title": "NIST CMVP",
+          "url": "https://csrc.nist.gov/projects/cryptographic-module-validation-program/",
+          "scope": "공인 시험기관과 검증, FIPS 140-2에서 140-3로의 전환 정책"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 보안 영역·레벨·CSP 입출력 조건·인증서 상태·전환 일정 및 국내 제도 일반화 교정.",
+      "unresolved": [
+        "국내 사업별 KCMVP 의무 적용 범위는 해당 최신 고시를 개별 확인해야 함."
+      ]
+    }
+  },
+  "t-adefdc26": {
+    "short": {
+      "source_sha256": "619ff1f5b14fbcafd1c06cc19aed119a3241a279f2f5d1aa78d4da0d503b0685",
+      "body": "## 1. RSA 알고리즘의 개요\n- 정의: 큰 합성수의 [[integer-factorization|소인수분해 문제]]의 어려움에 기반하여 [[encryption|암호화]]와 [[digital-signature|전자서명]]을 모두 제공하는 대표 [[public-key-cryptography|공개키 암호]] 알고리즘(1977, Rivest·Shamir·Adleman, PKCS #1)\n- [[dsa|DSA]]: [[discrete-logarithm-problem|이산대수 문제]] 기반 [[elgamal|ElGamal]] 서명을 개량한 미 NIST 전자서명 전용 표준(FIPS 186, 1991 제안·1994 채택; 현재 신규 DSA 생성 제외) → 두 알고리즘 비교가 [[pki|PKI]] 설계의 기본\n\n식은 원리 설명이며 실제 암호화·서명은 표준 인코딩과 검증 절차를 모두 수행한다. DSA 식의 H(M)·h는 해시의 왼쪽 min(N, 출력 길이)비트를 정수화한 값이며 r·s 범위를 먼저 검사한다.\n\n## 2. RSA의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  K[\"키 생성: p,q 선택 → n=pq, φ(n)=(p-1)(q-1), e·d≡1 mod φ(n)\"] --> PUB[\"공개키 (n, e)\"]\n  K --> PRI[\"개인키 (n, d)\"]\n  PUB --> E[\"암호화 C = M^e mod n / 서명검증: S^e mod n의 인코딩 검증\"]\n  PRI --> D[\"복호화 M = C^d mod n / 서명 S = Encode(H(M))^d mod n\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 모듈러스 n | 두 큰 소수 p·q의 곱(2048~4096비트), 공개 |\n| 공개지수 e | 보통 65537, 암호화·서명검증에 사용 |\n| 개인지수 d | e의 모듈러 역원, 복호화·서명 생성 |\n| 패딩 | [[oaep|OAEP]](암호화)·PSS(서명)로 결정성·선택암호문 공격 방지 |\n\n## 3. RSA와 DSA 비교\n| 구분 | RSA | DSA |\n|---|---|---|\n| 수학적 기반 | 소인수분해 문제 | 이산대수 문제(ElGamal·Schnorr 변형) |\n| 기능 | 암호화 + 서명 + 키 전송 | 전자서명 전용(암호화 불가) |\n| 키 길이 | 2048~4096비트 | p 2048~3072비트, q 224~256비트 |\n| 서명 길이 | 모듈러스 크기(2048비트) | 2N비트 정수 표현(N은 q의 비트수), 전송 인코딩은 별도 |\n| 속도 | 서명 느림, 검증 빠름(e 작음) | 서명 빠름(사전계산), 검증 느림 |\n| 난수 의존 | 키 생성·OAEP·PSS 및 부채널 방어에 사용 | 서명마다 비밀 난수 k 필수, 재사용 시 개인키 노출 |\n| 표준·활용 | PKCS #1, TLS, 인증서, SSH | FIPS 186, 정부·DNSSEC, [[ecdsa|ECDSA]]·[[kcdsa|KCDSA]]로 계승 |\n\n## 4. 고려사항\n- 신규 DSA 생성은 길이에 관계없이 FIPS 186-5에서 제외. RSA·타원곡선 서명은 적용 기준과 PQC 전환 계획에 따라 선택, 결정적 k 생성(RFC 6979)\n- [[shor-algorithm|쇼어 알고리즘]]에 두 알고리즘 모두 취약 → [[post-quantum-cryptography|양자내성암호]](ML-DSA) 전환 로드맵, [[crypto-agility|암호 민첩성]] 확보",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 기본 연산과 OAEP·PSS·v1.5 구분, §6 키 용도 분리"
+        },
+        {
+          "title": "FIPS 186-4 (폐지된 원리 자료)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "DSA 수식·범위·해시 절단"
+        },
+        {
+          "title": "NIST DSS 개정",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "DSA 신규 생성 제외"
+        },
+        {
+          "title": "NIST IR 8547",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "2026년 양자 취약 공개키 암호 전환 일정"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. RSA 스킴·키 재사용·난수·복호화 인코딩, DSA 범위와 현행 전환 정책 대조.",
+      "unresolved": [
+        "RSA 특허·제정 동기, RSA-250·Logjam 공격 사례의 원 논문 대조는 남아 있음."
+      ]
+    },
+    "long": {
+      "source_sha256": "37a388ca14b4ee73758e8c0b62635b1bac898d852a56fe60451c3badab5abf11",
+      "body": "## 1. RSA 알고리즘의 개요\n### 가. 정의\n- RSA: 큰 합성수 n=pq의 [[integer-factorization|소인수분해 문제]]의 계산적 어려움에 기반하여 [[encryption|암호화]]·[[digital-signature|전자서명]]·[[key-exchange|키 전송]]에 활용하는 대표 [[public-key-cryptography|공개키 암호]] 알고리즘(1977, PKCS #1 v2.2 / RFC 8017)\n- [[dsa|DSA(Digital Signature Algorithm)]]: 유한체 [[discrete-logarithm-problem|이산대수 문제]]에 기반한 [[elgamal|ElGamal]]·Schnorr 서명을 개량해 미 NIST가 표준화한 전자서명 전용 알고리즘(FIPS 186, 1991 제안·1994 채택)\n\n### 나. 등장배경 / 필요성\n- [[diffie-hellman|Diffie-Hellman]](1976)이 공개키 개념을 제시했으나 암호화·서명을 모두 수행하는 실용 알고리즘 부재 → RSA 등장\n- RSA 특허(1983~2000)와 수출 규제 회피, 정부 전자서명 표준 필요 → 서명 전용·특허 자유 DSA 제정\n- 두 알고리즘 비교는 [[pki|PKI]]·TLS·코드서명 설계에서 알고리즘 선택의 기본 지식\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[trapdoor-one-way-function|트랩도어 일방향 함수]] | 공개 정보로 순방향은 쉽고 역방향은 비밀 정보 없이 어려움 |\n| 소인수분해 vs 이산대수 | n→p,q 분해 / g^x mod p에서 x 구하기 모두 준지수 시간 복잡도 |\n| 서명 = 해시 + 개인키 연산 | 메시지 [[hash-function|해시]]값에 개인키 연산, 공개키로 검증 |\n\n식은 원리 설명이며 실제 암호화·서명은 표준 인코딩과 검증 절차를 모두 수행한다. DSA 식의 H(M)·h는 해시의 왼쪽 min(N, 출력 길이)비트를 정수화한 값이며 r·s 범위를 먼저 검사한다.\n\n## 2. RSA와 DSA의 구성 및 동작 절차\n### 가. 동작 구성도\n```mermaid\nflowchart TB\n  subgraph RSA[RSA 서명]\n    R1[\"키: n=pq, e, d (e·d ≡ 1 mod φ(n))\"] --> R2[\"서명 S = Pad(H(M))^d mod n\"]\n    R2 --> R3[\"검증: 복구한 인코딩에 스킴별 검증 절차 적용\"]\n  end\n  subgraph DSA[DSA 서명]\n    D1[\"파라미터 p, q, g / 개인키 x, 공개키 y = g^x mod p\"] --> D2[\"난수 k 선택, r = (g^k mod p) mod q\"]\n    D2 --> D3[\"s = k^-1 (H(M) + x·r) mod q → 서명 (r, s)\"]\n    D3 --> D4[\"검증: v = (g^(H·w) · y^(r·w) mod p) mod q, w = s^-1 → v == r\"]\n  end\n```\n### 나. 구성요소 비교\n| 구성요소 | RSA | DSA |\n|---|---|---|\n| 도메인 파라미터 | 없음(키마다 n 생성) | p(2048~3072비트 소수), q(224~256비트 소수, p-1의 약수), g(차수 q 생성원) → 그룹 공유 가능 |\n| 개인키 | d (또는 p, q, dP, dQ, qInv CRT 형태) | x (0 < x < q) |\n| 공개키 | (n, e), e=65537 관용 | y = g^x mod p |\n| 서명 값 | 정수 S(n 크기) | 쌍 (r, s), 각 q 크기 |\n| 해시 | SHA-2 계열, PSS 패딩 | SHA-2(q 길이에 맞춤) |\n| 난수 | 키 생성·OAEP·PSS 솔트 | 서명마다 비밀 k 필수 |\n\n### 다. 동작 절차\n| 단계 | RSA | DSA |\n|---|---|---|\n| 1. 키 생성 | 소수 p,q → n, φ(n) → e 선택 → d = e^-1 mod φ(n) | p,q,g 생성 → x 선택 → y = g^x mod p |\n| 2. 서명 | h = H(M), S = Pad(h)^d mod n | k 선택, r = (g^k mod p) mod q, s = k^-1(h + xr) mod q |\n| 3. 검증 | RSA 공개키 연산 후 선택한 서명 스킴의 인코딩 검증(PSS의 salt·해시 구조 등) | w = s^-1 mod q, u1 = hw, u2 = rw, v = (g^u1 y^u2 mod p) mod q, v == r |\n| 4. 암호화 | C = Pad_OAEP(M)^e mod n, 복호화 후 OAEP 디코딩·오류 검사로 M 복원 | 미지원 |\n\n## 3. RSA와 DSA의 비교\n### 가. 특성 비교\n| 구분 | RSA | DSA |\n|---|---|---|\n| 수학적 기반 | 소인수분해 문제 | 이산대수 문제 |\n| 제공 기능 | 암호화, 서명, 키 교환(키 전송) | 전자서명 전용 |\n| 권고 키 길이(112비트 보안) | n 2048비트 | p 2048, q 224비트 |\n| 서명 크기 | 2048비트(256바이트) | 448~512비트(56~64바이트) |\n| 서명 생성 속도 | 느림(d 큼), CRT 최적화 가능(속도는 구현·키 길이에 따라 다름) | 빠름, r 사전계산 가능 |\n| 서명 검증 속도 | 매우 빠름(e=65537) | 느림(모듈러 지수 2회) |\n| 난수 의존성 | 키 생성·OAEP·PSS 등에 필요; 서명 방식별 난수 요건 구분 | k 유출·재사용·편향 시 개인키 복구(PS3 사례) |\n| 패딩 | [[oaep|OAEP]] 암호화·[[pss|PSS]] 서명 등 표준 스킴 선택. PKCS#1 v1.5 암호화의 오라클 문제와 v1.5 서명을 혼동하지 않음 | 패딩 불필요 |\n| 파라미터 공유 | 불가(개별 n) | 도메인 파라미터 공유로 키 생성 저렴 |\n| 표준 | PKCS #1, FIPS 186-5(RSA 서명 유지) | FIPS 186-4까지, 186-5(2023)에서 신규 서명 생성 승인 제외 |\n| 주요 활용 | TLS 인증서, SSH, S/MIME, 코드서명, 키 캡슐화 | DNSSEC, 구형 SSH·PGP, 정부 서명 |\n| 계승 | RSA-PSS, RSA-KEM | [[ecdsa|ECDSA]], [[eddsa|EdDSA]], [[kcdsa|KCDSA]] |\n\n### 나. 보안 취약점 비교\n| 구분 | RSA | DSA |\n|---|---|---|\n| 키 생성 | 약한 소수·공통 인수(공유 p) 시 분해, 작은 e·d 공격(Wiener) | 약한 도메인 파라미터, 백도어 파라미터 가능성 |\n| 구현 | [[side-channel-attack|부채널]](타이밍·전력)로 d 노출, 패딩 오라클(Bleichenbacher) | k 부채널·격자 공격(일부 비트 누출로 x 복구) |\n| 수학적 | 일반 수체 체(GNFS) 진전, RSA-250 분해(2020) | 이산대수 기록 진전, Logjam(1024비트) |\n| 양자 | [[shor-algorithm|쇼어 알고리즘]]으로 다항시간 해독 | 동일하게 해독 |\n\n### 다. 선택 기준\n| 요구 | 적합 알고리즘 | 근거 |\n|---|---|---|\n| 암호화·서명 기능 모두 필요 | RSA의 별도 키 쌍 | 같은 키의 다중 스킴 재사용은 신규 응용에 비권고(RFC 8017 §6) |\n| 검증 빈도 높음(인증서·코드서명) | RSA | 검증 매우 빠름 |\n| 서명 크기·대역폭 제약 | DSA → ECDSA/EdDSA | 짧은 서명 |\n| 서명 시 새 난수 의존 축소 | 결정적 서명 방식 검토 | 키 생성 난수와 부채널 방어까지 불필요한 것은 아님 |\n| 신규 시스템 | ECDSA/EdDSA, 양자내성 ML-DSA 병행 | FIPS 186-5·NIST 전환 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 길이 | 신규 DSA 생성은 제외. RSA 등 양자 취약 알고리즘은 NIST IR 8547(2026)의 전환 일정과 적용 시스템별 기한 확인 |\n| 난수 | DSA·ECDSA는 결정적 k(RFC 6979) 사용, 검증된 DRBG |\n| 패딩·해시 | RSA는 OAEP·PSS, SHA-1 서명 금지, SHA-256 이상 |\n| 구현 | [[kcmvp|KCMVP]]·FIPS 140-3 검증 모듈, 상수시간 연산, 부채널 방어 |\n| 전환 | DSA는 신규 사용 중단(FIPS 186-5), 레거시 검증만 유지 |\n| 발전방향 | [[post-quantum-cryptography|양자내성암호]] ML-DSA(FIPS 204)·SLH-DSA(FIPS 205)로 하이브리드 전환, [[crypto-agility|암호 민첩성]] 설계 |\n\n## 5. 결론\n- RSA는 소인수분해 기반의 범용 공개키 알고리즘으로 암호화·서명·키 전송에 활용하며, DSA는 이산대수 기반 서명 전용으로 짧은 서명과 빠른 서명 생성이 장점이나 난수 의존성과 표준 퇴출로 ECDSA·EdDSA에 계승되었으므로, 신규 설계는 RSA-PSS 또는 타원곡선 서명을 채택하고 양자내성 서명으로의 전환 민첩성을 확보해야 함",
+      "sources": [
+        {
+          "title": "RFC 8017",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 기본 연산과 OAEP·PSS·v1.5 구분, §6 키 용도 분리"
+        },
+        {
+          "title": "FIPS 186-4 (폐지된 원리 자료)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "DSA 수식·범위·해시 절단"
+        },
+        {
+          "title": "NIST DSS 개정",
+          "url": "https://csrc.nist.gov/News/2023/nist-releases-fips-186-5-and-sp-800-186",
+          "scope": "DSA 신규 생성 제외"
+        },
+        {
+          "title": "NIST IR 8547",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "2026년 양자 취약 공개키 암호 전환 일정"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. RSA 스킴·키 재사용·난수·복호화 인코딩, DSA 범위와 현행 전환 정책 대조.",
+      "unresolved": [
+        "RSA 특허·제정 동기, RSA-250·Logjam 공격 사례의 원 논문 대조는 남아 있음."
+      ]
+    }
+  },
+  "t-15959f1e": {
+    "short": {
+      "source_sha256": "a99adcf95364f137bde60b3868bb1cf14378f809c313c83acfcdf3786af1db36",
+      "body": "## 1. 타원곡선 암호의 개요\n- 정의: 대표적인 소수체(p > 3)의 짧은 Weierstrass 형식 y² = x³ + ax + b (mod p) 등의 타원곡선 상 점들의 군(群) 연산을 이용하고, 타원곡선 [[discrete-logarithm-problem|이산대수 문제]](ECDLP)의 계산 난해성에 안전성을 두는 [[public-key-cryptography|공개키 암호]]\n- 필요성: [[rsa|RSA]] 대비 짧은 키로 동등 안전성(256비트 ECC ≈ 3,072비트 RSA), IoT·모바일 등 저전력 환경에 적합\n\n## 2. ECC의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"도메인 파라미터(p, a, b, G, n)\"] --> B[\"개인키 d(난수)\"]\n  B -->|스칼라 곱| C[\"공개키 Q = dG\"]\n  C --> D[\"ECDH 키교환 / ECDSA 서명\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 곡선 파라미터 | 소수 p, 계수 a·b, 기준점 G, 위수 n |\n| 점 연산 | 점 덧셈·두 배 연산으로 스칼라 곱 kG 계산 |\n| 개인키·공개키 | d는 난수, Q = dG; Q와 G로 d를 구하는 것이 ECDLP |\n\n## 3. ECC의 특징 및 RSA 비교\n| 구분 | ECC | RSA |\n|---|---|---|\n| 수학적 기반 | 타원곡선 이산대수 문제 | [[integer-factorization|소인수분해]] 문제 |\n| 동등 안전성 키 길이 | 256비트 | 3,072비트 |\n| 연산 속도·자원 | 짧은 키가 자원 절감에 유리하나 속도·메모리는 구현별 측정 | 검증은 빠르나 키 생성 느림 |\n| 활용 | [[ecdsa|ECDSA]], [[ecdh|ECDH]], EdDSA, [[tls|TLS]], 비트코인 | 레거시 인증서, 전자서명 |\n\n## 4. 고려사항\n- 프로토콜이 허용하는 곡선 선택(NIST P-256, X25519 등은 식·인코딩·용도가 다르며 secp256k1을 포함한 모든 곡선이 모든 FIPS 용도에 승인된 것은 아님), 안전한 난수 생성(서명 난수 k 재사용 금지)\n- 특허·구현 난이도, 부채널 공격 대비 상수시간 구현\n- [[quantum-computer|양자컴퓨터]] Shor 알고리즘에 취약 → [[post-quantum-cryptography|양자내성암호]] 전환 로드맵\n",
+      "sources": [
+        {
+          "title": "FIPS 186-4 (기초 원리)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "유한체 곡선·도메인·키 범위와 타원곡선 서명"
+        },
+        {
+          "title": "RFC 7748",
+          "url": "https://www.rfc-editor.org/rfc/rfc7748.html",
+          "scope": "Montgomery 곡선·X25519/X448·공유비밀 처리"
+        },
+        {
+          "title": "RFC 5480",
+          "url": "https://www.rfc-editor.org/rfc/rfc5480.html",
+          "scope": "namedCurve 식별자·점 인코딩·공개키 용도"
+        },
+        {
+          "title": "RFC 8032",
+          "url": "https://www.rfc-editor.org/rfc/rfc8032.html",
+          "scope": "EdDSA 결정적 서명과 구현 주의"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 곡선 식의 적용 체·파라미터·공개키 표현·ECDH 인증과 ECDHE 전방비밀성 조건·곡선 명칭 대조.",
+      "unresolved": [
+        "특정 기기의 전력·성능 우열과 국내 EC-KCDSA 규격의 세부 조건은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "a9e33fe5d9b7e764531375ebc07a2ce5b9d3edab82b4698db3002e20d67b7301",
+      "body": "## 1. 타원곡선 암호의 개요\n### 가. 정의\n- 대표적으로 소수체 F_p(p > 3) 위에 정의된 짧은 Weierstrass 타원곡선 E: y² = x³ + ax + b (단, 4a³ + 27b² ≠ 0 (mod p)) 상의 점들이 이루는 아벨군의 연산을 이용하며, 타원곡선 [[discrete-logarithm-problem|이산대수 문제]](ECDLP)의 계산적 난해성에 안전성 근거를 두는 [[public-key-cryptography|공개키 암호]] 체계(1985년 Koblitz·Miller 제안)\n\n### 나. 등장배경 / 필요성\n- [[rsa|RSA]]·[[diffie-hellman|DH]]는 안전성 유지를 위해 키 길이가 계속 증가하여 연산·전송 비용 부담\n- IoT·스마트카드·모바일 등 연산 자원과 대역폭이 제한된 환경에서 짧은 키로 높은 안전성 요구\n- ECDLP에는 소인수분해의 수체 체(NFS) 같은 준지수 시간 알고리즘이 알려지지 않아 키 길이 효율성 우수\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 타원곡선 군 | 곡선 위 점들과 무한원점 O가 덧셈 연산에 대해 군을 구성 |\n| 스칼라 곱 | kG = G + G + ... + G(k회), 더블앤애드로 O(log k) 연산 |\n| ECDLP | G와 Q = dG가 주어졌을 때 d를 구하는 문제, 일반 군 공격인 Pollard rho가 O(√n); 선택한 곡선의 특수 취약성·양자 공격은 별도 |\n\n## 2. ECC의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  P[\"도메인 파라미터 (p, a, b, G, n, h)\"] --> K[\"키 생성: 개인키 d ∈ [1, n-1], 공개키 Q = dG\"]\n  K --> S[\"ECDSA 전자서명(서명·검증)\"]\n  K --> E[\"ECDH 키 합의(공유비밀 dA·QB = dB·QA)\"]\n  K --> C[\"ECIES 공개키 암호화\"]\n  S --> T[\"TLS 인증서·코드서명·블록체인\"]\n  E --> T\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 유한체 | 좌표 연산의 수 체계 | 소수체 F_p와 이진체 F_(2^m)는 구분하며 곡선 식도 다름 |\n| 곡선 계수 a, b | 곡선 형태 결정 | 비특이 조건 4a³ + 27b² ≠ 0 (mod p) |\n| 기준점 G | 공개키 생성의 생성원 | 위수 n이 큰 소수, 보조인자 h = #E / n |\n| 개인키 d | 비밀 스칼라 | 암호학적 난수 생성기 |\n| 공개키 Q | 검증·키합의용 공개 점 | Q = dG, 점 압축으로 x좌표와 부호만 전송 |\n| 점 연산 | 덧셈·두 배 연산 | 사영좌표·몽고메리 래더로 역원 연산 회피 |\n\n### 다. 동작 절차 ([[ecdh|ECDH]] 키 교환 기준)\n1. 양측이 표준 곡선 파라미터(p, a, b, G, n) 합의\n2. A는 난수 dA 선택, QA = dA·G 전송; B는 dB 선택, QB = dB·G 전송\n3. A는 dA·QB, B는 dB·QA 계산 → 동일한 점 dA·dB·G 획득\n4. 공유 점의 x좌표를 [[key-derivation-function|KDF]]에 입력하여 세션키 유도\n5. 공개키·공유비밀 유효성 검사와 상대 인증을 수행한다. 인증 없는 ECDH는 능동 중간자 공격에 취약하며, 공유점 계산의 어려움은 CDH 가정과도 구분한다\n\n## 3. ECC의 상세\n### 가. RSA와 비교\n| 구분 | ECC | RSA |\n|---|---|---|\n| 수학적 기반 | 타원곡선 이산대수 문제 | [[integer-factorization|소인수분해]] 문제 |\n| 대표 고전 공격 복잡도 | 일반 군 공격 O(√n), n은 부분군 위수이며 비트 길이에 대해 지수적 | 준지수 시간(일반 수체 체) |\n| 112비트 보안강도 키 | 224비트 | 2,048비트 |\n| 128비트 보안강도 키 | 256비트 | 3,072비트 |\n| 256비트 보안강도 키 | 512비트 | 15,360비트 |\n| 연산 특성 | 키 길이·곡선·최적화에 따라 생성·서명·검증 비용이 달라짐 | 공개키 연산(검증·암호화) 빠름, 개인키 연산 느림 |\n| 자원 | 짧은 키·서명, 저전력 적합 | 큰 키·서명, 메모리 부담 |\n\n### 나. 주요 알고리즘 및 표준 곡선\n| 구분 | 내용 |\n|---|---|\n| [[ecdsa|ECDSA]] | 전자서명(FIPS 186), 서명마다 고유 난수 k 필수 |\n| ECDH / ECDHE | 키 합의. 적절히 인증된 일회성 ECDHE와 비밀키 폐기가 [[forward-secrecy|순방향 비밀성]]을 지원하며 정적 ECDH에 자동 적용되는 것은 아님 |\n| EdDSA(Ed25519) | 결정론적 서명; 키 생성 난수·부채널·오류 주입 방어는 여전히 필요 |\n| ECIES | 하이브리드 공개키 암호화 |\n| 표준 곡선 | NIST P-256(secp256r1)/P-384(secp384r1), secp256k1(비트코인), Curve25519/448(RFC 7748), 국내 KCDSA 계열 EC-KCDSA |\n\n### 다. 적용 분야\n- TLS 인증서·HTTPS, SSH, 코드서명, 전자여권, 스마트카드, 블록체인 지갑 서명, 모바일 인증서\n\n## 4. ECC 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 곡선 선택 | 검증된 표준 곡선 사용, 비정상 곡선(anomalous·supersingular) 회피, 백도어 의혹 곡선 배제 |\n| 난수 관리 | ECDSA 난수 k 재사용·편향 시 개인키 노출(PS3 사례) → 결정론적 서명(RFC 6979) 또는 EdDSA |\n| 구현 보안 | 상수시간 연산으로 타이밍·전력 분석 등 [[side-channel-attack|부채널 공격]] 대비, 유효 곡선 점 검증(Invalid curve attack) |\n| 상호운용 | 점 압축·인코딩 표준(SEC 1, X9.62) 준수, 레거시 RSA 시스템과 하이브리드 운영 |\n| 양자 위협 | [[quantum-computer|양자컴퓨터]] Shor 알고리즘에 다항시간 취약 → [[post-quantum-cryptography|양자내성암호]](ML-KEM·ML-DSA)와 하이브리드 전환 로드맵 수립 |\n\n## 5. 결론\n- ECC는 짧은 키로 높은 보안강도를 제공하여 TLS·모바일·블록체인의 사실상 표준 공개키 암호로 자리잡았으나, 구현 취약점 관리와 양자내성암호로의 단계적 전환 계획을 함께 고려해야 함\n",
+      "sources": [
+        {
+          "title": "FIPS 186-4 (기초 원리)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf",
+          "scope": "유한체 곡선·도메인·키 범위와 타원곡선 서명"
+        },
+        {
+          "title": "RFC 7748",
+          "url": "https://www.rfc-editor.org/rfc/rfc7748.html",
+          "scope": "Montgomery 곡선·X25519/X448·공유비밀 처리"
+        },
+        {
+          "title": "RFC 5480",
+          "url": "https://www.rfc-editor.org/rfc/rfc5480.html",
+          "scope": "namedCurve 식별자·점 인코딩·공개키 용도"
+        },
+        {
+          "title": "RFC 8032",
+          "url": "https://www.rfc-editor.org/rfc/rfc8032.html",
+          "scope": "EdDSA 결정적 서명과 구현 주의"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 곡선 식의 적용 체·파라미터·공개키 표현·ECDH 인증과 ECDHE 전방비밀성 조건·곡선 명칭 대조.",
+      "unresolved": [
+        "특정 기기의 전력·성능 우열과 국내 EC-KCDSA 규격의 세부 조건은 미확인."
+      ]
+    }
+  },
+  "t-88bce01d": {
+    "short": {
+      "source_sha256": "7dff0522dc0152d6cc178d2ee9b14346295872eb9ce41312c4417d9f5381e99b",
+      "body": "## 1. 양자내성암호의 개요\n- 정의: [[quantum-computer|양자컴퓨터]]의 공격에도 안전하도록 격자·부호·해시 등 양자 알고리즘으로 효율적 해결이 알려지지 않은 수학적 난제에 기반하여 설계된, 기존 컴퓨터에서 동작하는 공개키 암호\n- 필요성: [[shor-algorithm|Shor 알고리즘]]이 소인수분해·이산대수를 다항시간에 해결하여 [[rsa|RSA]]·[[elliptic-curve-cryptography|ECC]]·DH 무력화, 현재 암호문을 수집해 미래에 해독하는 [[harvest-now-decrypt-later|HNDL]] 위협\n\n## 2. 양자내성암호의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  Q[양자컴퓨터 위협] --> S[Shor: RSA·ECC 붕괴]\n  Q --> G[Grover: 이상적 탐색의 제곱근 가속]\n  S --> P[양자내성암호 전환]\n  G --> A[용도별 목표 강도·표준 확인]\n  P --> K[\"KEM: ML-KEM(Kyber)\"]\n  P --> D[\"서명: ML-DSA·SLH-DSA·FN-DSA\"]\n```\n| 기반 난제 | 특징 | 대표 알고리즘 |\n|---|---|---|\n| [[lattice-based-cryptography|격자 기반]] | [[learning-with-errors|LWE]]·SIS 문제, 속도·크기 균형 우수 | [[ml-kem|ML-KEM]](Kyber), [[ml-dsa|ML-DSA]](Dilithium), FN-DSA(Falcon) |\n| [[hash-based-signature|해시 기반]] | 해시 기반 보안 가정(방식별 역상·충돌·의사난수 성질 등 필요), 보수적 안전성 | [[slh-dsa|SLH-DSA]](SPHINCS+), XMSS |\n| [[code-based-cryptography|부호 기반]] | 오류정정부호 복호 난제, 큰 공개키 | Classic McEliece, HQC |\n| [[multivariate-cryptography|다변수 다항식]] | 다변수 2차 방정식 풀이 난제 | Rainbow(2022년 공격으로 탈락) |\n| [[isogeny-based-cryptography|아이소제니]] | 타원곡선 간 아이소제니(일반적인 동형사상과 구분), 작은 키 | SIKE(2022년 공격으로 탈락) |\n\n## 3. 표준화 현황 및 특징\n| 구분 | 내용 |\n|---|---|\n| NIST 표준 | 2024년 8월 FIPS 203(ML-KEM), 204(ML-DSA), 205(SLH-DSA) 확정, FIPS 206(FN-DSA) 진행, 2025년 HQC 추가 선정 |\n| 국내 [[kpqc|KpqC]] | 2025년 1월 16일 최종 선정 발표: KEM SMAUG-T·NTRU+, 서명 HAETAE·AIMer |\n| 양자키분배와 차이 | [[quantum-key-distribution|QKD]]는 물리 채널 기반 키 분배, PQC는 수학 기반 SW 교체로 기존 인프라 호환 |\n\n## 4. 고려사항\n- 기존 ECDHE와 ML-KEM을 병행하는 [[hybrid-key-exchange|하이브리드 키 교환]]으로 전환기 안전성 확보(TLS 1.3 X25519MLKEM768)\n- 암호 인벤토리 작성과 [[crypto-agility|암호 민첩성]] 설계로 알고리즘 교체 용이성 확보, 적용 국가·기관 정책과 장기 보호 기간에 맞춘 전환 로드맵 수립",
+      "sources": [
+        {
+          "title": "NIST FIPS 203",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf",
+          "scope": "ML-KEM 생성·캡슐화·역캡슐화 및 크기"
+        },
+        {
+          "title": "NIST IR 8547 (2026)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "현행 PQC 표준·가정·전환 일정과 적용 범위"
+        },
+        {
+          "title": "KpqC 최종 선정 발표",
+          "url": "https://kpqc.or.kr/competition_02.html",
+          "scope": "2025-01-16 선정 날짜·4개 알고리즘"
+        },
+        {
+          "title": "NIST HQC 선정",
+          "url": "https://csrc.nist.gov/news/2025/hqc-announced-as-a-4th-round-selection",
+          "scope": "2025년 HQC 선정과 표준 완성의 구분"
+        },
+        {
+          "title": "FN-DSA JOSE/COSE 초안",
+          "url": "https://datatracker.ietf.org/doc/html/draft-ietf-cose-falcon",
+          "scope": "FN-DSA 표준화 진행 상태(Internet-Draft)"
+        },
+        {
+          "title": "RFC 5480",
+          "url": "https://www.rfc-editor.org/rfc/rfc5480.html",
+          "scope": "P-256 공개키 점 인코딩과 좌표 길이 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. KpqC 날짜·선정/표준 구분, KEM 절차, 양자 안전성 표현, 키 크기 비교 전제·하이브리드 조건·전환 적용 범위 대조.",
+      "unresolved": [
+        "FIPS 204 전문 요청이 반복 시간 초과되어 ML-DSA-65 크기 수치의 원문 대조는 미완료.",
+        "산업별 기본 활성화 여부·제품 버전과 국내 전환 정책의 상세 기한은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "1fbd4c208ec2c04da7ecf91f8689a6a5ead80db22ed6f5d909b27a2368279b95",
+      "body": "## 1. 양자내성암호의 개요\n### 가. 정의\n- 대규모 [[quantum-computer|양자컴퓨터]]가 실현되어도 안전성이 유지되도록, 양자 알고리즘으로 효율적 해법이 알려지지 않은 격자·부호·해시·다변수 등 수학적 난제에 기반하여 설계된 공개키 암호(Post-Quantum Cryptography, 양자내성·양자안전 암호)로, 기존 고전 컴퓨터와 네트워크에서 동작\n\n### 나. 등장배경 / 필요성\n| 배경 | 내용 |\n|---|---|\n| [[shor-algorithm|Shor 알고리즘]](1994) | 소인수분해·이산대수 문제를 다항시간에 해결, [[rsa|RSA]]·[[diffie-hellman|DH]]·[[elliptic-curve-cryptography|ECC]] 등 현행 공개키 암호 전면 붕괴 |\n| [[grover-algorithm|Grover 알고리즘]](1996) | 탐색 복잡도를 2^n에서 2^(n/2)로 감소, 이상적 비구조 탐색의 제곱근 가속. 실제 회로·병렬화 비용과 해시 충돌/역상 문제를 구분 |\n| 양자컴퓨터 발전 | 수천 큐비트 시제품 등장, 오류 보정 기술 발전으로 암호 해독에 유효한 양자컴퓨터(CRQC) 출현 시기 불확실 |\n| [[harvest-now-decrypt-later|HNDL(Harvest Now, Decrypt Later)]] | 현재 암호 통신을 수집·저장한 뒤 양자컴퓨터 실현 시 해독, 장기 보호 필요 정보는 즉시 위협 |\n| 전환 소요기간 | 과거 알고리즘 전환(DES → AES, SHA-1 → SHA-2)에 10년 이상 소요, 선제 준비 필수 |\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[key-encapsulation-mechanism|키 캡슐화 메커니즘(KEM)]] | 공개키로 대칭 세션키를 캡슐화·전달하는 PQC 키 교환 방식(ML-KEM) |\n| PQC 서명 | 양자내성 난제 기반 [[digital-signature|전자서명]](ML-DSA, SLH-DSA, FN-DSA) |\n| [[quantum-key-distribution|양자키분배(QKD)]]와 구분 | QKD는 양자역학 물리 특성으로 키 분배(전용 광채널 필요), PQC는 수학적 SW 방식으로 기존 인프라 호환 |\n\n## 2. 양자내성암호의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  T[양자컴퓨터 위협] --> T1[\"Shor: 공개키 암호 붕괴\"]\n  T --> T2[\"Grover: 이상적 탐색의 제곱근 가속\"]\n  T1 --> PQC[양자내성암호 PQC]\n  T2 --> SYM[용도별 목표 강도·표준에 따라 선택]\n  PQC --> F1[격자 기반: ML-KEM·ML-DSA·FN-DSA]\n  PQC --> F2[해시 기반: SLH-DSA·XMSS]\n  PQC --> F3[부호 기반: Classic McEliece·HQC]\n  PQC --> F4[다변수·아이소제니: 연구 단계]\n  F1 --> APP[\"적용: TLS·VPN·PKI·코드서명·IoT\"]\n  F2 --> APP\n  F3 --> APP\n  APP --> HYB[\"하이브리드(고전+PQC) 전환기 운용\"]\n```\n\n### 나. 기반 난제별 구성요소\n| 분류 | 기반 난제 | 특징(장점·단점) | 대표 알고리즘 |\n|---|---|---|---|\n| [[lattice-based-cryptography|격자 기반]] | [[learning-with-errors|LWE]]·Module-LWE, SIS, NTRU 격자 최단벡터 | 키·서명 크기와 속도 균형 우수, 최다 채택, 구조적 격자 안전성 검증 지속 필요 | [[ml-kem|ML-KEM]](CRYSTALS-Kyber), [[ml-dsa|ML-DSA]](CRYSTALS-Dilithium), FN-DSA(Falcon), NTRU |\n| [[hash-based-signature|해시 기반]] | 해시함수 일방향성·충돌저항성 | 가장 보수적 안전성, 서명 크기 크고 느림, 상태 유지형(XMSS)은 키 재사용 관리 필요 | [[slh-dsa|SLH-DSA]](SPHINCS+), XMSS, LMS |\n| [[code-based-cryptography|부호 기반]] | 일반 선형부호 복호(Syndrome Decoding) 난제 | 장기간 연구된 계열이나 개별 알고리즘의 안전성을 증명한 것은 아님, 공개키 매우 큼(McEliece 수백 KB) | Classic McEliece, HQC, BIKE |\n| [[multivariate-cryptography|다변수 다항식 기반]] | 다변수 2차 연립방정식(MQ) 풀이 | 서명 작고 빠름, 공개키 큼, Rainbow 2022년 고전 컴퓨터로 공격 | Rainbow(탈락), UOV, MAYO |\n| [[isogeny-based-cryptography|아이소제니 기반]] | 초특이 타원곡선 간 아이소제니(일반적인 동형사상과 구분) 계산 | 키 크기 최소, 속도 느림, SIKE 2022년 공격으로 탈락 | SIKE(탈락), SQIsign |\n\n### 다. ML-KEM 기반 키 교환 절차\n1. 수신자가 Module-LWE 기반 공개키(pk)·개인키(sk) 쌍 생성 후 pk 공개\n2. 송신자가 난수를 선택하여 pk로 캡슐화 → 암호문(ct)과 공유 비밀(ss) 생성\n3. 송신자가 ct를 수신자에게 전송\n4. 수신자가 sk로 ct를 역캡슐화하여 동일한 공유 비밀 ss 복원\n5. 양측이 ss로부터 KDF를 통해 대칭 세션키 유도, AES-GCM 등으로 데이터 암호화\n\n## 3. 양자내성암호 표준화 동향 및 기존 암호와의 비교\n### 가. 표준화 현황\n| 구분 | 내용 |\n|---|---|\n| NIST PQC 공모 | 2016년 공모 시작 → 2022년 7월 Kyber·Dilithium·Falcon·SPHINCS+ 최초 선정 |\n| NIST 표준 확정 | 2024년 8월 FIPS 203(ML-KEM), FIPS 204(ML-DSA), FIPS 205(SLH-DSA) 발표, FIPS 206(FN-DSA) 표준화 진행, 2025년 3월 HQC를 추가 KEM으로 선정 |\n| 국내 [[kpqc|KpqC]] 공모 | 2021년 시작, 2025년 1월 16일 최종 선정 발표: KEM SMAUG-T·NTRU+, 서명 HAETAE·AIMer, [[kcmvp|KCMVP]] 검증 체계 반영 추진 |\n| 정책 | NIST IR 8547(2026)은 미국 연방 맥락의 2035년 전환 목표와 고위험 시스템의 조기 기한을 구분. 이를 모든 국가·시스템의 단일 의무 기한으로 일반화하지 않음 |\n| 산업 적용 | TLS 1.3 하이브리드(X25519MLKEM768) 브라우저·CDN 적용 사례(제품·버전별 기본 활성화 여부 확인 필요), Signal·iMessage PQ 프로토콜, OpenSSH 하이브리드 키 교환 |\n\n### 나. 기존 공개키 암호와 PQC 비교\n| 비교 항목 | RSA-3072 / ECC P-256 | ML-KEM-768 / ML-DSA-65 |\n|---|---|---|\n| 기반 난제 | 소인수분해 / 타원곡선 이산대수 | ML-KEM의 Module-LWE, ML-DSA의 Module-LWE·Module-SIS 계열 가정 구분 |\n| 양자 안전성 | Shor로 붕괴 | 현재 알려진 효율적 양자 공격에 저항하도록 설계(공격 알고리즘 자체가 없다는 뜻은 아님) |\n| 공개키 크기 | RSA 모듈러스만 384B / P-256 SEC1 점 33B(압축)·65B(비압축), 인증서 부가 인코딩 별도 | 1,184B / 1,952B |\n| 암호문·서명 크기 | 384B / 64B | 1,088B / 3,309B |\n| 연산 속도 | ECC 대비 ML-KEM이 유사 또는 빠름 | 키 생성·캡슐화 고속, 대역폭 증가 |\n| 성숙도 | 수십 년 검증 | 표준화 직후, 구현 부채널 검증 진행 |\n\n### 다. 전환 전략(하이브리드 접근)\n| 전략 | 내용 |\n|---|---|\n| [[hybrid-key-exchange|하이브리드 키 교환]] | ECDHE와 ML-KEM 공유 비밀을 결합(KDF)하여 안전한 결합기·인증·협상과 두 구성요소의 독립성 등 조건 아래 전환 위험 완화 |\n| 하이브리드 서명·인증서 | 고전 서명과 PQC 서명 병기(복합 인증서), 레거시 호환 |\n| 대칭키 상향 | 대칭키·해시의 사용 목적과 목표 강도에 따라 선택; 모든 용도에 동일 하한을 강제하지 않음 |\n| 단계적 전환 | 장기 보호 데이터·키 교환 우선 → 서명·PKI → 레거시 시스템 |\n\n## 4. 양자내성암호 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 암호 인벤토리 | 조직 내 암호 사용 현황(알고리즘·키·프로토콜·제품) 식별, 위험 우선순위화 |\n| [[crypto-agility|암호 민첩성]] | 알고리즘을 하드코딩하지 않고 교체 가능한 구조 설계, 암호 라이브러리 추상화 |\n| 성능·대역폭 | 키·서명 크기 증가로 TLS 핸드셰이크·인증서 체인 크기 증가, IoT·임베디드 제약 검토 |\n| 구현 안전성 | [[side-channel-attack|부채널 공격]](KyberSlash 등) 대응, 상수 시간 구현, 검증된 라이브러리 사용 |\n| 상호운용성 | IETF TLS·IPsec·X.509 PQC 확장 표준 준수, 하이브리드 협상 호환성 |\n| 발전방향 | 알고리즘 다양화(부호·아이소제니 백업), PQC 전용 HSM·칩, QKD와의 보완적 결합, 공급망 전반 전환 로드맵 이행 |\n\n## 5. 결론\n- 양자내성암호는 Shor 알고리즘으로 붕괴되는 RSA·ECC를 대체하는 기존 컴퓨터에서 구현할 수 있는 주요 공개키 전환 방안으로, NIST 표준 발표와 KpqC 공모전 알고리즘 선정(표준 제정과 구분)에 따라 암호 인벤토리와 암호 민첩성을 기반으로 표준·구현·상호운용성 검증을 거친 단계적 전환으로 HNDL 위협에 대응 가능",
+      "sources": [
+        {
+          "title": "NIST FIPS 203",
+          "url": "https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.203.pdf",
+          "scope": "ML-KEM 생성·캡슐화·역캡슐화 및 크기"
+        },
+        {
+          "title": "NIST IR 8547 (2026)",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ir/2026/NIST.IR.8547.pdf",
+          "scope": "현행 PQC 표준·가정·전환 일정과 적용 범위"
+        },
+        {
+          "title": "KpqC 최종 선정 발표",
+          "url": "https://kpqc.or.kr/competition_02.html",
+          "scope": "2025-01-16 선정 날짜·4개 알고리즘"
+        },
+        {
+          "title": "NIST HQC 선정",
+          "url": "https://csrc.nist.gov/news/2025/hqc-announced-as-a-4th-round-selection",
+          "scope": "2025년 HQC 선정과 표준 완성의 구분"
+        },
+        {
+          "title": "FN-DSA JOSE/COSE 초안",
+          "url": "https://datatracker.ietf.org/doc/html/draft-ietf-cose-falcon",
+          "scope": "FN-DSA 표준화 진행 상태(Internet-Draft)"
+        },
+        {
+          "title": "RFC 5480",
+          "url": "https://www.rfc-editor.org/rfc/rfc5480.html",
+          "scope": "P-256 공개키 점 인코딩과 좌표 길이 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. KpqC 날짜·선정/표준 구분, KEM 절차, 양자 안전성 표현, 키 크기 비교 전제·하이브리드 조건·전환 적용 범위 대조.",
+      "unresolved": [
+        "FIPS 204 전문 요청이 반복 시간 초과되어 ML-DSA-65 크기 수치의 원문 대조는 미완료.",
+        "산업별 기본 활성화 여부·제품 버전과 국내 전환 정책의 상세 기한은 미확인."
+      ]
+    }
   }
 }

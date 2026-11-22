@@ -44,6 +44,10 @@ def reference_answer(topic_id: str, answer: dict) -> dict:
             body = edit['body']
             sources = '\n'.join(f"- [{source['title']}]({source['url']}) — {source['scope']}" for source in edit['sources'])
             body += '\n\n## 검토 근거\n' + sources
+            if edit.get('review_scope'):
+                body += '\n\n검토 범위: ' + edit['review_scope']
+            if edit.get('unresolved'):
+                body += '\n\n## 미확인 항목\n' + '\n'.join(f'- {item}' for item in edit['unresolved'])
             status = 'corrected'
         else:
             status = 'source_mismatch'
