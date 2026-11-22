@@ -15206,5 +15206,213 @@
         "공격 주체·작전명과 정확한 물리 피해 수는 공식 확인하지 못함."
       ]
     }
+  },
+  "t-550129e8": {
+    "short": {
+      "source_sha256": "e406539448ac0cecca5b0ecf421e332cf0ea9d2825f488a047bc9882c95a3239",
+      "body": "## 1. 멜트다운의 개요\n- 정의: CPU의 [[out-of-order-execution|비순차 실행]] 중 권한 검사 완료 전에 커널 메모리를 읽어 캐시에 남긴 흔적을 [[cache-side-channel-attack|캐시 부채널]]로 추출하여 사용자 프로세스가 커널·타 프로세스 메모리를 읽는 하드웨어 취약점(CVE-2017-5754, 2018.1 공개)\n- 배경: 성능 최적화를 위한 투기적·비순차 실행이 [[privilege-level|권한 경계]]를 일시적으로 무시, [[spectre|스펙터]]와 함께 공개\n\n## 2. 멜트다운의 공격 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"1. 커널 주소 읽기 명령(권한 위반)\"] --> B[\"2. 비순차 실행: 예외 전 값 로드\"]\n  B --> C[\"3. 값 기반 배열 인덱스 접근 → 캐시 적재\"]\n  C --> D[\"4. 예외 발생·결과 폐기(아키텍처 상태 복원)\"]\n  D --> E[\"5. Flush+Reload로 캐시 적중 측정 → 값 복원\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 비순차 실행 엔진 | 권한 검사(예외) 확정 전 후속 명령 선행 실행 |\n| [[cpu-cache|CPU 캐시]] | 폐기된 실행의 데이터 접근 흔적 잔존 |\n| [[flush-reload|Flush+Reload]] | 접근 시간 차로 캐시 적중 여부 판별 |\n| 커널 매핑 | KPTI 미적용 시 사용자 프로세스 페이지 테이블에 권한 보호된 커널 영역이 매핑되는 [[page-table|페이지 테이블]] 구조 |\n\n## 3. 마이크로아키텍처 vs 아키텍처 관점\n| 구분 | 내용 |\n|---|---|\n| 마이크로아키텍처 | 비순차·투기 실행, 캐시 상태 등 ISA에 비노출 상태가 복원되지 않아 정보 누출 |\n| 아키텍처 | ISA상 권한 검사·예외는 정확히 동작하나 부작용(캐시)은 보장 범위 외 |\n| 스펙터와 비교 | 멜트다운은 예외 지연 악용·Intel 중심, 스펙터는 [[branch-prediction|분기예측]] 오도·다양한 CPU에 영향(모델·변종별 확인) |\n\n## 4. 대응 방안\n- SW: [[kernel-page-table-isolation|KPTI]]로 사용자·커널 페이지 테이블 분리(성능 영향은 CPU·워크로드·완화 설정에 따라 측정), OS·하이퍼바이저 패치\n- HW: [[microcode|마이크로코드]] 업데이트, 신규 CPU에서 권한 검사 선행 설계, [[trusted-execution-environment|TEE]] 영향 검토",
+      "sources": [
+        {
+          "title": "Lipp et al., Meltdown 원 논문",
+          "url": "https://meltdownattack.com/meltdown.pdf",
+          "scope": "원형 취약점의 사용자/커널 격리와 매핑된 메모리, KAISER 완화"
+        },
+        {
+          "title": "Meltdown 연구진 FAQ, 2018 당시 설명",
+          "url": "https://meltdownattack.com/",
+          "scope": "Xen PV·공유 커널 컨테이너 영향 조건; 현행 CPU 목록으로 사용하지 않음"
+        },
+        {
+          "title": "Linux Kernel Page Table Isolation",
+          "url": "https://docs.kernel.org/arch/x86/pti.html",
+          "scope": "사용자용 최소 커널 매핑과 페이지 테이블 전환 비용, PCID 관련 조건"
+        },
+        {
+          "title": "Linux Kernel Spectre Side Channels",
+          "url": "https://docs.kernel.org/admin-guide/hw-vuln/spectre.html",
+          "scope": "v1/v2 영향·가젯·완화 수단과 CPU별 sysfs 상태 확인"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 원형 공격·주소 매핑·예외 처리와 가상화 조건을 대조하고 고정 성능 저하·속도·전 CPU 일반화를 교정.",
+      "unresolved": [
+        "CPU별 최신 영향을 전 모델로 대조하지 못함. 구체적인 권한 검사 내부 타이밍·64B 캐시 라인·Tomasulo 적용은 구현별 확인 필요.",
+        "500KB/s·5~30%의 원 측정 조건을 확인하지 못해 보편적 수치에서 제외. Foreshadow·SGX와 연구형 STT 대응은 해당 논문 전체 대조 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "16eb36205ab38d738b171f422a14b063c940c928feaae7571bcdd1f138d0cec0",
+      "body": "## 1. 멜트다운의 개요\n### 가. 정의\n- CPU가 성능을 위해 수행하는 [[out-of-order-execution|비순차 실행]] 과정에서 메모리 접근 권한 검사가 확정되기 전에 커널 메모리 값이 로드·사용되고, 예외 처리로 결과가 폐기된 후에도 [[cpu-cache|CPU 캐시]]에 남은 흔적을 [[cache-side-channel-attack|캐시 부채널]]로 읽어 사용자 모드 프로세스가 커널 및 타 프로세스의 메모리를 읽을 수 있는 하드웨어 취약점(CVE-2017-5754, Rogue Data Cache Load)\n### 나. 등장배경\n- 2018년 1월 Google Project Zero 등이 [[spectre|스펙터]]와 함께 공개, 초기 발표 당시 다수 Intel 및 일부 타사 CPU 영향이 논의됨; 현재 영향 여부는 CPU 모델·변종·벤더 공지로 확인\n- 수십 년간 CPU 성능 향상은 투기적·비순차 실행·캐시 계층에 의존, 보안 검증은 ISA 수준 아키텍처 상태만 고려\n- 취약·미패치 Xen PV 및 공유 커널 컨테이너 등에서 격리 위험; 모든 하드웨어 가상화 게스트가 호스트 메모리를 읽는 것은 아님\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 아키텍처 상태 | ISA가 정의한 레지스터·메모리 상태, 예외 시 정확히 복원 |\n| 마이크로아키텍처 상태 | 캐시·TLB·분기예측기 등 구현 내부 상태, 예외 시 복원되지 않음 |\n| 일시적 실행(Transient Execution) | 폐기될 운명이나 일시적으로 실행되어 부작용을 남기는 명령 |\n| [[side-channel-attack|부채널]] | 시간·전력 등 간접 정보로 비밀 추출, 멜트다운은 캐시 접근 시간 차 이용 |\n\n## 2. 멜트다운의 공격 구성도 및 구성요소\n### 가. 공격 구성도\n```mermaid\nflowchart TB\n  P[\"사용자 프로세스(공격자)\"] --> I1[\"① 커널 주소 K 바이트 로드 명령\"]\n  I1 --> OoO[\"비순차 실행 엔진\"]\n  OoO -->|\"권한 검사 미완료 상태에서 선행\"| L[\"② 커널 값 v 로드(마이크로아키텍처적)\"]\n  L --> I2[\"③ probe[v*4096] 접근 → 캐시 라인 적재\"]\n  OoO -->|\"권한 검사 완료\"| EX[\"④ 페이지 폴트 예외: 아키텍처 상태 복원·결과 폐기\"]\n  EX --> H[\"⑤ 예외 처리(핸들러·TSX 억제)\"]\n  H --> FR[\"⑥ Flush+Reload: probe 배열 256개 라인 접근 시간 측정\"]\n  FR --> OUT[\"빠른 인덱스 = 커널 값 v 복원\"]\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 관련 기술 |\n|---|---|---|\n| 비순차 실행 엔진 | 명령 의존성 해소 순서로 실행, 예외는 리타이어 시점에 처리 | Tomasulo 알고리즘, 재정렬 버퍼(ROB) |\n| 권한 검사 | [[page-table|페이지 테이블]] 엔트리의 U/S 비트로 커널 접근 차단 | [[memory-management-unit|MMU]], [[translation-lookaside-buffer|TLB]] |\n| 커널 주소공간 매핑 | KPTI 미적용 구성에서 사용자 프로세스 페이지 테이블에도 커널 영역 매핑 | [[virtual-memory|가상 메모리]], 직접 물리 매핑 |\n| CPU 캐시 | 접근 데이터 임시 저장, 적중·실패 시간 차 | L1D·L2·L3, 캐시 라인 64B |\n| 부채널 측정 | 캐시 적중 여부로 비밀값 추론 | [[flush-reload|Flush+Reload]](clflush·rdtsc) |\n### 다. 공격 절차\n1. 준비: 256×4096 바이트 probe 배열을 생성하고 clflush로 캐시에서 제거\n2. 일시적 실행: 커널 주소 바이트 v를 읽고 probe[v×4096]에 접근하는 코드 실행\n3. 예외: 권한 위반 페이지 폴트 발생, 아키텍처 상태 복원되나 probe 라인은 캐시에 잔존\n4. 예외 억제: 시그널 핸들러 또는 Intel TSX 트랜잭션으로 프로세스 종료 방지\n5. 측정: 256개 probe 라인 접근 시간 측정, 잡음·오류를 고려해 v를 추정하고 반복; 누출 속도는 실험 환경에 따라 다름\n\n## 3. CPU 마이크로아키텍처 및 아키텍처 측면 분석\n### 가. 마이크로아키텍처 측면\n| 구분 | 내용 |\n|---|---|\n| 비순차 실행 | 선행 명령(권한 검사 포함 로드)의 완료를 기다리지 않고 후속 명령 실행, 예외는 리타이어 시 반영 |\n| 권한 검사 지연 | 취약 구현에서 권한 위반 로드의 값이 예외 처리 전 후속 일시적 명령에 사용될 수 있음; 세부 타이밍은 CPU별 상이 |\n| 캐시 부작용 | 폐기된 명령이 적재한 캐시 라인은 롤백되지 않아 마이크로아키텍처 상태로 잔존 |\n| 비교 | 원형 Meltdown의 영향과 다른 일시적 실행 취약점은 구분; 벤더·CPU 모델별 보안 공지 확인 |\n### 나. 아키텍처(ISA·OS) 측면\n| 구분 | 내용 |\n|---|---|\n| 권한 모델 | [[privilege-level|권한 수준]](Ring 0·3)과 페이지 테이블 U/S 비트로 커널 메모리 보호, ISA 관점에서는 정상 동작 |\n| 주소공간 설계 | 시스템 콜 성능을 위해 커널을 모든 프로세스 주소공간에 매핑, 커널 직접 매핑 영역 등 매핑된 물리 메모리가 공격 범위에 포함될 수 있음 |\n| 보안 보장 한계 | ISA는 아키텍처 상태만 정의하고 타이밍·캐시 등 부작용은 명세 외 → 명세와 구현의 간극이 취약점 |\n| KASLR 우회 | 커널 주소 무작위화도 캐시 타이밍으로 매핑 여부 판별하여 우회 |\n### 다. 멜트다운 vs 스펙터 비교\n| 구분 | 멜트다운 | 스펙터 |\n|---|---|---|\n| CVE | CVE-2017-5754 | CVE-2017-5753(v1), CVE-2017-5715(v2) |\n| 악용 메커니즘 | 예외 처리 지연 중 비순차 실행 | [[branch-prediction|분기예측]] 오도에 의한 투기 실행 |\n| 공격 경계 | 사용자→커널 메모리 | 프로세스 간·샌드박스 내(브라우저 JS) |\n| 영향 CPU | Intel 중심, 일부 ARM의 영향 모델 | Intel·AMD·ARM의 영향 모델 |\n| 대응 | KPTI로 근본 완화 | 변종·CPU별 Retpoline·IBRS·LFENCE 등 적용 |\n\n## 4. 멜트다운 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| OS 패치 | [[kernel-page-table-isolation|KPTI]](KAISER): 사용자용 페이지 테이블에 진입·복귀용 최소 커널 영역만 유지; 전환·TLB 비용은 PCID 지원과 워크로드에 따라 다름 |\n| 펌웨어·HW | [[microcode|마이크로코드]] 업데이트, 해당 취약점에 하드웨어 수정이 적용된 CPU 모델 확인 |\n| 가상화·클라우드 | 하이퍼바이저 패치, 게스트 격리 재검증, [[trusted-execution-environment|TEE]](SGX) 변종 Foreshadow 대응 |\n| 운영 | 패치 성능 영향 측정 후 적용, 데이터베이스·I/O 집약 워크로드 영향 큼 |\n| 발전방향 | 투기 실행 보안 설계(STT·투기 실행 데이터 격리), 하드웨어·소프트웨어 공동 설계, 부채널 저항 ISA 확장 |\n\n## 5. 결론\n- 멜트다운은 성능 최적화를 위한 마이크로아키텍처 동작이 ISA 보안 모델이 보장하지 않는 부작용을 남겨 발생한 구조적 취약점으로, KPTI 등 SW 완화와 함께 보안을 고려한 CPU 설계 패러다임 전환의 계기",
+      "sources": [
+        {
+          "title": "Lipp et al., Meltdown 원 논문",
+          "url": "https://meltdownattack.com/meltdown.pdf",
+          "scope": "원형 취약점의 사용자/커널 격리와 매핑된 메모리, KAISER 완화"
+        },
+        {
+          "title": "Meltdown 연구진 FAQ, 2018 당시 설명",
+          "url": "https://meltdownattack.com/",
+          "scope": "Xen PV·공유 커널 컨테이너 영향 조건; 현행 CPU 목록으로 사용하지 않음"
+        },
+        {
+          "title": "Linux Kernel Page Table Isolation",
+          "url": "https://docs.kernel.org/arch/x86/pti.html",
+          "scope": "사용자용 최소 커널 매핑과 페이지 테이블 전환 비용, PCID 관련 조건"
+        },
+        {
+          "title": "Linux Kernel Spectre Side Channels",
+          "url": "https://docs.kernel.org/admin-guide/hw-vuln/spectre.html",
+          "scope": "v1/v2 영향·가젯·완화 수단과 CPU별 sysfs 상태 확인"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 원형 공격·주소 매핑·예외 처리와 가상화 조건을 대조하고 고정 성능 저하·속도·전 CPU 일반화를 교정.",
+      "unresolved": [
+        "CPU별 최신 영향을 전 모델로 대조하지 못함. 구체적인 권한 검사 내부 타이밍·64B 캐시 라인·Tomasulo 적용은 구현별 확인 필요.",
+        "500KB/s·5~30%의 원 측정 조건을 확인하지 못해 보편적 수치에서 제외. Foreshadow·SGX와 연구형 STT 대응은 해당 논문 전체 대조 미완료."
+      ]
+    }
+  },
+  "t-1729657d": {
+    "short": {
+      "source_sha256": "9faea5658ace8ed474baffc6ead3ef663ae70f0a0a9b7b07515b9659694da4ec",
+      "body": "## 1. 스펙터의 개요\n- 정의: CPU의 [[speculative-execution|추측 실행]]과 [[branch-prediction|분기 예측]]을 악용하여 보호 경계 밖 메모리를 추측 실행으로 읽게 한 뒤, 폐기된 결과가 [[cpu-cache|캐시]]에 남기는 흔적을 [[cache-timing-attack|캐시 타이밍]] [[side-channel-attack|부채널]]로 복원하는 CPU 하드웨어 취약점 (2018.1 공개, [[cve|CVE]]-2017-5753·5715)\n- 등장배경: 성능 향상을 위한 [[out-of-order-execution|비순차·추측 실행]] 설계가 보안 격리를 고려하지 않아 Intel·AMD·ARM의 여러 고성능 CPU에 영향(모델·변종별 확인)\n\n## 2. 스펙터의 공격 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"1.분기 예측기 훈련\"] --> B[\"2.경계 밖 접근 추측 실행\"] --> C[\"3.비밀값 의존 캐시 적재\"] --> D[\"4.추측 폐기 (캐시 잔존)\"] --> E[\"5.접근 시간 측정으로 비밀 복원\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 추측 실행 | 분기 결과 확정 전 예측 경로 선실행, 오예측 시 결과 폐기 |\n| 분기 예측기 | 과거 이력으로 분기 방향·목적지 예측, 공격자가 훈련 가능 |\n| 캐시 부채널 | [[flush-reload|Flush+Reload]] 등으로 적재 여부를 시간차로 판별 |\n| 가젯 | 피해 프로세스 내 비밀 접근·캐시 적재 코드 조각 |\n\n## 3. 스펙터의 변종 및 멜트다운 비교\n| 구분 | Variant 1 [[bounds-check-bypass|경계 검사 우회]] | Variant 2 [[branch-target-injection|분기 목적지 주입]] | [[meltdown|멜트다운]] (Variant 3) |\n|---|---|---|---|\n| 원리 | 조건 분기 오예측으로 배열 경계 밖 읽기 | 간접 분기 예측기 오염으로 가젯 실행 | 권한 검사 전 커널 메모리 추측 읽기 |\n| 영향 | 동일 프로세스·브라우저 [[sandbox|샌드박스]] | 프로세스·[[virtual-machine|VM]] 경계 | 사용자→커널 메모리 |\n| 대응 | 지원 CPU에 맞는 추측 실행 장벽(LFENCE 등) 삽입, 인덱스 마스킹 | [[retpoline|Retpoline]], IBRS·IBPB [[microcode|마이크로코드]] | [[kernel-page-table-isolation|KPTI]] |\n\n## 4. 고려사항\n- 특정 변종은 소프트웨어로 완화할 수 있으나 모든 일시적 실행 공격에 대한 일괄 해결은 아님, 마이크로코드·OS·컴파일러·브라우저([[site-isolation|사이트 격리]], 타이머 정밀도 제한) 다층 적용\n- 완화 조치의 성능 영향을 실제 CPU·워크로드·완화 설정별로 평가, 클라우드 멀티테넌트 환경 우선 적용, 후속 [[transient-execution-attack|일시적 실행 공격]](Foreshadow·MDS·Retbleed) 지속 모니터링",
+      "sources": [
+        {
+          "title": "Kocher et al., Spectre Attacks 원 논문",
+          "url": "https://spectreattack.com/spectre.pdf",
+          "scope": "피해 프로세스 주소 공간의 가젯·경계 검사 우회와 간접 분기 오도"
+        },
+        {
+          "title": "Linux Kernel Spectre Side Channels",
+          "url": "https://docs.kernel.org/admin-guide/hw-vuln/spectre.html",
+          "scope": "v1/v2 영향·가젯·완화 수단과 CPU별 sysfs 상태 확인"
+        },
+        {
+          "title": "Linux Kernel Page Table Isolation",
+          "url": "https://docs.kernel.org/arch/x86/pti.html",
+          "scope": "사용자용 최소 커널 매핑과 페이지 테이블 전환 비용, PCID 관련 조건"
+        },
+        {
+          "title": "MDN SharedArrayBuffer security requirements",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+          "scope": "보안 컨텍스트와 교차 출처 격리 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 피해자 주소 공간과 소프트웨어 경계, v1/v2 및 Meltdown의 완화 수단을 구분. 전 CPU·고정 오버헤드 단정 제거.",
+      "unresolved": [
+        "Foreshadow·MDS·Retbleed·Downfall·Inception 등 후속 공격별 논문 전문은 이 항목에서 모두 대조하지 못함.",
+        "SharedArrayBuffer의 브라우저별 버전 지원·타이머 정밀도는 개별 구현 확인 필요. CPU 전 모델·마이크로코드 최신 목록의 완전성을 보장하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "7fdd3787e8a7dde6cfcefeacb3513dcd29caee4b110af4675437361d12e37ccc",
+      "body": "## 1. 스펙터의 개요\n### 가. 정의\n- 현대 CPU의 성능 최적화 기능인 [[speculative-execution|추측 실행]]과 [[branch-prediction|분기 예측]]을 악용해 피해 프로세스가 자신의 주소 공간에서 소프트웨어 경계 검사로 제한한 메모리 등을 추측 경로에서 읽도록 유도하고, 추측이 폐기된 뒤에도 [[cpu-cache|캐시]]에 남는 마이크로아키텍처 상태를 [[cache-timing-attack|캐시 타이밍]] [[side-channel-attack|부채널]]로 측정하여 비밀 정보를 복원하는 하드웨어 취약점\n- 2018년 1월 Google Project Zero와 학계 연구진이 멜트다운과 함께 공개, Variant 1([[cve|CVE]]-2017-5753 경계 검사 우회), Variant 2(CVE-2017-5715 분기 목적지 주입)\n\n### 나. 등장배경 / 필요성\n- 1990년대 이후 CPU는 [[out-of-order-execution|비순차 실행]]·추측 실행으로 파이프라인 유휴를 줄여 성능 향상, 추측 결과 폐기 시 아키텍처 상태는 복원하나 캐시 등 마이크로아키텍처 상태는 미복원\n- 소프트웨어 취약점이 아닌 설계 수준 결함으로 여러 벤더의 고성능 CPU에 영향; 모든 CPU가 취약한 것은 아니며 모델·변종별 완화 상태 확인 필요\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 추측 실행 | 분기·메모리 접근 결과 확정 전 예측 경로를 미리 실행, 오예측 시 결과 폐기 |\n| 분기 예측기 | 분기 이력·방향 예측 구조와 분기 목적지 버퍼(BTB) 등으로 방향·목적지 예측, 공격자 코드가 훈련 가능 |\n| [[transient-execution-attack|일시적 실행]] | 폐기될 명령이 남긴 캐시·버퍼 흔적을 부채널로 관찰 |\n| 가젯 | 피해자 주소 공간에서 비밀을 읽어 캐시 상태로 변환하는 코드 조각 |\n\n## 2. 스펙터의 구성도 및 구성요소\n### 가. 구성도 (Variant 1 공격 흐름)\n```mermaid\nflowchart TB\n  T[\"1.훈련: 유효 인덱스로 분기 반복 실행 → 예측기가 '참' 학습\"] --> F[\"2.캐시 플러시: 공유 배열 probe를 캐시에서 제거\"]\n  F --> X[\"3.악의적 인덱스 x 입력: array1 크기 밖\"]\n  X --> S[\"4.추측 실행: 경계 검사 결과 대기 중 array1[x] 읽기 = 비밀 바이트 k\"]\n  S --> L[\"5.k에 의존한 probe[k*4096] 접근 → 해당 라인 캐시 적재\"]\n  L --> R[\"6.경계 검사 실패 판정 → 결과 폐기, 캐시 상태 잔존\"]\n  R --> M[\"7.probe 각 라인 접근 시간 측정 → 빠른 라인 = k 복원\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 추측 실행 엔진 | 분기 확정 전 명령 선실행 | 비순차 실행, 재정렬 버퍼(ROB) |\n| 분기 예측기 | 조건 분기 방향·간접 분기 목적지 예측 | PHT, BTB, RSB, 공유 예측기 오염 |\n| 캐시 부채널 | 추측 결과의 캐시 잔존 관찰 | [[flush-reload|Flush+Reload]], Prime+Probe, Evict+Time |\n| 고정밀 타이머 | 캐시 적중·미스 시간차(수십 ns) 측정 | rdtsc, performance.now |\n| 가젯 | 비밀 접근 후 캐시 적재 | 배열 이중 인덱싱 코드, 간접 호출 대상 |\n\n### 다. 공격 절차 (Variant 2, 분기 목적지 주입)\n1. 공격자 프로세스가 피해자와 동일 코어에서 간접 분기 목적지가 가젯 주소가 되도록 BTB 훈련\n2. 피해자(커널·[[hypervisor|하이퍼바이저]]·타 프로세스)가 간접 분기 실행 시 오염된 예측으로 가젯을 추측 실행\n3. 가젯이 피해자 비밀을 읽어 캐시 적재\n4. 공격자가 Flush+Reload로 비밀 복원 → 프로세스·[[virtual-machine|VM]] 경계 침범\n\n## 3. 스펙터의 상세\n### 가. 변종 및 멜트다운 비교\n| 구분 | Spectre V1 [[bounds-check-bypass|경계 검사 우회]] | Spectre V2 [[branch-target-injection|분기 목적지 주입]] | [[meltdown|멜트다운]] V3 |\n|---|---|---|---|\n| CVE | 2017-5753 | 2017-5715 | 2017-5754 |\n| 악용 요소 | 조건 분기 예측 | 간접 분기 예측(BTB) | 비순차 실행 중 권한 검사 지연 |\n| 피해 범위 | 동일 프로세스 내 격리(브라우저 JS [[sandbox|샌드박스]]), 커널 syscall 경계 | 취약·미완화 구성의 프로세스 간, 게스트→호스트 | 사용자 공간→커널에 매핑된 메모리(취약·미완화 구성) |\n| 영향 CPU | Intel·AMD·ARM의 영향 모델 | Intel·AMD·ARM의 영향 모델 | 주로 Intel, 일부 ARM |\n| 대응 | 지원 CPU에서 LFENCE 등의 추측 실행 장벽, 인덱스 마스킹, 컴파일러 하드닝 | [[retpoline|Retpoline]], IBRS·IBPB·STIBP [[microcode|마이크로코드]], eIBRS | [[kernel-page-table-isolation|KPTI]] 커널 페이지 테이블 분리 |\n| 완화 난도 | 가젯별 개별 수정, 완전 차단 어려움 | CPU·설정별 성능 영향 평가 | 원형은 KPTI로 완화; 다른 변종은 별도 대응 |\n\n### 나. 후속 일시적 실행 공격\n| 공격 | 시기 | 내용 |\n|---|---|---|\n| Spectre-NG, SpectreRSB | 2018년 | 투기 저장소 우회(V4), 리턴 스택 버퍼 오염 |\n| Foreshadow (L1TF) | 2018년 | SGX 엔클레이브·VM L1 캐시 데이터 유출 |\n| ZombieLoad·RIDL ([[microarchitectural-data-sampling|MDS]]) | 2019년 | 내부 버퍼(라인 필 버퍼) 잔류 데이터 샘플링 |\n| Retbleed | 2022년 | 리턴 명령 예측 악용으로 Retpoline 우회 |\n| Downfall·Inception | 2023년 | Gather 명령·분기 예측기 훈련 변종 |\n\n### 다. 영향 시나리오 (취약 CPU·가젯·공유 자원 조건을 만족하고 완화되지 않은 구성)\n- 브라우저: 악성 웹페이지 JavaScript가 동일 프로세스 내 타 사이트 비밀(쿠키·비밀번호) 읽기\n- 클라우드: 공격 VM이 동일 호스트 타 테넌트·하이퍼바이저 메모리 유출\n- 엔드포인트: 저권한 악성코드가 커널·타 프로세스 메모리의 키·자격증명 탈취\n\n## 4. 스펙터 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 계층별 대응 | 마이크로코드(IBRS·IBPB), OS(Retpoline·예측기 격리; KPTI는 주로 Meltdown 대응), 컴파일러(LFENCE·투기 하드닝), 애플리케이션(가젯 제거), 브라우저([[site-isolation|사이트 격리]], 타이머 정밀도 저하, SharedArrayBuffer 사용에 필요한 교차 출처 격리 등 브라우저별 조건) 다층 적용 |\n| 성능 영향 | 완화 조치의 오버헤드는 CPU·워크로드·설정별 측정 필요, 보안 요구와 성능 간 위험 기반 선택(클라우드 멀티테넌트 우선) |\n| 완전성 | 소프트웨어 완화는 알려진 가젯·변종 한정, 신규 변종 지속 출현 → 하드웨어 재설계(eIBRS, 분기 예측기 격리) 필요 |\n| 자산 관리 | 펌웨어 업데이트 가능 여부 점검, 지원 종료 CPU 교체 계획 |\n| 발전방향 | 보안 인식 마이크로아키텍처 설계, 투기 실행 격리(Speculative Taint Tracking), 기밀 컴퓨팅과 결합, 부채널 저항 암호 구현 |\n\n## 5. 결론\n- 스펙터는 CPU 성능 최적화 설계 자체에 내재된 취약점으로 소프트웨어 패치만으로 근절이 어려우며, 마이크로코드·OS·컴파일러·브라우저의 다층 완화와 성능 영향 평가, 신규 변종 모니터링을 병행하면서 장기적으로 보안을 고려한 하드웨어 재설계로 대응해야 함",
+      "sources": [
+        {
+          "title": "Kocher et al., Spectre Attacks 원 논문",
+          "url": "https://spectreattack.com/spectre.pdf",
+          "scope": "피해 프로세스 주소 공간의 가젯·경계 검사 우회와 간접 분기 오도"
+        },
+        {
+          "title": "Linux Kernel Spectre Side Channels",
+          "url": "https://docs.kernel.org/admin-guide/hw-vuln/spectre.html",
+          "scope": "v1/v2 영향·가젯·완화 수단과 CPU별 sysfs 상태 확인"
+        },
+        {
+          "title": "Linux Kernel Page Table Isolation",
+          "url": "https://docs.kernel.org/arch/x86/pti.html",
+          "scope": "사용자용 최소 커널 매핑과 페이지 테이블 전환 비용, PCID 관련 조건"
+        },
+        {
+          "title": "MDN SharedArrayBuffer security requirements",
+          "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer",
+          "scope": "보안 컨텍스트와 교차 출처 격리 요구사항"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 피해자 주소 공간과 소프트웨어 경계, v1/v2 및 Meltdown의 완화 수단을 구분. 전 CPU·고정 오버헤드 단정 제거.",
+      "unresolved": [
+        "Foreshadow·MDS·Retbleed·Downfall·Inception 등 후속 공격별 논문 전문은 이 항목에서 모두 대조하지 못함.",
+        "SharedArrayBuffer의 브라우저별 버전 지원·타이머 정밀도는 개별 구현 확인 필요. CPU 전 모델·마이크로코드 최신 목록의 완전성을 보장하지 않음."
+      ]
+    }
+  },
+  "t-eb71308f": {
+    "short": {
+      "source_sha256": "6bf3b27b75520b2bbcd48f6fef30f8e7c95005cc6ea9d097ddc19ffbc3b9fd8d",
+      "body": "## 1. TOCTOU(검사시점과 사용시점)의 개요\n- 정의: 자원의 상태를 검사(Check)한 시점과 실제 사용(Use)하는 시점 사이의 시간차를 이용해 자원이 변경되어 발생하는 [[race-condition|경쟁조건]] 기반 보안 약점([[cwe|CWE]]-367)\n- 등장배경: 멀티스레드·멀티프로세스 환경에서 검사-사용이 [[atomic-operation|원자적]]으로 수행되지 않는 [[secure-coding|시큐어코딩]] 결함, 행안부 SW 보안약점 \"시간 및 상태\" 항목\n\n## 2. TOCTOU의 발생 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"T1: access() 권한 검사\"] --> B[\"공격자: 파일을 심볼릭 링크로 교체\"]\n  B --> C[\"T2: open() 사용 → 비인가 파일 접근\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 검사(Check) | 파일 존재·권한·잔액 등 조건 확인 |\n| 시간차(Window) | 검사와 사용 사이 스케줄링·I/O 지연 구간 |\n| 사용(Use) | 검사 결과를 신뢰하고 자원 접근·갱신 |\n| 공격자 | 시간차에 [[symbolic-link|심볼릭 링크]] 교체, 동시 갱신으로 상태 변경 |\n\n## 3. 발생 상황 및 보안대책\n| 구분 | 내용 |\n|---|---|\n| 파일 시스템 | access() 후 open(), stat() 후 chmod() → 링크 교체로 [[privilege-escalation|권한 상승]] |\n| 공유 메모리·DB | 잔액 검사 후 출금, 재고 확인 후 차감 → 동시 요청으로 이중 지출 |\n| 대책1 | 대상 고정: 안전하게 open()한 디스크립터로 fstat()·사용. 신규 생성은 O_CREAT&#124;O_EXCL; O_NOFOLLOW는 마지막 경로 요소만 제한 |\n| 대책2 | [[critical-section|임계구역]]을 [[mutex|뮤텍스]]·[[semaphore|세마포어]]·synchronized로 보호, DB는 트랜잭션·[[pessimistic-locking|비관적 잠금]] |\n| 대책3 | [[compare-and-swap|CAS]] 기반 원자적 연산, [[least-privilege|최소 권한]] 실행, 임시파일 안전 생성(mkstemp) |\n\n## 4. 제시 코드(account 입출금)의 문제점 및 해결\n- 문제: `account += amount`는 비원자적 읽기-수정-쓰기이며 C의 [[volatile-keyword|volatile]]은 스레드 동기화·원자성을 보장하지 않음 → 동기화 없는 deposit·withdraw 동시 접근은 C에서 데이터 경쟁으로 정의되지 않은 동작\n- 해결: 두 함수를 뮤텍스 또는 synchronized로 상호배제, 또는 원자적 타입(AtomicLong·std::atomic) 사용, 잔액 검사 후 출금은 동일 잠금 안에서 수행",
+      "sources": [
+        {
+          "title": "MITRE CWE-367",
+          "url": "https://cwe.mitre.org/data/definitions/367.html",
+          "scope": "자원 검사 이후 변경으로 검증 결과가 무효화되는 경쟁 조건"
+        },
+        {
+          "title": "WG14 N1570 C11 공개 초안 §5.1.2.4",
+          "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+          "scope": "비원자 충돌 접근의 happens-before 부재는 데이터 경쟁·정의되지 않은 동작"
+        },
+        {
+          "title": "GCC Volatiles",
+          "url": "https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html",
+          "scope": "volatile이 일반 메모리 접근을 정렬하는 장벽이 아님"
+        },
+        {
+          "title": "Linux open(2)",
+          "url": "https://man7.org/linux/man-pages/man2/open.2.html",
+          "scope": "디스크립터 대상 유지, O_CREAT|O_EXCL 및 O_NOFOLLOW의 범위"
+        },
+        {
+          "title": "Linux openat2(2)",
+          "url": "https://man7.org/linux/man-pages/man2/openat2.2.html",
+          "scope": "RESOLVE_NO_SYMLINKS의 전체 경로 링크 제한"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문과 C 예제 검토. C volatile과 Java 의미, 데이터 경쟁과 TOCTOU, 파일 디스크립터·생성 플래그의 보호 범위를 구분.",
+      "unresolved": [
+        "행정안전부 가이드의 현행 분류·판본 및 DBMS별 잠금 격리 수준은 해당 원문으로 전체 대조하지 못함.",
+        "제시 C 코드는 결함 설명용이며 실행하지 않음. mutex 예시는 오류 반환·금액 검증 등 전체 구현을 생략한 개념 조각."
+      ]
+    },
+    "long": {
+      "source_sha256": "4a59768dc5b3bf6d5326a7e7019ce3f35324bc629adaf41ce6bd2eb54a1660f6",
+      "body": "## 1. TOCTOU(검사시점과 사용시점)의 개요\n### 가. 정의\n- 프로그램이 자원의 상태(존재·권한·잔액 등)를 검사(Time Of Check)한 뒤 그 결과를 신뢰하여 자원을 사용(Time Of Use)하는 사이에 다른 주체가 자원 상태를 변경함으로써 검증을 무효화하는 [[race-condition|경쟁조건]](Race Condition) 유형의 소프트웨어 보안 약점([[cwe|CWE]]-367, CWE-362의 하위 유형)\n\n### 나. 등장배경 및 필요성\n- 멀티코어·멀티스레드·분산 환경에서 검사와 사용이 [[atomic-operation|원자적]]으로 묶이지 않아 선점(Preemption)·I/O 지연 구간이 공격 가능 창(Window)으로 노출\n- 행정안전부 「소프트웨어 개발보안 가이드」 \"시간 및 상태\" 항목, OWASP·CERT [[secure-coding|시큐어코딩]] 표준에서 구현단계 점검 대상으로 지정\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 검사(Check) | access(), stat(), if(balance >= amount) 등 사전 조건 확인 |\n| 사용(Use) | open(), write(), balance -= amount 등 조건에 의존한 자원 접근 |\n| 공격 창(Window) | 검사와 사용 사이 시간차, 공격자가 [[symbolic-link|심볼릭 링크]] 교체·동시 갱신으로 상태 변경 |\n\n## 2. TOCTOU의 발생 구조 및 구성요소\n### 가. 발생 구조도\n```mermaid\nsequenceDiagram\n  participant P as 피해 프로세스(root 권한)\n  participant F as 파일시스템\n  participant A as 공격자\n  P->>F: access(\"/tmp/data\", W_OK) 검사\n  F-->>P: 허용(사용자 소유 파일)\n  A->>F: rm /tmp/data, ln -s /etc/passwd /tmp/data\n  P->>F: open(\"/tmp/data\", O_WRONLY) 사용\n  F-->>P: /etc/passwd 핸들 반환 → 비인가 쓰기\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 검사 로직 | 자원 접근 자격·상태 판단 | 경로 기반 시스템콜(access, stat), 조건문 |\n| 공유 자원 | 복수 주체가 접근하는 파일·메모리·DB 레코드 | 파일 경로, 전역변수, 계정 테이블 |\n| 스케줄러·동시성 | 검사와 사용 사이 선점·인터리빙 발생 | 스레드 스케줄링, [[context-switch|컨텍스트 스위치]] |\n| 공격자 | 창 구간에서 자원 상태 변경 | 심볼릭 링크·하드링크 교체, 반복 요청(Race) |\n| 사용 로직 | 검사 결과를 전제로 자원 조작 | open, write, 잔액 차감 |\n\n### 다. 공격 절차\n1. 피해 프로그램이 경로 기반으로 권한을 검사하는 지점과 사용 지점 식별\n2. 두 지점 사이 지연을 키우기 위해 CPU 부하·대용량 디렉터리 등으로 창 확대\n3. 창 구간에서 파일을 링크로 교체하거나 동일 트랜잭션을 병렬 요청\n4. 상승된 권한으로 민감 파일 변조 또는 잔액 이중 인출 성공\n\n## 3. 문제 발생 상황과 보안대책\n### 가. 발생 상황별 유형\n| 유형 | 상황 | 결과 |\n|---|---|---|\n| 파일 시스템 | setuid 프로그램이 access() 후 open(), 임시파일 존재 확인 후 생성 | 심볼릭 링크 공격, [[privilege-escalation|권한 상승]] |\n| 메모리 공유 | 스레드 간 전역변수 검사 후 갱신 | 갱신 손실, 불일치 상태 |\n| 데이터베이스 | 잔액·재고 SELECT 후 UPDATE | 이중 지출, 음수 재고 |\n| 웹 애플리케이션 | 쿠폰 유효성 검사 후 사용 처리, 동시 다중 요청 | 쿠폰 다중 사용(Race Condition 취약점) |\n\n### 나. 보안대책\n| 구분 | 대책 | 적용 기법 |\n|---|---|---|\n| 검사-사용 통합 | 경로 재조회 대신 [[file-descriptor|파일 디스크립터]]로 동일 대상을 검사·사용; 여러 호출이며 내용 변경 동기화는 별도 | open() 후 fstat()·fchmod(), 신규 생성 O_CREAT&#124;O_EXCL, mkstemp(); O_NOFOLLOW는 마지막 요소, 전체 링크 제한은 openat2의 RESOLVE_NO_SYMLINKS 등 검토 |\n| 상호배제 | 검사와 사용을 하나의 [[critical-section|임계구역]]으로 묶음 | 모든 참여자가 같은 잠금을 지키는 [[mutex|뮤텍스]]·이진 [[semaphore|세마포어]]·synchronized·ReentrantLock; 외부 공격자는 프로세스 내부 잠금에 구속되지 않음 |\n| 원자적 연산 | 언어·라이브러리의 원자적 읽기-수정-쓰기 사용; 단일 기계 명령·lock-free 여부는 구현별 상이 | [[compare-and-swap|CAS]], AtomicInteger, std::atomic |\n| 트랜잭션 제어 | DB에서 검사와 갱신을 동일 트랜잭션·잠금으로 수행 | SELECT FOR UPDATE([[pessimistic-locking|비관적 잠금]]), 버전 컬럼([[optimistic-locking|낙관적 잠금]]), 조건부 UPDATE |\n| 권한 축소 | 공격 성공 시 피해 범위 축소 | [[least-privilege|최소 권한]] 실행, setuid 최소화, 안전한 디렉터리 사용 |\n| 검증 자동화 | 개발 단계 약점 탐지 | [[static-analysis|정적 분석]] 도구(CWE-367 룰), 동시성 테스트, 코드 리뷰 |\n\n## 4. 제시 코드의 문제점 및 해결방안\n### 가. 제시 코드 분석\n```c\nstatic volatile double account;\nvoid deposit(int amount)  { account += amount; }\nvoid withdraw(int amount) { account -= amount; }\n```\n| 문제점 | 설명 |\n|---|---|\n| 비원자적 복합 연산 | `account += amount`는 비원자적 읽기-수정-쓰기이며, 정확한 기계 명령 수와 무관하게 동기화가 필요 |\n| [[volatile-keyword|volatile]] 오해 | C의 volatile은 스레드 간 happens-before·원자성·상호배제를 제공하지 않음; Java volatile과 구분 |\n| 데이터 경쟁과 TOCTOU 구분 | 제시 코드는 검사 조건 없는 동시 갱신의 데이터 경쟁. 잔액 검사 후 차감이 분리된 경우가 TOCTOU에 해당 |\n| 잔액 검증 부재 | withdraw에 잔액 확인이 없고, 확인을 추가해도 검사-차감이 분리되면 초과 인출 가능 |\n\n### 나. 해결방안\n| 방안 | 구현 | 효과 |\n|---|---|---|\n| 뮤텍스 적용 | pthread_mutex_lock(&m); if(account >= amount) account -= amount; pthread_mutex_unlock(&m); | 검사와 사용을 하나의 임계구역으로 보호 |\n| 원자적 타입 | C11 _Atomic 또는 C++ std::atomic, Java AtomicLong의 compareAndSet 루프 | CAS 루프 등으로 검사-갱신 결합; 원자 타입이 항상 lock-free인 것은 아님 |\n| 자료형 교정 | double 대신 명확한 최소 화폐 단위의 충분한 범위 정수형 사용; 음수 입력·오버플로 검사 | 단위·범위를 명시하고 산술 오류 방지; 원자성은 별도 보장 |\n| 설계 보완 | 입출금을 트랜잭션 로그 기반으로 처리, 음수 잔액 불변식 검증 | 감사 추적, 데이터 무결성 확보 |\n\n## 5. 결론\n- TOCTOU는 검사와 사용의 분리가 본질이므로 \"검사한 대상 그 자체를 사용\"하는 설계(파일 디스크립터 기준 처리, 임계구역·원자 연산·트랜잭션 잠금)로 창을 제거하고, 정적 분석·동시성 테스트를 개발 생명주기에 내재화하여 구현단계에서 예방 필요",
+      "sources": [
+        {
+          "title": "MITRE CWE-367",
+          "url": "https://cwe.mitre.org/data/definitions/367.html",
+          "scope": "자원 검사 이후 변경으로 검증 결과가 무효화되는 경쟁 조건"
+        },
+        {
+          "title": "WG14 N1570 C11 공개 초안 §5.1.2.4",
+          "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+          "scope": "비원자 충돌 접근의 happens-before 부재는 데이터 경쟁·정의되지 않은 동작"
+        },
+        {
+          "title": "GCC Volatiles",
+          "url": "https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html",
+          "scope": "volatile이 일반 메모리 접근을 정렬하는 장벽이 아님"
+        },
+        {
+          "title": "Linux open(2)",
+          "url": "https://man7.org/linux/man-pages/man2/open.2.html",
+          "scope": "디스크립터 대상 유지, O_CREAT|O_EXCL 및 O_NOFOLLOW의 범위"
+        },
+        {
+          "title": "Linux openat2(2)",
+          "url": "https://man7.org/linux/man-pages/man2/openat2.2.html",
+          "scope": "RESOLVE_NO_SYMLINKS의 전체 경로 링크 제한"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문과 C 예제 검토. C volatile과 Java 의미, 데이터 경쟁과 TOCTOU, 파일 디스크립터·생성 플래그의 보호 범위를 구분.",
+      "unresolved": [
+        "행정안전부 가이드의 현행 분류·판본 및 DBMS별 잠금 격리 수준은 해당 원문으로 전체 대조하지 못함.",
+        "제시 C 코드는 결함 설명용이며 실행하지 않음. mutex 예시는 오류 반환·금액 검증 등 전체 구현을 생략한 개념 조각."
+      ]
+    }
   }
 }
