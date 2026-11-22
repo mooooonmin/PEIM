@@ -130,3 +130,12 @@ source_topic_ids, provenance, revision을 가진 별도 편집 자료입니다. 
 공백을 제외한 현재 원문이 question_text와 일치할 때만 예시를 반환하며, 불일치하면 scaffold로 반환합니다.
 kind=example은 편집 자료가 있다는 뜻이며 공식 정답·학술적 검증 상태가 아닙니다.
 kind=scaffold는 예시 미등록 상태이며 example=null입니다. 자동 생성 결과는 초안으로 표시합니다.
+
+목차·힌트는 요구 문구에 따라 비교·계산·설계·절차·개념형으로 구성합니다. 복합 문항은
+가·나·다 순서를 유지하고 각 항목에 해당하는 힌트를 제공합니다. 공식 유형 판정은 아닙니다.
+
+`GET /api/topics/{tid}/reference`의 각 답안은 기존 variant/body와 함께 `editorial_status`를 반환합니다.
+`format_only`는 형식 정리만, `corrected`는 원문 해시가 일치하는 편집본 적용,
+`source_mismatch`는 교정 대상이지만 원문이 달라 형식만 정리한 상태입니다.
+이 상태는 DB의 학술적 verification_status와 별개이며 전체 검증을 뜻하지 않습니다.
+편집본 적용과 보존 정책은 [콘텐츠 파이프라인](content-pipeline.md#학습-화면의-편집본)을 따릅니다.
