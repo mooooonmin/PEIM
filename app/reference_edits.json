@@ -16514,5 +16514,227 @@
         "FIPS 140-3의 모듈별 물리 보호 세부 요건은 ISO/IEC 19790 및 CMVP 지침 원문 전체 대조가 필요함. 금융 법령·App Attest·기기별 탬퍼 센서 및 실제 우회 저항성은 미확인."
       ]
     }
+  },
+  "t-316e3449": {
+    "short": {
+      "source_sha256": "2cb785f31c4d1d3a77a0b087b969fa498516cc99a3292b742ceb110e61955414",
+      "body": "## 1. TPM(Trusted Platform Module)의 개요\n- 정의: 암호키 생성·저장, 난수 생성, 플랫폼 무결성 측정값 저장을 보호 경계 안에서 수행하는 보안 모듈(이산형 칩·펌웨어·가상 구현, ISO/IEC 11889, [[trusted-computing-group|TCG]] TPM 2.0 규격)\n- 필요성: 소프트웨어만으로는 부트킷·펌웨어 변조·키 유출 방어 한계 → 하드웨어 [[root-of-trust|신뢰 루트]] 필요(Windows 11 필수 요건)\n\n## 2. TPM의 구성도 및 구성요소\n```mermaid\nflowchart LR\n  subgraph TPM[\"이산형 TPM 2.0 구성 예\"]\n    IO[\"I/O\"] --> EX[실행엔진]\n    EX --> CR[\"암호 엔진(RSA, ECC, SHA-256, HMAC)\"]\n    EX --> RNG[난수 생성기]\n    EX --> NV[\"비휘발성 메모리(EK, SRK, 인증값)\"]\n    EX --> PCR[\"PCR 레지스터(측정값)\"]\n  end\n  CPU[\"호스트 CPU/OS\"] -->|\"SPI, LPC, I2C 버스\"| IO\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[endorsement-key|EK]] | Endorsement Primary Seed와 템플릿으로 생성하는 신원용 키; 인증서 신뢰 체인 확인 |\n| [[storage-root-key|SRK]] | 사용자 키 계층의 루트, 하위 키를 암호화해 외부 저장 |\n| [[platform-configuration-register|PCR]] | 부트 구성요소 해시를 Extend 연산으로 누적 저장 |\n| [[attestation-identity-key|AIK]] | TPM 1.2의 증명 키; 2.0에서는 AK로 PCR 등 증명 구조에 서명 |\n\n## 3. TPM의 주요 기능\n| 기능 | 내용 |\n|---|---|\n| 키 보호 | 민감 키 자료의 평문 노출 방지; 이동·복제 가능 여부는 키 속성·정책에 따름 |\n| [[measured-boot|측정 부트]] | BIOS·부트로더·커널 해시를 PCR에 기록, [[secure-boot|시큐어 부트]]와 결합해 [[chain-of-trust|신뢰 체인]] 형성 |\n| [[sealing|봉인(Sealing)]] | PCR 상태 등 인가 정책을 만족해야 접근 가능한 데이터 봉인(BitLocker 디스크 암호화 키 보호) |\n| [[remote-attestation|원격 증명]] | TPM 2.0의 AK로 서명한 PCR Quote로 플랫폼 무결성 원격 검증 |\n\n## 4. 적용 시 고려사항\n- 유형 선택: 이산형(dTPM) 칩, 펌웨어형(fTPM, Intel PTT·AMD fTPM), 가상 TPM(vTPM) 간 보안 수준·비용 비교\n- 버스 스니핑·[[cold-boot-attack|콜드 부트]] 등 물리 공격 대비 PIN·[[multi-factor-authentication|다중 인증]] 병행, 복구키 백업·초기화 절차 수립(비이동 키의 단순 내보내기와 구분)\n- TPM 1.2의 SHA-1·RSA 중심 구조에서 2.0(SHA-256·ECC·알고리즘 민첩성)으로 전환",
+      "sources": [
+        {
+          "title": "TCG TPM 2.0 Library Part 1 v185",
+          "url": "https://medias.cdn.trustedcomputinggroup.org/production/Trusted_Platform_Module_2_0_Library_Part_1_Architecture_Version_185_pub_2a3392dc49.pdf",
+          "scope": "2026-03-12 규격: 8.6·14 PCR 초기화/리셋/Extend, 20.2 저장 계층 본문 확인"
+        },
+        {
+          "title": "TCG EK Credential Profile 2.3",
+          "url": "https://medias.cdn.trustedcomputinggroup.org/production/TCG_IWG_EK_Credential_Profile_v2p3_r2_pub_d3bff98dfc.pdf",
+          "scope": "2.1.1 EPS 내부 생성·제조사 주입과 EK 기본 객체"
+        },
+        {
+          "title": "Microsoft PCR banks",
+          "url": "https://learn.microsoft.com/en-us/windows/security/hardware-security/tpm/switch-pcr-banks-on-tpm-2-0-devices",
+          "scope": "PC Client 24 PCR 뱅크, 첫 16 PCR 리셋 제한, 봉인·BitLocker 복구키 준비"
+        },
+        {
+          "title": "ROCA 발견 연구진 원문",
+          "url": "https://crocs.fi.muni.cz/public/papers/rsa_ccs17",
+          "scope": "2017 Infineon RSA 키 생성 라이브러리 취약점; 모든 fTPM 문제로 일반화 금지"
+        },
+        {
+          "title": "TPM-Fail 발견 연구진 원문",
+          "url": "https://tpm.fail/",
+          "scope": "일부 Intel 펌웨어 TPM·ST 칩의 타이밍 누출과 인증의 한계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. PCR 리셋, 키 계층·보호 경계, 구현별 인증 단정과 취약점 범위 교정.",
+      "unresolved": [
+        "제품별 알고리즘·난수 회로·인증 수준·버스 공격 방어 효과는 실기 검증하지 않음. TPM 1.2 세부 프로파일 및 각 클라우드 vTPM 구현은 추가 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "b34fe8a6c2927714f32b7b0496972b760d9b2a0f36db6bda090584d5808aec85",
+      "body": "## 1. TPM(Trusted Platform Module)의 개요\n### 가. 정의\n- 플랫폼(PC·서버·IoT)에서 암호키의 생성·저장·사용, 난수 생성, 부트 구성요소 무결성 측정값 보관 및 증명을 보호 경계 안에서 수행하는 보안 모듈로, 이산형·펌웨어형·가상형의 보호 경계가 다르며 [[trusted-computing-group|TCG]]가 규격화하고 ISO/IEC 11889로 국제표준화된 하드웨어 [[root-of-trust|신뢰 루트]](Root of Trust)\n\n### 나. 등장배경 및 필요성\n- 부트킷·루트킷·펌웨어 변조는 OS 위에서 동작하는 백신만으로 탐지하기 어려울 수 있으며, 소프트웨어에 저장된 키는 메모리 덤프·[[malware|악성코드]]로 유출\n- 디스크 암호화·[[zero-trust|제로 트러스트]] 장치 인증·원격 근무 확산으로 \"장치가 신뢰 상태인가\"를 증명할 하드웨어 기반 수단 필요, Windows 11은 TPM 2.0을 설치 필수 요건으로 지정\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 신뢰 루트(RoT) | TPM의 저장·보고 보호와 플랫폼의 측정 신뢰 루트(RTM)를 결합; RTM을 모두 TPM 내부 기능으로 보지 않음 |\n| 측정과 증명 | 구성요소 해시를 누적 기록(측정)하고 서명하여 제3자에게 제시(증명) |\n| 키 계층 | Primary Seed에서 계층별 기본 키를 만들고 부모 키로 하위 객체의 암호화·무결성을 보호해 외부 저장 |\n\n## 2. TPM의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph HOST[\"호스트 플랫폼\"]\n    FW[\"UEFI 펌웨어\"] --> BL[부트로더] --> OS[운영체제] --> APP[\"응용(BitLocker, VPN 클라이언트)\"]\n  end\n  subgraph TPM[\"TPM 2.0\"]\n    IO[\"I/O 인터페이스(SPI, LPC, I2C)\"]\n    EXE[\"실행 엔진(명령 처리, 인가 세션)\"]\n    CRY[\"암호 엔진: RSA 2048, ECC P-256, SHA-256, HMAC, AES\"]\n    RNG[\"난수 생성기\"]\n    NVM[\"비휘발성 메모리: EK, SRK, 소유자 인증값, NV 인덱스\"]\n    VM[\"휘발성 메모리: PCR·세션·로드된 키(PC Client 프로파일의 PCR 뱅크 예: 24개)\"]\n  end\n  FW -->|\"측정값 Extend\"| VM\n  APP -->|\"키 사용, Seal, Quote\"| IO\n  IO --> EXE --> CRY\n  EXE --> RNG\n  EXE --> NVM\n  EXE --> VM\n  VM -->|\"AK 서명 Quote\"| VER[원격 검증 서버]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[endorsement-key|EK(Endorsement Key)]] | TPM 고유 EPS와 템플릿에서 생성하는 기본 키; EPS는 TPM 내부 생성 또는 제조 환경 주입 | RSA 2048·ECC, 제조사 CA 인증서 |\n| [[storage-root-key|SRK(Storage Root Key)]] | Storage Primary Seed에서 생성하는 저장 계층 기본 키, 하위 키 래핑 | 키 계층(Key Hierarchy), 래핑 암호화 |\n| [[attestation-identity-key|AIK]] | EK 노출 없이 PCR 값에 서명하는 증명 전용 키(2.0은 Attestation Key) | Privacy CA, [[digital-signature|전자서명]] |\n| [[platform-configuration-register|PCR]] | 부트 구성요소 해시를 PCR[n] = H(PCR[n] 이전값 ∥ 측정값)로 누적 저장; 리셋 가능 여부·초기값·locality는 플랫폼별 PCR 속성에 따름 | SHA-1·SHA-256 뱅크, Extend 연산 |\n| 암호 엔진 | 키 생성·서명·해시·HMAC·대칭 암호 수행 | RSA, ECC, [[sha-256|SHA-256]], [[hmac|HMAC]], [[aes|AES]] |\n| 난수 생성기 | 엔트로피와 난수 생성 절차를 통한 난수 공급 | 구체 회로·구현·검증 범위는 제품별 확인 |\n| NV 메모리 | 키·인증값·카운터·정책 영구 저장 | NV 인덱스, 사전 인가 정책 |\n\n### 다. 동작 절차(측정 부트와 원격 증명)\n1. 전원 인가 시 CRTM(Core Root of Trust for Measurement)이 [[uefi|UEFI]] 펌웨어를 해시하여 PCR0에 Extend\n2. 펌웨어가 부트로더, 부트로더가 커널·드라이버를 순차 측정하여 PCR에 누적([[measured-boot|측정 부트]]), [[secure-boot|시큐어 부트]]는 서명 검증으로 미인가 코드 실행 차단\n3. OS가 디스크 암호화 키를 Unseal 요청 → TPM이 PCR 등 구성한 인가 정책을 만족할 때 키 반환([[sealing|봉인]])\n4. 원격 검증자가 nonce 전송 → TPM이 선택 PCR의 다이제스트와 nonce를 포함한 증명 구조에 AK로 서명한 Quote 반환 → 검증자가 AK 신뢰·서명·신선도·이벤트 로그·기준 정책을 확인하여 접속 허용 여부 결정([[remote-attestation|원격 증명]])\n\n## 3. TPM의 상세\n### 가. 유형 비교\n| 구분 | 이산형 TPM(dTPM) | 펌웨어 TPM(fTPM) | 가상 TPM(vTPM) |\n|---|---|---|---|\n| 구현 | 별도 전용 칩 | 플랫폼 보안 실행 환경의 펌웨어(Intel PTT, AMD fTPM 등; 구조는 제품별 상이) | 하이퍼바이저가 VM별 소프트웨어로 제공 |\n| 보안 수준 | 칩·버스·인증 범위·취약점을 함께 평가; 모든 제품이 FIPS 인증된 것은 아님 | 플랫폼 격리·펌웨어 신뢰와 업데이트에 의존 | 호스트·하이퍼바이저 신뢰에 의존 |\n| 비용·적용 | 서버·고보안 PC | 일반 노트북·임베디드 | 클라우드 VM, 기밀 컴퓨팅 |\n\n### 나. TPM 1.2와 2.0 비교\n| 구분 | TPM 1.2 | TPM 2.0 |\n|---|---|---|\n| 해시 | [[sha-1|SHA-1]] 단일 | SHA-256 등 다중 뱅크, 알고리즘 민첩성 |\n| 비대칭키 | RSA 중심; 키 길이·요건은 프로파일 확인 | RSA, [[elliptic-curve-cryptography|ECC]] P-256, 프로파일·구현에 따른 알고리즘 지원 |\n| 키 계층 | 저장 계층 1개 | 플랫폼·저장·증명(Endorsement) 3계층 + Null |\n| 인가 | 소유자 패스워드(HMAC) | 패스워드, HMAC, 정책 기반 인가(Enhanced Authorization) |\n\n### 다. 유사 기술 비교\n| 구분 | TPM | [[hsm|HSM]] | TEE |\n|---|---|---|---|\n| 목적 | 플랫폼 무결성·키 보호 | 보호 경계 내 키 관리·암호 연산(처리량은 제품별 상이) | 격리된 코드 실행 환경 |\n| 형태 | 이산형·펌웨어형·가상형 등 | 네트워크·PCIe 장비 | CPU 모드(Intel SGX, ARM TrustZone) |\n| 활용 | BitLocker, 장치 증명, Windows Hello | PKI 루트키, 금융 거래 | 모바일 결제, DRM, 생체정보 처리 |\n\n## 4. TPM 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 물리·측면채널 공격 | LPC/SPI 버스 스니핑으로 BitLocker 키 노출 사례, [[cold-boot-attack|콜드 부트]] 공격 → TPM+PIN, 파라미터 암호화 세션, [[multi-factor-authentication|다중 인증]] 병행 |\n| 펌웨어 취약점 | 구현 취약점: ROCA는 Infineon RSA 라이브러리 사용 칩, TPM-Fail은 일부 Intel fTPM·ST 칩의 타이밍 누출 사례 → 펌웨어 업데이트·인증 제품 선택 |\n| 운영 관리 | Clear 시 저장 계층 키 무효화로 봉인 데이터 접근 상실 가능(디스크 파일 자체 삭제와 구분) → 복구키 백업, 메인보드 교체 절차, 폐기 시 키 파기 |\n| 가용성·성능 | 제품별 연산 성능·용도를 평가하여 대칭 암호화는 호스트 수행, TPM은 키 보호·증명에 집중 |\n| 발전방향 | 제로 트러스트 장치 신뢰 신호로 활용(장치 상태 기반 조건부 접근), 클라우드 vTPM·기밀 컴퓨팅 연계, DICE 등 장치 신뢰 기술과의 역할 구분, [[post-quantum-cryptography|양자내성 암호]] 지원 규격·구현 확인 |\n\n## 5. 결론\n- TPM은 소프트웨어가 신뢰할 수 없는 영역(부트·키 저장)에 하드웨어 신뢰 루트를 제공하는 핵심 기반으로, 측정 부트·봉인·원격 증명을 제로 트러스트 장치 인증과 결합하되 위협 모델에 맞춘 추가 인증과 펌웨어 관리를 수행",
+      "sources": [
+        {
+          "title": "TCG TPM 2.0 Library Part 1 v185",
+          "url": "https://medias.cdn.trustedcomputinggroup.org/production/Trusted_Platform_Module_2_0_Library_Part_1_Architecture_Version_185_pub_2a3392dc49.pdf",
+          "scope": "2026-03-12 규격: 8.6·14 PCR 초기화/리셋/Extend, 20.2 저장 계층 본문 확인"
+        },
+        {
+          "title": "TCG EK Credential Profile 2.3",
+          "url": "https://medias.cdn.trustedcomputinggroup.org/production/TCG_IWG_EK_Credential_Profile_v2p3_r2_pub_d3bff98dfc.pdf",
+          "scope": "2.1.1 EPS 내부 생성·제조사 주입과 EK 기본 객체"
+        },
+        {
+          "title": "Microsoft PCR banks",
+          "url": "https://learn.microsoft.com/en-us/windows/security/hardware-security/tpm/switch-pcr-banks-on-tpm-2-0-devices",
+          "scope": "PC Client 24 PCR 뱅크, 첫 16 PCR 리셋 제한, 봉인·BitLocker 복구키 준비"
+        },
+        {
+          "title": "ROCA 발견 연구진 원문",
+          "url": "https://crocs.fi.muni.cz/public/papers/rsa_ccs17",
+          "scope": "2017 Infineon RSA 키 생성 라이브러리 취약점; 모든 fTPM 문제로 일반화 금지"
+        },
+        {
+          "title": "TPM-Fail 발견 연구진 원문",
+          "url": "https://tpm.fail/",
+          "scope": "일부 Intel 펌웨어 TPM·ST 칩의 타이밍 누출과 인증의 한계"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. PCR 리셋, 키 계층·보호 경계, 구현별 인증 단정과 취약점 범위 교정.",
+      "unresolved": [
+        "제품별 알고리즘·난수 회로·인증 수준·버스 공격 방어 효과는 실기 검증하지 않음. TPM 1.2 세부 프로파일 및 각 클라우드 vTPM 구현은 추가 확인 필요."
+      ]
+    }
+  },
+  "t-f9a468bb": {
+    "short": {
+      "source_sha256": "a9f6b8f1e6775ccc5b8c23166be9816cb3f9510606ff9da806f7855d2800b9e4",
+      "body": "## 1. 스마트카드의 개요\n- 정의: IC를 내장하여 저장·처리를 제공하는 카드 계열이며, 아래는 CPU·암호 연산 기능을 가진 프로세서 카드 중심 설명. 접촉식([[iso-iec-7816|ISO/IEC 7816]])과 비접촉식([[iso-iec-14443|ISO/IEC 14443]]) 등 해당 인터페이스 표준 적용\n- 등장배경: 자기띠 카드의 복제 용이성·저장용량 한계 극복, 금융·교통·신분증에서 [[tamper-resistance|변조 방지]] 인증 매체 필요\n\n## 2. 스마트카드의 구조 및 구성요소\n- 아래는 프로세서 카드의 구성 예이며, 지원 기능·메모리·센서는 제품별로 다름\n```mermaid\nflowchart LR\n  R[\"리더기\"] -->|\"APDU 명령\"| IO[\"I/O 접점·안테나\"] --> CPU[\"CPU\"]\n  CPU --> ROM[\"ROM: COS\"]\n  CPU --> EE[\"EEPROM: 앱·키·데이터\"]\n  CPU --> RAM[\"RAM\"]\n  CPU --> CO[\"암호 코프로세서\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| CPU | 명령 처리, 접근제어 수행 (비트 폭·성능은 제품별 상이) |\n| ROM | [[card-operating-system|카드 운영체제]] 저장 |\n| [[eeprom|EEPROM]]·플래시 | 응용 프로그램, 키, 사용자 데이터 저장 |\n| RAM | 연산 임시 저장 |\n| [[cryptographic-coprocessor|암호 코프로세서]] | RSA·ECC·AES 고속 연산 |\n| 보안 센서 | 전압·주파수·온도 이상 감지, 능동 쉴드 |\n\n## 3. 스마트카드의 특징\n| 구분 | 내용 |\n|---|---|\n| 보안성 | 키가 칩 외부로 노출되지 않는 연산, [[personal-identification-number|PIN]]·[[mutual-authentication|상호인증]], 변조 방지 |\n| 저장성 | 용량은 제품별 상이, 멀티 애플리케이션 지원 가능([[java-card|Java Card]]) |\n| 통신 | [[application-protocol-data-unit|APDU]] 명령-응답, 접촉·비접촉·콤비 |\n| 활용 | [[emv|EMV]] 신용카드, 교통카드, 전자여권, [[usim|USIM]], 전자서명 저장 |\n\n## 4. 고려사항\n- [[side-channel-attack|부채널 공격]]·[[fault-injection-attack|오류 주입]] 대비 마스킹·랜덤 지연 등 대응 설계, [[common-criteria|CC]] 인증\n- 발급·폐기 생명주기 관리, [[secure-element|보안 요소]]·[[near-field-communication|NFC]] 기반 모바일 융합",
+      "sources": [
+        {
+          "title": "Oracle Java Card FAQ",
+          "url": "https://www.oracle.com/java/technologies/java-card/javcard-faq.html",
+          "scope": "메모리·프로세서 카드 구분, Java Card 응용 격리·다양한 형태·제품별 인증"
+        },
+        {
+          "title": "NXP AN10834",
+          "url": "https://www.nxp.com/docs/en/application-note/AN10834.pdf",
+          "scope": "2021 Rev4.2: ISO14443 카드 활성화·충돌 방지, Type A RATS/ATS 및 응용 선택 흐름"
+        },
+        {
+          "title": "Microsoft PC/SC interface",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/nfc/pc-sc-interface",
+          "scope": "비접촉 ATS/ATTRIB 자료로 구성하는 PC/SC ATR 표현과 실제 인터페이스 구분"
+        },
+        {
+          "title": "GlobalPlatform Card Specification",
+          "url": "https://globalplatform.org/specs-library/card-specification/",
+          "scope": "발급 후 응용 관리 지원; 모든 카드에서 무조건 허용되는 기능이 아님"
+        },
+        {
+          "title": "GlobalPlatform Card Specification 2.3",
+          "url": "https://globalplatform.org/wp-content/uploads/2018/03/GPC_Specification_v2.3.pdf",
+          "scope": "7.1 Security Domain의 키 관리·콘텐츠 관리 권한; 구판 구조 설명이며 최신 명령 계약 확인은 별도"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 카드 분류, 접촉/비접촉 초기화, 고정 성능·인증 일반화, 발급 후 관리 조건 교정.",
+      "unresolved": [
+        "ISO 유료 규격 전문 및 각 칩 COS·파일시스템·센서·접점 전기 규격은 직접 확인하지 않음. 제품별 부채널 방어·수명·상호운용 성능은 실기 검증하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "8995892fb2d8ea18e1be688c0fcae278e808ec1fc8a62527d534a0bae1840bde",
+      "body": "## 1. 스마트카드의 개요\n### 가. 정의\n- 예를 들어 ID-1 신용카드 크기 플라스틱 카드에 마이크로프로세서, 메모리, 암호 연산 기능을 갖춘 IC 칩을 내장하여 정보를 안전하게 저장하고 리더기와 통신하면서 인증·연산을 수행하는 지능형 카드\n- 접촉식은 [[iso-iec-7816|ISO/IEC 7816]], 비접촉식은 [[iso-iec-14443|ISO/IEC 14443]] 국제표준을 따르며 금융·통신·신분증·교통 분야 보안 토큰으로 활용\n\n### 나. 등장배경 / 필요성\n- 자기띠 카드: 저장용량 수백 바이트, 복제 용이, 연산 불가 → 카드 위변조 위험\n- 오프라인 환경에서도 카드 자체가 암호 연산·인증을 수행하는 [[tamper-resistance|변조 방지]] 매체 필요\n- 하나의 카드에 여러 서비스(결제·교통·출입)를 탑재하는 멀티 애플리케이션 요구\n\n### 다. 핵심 개념\n| 구분 | 메모리 카드 | 프로세서 카드 |\n|---|---|---|\n| 구성 | 메모리 + 보안 로직 | CPU + ROM + EEPROM + RAM + 코프로세서 |\n| 연산 | 범용 CPU 연산 없이 읽기·쓰기 및 구현된 보안 로직 수행 | 암호 연산·접근제어 수행 |\n| 보안 | 보안 로직·암호 기능·구현에 따라 다름 | 키 보호·상호인증 지원 가능; 구현·평가 범위 확인 |\n| 용도 | 선불카드, 단순 식별 | 신용카드, 신분증, USIM |\n\n## 2. 스마트카드의 구조 및 구성요소\n- 아래는 프로세서 카드의 구성 예이며, 지원 기능·메모리·센서는 제품별로 다름\n### 가. 구조도\n```mermaid\nflowchart TB\n  subgraph PHY[\"물리 구조\"]\n    C[\"플라스틱 카드 ID-1\"] --> M[\"IC 모듈: 접점 위치 C1~C8(용도·사용 여부는 인터페이스별 상이) 또는 안테나\"]\n  end\n  subgraph CHIP[\"칩 내부 구조\"]\n    CPU[\"CPU\"] --> ROM[\"ROM: COS 커널·명령 해석기\"]\n    CPU --> EEPROM[\"EEPROM·Flash: 파일시스템, 키, 애플릿\"]\n    CPU --> RAM[\"RAM: 작업 메모리\"]\n    CPU --> CO[\"암호 코프로세서: RSA·ECC·AES 등(지원 알고리즘 확인)\"]\n    CPU --> SEN[\"보안 센서·난수생성기\"]\n  end\n  subgraph LOG[\"논리 구조\"]\n    MF[\"MF 마스터 파일\"] --> DF[\"DF 전용 파일: 앱별\"]\n    DF --> EF[\"EF 기본 파일: 데이터\"]\n  end\n  M --> CPU\n  EEPROM --> MF\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| IC 모듈·접점 | 전원 공급, 클럭, 리셋, 직렬 I/O | ISO/IEC 7816-2 접점 배치, 비접촉 13.56 MHz 안테나 |\n| CPU | 명령 처리, 접근 조건 검사 | 8051 계열, ARM SecurCore 32비트 |\n| ROM | ROM에 저장한 운영체제 코드; Flash 기반 코드·업데이트 가능 여부는 구현에 따름 | 네이티브 COS, [[java-card|Java Card]] VM, MULTOS |\n| [[eeprom|EEPROM]]·Flash | 비휘발성 사용자 데이터·키·애플릿 저장 | 용량·쓰기 내구성은 제품 규격 확인 |\n| RAM | 연산 임시 저장 | 수 KB, 전원 차단 시 소거 |\n| [[cryptographic-coprocessor|암호 코프로세서]] | 공개키·대칭키 고속 연산 | RSA, ECC, AES, SHA 등; 레거시 3DES는 신규 설계 권장과 구분 |\n| 보안 센서·쉴드 | 물리 공격 탐지 | 전압·주파수·온도·광 센서, 능동 메탈 쉴드, 버스 암호화 |\n| 파일 시스템 | 계층적 데이터 관리와 접근제어 | MF-DF-EF 구조, 파일별 접근 조건(PIN·키) |\n\n### 다. 동작 절차\n1. 활성화: 접촉식 카드는 리셋 후 ATR, ISO/IEC 14443-4 Type A는 선택 후 RATS/ATS 등 인터페이스별 절차 사용(PC/SC의 가상 ATR과 무선 응답을 구분)\n2. 애플리케이션 선택: SELECT [[application-protocol-data-unit|APDU]]로 DF·AID 선택\n3. 응용 정책에 따른 인증: [[personal-identification-number|PIN]] 검증(VERIFY), 난수 기반 [[mutual-authentication|상호인증]](INTERNAL·EXTERNAL AUTHENTICATE)\n4. 데이터 처리: READ·UPDATE RECORD, 전자서명·암호 연산 수행\n5. 보안 메시징 지원·선택 시 세션키로 APDU 암호화·MAC 보호; 응답(SW1 SW2 상태 코드) 반환\n\n## 3. 스마트카드의 특징 및 유형\n### 가. 특징\n| 특징 | 내용 |\n|---|---|\n| 보안성 | 보호 대상 키의 평문 외부 노출을 막도록 설계하고 칩 내부 연산, PIN 오류 횟수 제한, 변조 방지 설계 |\n| 저장성·연산성 | 제품별 저장 용량, 암호 연산·접근제어 자체 수행 |\n| 다목적성 | 멀티 애플리케이션 탑재, 플랫폼 지원·발급기관 권한·수명주기 상태에 따른 발급 후 애플릿 추가(Post-issuance) |\n| 표준성·호환성 | ISO/IEC 7816·14443, [[emv|EMV]], GlobalPlatform 등 규격 기반 호환성; 실제 응용·버전·리더기 시험 별도 |\n| 휴대성·내구성 | 수년 사용, 비접촉 시 접점 마모 없음 |\n\n### 나. 유형\n| 분류 기준 | 유형 | 내용 |\n|---|---|---|\n| 인터페이스 | 접촉식 | 접점 접촉, 금융·신분증 |\n| | 비접촉식 | 근거리 RF 통신(도청·중계 공격의 안전 거리로 해석하지 않음), 교통·출입 |\n| | 콤비·하이브리드 | 하나의 칩 양 인터페이스(콤비) / 두 칩 분리(하이브리드) |\n| 칩 구성 | 메모리 카드 / CPU 카드 | 범용 CPU와 보안 로직의 구성 차이 |\n| 운영체제 | 네이티브 / 개방형 | 전용 COS / Java Card·MULTOS 멀티앱 |\n\n### 다. 보안 위협 및 대응\n| 위협 | 내용 | 대응 |\n|---|---|---|\n| [[side-channel-attack|부채널 공격]] | 전력 소비([[differential-power-analysis|DPA]])·전자파·타이밍 분석으로 키 추출 | 마스킹, 랜덤 지연, 균일 연산 경로 |\n| [[fault-injection-attack|오류 주입]] | 전압 글리치·레이저로 오동작 유발 | 센서 탐지, 연산 중복 검증 |\n| 침투 공격 | 디패키징·마이크로 프로빙·역공학 | 능동 쉴드, 버스 암호화, 메모리 스크램블 |\n| 논리 공격 | 비정상 APDU, 애플릿 간 접근 | 방화벽(Java Card), 입력 검증, [[common-criteria|CC]] EAL 평가 |\n\n## 4. 스마트카드 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 보안 인증 | 용도별 CC 평가 대상·버전·보증 수준, 결제 시 해당 EMVCo 승인 범위 확인(모든 카드의 공통 필수 조건 아님) |\n| 생명주기 | 개인화(키 주입) 환경 보안, 분실·폐기 시 키 무효화 |\n| 키 관리 | 발급기관 HSM 기반 키 생성·분배, 카드별 키 다변화 |\n| 상호운용 | 해당 인터페이스 표준 적용, 리더기·단말 호환성 검증 |\n| 발전방향 | 스마트폰 [[secure-element|보안 요소]]·eSIM, [[near-field-communication|NFC]] 모바일 결제, 생체인증 결합 카드, 양자내성 알고리즘의 규격·메모리·실행 성능 검토 |\n\n## 5. 결론\n- 스마트카드는 변조 방지 칩 내부에서 키 저장과 암호 연산을 수행하는 안전한 인증 매체로, 금융·신분증·통신 분야의 핵심 보안 토큰이며 부채널·오류 주입 대응 설계와 용도에 맞는 인증·평가 범위를 확인하며 모바일 보안 요소와 융합 발전",
+      "sources": [
+        {
+          "title": "Oracle Java Card FAQ",
+          "url": "https://www.oracle.com/java/technologies/java-card/javcard-faq.html",
+          "scope": "메모리·프로세서 카드 구분, Java Card 응용 격리·다양한 형태·제품별 인증"
+        },
+        {
+          "title": "NXP AN10834",
+          "url": "https://www.nxp.com/docs/en/application-note/AN10834.pdf",
+          "scope": "2021 Rev4.2: ISO14443 카드 활성화·충돌 방지, Type A RATS/ATS 및 응용 선택 흐름"
+        },
+        {
+          "title": "Microsoft PC/SC interface",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/nfc/pc-sc-interface",
+          "scope": "비접촉 ATS/ATTRIB 자료로 구성하는 PC/SC ATR 표현과 실제 인터페이스 구분"
+        },
+        {
+          "title": "GlobalPlatform Card Specification",
+          "url": "https://globalplatform.org/specs-library/card-specification/",
+          "scope": "발급 후 응용 관리 지원; 모든 카드에서 무조건 허용되는 기능이 아님"
+        },
+        {
+          "title": "GlobalPlatform Card Specification 2.3",
+          "url": "https://globalplatform.org/wp-content/uploads/2018/03/GPC_Specification_v2.3.pdf",
+          "scope": "7.1 Security Domain의 키 관리·콘텐츠 관리 권한; 구판 구조 설명이며 최신 명령 계약 확인은 별도"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 카드 분류, 접촉/비접촉 초기화, 고정 성능·인증 일반화, 발급 후 관리 조건 교정.",
+      "unresolved": [
+        "ISO 유료 규격 전문 및 각 칩 COS·파일시스템·센서·접점 전기 규격은 직접 확인하지 않음. 제품별 부채널 방어·수명·상호운용 성능은 실기 검증하지 않음."
+      ]
+    }
+  },
+  "t-68d16f75": {
+    "short": {
+      "source_sha256": "9be48df60936b92768d186624101439cbd5522ca737cfad8b4d1d571792677d7",
+      "body": "## 1. 전자여권 보안(e-Passport Security)의 개요\n- 정의: [[icao-doc-9303|ICAO Doc 9303]] 표준에 따라 비접촉 [[rfid|RFID]] 칩에 신원·[[biometrics|생체정보]]를 저장한 전자여권의 위변조·복제·무단 판독을 방지하는 보안 기술 체계\n- 필요성: 비접촉 칩 특성상 [[skimming|스키밍]]·도청·복제·추적 위협 존재, 국가 간 상호 검증 신뢰 필요\n\n## 2. 전자여권 보안 기술 개념도\n```mermaid\nflowchart LR\n  BAC[\"BAC/PACE: 접근제어·채널 보호\"] --> PA[\"PA: DS 서명 검증(데이터 진위)\"]\n  PA --> AA[\"AA: 칩 개인키 챌린지(복제 방지)\"]\n  PA --> EAC[\"EAC: CA+TA(지문·홍채 접근통제)\"]\n```\n| 보안 문제점 | 내용 |\n|---|---|\n| 스키밍 | 소유자 모르게 원격 판독 |\n| 도청 | 판독기와 칩 간 통신 가로채기 |\n| 복제 | 칩 데이터 복사로 위조 여권 제작 |\n| 데이터 위변조 | 저장 신원정보 변경 |\n\n## 3. PA·AA·BAC·EAC 비교\n- [[passive-authentication|PA]]·[[active-authentication|AA]]는 데이터와 칩의 진위 검증, [[basic-access-control|BAC]]·[[extended-access-control|EAC]]는 칩 접근과 통신 채널 통제\n| 구분 | 목적 | 원리 | 한계 |\n|---|---|---|---|\n| PA(수동인증) | 데이터 무결성·진위 | 문서서명자(DS) 인증서로 SOD 서명·해시 검증 | 복제 탐지 불가, 필수 |\n| AA(능동인증) | 칩 복제 방지 | 칩 내 개인키로 판독기 난수에 서명(PA로 진위를 확인한 DG15 공개키로 응답 검증) | 선택, 추적 가능성 논란 |\n| BAC(기본접근제어) | 스키밍·도청 방지 | MRZ의 여권번호·생년월일·만료일 및 검사 숫자로 3DES 키 유도, 세션 암호화 | 낮은 엔트로피, PACE 지원 여부·적용 규격 확인 |\n| EAC(확장접근제어) | 민감 생체정보 보호 | 칩인증(CA, DH 키교환)+단말인증(TA, CVCA 인증서 체인) | 국가 간 인증서 교환 부담 |\n\n## 4. 고려사항\n- PA는 모든 발급국 필수, 민감 생체정보의 저장·접근통제는 발급국과 적용 프로파일 확인\n- CSCA 신뢰 근거를 외교 경로·Master List 등으로 확보하고 PKD의 DS 인증서·폐지정보를 활용\n- 국내는 2008년 전자여권 도입, 2021년 폴리카보네이트 차세대 여권으로 보안 강화\n",
+      "sources": [
+        {
+          "title": "ICAO ePassport validation requirements",
+          "url": "https://www.icao.int/icao-pkd/epassport-validation-roadmap-tool-system-requirements",
+          "scope": "PA의 데이터 진위 검증과 선택적 AA·CA·PACE-CAM 구분"
+        },
+        {
+          "title": "BSI TR-03110 Part 1 v2.2",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03110/BSI_TR-03110_Part-1_V2-2.pdf?__blob=publicationFile&v=1",
+          "scope": "2.4·3.3~3.5: MRZ/CAN, PACE, CA와 PA 병행, TA 접근권한; 해당 버전의 기술 설명이며 국가별 최신 의무 시행 근거가 아님"
+        },
+        {
+          "title": "ICAO Master List",
+          "url": "https://www.icao.int/icao-pkd/icao-master-list",
+          "scope": "CSCA 인증서의 외교 경로 신뢰 확보와 수신국의 신뢰 정책 책임"
+        },
+        {
+          "title": "외교부 전자여권 FAQ",
+          "url": "https://www.passport.go.kr/home/kor/board.do?menuPos=69&searchValue3=28",
+          "scope": "2008 일반여권 도입, BAC·EAC CA 안내 및 지문 미수록·신청 시 본인대조 후 폐기"
+        },
+        {
+          "title": "외교부 차세대 전자여권 발급 보도자료",
+          "url": "https://www.mofa.go.kr/www/brd/m_4080/view.do?page=1&pitem=10&seq=371764",
+          "scope": "2021-12-21 폴리카보네이트 차세대 전자여권 발급"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. PA·칩 인증·접근제어 역할, PACE 강도와 국가별 의무 구분, 국내 지문 저장·프로토콜 단정 교정.",
+      "unresolved": [
+        "ICAO Doc9303 Part11 전체 PDF는 웹 크기 제한·직접 요청 403으로 확인 불가하여 공식 요약과 BSI 기술 규격을 대조함. 발급국·발급시기별 PACE/TA 의무와 실제 국내 칩의 전체 기능은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "16e15a516ece1911ed7bd89a4a8047250a66d5b816e9fb79109d38ff2627745e",
+      "body": "## 1. 전자여권 보안(e-Passport Security)의 개요\n### 가. 정의\n- [[icao-doc-9303|ICAO Doc 9303]] 표준에 따라 여권에 내장된 비접촉 [[rfid|RFID]] 칩(ISO/IEC 14443)에 신원정보·얼굴 영상 등 [[biometrics|생체정보]]를 논리 데이터 구조(LDS)로 저장하고, 전자서명과 접근제어 프로토콜로 위변조·복제·무단 판독을 방지하는 보안 체계\n\n### 나. 등장배경 / 필요성\n- 9.11 이후 국경 보안 강화, 미국 비자면제 조건으로 전자여권 요구\n- 비접촉 칩은 물리적 접촉 없이 판독 가능하여 종이 여권에 없던 전자적 위협 발생\n- 국가 간 여권 진위를 자동 검증하기 위한 공통 신뢰 체계 필요\n\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| LDS(논리 데이터 구조) | DG1(MRZ 정보), DG2(얼굴), DG3(지문), DG4(홍채), DG15(AA 공개키), SOD(보안객체) |\n| MRZ | 여권 하단 기계판독영역, 여권번호·생년월일·만료일 포함 |\n| 인증서 체계 | 국가서명인증기관(CSCA)이 문서서명자(DS) 인증서 발급, ICAO PKD로 공유 |\n\n## 2. 전자여권 보안 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  CSCA[\"국가서명인증기관(CSCA)\"] --> DS[\"문서서명자(DS)\"]\n  DS -->|\"LDS 해시 서명\"| SOD[\"SOD(보안객체)\"]\n  SOD --> CHIP[\"여권 칩: 선택된 DG + SOD + 지원 기능별 키\"]\n  CVCA[\"국가검증인증기관(CVCA)\"] --> DV[\"문서검증자(DV)\"] --> IS[\"검사시스템(IS) 인증서\"]\n  READER[\"출입국 판독기\"] -->|\"접근제어: BAC 또는 PACE\"| CHIP\n  READER -->|\"2. PA: SOD 서명 검증\"| CHIP\n  READER -->|\"3. AA 또는 CA: 복제 여부\"| CHIP\n  READER -->|\"4. TA: IS 인증서로 DG3·DG4 접근\"| CHIP\n  PKD[\"ICAO PKD(인증서 공유)\"] --> READER\n```\n\n### 나. 전자여권 보안 문제점\n- 비접촉 통신과 생체정보 저장이라는 특성에서 비롯되는 위협이 보안 기술 설계의 출발점\n| 문제점 | 내용 | 대응 기술 |\n|---|---|---|\n| [[skimming|스키밍]] | 소유자 모르게 근접 판독기로 칩 데이터 무단 읽기 | BAC·PACE, 차폐 커버 |\n| 도청(Eavesdropping) | 정상 판독 중 칩과 판독기 간 무선 통신 가로채기(거리·조건은 환경별 상이) | BAC·PACE 세션 암호화 |\n| 복제(Cloning) | 칩 데이터를 복사하여 위조 여권에 기록 | AA, 칩인증(CA) |\n| 데이터 위변조 | 저장 신원·생체정보 변경 | PA(전자서명) |\n| 추적(Tracking) | 고정 칩 식별자(UID)로 소유자 위치 추적 | 난수 UID, 접근제어 |\n| 생체정보 유출 | 지문·홍채 등 민감정보 무단 접근 | EAC(단말인증) |\n\n### 다. 검증 절차\n- 기능별 설명 순서이며 실제 프로토콜 순서는 적용 프로파일에 따름\n1. 지원 규격에 따라 MRZ 기반 BAC 또는 MRZ/CAN 기반 PACE를 수행해 보안 채널 수립\n2. SOD 읽기 후 DS 인증서와 CSCA 인증서 체인으로 서명 검증, 각 DG 해시 비교(PA)\n3. 지원 시 AA 또는 CA 수행; 공개키의 PA 검증과 함께 칩 개인키 보유를 확인\n4. 해당 민감정보가 저장되어 있고 접근을 요청하는 경우 단말인증으로 판독기 권한 증명 후 DG3·DG4 접근\n5. 해당 국가의 저장 정보·심사 정책에 맞춰 얼굴 등 생체정보와 소지자를 대조\n\n## 3. PA·AA·BAC·EAC 비교\n### 가. 각 기술의 동작 원리\n- [[passive-authentication|PA(수동인증)]]와 [[active-authentication|AA(능동인증)]]는 진위 검증 기술, [[basic-access-control|BAC(기본접근제어)]]와 [[extended-access-control|EAC(확장접근제어)]]는 접근통제 기술\n| 기술 | 목적 | 동작 원리 |\n|---|---|---|\n| PA(수동인증) | 저장 데이터의 무결성·진위 | 발급국 DS가 각 DG 해시를 모아 SOD에 서명, 판독기가 CSCA 체인으로 서명 검증 후 DG 해시 재계산·비교, 서명 검증은 판독기가 수행(칩의 데이터 읽기·보안 메시징 연산과 구분) |\n| AA(능동인증) | 칩 복제 방지 | 칩 내부에 개인키 보관(판독 불가), 판독기가 난수 챌린지 전송, 칩이 서명 응답, PA로 검증한 DG15 공개키로 응답 검증 |\n| BAC(기본접근제어) | 스키밍·도청 방지 | MRZ의 여권번호·생년월일·만료일과 해당 검사 숫자에서 접근키 유도, 상호 인증 후 3DES 세션키로 통신 암호화 |\n| EAC(확장접근제어) | 민감 생체정보 접근 통제 및 강한 복제 방지 | 칩인증(CA): 칩 정적 키·단말 임시 키의 DH/ECDH 합의와 보안 메시징으로 개인키 보유를 확인하고 PA로 칩 공개키 진위를 확인, 단말인증(TA): CVCA→DV→IS 인증서 체인으로 판독기 권한 검증 후 DG3·DG4 접근 허용 |\n\n### 나. 비교표\n| 구분 | PA | AA | BAC | EAC |\n|---|---|---|---|---|\n| 보호 대상 | 데이터 진위 | 칩 진본성 | 통신 채널 | 민감 생체정보·채널 |\n| 암호 방식 | 전자서명(RSA·ECDSA) 검증 | 챌린지-응답 서명 | 대칭키(3DES) 상호인증 | 비대칭 키합의 + 인증서 체인 |\n| 칩의 인증 연산 | PA 서명 검증은 판독기 담당 | 서명 연산 | 대칭 암호 연산 | 공개키 연산(고성능 칩) |\n| 복제 방지 | 불가 | 가능 | 불가 | 가능(CA) |\n| 적용 | ICAO 필수 | 선택 | 선택(1세대 표준) | 민감정보·발급국·프로파일에 따른 적용 |\n| 한계 | 복제 탐지 불가 | 서명값으로 추적 가능성 논란 | MRZ 엔트로피 낮아 무차별 대입 가능, PACE로 대체 | 국가 간 CVCA 인증서 교환, 인증서 유효기간 관리 |\n\n### 다. 보안 기능 조합 예\n- 아래는 학습용 조합이며 모든 국가에 동일한 세대 구분·전환 시점을 적용하지 않음\n| 수준 | 조합 | 설명 |\n|---|---|---|\n| 기본 조합 예 | BAC + PA (+AA) | 기본 신원정보(DG1·DG2) 보호 |\n| 확장 조합 예 | PACE + PA + EAC(CA+TA) | 지문·홍채 저장, 강한 채널·복제 방지 |\n| 보완 | SAC(PACE) | 약한 비밀번호를 사용하는 인증 키 합의로 강한 세션키 수립; 비밀번호 자체의 엔트로피 증가나 전 세계 일괄 시행 연도를 뜻하지 않음 |\n\n## 4. 전자여권 보안 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 인증서 관리 | CSCA 신뢰 근거를 별도 확인하고 Master List·PKD·양자 교환 활용, DS 인증서·폐지 목록 갱신, CVCA 인증서 유효기간 단축에 따른 갱신 체계 |\n| 프라이버시 | 생체정보 최소 수집, AA 추적 논란 고려 시 CA 선호 |\n| 상호운용성 | 각국 판독기와의 호환 시험, ICAO 준수 |\n| 국내 현황 | 2008년 일반 전자여권 도입, 2021년 폴리카보네이트 개인정보면 도입. 외교부 FAQ는 BAC·EAC CA 사용과 지문 미수록을 안내; 모든 발급분의 PACE·TA 지원을 단정하지 않음 |\n| 발전방향 | 디지털 여행증명서(DTC), 모바일 여권, 생체 자동출입국 심사 연계 |\n\n## 5. 결론\n- 전자여권 보안은 PA로 진위, AA·CA로 복제 방지, BAC·PACE로 채널 보호, EAC로 민감정보 접근통제를 계층적으로 조합하며, 국가 간 인증서 신뢰 체계 운영이 핵심임\n",
+      "sources": [
+        {
+          "title": "ICAO ePassport validation requirements",
+          "url": "https://www.icao.int/icao-pkd/epassport-validation-roadmap-tool-system-requirements",
+          "scope": "PA의 데이터 진위 검증과 선택적 AA·CA·PACE-CAM 구분"
+        },
+        {
+          "title": "BSI TR-03110 Part 1 v2.2",
+          "url": "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03110/BSI_TR-03110_Part-1_V2-2.pdf?__blob=publicationFile&v=1",
+          "scope": "2.4·3.3~3.5: MRZ/CAN, PACE, CA와 PA 병행, TA 접근권한; 해당 버전의 기술 설명이며 국가별 최신 의무 시행 근거가 아님"
+        },
+        {
+          "title": "ICAO Master List",
+          "url": "https://www.icao.int/icao-pkd/icao-master-list",
+          "scope": "CSCA 인증서의 외교 경로 신뢰 확보와 수신국의 신뢰 정책 책임"
+        },
+        {
+          "title": "외교부 전자여권 FAQ",
+          "url": "https://www.passport.go.kr/home/kor/board.do?menuPos=69&searchValue3=28",
+          "scope": "2008 일반여권 도입, BAC·EAC CA 안내 및 지문 미수록·신청 시 본인대조 후 폐기"
+        },
+        {
+          "title": "외교부 차세대 전자여권 발급 보도자료",
+          "url": "https://www.mofa.go.kr/www/brd/m_4080/view.do?page=1&pitem=10&seq=371764",
+          "scope": "2021-12-21 폴리카보네이트 차세대 전자여권 발급"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. PA·칩 인증·접근제어 역할, PACE 강도와 국가별 의무 구분, 국내 지문 저장·프로토콜 단정 교정.",
+      "unresolved": [
+        "ICAO Doc9303 Part11 전체 PDF는 웹 크기 제한·직접 요청 403으로 확인 불가하여 공식 요약과 BSI 기술 규격을 대조함. 발급국·발급시기별 PACE/TA 의무와 실제 국내 칩의 전체 기능은 미확인."
+      ]
+    }
   }
 }
