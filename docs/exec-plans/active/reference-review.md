@@ -41,7 +41,8 @@
 - 난독화·코드 난독화·탬퍼 프루핑 3개 주제 [PR #58](https://github.com/mooooonmin/PEIM/pull/58) 병합.
 - TPM·스마트카드·전자여권 3개 주제 [PR #59](https://github.com/mooooonmin/PEIM/pull/59) 병합.
 - 사회공학·스피어 피싱·큐싱·실시간 피싱 4개 주제 [PR #60](https://github.com/mooooonmin/PEIM/pull/60) 병합.
-- CC·ISO 27001 2개 주제 전문 검토·교정 통합 중.
+- CC·ISO 27001 2개 주제 [PR #61](https://github.com/mooooonmin/PEIM/pull/61) 병합.
+- OWASP Top 10·PCI DSS·ISO 27017 3개 주제 전문 검토·교정 통합 중.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
