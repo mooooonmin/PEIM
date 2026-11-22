@@ -21,6 +21,9 @@
 
 ## 현재 상태와 다음 순서
 
+- 2026-11-22 사용자 요청으로 현재 작업 단위 정리 후 중지. 전체 검수는 미완료이며 자동으로 다음 주제를 진행하지 않는다.
+- 재개 자료는 Git 제외 경로 `artifacts/audit-{분야}.json`과 `artifacts/audit-{분야}-progress.json`에 보존한다. SE·DS·NEW의 미통합 자료와 CA·DB 후속 교정은 앱 반영·PR 병합 완료로 세지 않는다.
+- SE 인덱스 94~95의 저장은 자동 승인 검토가 거부하여 보류했다. 구체적인 거부 이유는 도구에서 제공되지 않았다. 재개 시 거부를 우회하지 말고 상태부터 확인한다.
 - 이전 교정: 정규화·RAG·트랜잭션 격리 수준(PR #38). 제한된 주장 대조이며 전수 검수 완료가 아니다.
 - SQL 인젝션·XSS: 예방 원칙·분류 교정, [PR #39](https://github.com/mooooonmin/PEIM/pull/39) 병합.
 - IPv6·서브네팅: 주소·보안·계산 조건과 예외 교정. 단위별 검증·원격 반영 결과는 해당 PR 참조.
@@ -45,7 +48,8 @@
 - OWASP Top 10·PCI DSS·ISO 27017 3개 주제 [PR #62](https://github.com/mooooonmin/PEIM/pull/62) 병합.
 - 개인정보 비식별화·가명·익명처리·k-익명성 4개 주제 [PR #63](https://github.com/mooooonmin/PEIM/pull/63) 병합.
 - PET·프라이버시 보존 데이터 마이닝·통계 DB 보안 3개 주제 [PR #64](https://github.com/mooooonmin/PEIM/pull/64) 병합.
-- N2SF·망분리·CSAP 3개 주제 전문 검토·교정 통합 중.
+- N2SF·망분리·CSAP 3개 주제 [PR #65](https://github.com/mooooonmin/PEIM/pull/65) 병합.
+- 양자암호·동형암호·다자간 계산 3개 주제 전문 검토·교정·검증 후 [PR #66](https://github.com/mooooonmin/PEIM/pull/66) 제출. 원격 병합 상태와 CI는 해당 PR 참조.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
