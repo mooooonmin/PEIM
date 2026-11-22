@@ -31,7 +31,8 @@
 - 접근제어·인증 8개 주제 [PR #47](https://github.com/mooooonmin/PEIM/pull/47) 병합. RBAC·BLP·PAM·특권 비밀번호 관리 4개 주제 [PR #48](https://github.com/mooooonmin/PEIM/pull/48) 병합.
 - 포렌식 관련 6개 주제 [PR #49](https://github.com/mooooonmin/PEIM/pull/49) 병합.
 - 네트워크 103개 주제 [PR #50](https://github.com/mooooonmin/PEIM/pull/50) 병합. DS·SE·NEW는 후속 대조 진행.
-- 위협·악성코드 관련 6개 주제 전문 검토·교정 통합 중.
+- 위협·악성코드 관련 6개 주제 [PR #51](https://github.com/mooooonmin/PEIM/pull/51) 병합.
+- 정보 탈취·스파이웨어·크라임웨어 3개 주제 전문 검토·교정 통합 중.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
