@@ -16982,5 +16982,193 @@
         "서비스별 디바이스 바인딩·세션 폐기 정책과 실제 피싱 키트 실험은 수행하지 않음. 액티브/패시브 명칭의 단일 표준 정의는 확인하지 못함."
       ]
     }
+  },
+  "t-02db08b4": {
+    "short": {
+      "source_sha256": "c834742e1358914ca80551db8f7235d5077685dc5ed0f1261a8f1fad643f473e",
+      "body": "## 1. 공통평가기준(CC)의 개요\n- 정의: 정보보호 제품·시스템의 보안 기능과 보증 수준을 국제적으로 통일된 기준으로 평가·인증하는 표준(ISO/IEC 15408), TCSEC·ITSEC 등 기존 국가·지역 평가기준을 조화\n- 목적: [[common-criteria-recognition-arrangement|CCRA]] 협정 범위 내 상호인정으로 중복 평가 감소, 평가 신뢰성·일관성 확보\n\n## 2. CC의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  PP[\"보호프로파일(PP)\"] --> ST[\"보안목표명세서(ST)\"] --> TOE[\"평가대상(TOE)\"]\n  TOE --> EVAL[\"평가·인증\"] --> EAL[\"ST에 명시한 보증요구 충족\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[protection-profile|보호프로파일(PP)]] | 제품군 공통 보안요구사항 정의 |\n| [[security-target|보안목표명세서(ST)]] | 특정 제품의 보안요구·구현 명세 |\n| [[target-of-evaluation|평가대상(TOE)]] | 평가 대상 제품·시스템 |\n| [[evaluation-assurance-level|보증등급(EAL)]] | EAL1~7 보증 수준 |\n\n## 3. 평가기준 비교\n| 구분 | [[tcsec|TCSEC]] | [[itsec|ITSEC]] | [[common-criteria|CC]] |\n|---|---|---|---|\n| 지역 | 미국 | 유럽 | 국제(ISO 15408) |\n| 평가 | 기능+보증 통합(D~A1) | 기능·보증 분리(F,E) | 기능·보증 분리, PP·ST |\n| 특징 | 기밀성 중심 | 유연성 | 상호인정·확장성 |\n\n## 4. 고려사항\n- 국내 CC 평가·인증은 ITSCC가 인증하며, 국가·공공기관 도입 시 보안적합성 검증 등 적용 요건은 별도로 확인\n- PP 기반 조달 연계, [[collaborative-protection-profile|cPP]] 국제 표준화 대응",
+      "sources": [
+        {
+          "title": "Common Criteria Portal: CC:2022 및 Errata",
+          "url": "https://www.commoncriteriaportal.org/cc/index.cfm",
+          "scope": "5개 Part·CEM·Errata 및 판본 전환 안내"
+        },
+        {
+          "title": "CCRA 2014 Article 2–3",
+          "url": "https://www.commoncriteriaportal.org/files/CCRA%20-%20July%202,%202014%20-%20Ratified%20September%208%202014.pdf",
+          "scope": "cPP/EAL 상호인정 범위와 법령·정책 예외"
+        },
+        {
+          "title": "CC:2022 Part 5",
+          "url": "https://www.commoncriteriaportal.org/files/ccfiles/CC2022PART5R1.pdf",
+          "scope": "EAL1~7 보증 패키지; 4.4.5의 EAL4와 상위 등급의 의미"
+        },
+        {
+          "title": "ITSCC 정보보호제품 평가·인증제도",
+          "url": "https://www.itscc.kr/svc/svc/openPageB.do",
+          "scope": "국가보안기술연구소 ITSCC의 인증 역할, 정책·평가기관 구분, 2022년 도입요건 확대 이력"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. EAL4 상용제품 상한 오류, 인증기관·제도 혼동, EAL 필수 표기와 무조건적 국제 상호인정 단정 교정.",
+      "unresolved": [
+        "TCSEC·ITSEC의 역사적 등급표는 해당 원표준 전문을 이번 단위에서 대조하지 않음. 제품별 최신 조달 요건은 개별 도입 시 별도 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "308594322556a448a0f2cdfefe6870925908b31427bc65c46adcc55a5057247a",
+      "body": "## 1. 공통평가기준(CC)의 개요\n### 가. 정의\n- 정보보호 제품·시스템의 보안 기능 요구사항과 보증 요구사항을 국제적으로 표준화된 기준으로 평가·인증하는 체계(ISO/IEC 15408). 미국 [[tcsec|TCSEC]]·유럽 [[itsec|ITSEC]] 등 기존 평가기준을 조화해 제정\n\n### 나. 등장배경 및 필요성\n- 국가·지역별 상이한 평가기준으로 제품별 중복 평가·상호 불인정 문제 발생\n- 글로벌 조달·수출을 위한 단일 평가기준과 상호인정 필요\n- [[common-criteria-recognition-arrangement|CCRA]](CC 상호인정협정)로 인증의 협정상 인정 범위에 한해 회원국이 상호 인정하여 중복 평가 비용 감소\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 기능·보증 분리 | 보안기능요구사항(SFR)과 보증요구사항(SAR)을 분리 정의 |\n| PP·ST 체계 | 제품군 요구사항(PP)과 개별 제품 명세(ST) 구분 |\n| 보증등급 | 미리 정의된 [[evaluation-assurance-level|EAL]] 1~7 보증 패키지; 모든 인증이 EAL 표기를 요구하는 것은 아님 |\n\n## 2. CC의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  PP[\"보호프로파일(PP): 제품군 보안요구\"] --> ST[\"보안목표명세서(ST): 제품별 명세\"]\n  ST --> TOE[\"평가대상(TOE): 실제 제품\"]\n  SFR[\"보안기능요구사항(SFR)\"] --> ST\n  SAR[\"보증요구사항(SAR)\"] --> ST\n  TOE --> LAB[\"평가기관(CCTL) 평가\"]\n  LAB --> CB[\"인증기관 인증\"]\n  CB --> EAL[\"ST의 보증요구 충족 인증\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 |\n|---|---|\n| [[protection-profile|보호프로파일(PP)]] | 특정 제품군(방화벽·스마트카드 등)의 공통 보안요구사항을 구현 독립적으로 정의 |\n| [[security-target|보안목표명세서(ST)]] | 특정 제품의 보안환경·목표·기능·보증수준을 구체 명세 |\n| [[target-of-evaluation|평가대상(TOE)]] | 평가 대상이 되는 제품·시스템과 관련 문서 |\n| 보안기능요구사항(SFR) | 식별·인증, 접근통제, 암호지원 등 기능 클래스 |\n| 보증요구사항(SAR) | 개발·시험·취약점분석 등 신뢰성 확보 활동 |\n| [[evaluation-assurance-level|보증등급(EAL)]] | EAL1(기능시험)~EAL7(정형 검증) |\n\n### 다. 평가·인증 절차\n1. 개발자가 PP 참조 또는 독자적으로 ST 작성\n2. 평가기관(CCTL)이 TOE를 ST 기준으로 평가\n3. 보증요구(SAR) 충족 여부 심사, 취약점 분석 수행\n4. 인증기관이 ST·평가결과를 검토하여 인증서 발급\n5. CCRA 인정 범위 확인: cPP 적합 인증(보증요구 EAL4까지와 결함수정 ALC_FLR), 또는 EAL1~2와 ALC_FLR. 국가별 법령·정책상 예외도 확인\n\n## 3. CC의 상세\n### 가. ITSEC·TCSEC·CC 비교\n| 구분 | [[tcsec|TCSEC(오렌지북)]] | [[itsec|ITSEC]] | [[common-criteria|CC]] |\n|---|---|---|---|\n| 제정 | 미국 국방부(1985) | 유럽 4개국(1991) | ISO/IEC 15408(1999~) |\n| 평가 구조 | 기능·보증 통합 | 기능(F)·보증(E) 분리 | 기능(SFR)·보증(SAR) 분리 |\n| 등급 | D, C1·C2, B1·B2·B3, A1 | E0~E6 | EAL1~EAL7 |\n| 중점 | 기밀성(군사) 중심 | 기밀성·무결성·가용성 | PP·ST 기반 범용·확장 |\n| 상호인정 | 미지원 | 유럽 내 | CCRA 국제 상호인정 |\n\n### 나. 국내 인증체계 및 현황\n| 구분 | 내용 |\n|---|---|\n| 적용 기준 | [[common-criteria|CC평가·인증]]과 국가·공공기관 도입에 적용되는 보안적합성 검증은 구분 |\n| 인증기관 | 국가보안기술연구소(NSR)의 IT보안인증사무국(ITSCC)이 인증; 지정 평가기관이 평가 |\n| 대상 | ST에서 범위를 정한 정보보호제품·시스템; 제품 전체의 모든 기능을 인증하는 것은 아님 |\n| 제도 | 공공 도입 시 제품 유형별 요건 확인; 국가용 보안요구사항과 PP를 동일 문서로 단정하지 않음 |\n| 등급 활용 | 인증서·ST에서 보증요구, 평가 구성·버전, 가정과 운용환경 확인 |\n\n### 다. 보증등급(EAL) 체계\n| 등급 | 보증 활동 |\n|---|---|\n| EAL1 | 기능 시험 |\n| EAL2 | 구조 시험 |\n| EAL3 | 체계적 시험·점검 |\n| EAL4 | 체계적 설계·시험·검토(상용제품의 최고 등급이라는 뜻이 아님) |\n| EAL5~7 | 준정형·정형적 설계 및 검증(고신뢰 시스템) |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 조달 | 제품 유형별 CC 인증·보안기능 확인서 등 도입 요건과 보안적합성 검증 적용 여부 확인 |\n| 적정 등급 | 위험에 맞는 SFR·SAR 선정; EAL만으로 서로 다른 기능·범위의 제품 보안성을 순위화하지 않음 |\n| 표준화 | [[collaborative-protection-profile|cPP]] 기반 국제 공통 PP 채택 확대 |\n| 발전방향 | CC:2022의 5개 Part·CEM 및 Errata 적용 확인; Part 4는 평가방법·활동, Part 5는 미리 정의된 보증 패키지 |\n\n## 5. 결론\n- CC는 PP·ST의 기능·보증요구를 기준으로 명시된 TOE를 평가한다. 인증 범위와 운용 가정, CCRA 인정 조건을 함께 읽어야 하며 인증이 취약점 부재를 보장하지는 않는다",
+      "sources": [
+        {
+          "title": "Common Criteria Portal: CC:2022 및 Errata",
+          "url": "https://www.commoncriteriaportal.org/cc/index.cfm",
+          "scope": "5개 Part·CEM·Errata 및 판본 전환 안내"
+        },
+        {
+          "title": "CCRA 2014 Article 2–3",
+          "url": "https://www.commoncriteriaportal.org/files/CCRA%20-%20July%202,%202014%20-%20Ratified%20September%208%202014.pdf",
+          "scope": "cPP/EAL 상호인정 범위와 법령·정책 예외"
+        },
+        {
+          "title": "CC:2022 Part 5",
+          "url": "https://www.commoncriteriaportal.org/files/ccfiles/CC2022PART5R1.pdf",
+          "scope": "EAL1~7 보증 패키지; 4.4.5의 EAL4와 상위 등급의 의미"
+        },
+        {
+          "title": "ITSCC 정보보호제품 평가·인증제도",
+          "url": "https://www.itscc.kr/svc/svc/openPageB.do",
+          "scope": "국가보안기술연구소 ITSCC의 인증 역할, 정책·평가기관 구분, 2022년 도입요건 확대 이력"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. EAL4 상용제품 상한 오류, 인증기관·제도 혼동, EAL 필수 표기와 무조건적 국제 상호인정 단정 교정.",
+      "unresolved": [
+        "TCSEC·ITSEC의 역사적 등급표는 해당 원표준 전문을 이번 단위에서 대조하지 않음. 제품별 최신 조달 요건은 개별 도입 시 별도 확인 필요."
+      ]
+    }
+  },
+  "t-4232a2d1": {
+    "short": {
+      "source_sha256": "a7685a7383f47de67411d186daf474943071a2d977c8ae1382d7af5900479619",
+      "body": "## 1. ISO 27001의 개요\n- 정의: 조직의 [[isms|정보보호관리체계(ISMS)]] 수립·구현·운영·개선 요구사항을 규정한 국제 인증 표준(ISO/IEC 27001:2022 및 Amd 1:2024)\n- 필요성: 카드 3사 개인정보 유출(2014) 등 내부자·협력사 경로 유출 사고 → 기술 통제를 넘어 [[risk-management|위험관리]] 기반 관리체계와 제3자 인증 필요\n\n## 2. ISO 27001의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  P[\"Plan: 범위·정책·위험평가\"] --> D[\"Do: 통제 구현·운영\"]\n  D --> C[\"Check: 모니터링·내부감사\"]\n  C --> A[\"Act: 시정조치·개선\"]\n  A --> P\n```\n| 구성요소 | 역할 |\n|---|---|\n| 본문 4~10장 | 조직 상황, 리더십, 기획([[risk-assessment|위험평가]]·처리), 지원, 운영, 성과평가, 개선 |\n| 부속서 A(93개 통제) | 조직적 37·인적 8·물리적 14·기술적 34 통제 |\n| [[statement-of-applicability|적용성 보고서(SoA)]] | 필요 통제·선정 근거·구현 여부와 부속서 A 제외 근거 문서 |\n| 인증 심사 | 1·2단계 최초심사, 사후심사·3년 인증 주기(갱신심사 연도 예외 등 세부 프로그램 확인) |\n\n## 3. 개인정보 유출 방지를 위한 ISO 27001·DB보안 조치\n| 관점 | 강화 조치 |\n|---|---|\n| 조직·인적(A.5, A.6) | 협력사 보안 계약·점검, 외주 개발자 [[least-privilege|최소권한]], 퇴직 시 권한 회수 |\n| 기술(A.8) | [[data-loss-prevention|DLP]]·매체 통제, [[privileged-access-management|특권계정 관리]], 로그 모니터링 |\n| DB 접근통제 | [[database-access-control|DB 접근제어]] 솔루션으로 사용자·쿼리 통제, 대량 조회 차단 |\n| DB 암호화 | [[database-encryption|DB 암호화]](주민번호·카드번호), 키 분리 보관 |\n| DB 감사·비식별 | [[database-audit|DB 접근 로그]] 감사, 개발·테스트 DB [[data-masking|마스킹]] |\n\n## 4. 고려사항\n- [[isms-p|ISMS-P]]·[[personal-information-protection-act|개인정보보호법]] 안전성 확보조치와 통제 매핑으로 중복 심사 최소화\n- 인증 취득이 목적이 아닌 실질 운영: 경영진 참여, 위험 재평가 주기화, 유출 대응 훈련",
+      "sources": [
+        {
+          "title": "ISO/IEC 27001:2022",
+          "url": "https://www.iso.org/standard/27001",
+          "scope": "ISMS 요구사항 표준의 목적·판본과 2024 개정 존재"
+        },
+        {
+          "title": "ISO/IEC 27001:2022/Amd 1:2024",
+          "url": "https://www.nen.nl/media/PDF/ISO_IEC_27001_2022_Amd_1_2024_ed.3_-_id.88435_Publication_PDF_en_.pdf",
+          "scope": "4.1 기후변화 관련성 판단, 4.2 이해관계자 요구 참고사항"
+        },
+        {
+          "title": "SC27 SoA Auditing Practices Note",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27-WG1_N3298_Auditing%20Practices%20Note%20-%20SoA.pdf",
+          "scope": "SoA 필요 통제·선정/제외 근거·구현 상태; 규범 원문이 아닌 위원회 논의용 안내"
+        },
+        {
+          "title": "SC27 Annex A Auditing Practices Note",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27-WG1_N3297_Auditing%20Practices%20Note%20-%20Annex%20A.pdf",
+          "scope": "Annex A 비교와 모든 통제의 일률 구현 구분; 위원회 논의용 안내"
+        },
+        {
+          "title": "SC27 Journal Vol 2 Issue 2: 27002 편집자 설명",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IEC%20JTC%201-SC%2027_N22755_SC27%20Journal%20Vol%202%20Issue%202%20(update%20Dec%202022).pdf",
+          "scope": "93개 통제의 37·8·14·34 구성"
+        },
+        {
+          "title": "IAS ISO/IEC 17021-1 Section 9 교육 자료",
+          "url": "https://www.iasonline.org/wp-content/uploads/2021/02/17021-1-2015-Section-9-1.pdf",
+          "scope": "9.1.3 인증 주기·최초/사후/갱신심사 일정 조건"
+        },
+        {
+          "title": "NIST SP 800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.1.1.2 비밀번호 Salt·해시·비용 인자 저장 요건"
+        },
+        {
+          "title": "Microsoft Data Encryption at Rest",
+          "url": "https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/security/transparent-data-encryption",
+          "scope": "TDE의 저장 매체 보호와 실행 중 데이터 보호 구분"
+        },
+        {
+          "title": "ISO/IEC 27701:2025",
+          "url": "https://www.iso.org/standard/27701",
+          "scope": "2019판을 대체하는 독립형 PIMS 표준"
+        },
+        {
+          "title": "금융위원회 2014년 개인정보 유출 관련 발표",
+          "url": "https://www.fsc.go.kr/no010103/24544",
+          "scope": "당시 발표의 약 1억 건·외부 파견직원 경로; 모든 기술 통제 부재를 뒷받침하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 2024/2025 판본, SoA·Annex A 조건, 인증심사와 법정 신고 기한 구분, 비밀번호 저장 오류 및 통제 효과 단정 교정.",
+      "unresolved": [
+        "ISO 27001/27002 유료 본문 전체는 확보하지 못함. 상세 통제 번호·문구는 공개 위원회 자료 범위를 넘어 완전 대조하지 못했으며 법령별 암호화·신고 요건은 별도 적용 검토 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "7d5c91d268f7d1babbe6fd6ec9c574b03a7c4aaee0a39f5ea96b932747933eea",
+      "body": "## 1. ISO 27001의 개요\n### 가. 정의\n- 조직이 [[isms|정보보호관리체계(ISMS)]]를 수립·구현·유지·지속 개선하기 위한 요구사항과 통제 목록(부속서 A)을 규정한 국제 인증 표준(ISO/IEC 27001:2022 및 Amd 1:2024, ISO/IEC 27002가 통제 구현 지침)\n\n### 나. 등장배경 / 필요성 (카드 3사 유출 사고 교훈)\n- 금융위원회 2014년 1월 발표는 카드 3사의 약 1억 건 유출과 외부 파견직원 경로를 설명했다. 아래 통제 표는 재발 방지를 위한 위험 예시이며, 당시 모든 통제가 부재했다는 조사 결론은 아님\n- 개인 측면 [[smishing|스미싱]]·스팸, 기업 측면 재발급·집단소송 비용, 국가 측면 제도 개선 요구 → 기술 단품이 아닌 [[risk-management|위험관리]] 기반 관리체계와 제3자 검증 필요\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[pdca|PDCA]] 기반 ISMS | 계획-실행-점검-개선 순환으로 지속 개선 |\n| 위험 기반 접근 | [[risk-assessment|위험평가]] 결과로 통제 선택·[[statement-of-applicability|적용성 보고서(SoA)]] 작성 |\n| 부속서 A 통제 | 2022판 93개 통제, 조직·인적·물리·기술 4개 테마 |\n\n## 2. ISO 27001의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph REQ[\"본문 요구사항(4~10장)\"]\n    C4[4 조직 상황] --> C5[5 리더십] --> C6[6 기획: 위험평가·처리]\n    C6 --> C7[7 지원] --> C8[8 운영] --> C9[9 성과평가] --> C10[10 개선]\n  end\n  C6 --> SOA[적용성 보고서 SoA]\n  SOA --> ANX[\"부속서 A 93개 통제\"]\n  ANX --> A5[A.5 조직적 37]\n  ANX --> A6[A.6 인적 8]\n  ANX --> A7[A.7 물리적 14]\n  ANX --> A8[A.8 기술적 34]\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 4장 조직 상황 | 내·외부 이슈·이해관계자·범위, 기후변화 관련성 판단(Amd 1:2024) | 범위 정의서 |\n| 5장 리더십 | 경영진 의지, 정보보호 정책, 역할·책임 | 정보보호 역할·책임·권한 할당(특정 직함을 일률 요구하지 않음) |\n| 6장 기획 | 위험평가·위험처리 계획, 정보보호 목표 | 위험 기준, SoA |\n| 7장 지원 | 자원, 역량, 인식, 의사소통, 문서화 | 교육·훈련 |\n| 8장 운영 | 위험처리 실행, 변경 관리, 외주 통제 | 운영 절차 |\n| 9장 성과평가 | 모니터링·측정, 내부감사, 경영검토 | KPI, 감사 |\n| 10장 개선 | 부적합·시정조치, 지속 개선 | CAPA |\n| 부속서 A | 필요 통제의 누락 확인을 위해 비교해야 하는 목록; 93개 전부 구현을 일률 요구하지 않음 | 93개 통제 |\n\n### 다. 인증 절차\n1. 범위 정의 → 위험평가 → SoA·정책·절차 수립 → 통제 구현·운영 증적 확보(27001의 보편적 최소 3개월 의무로 단정하지 않음)\n2. 1단계 문서심사 → 2단계 현장심사 → 인증서 발급(3년 유효)\n3. 첫 사후심사는 최초 인증 결정 후 12개월 이내, 이후 갱신심사 연도를 제외하고 매년 최소 1회; 만료 전 갱신심사\n\n## 3. 개인정보 유출 방지를 위한 기업 측면 강화 조치\n### 가. ISO 27001 관점 강화 조치\n| 통제 영역 | 관리할 위험 예시 | 강화 조치 |\n|---|---|---|\n| A.5.19~5.23 공급자 관계 | 외주 개발자 통제 부재 | 협력사 보안 계약·점검, 외주 인력 보안서약·교육, 작업 종료 시 권한 회수 |\n| A.5.15/5.18 접근통제·권한 | 실데이터 접근 과다 | [[least-privilege|최소권한]]·업무분리, 권한 부여 승인·정기 검토 |\n| A.8.2 특권 접근권한 | DBA·개발 계정 공유 | [[privileged-access-management|특권계정 관리]], 세션 녹화 |\n| A.8.10/8.11/8.12 | 실데이터로 개발, 대량 반출 미탐지 | [[data-masking|데이터 마스킹]], 정보 삭제, [[data-loss-prevention|DLP]] |\n| A.7.10 저장매체 | USB 반출 | 매체 통제·[[endpoint-security|엔드포인트]] 매체 차단 |\n| A.8.15/8.16 로깅·모니터링 | 이상 조회 미탐지 | 로그 중앙 수집·[[siem|SIEM]] 연계, 대량 조회 알람 |\n| A.5.24~5.28 사고관리 | 지연 대응 | 유출 대응 절차·모의훈련, 해당 법률의 신고 대상·기산점·예외 확인(ISO가 일률적인 72시간을 정하지 않음) |\n| A.5.34 PII 보호 | 법규 준수 미흡 | [[personal-information-protection-act|개인정보보호법]]·신용정보법 요구사항 통제 매핑 |\n\n### 나. DB보안 관점 강화 조치\n```mermaid\nflowchart LR\n  U[사용자/개발자] --> AC[\"DB 접근제어(게이트웨이)\"]\n  AC --> DB[(운영 DB: 암호화 컬럼)]\n  DB --> AUD[DB 감사 로그]\n  DB -->|마스킹 복제| TDB[(개발·테스트 DB)]\n  KMS[키관리 서버] --- DB\n```\n| DB보안 영역 | 강화 조치 | 핵심기술 |\n|---|---|---|\n| [[database-access-control|접근제어]] | 접속 경로 단일화(게이트웨이), 사용자·IP·시간·쿼리 유형 통제, 대량 SELECT 차단·결재 | 게이트웨이·에이전트 등 차단 경로; 수동적 스니핑만으로 차단을 보장하지 않음 |\n| [[database-encryption|암호화]] | 민감 식별정보는 적용 법령·위험에 맞춰 암호화·키 분리; 비밀번호는 Salt와 비용 인자를 둔 전용 해시로 저장 | API·플러그인·[[tde|TDE]] 등 보호 계층 선택; TDE는 권한 있는 SELECT의 평문 조회를 막지 않음 |\n| [[database-audit|감사]] | 위험·법적 요구에 맞는 접근·변경 감사 범위와 누락 여부 확인, 비정상 행위 탐지, 로그 위변조 방지 | 감사 로그 서버, [[user-and-entity-behavior-analytics|UEBA]] |\n| 비식별·마스킹 | 개발·테스트·분석 DB에 재식별 위험을 평가한 [[de-identification|가명·익명 처리]] 데이터 제공, 조회 화면 마스킹 | 정적·동적 마스킹 |\n| [[database-vulnerability-assessment|취약점 점검]] | 기본 계정·패치·권한 설정 점검, [[sql-injection|SQL 인젝션]] 방어 | 취약점 스캐너, 보안 패치 |\n| 계정 관리 | 개인별 계정, 공유 계정 최소화와 불가피한 경우 개인별 추적성 확보, 패스워드 정책, 휴면 계정 삭제 | IAM 연계 |\n\n### 다. 관리·기술 통제 통합 비교\n| 구분 | ISO 27001 관점 | DB보안 관점 |\n|---|---|---|\n| 성격 | 관리체계·프로세스·제3자 인증 | 기술적 통제·솔루션 |\n| 초점 | 위험 기반 통제 선택, 공급자·인력 관리 | 저장 데이터 보호, 접근 경로 통제 |\n| 상호관계 | DB보안 통제의 선택·운영 근거(SoA) | ISO 27001 A.8 기술 통제의 구현 수단 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 법규 연계 | 개인정보보호법 제29조 안전성 확보조치, [[isms-p|ISMS-P]]와 통제 매핑으로 중복 부담 최소화 |\n| 암호화 | 성능 영향(인덱스·조회) 사전 검증, 키 수명주기 관리; [[hsm|HSM]]·[[kcmvp|KCMVP]] 적용은 위험·법령·조달 요건에 따라 결정 |\n| 운영 | 인증 취득 자체가 아닌 실효 운영: 경영진 참여, 위험 재평가 주기화, 내부감사 독립성 |\n| 외주 | 개발 환경 격리(망분리·VDI), 실데이터 반입 금지, 상주 인력 출입·매체 통제 |\n| 발전방향 | ISO/IEC 27701:2025는 독립형 PIMS 표준(2019판의 확장형 구조와 구분), 클라우드 DB(DBaaS) 보안 책임 공유 모델, 동형암호·[[privacy-enhancing-technology|PET]] 적용 |\n\n## 5. 결론\n- ISO 27001의 위험 기반 관리체계와 적합한 DB 통제를 결합하고 효과를 지속 평가한다. 인증은 명시된 범위의 적합성을 나타내며 개인정보 유출 부재를 보장하지 않는다",
+      "sources": [
+        {
+          "title": "ISO/IEC 27001:2022",
+          "url": "https://www.iso.org/standard/27001",
+          "scope": "ISMS 요구사항 표준의 목적·판본과 2024 개정 존재"
+        },
+        {
+          "title": "ISO/IEC 27001:2022/Amd 1:2024",
+          "url": "https://www.nen.nl/media/PDF/ISO_IEC_27001_2022_Amd_1_2024_ed.3_-_id.88435_Publication_PDF_en_.pdf",
+          "scope": "4.1 기후변화 관련성 판단, 4.2 이해관계자 요구 참고사항"
+        },
+        {
+          "title": "SC27 SoA Auditing Practices Note",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27-WG1_N3298_Auditing%20Practices%20Note%20-%20SoA.pdf",
+          "scope": "SoA 필요 통제·선정/제외 근거·구현 상태; 규범 원문이 아닌 위원회 논의용 안내"
+        },
+        {
+          "title": "SC27 Annex A Auditing Practices Note",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IECJTC1-SC27-WG1_N3297_Auditing%20Practices%20Note%20-%20Annex%20A.pdf",
+          "scope": "Annex A 비교와 모든 통제의 일률 구현 구분; 위원회 논의용 안내"
+        },
+        {
+          "title": "SC27 Journal Vol 2 Issue 2: 27002 편집자 설명",
+          "url": "https://committee.iso.org/files/live/sites/jtc1sc27/files/resources/ISO-IEC%20JTC%201-SC%2027_N22755_SC27%20Journal%20Vol%202%20Issue%202%20(update%20Dec%202022).pdf",
+          "scope": "93개 통제의 37·8·14·34 구성"
+        },
+        {
+          "title": "IAS ISO/IEC 17021-1 Section 9 교육 자료",
+          "url": "https://www.iasonline.org/wp-content/uploads/2021/02/17021-1-2015-Section-9-1.pdf",
+          "scope": "9.1.3 인증 주기·최초/사후/갱신심사 일정 조건"
+        },
+        {
+          "title": "NIST SP 800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.1.1.2 비밀번호 Salt·해시·비용 인자 저장 요건"
+        },
+        {
+          "title": "Microsoft Data Encryption at Rest",
+          "url": "https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/security/transparent-data-encryption",
+          "scope": "TDE의 저장 매체 보호와 실행 중 데이터 보호 구분"
+        },
+        {
+          "title": "ISO/IEC 27701:2025",
+          "url": "https://www.iso.org/standard/27701",
+          "scope": "2019판을 대체하는 독립형 PIMS 표준"
+        },
+        {
+          "title": "금융위원회 2014년 개인정보 유출 관련 발표",
+          "url": "https://www.fsc.go.kr/no010103/24544",
+          "scope": "당시 발표의 약 1억 건·외부 파견직원 경로; 모든 기술 통제 부재를 뒷받침하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 검토. 2024/2025 판본, SoA·Annex A 조건, 인증심사와 법정 신고 기한 구분, 비밀번호 저장 오류 및 통제 효과 단정 교정.",
+      "unresolved": [
+        "ISO 27001/27002 유료 본문 전체는 확보하지 못함. 상세 통제 번호·문구는 공개 위원회 자료 범위를 넘어 완전 대조하지 못했으며 법령별 암호화·신고 요건은 별도 적용 검토 필요."
+      ]
+    }
   }
 }
