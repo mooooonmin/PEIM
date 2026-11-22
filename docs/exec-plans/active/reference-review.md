@@ -37,7 +37,8 @@
 - Meltdown·Spectre·TOCTOU 3개 주제 [PR #54](https://github.com/mooooonmin/PEIM/pull/54) 병합.
 - 인젝션·포맷 스트링·개발보안 관련 7개 주제 [PR #55](https://github.com/mooooonmin/PEIM/pull/55) 병합. 이전 SQL 인젝션·XSS 편집본도 전문 대조 범위로 확대.
 - SIEM·SOAR·TTPs·패치관리 4개 주제 [PR #56](https://github.com/mooooonmin/PEIM/pull/56) 병합.
-- DRM·워터마킹·디지털 저작권 보호·스테가노그래피 4개 주제 전문 검토·교정 통합 중.
+- DRM·워터마킹·디지털 저작권 보호·스테가노그래피 4개 주제 [PR #57](https://github.com/mooooonmin/PEIM/pull/57) 병합.
+- 난독화·코드 난독화·탬퍼 프루핑 3개 주제 전문 검토·교정 통합 중.
 - 전체 검수 진행: NW·DB·CA는 독립된 분야별 대조, SEC는 암호 기초부터 대조한다.
 - 이후 SE·DS·MGT·NEW까지 계속 진행하며 기존 7개 편집 주제도 전문 검토 범위에 포함한다.
 
