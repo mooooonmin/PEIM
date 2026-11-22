@@ -16736,5 +16736,251 @@
         "ICAO Doc9303 Part11 전체 PDF는 웹 크기 제한·직접 요청 403으로 확인 불가하여 공식 요약과 BSI 기술 규격을 대조함. 발급국·발급시기별 PACE/TA 의무와 실제 국내 칩의 전체 기능은 미확인."
       ]
     }
+  },
+  "t-b00d489c": {
+    "short": {
+      "source_sha256": "9e1f0aa88155ae99a42c6fdb643825b14ed007da5b15bf403691f391ac5fa3c4",
+      "body": "## 1. 사회공학의 개요\n- 정의: 신뢰·권위·공포·호의 등 인간의 심리적 취약점을 이용하여 기밀정보 획득, 시스템 접근, 금전 편취 등 사람의 판단·행동을 조작해 보안 침해를 유도하는 공격 기법\n- 등장배경: 기술적 보안 통제 강화로 업무상 신뢰와 확인 절차의 빈틈을 표적화, [[apt|APT]]의 초기 침투 벡터로 활용\n\n## 2. 사회공학의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[\"1.정보 수집\"] --> B[\"2.관계 형성·신뢰 구축\"] --> C[\"3.공격 실행·정보 획득\"] --> D[\"4.종료·흔적 제거\"]\n```\n| 구성요소 | 내용 |\n|---|---|\n| 심리적 원리 | 권위, 호감, 상호성, 희소성·긴급성, 사회적 증거, 일관성 |\n| 공격 매체 | 이메일, 전화, 문자, SNS, 물리적 접근 |\n| 표적 | 임직원, 고객센터, 협력사, 경영진 |\n\n## 3. 사회공학의 유형\n| 구분 | 기법 | 내용 |\n|---|---|---|\n| 기술 기반 | [[phishing|피싱]], [[spear-phishing|스피어 피싱]], [[smishing|스미싱]], [[vishing|비싱]] | 위장 메일·문자·전화로 자격증명 탈취 |\n| 인간 기반 | [[pretexting|프리텍스팅]], [[quid-pro-quo|대가 제공]], [[business-email-compromise|BEC]] | 사칭 시나리오로 정보·송금 유도 |\n| 물리 기반 | [[tailgating|테일게이팅]], [[shoulder-surfing|숄더 서핑]], [[dumpster-diving|덤스터 다이빙]], [[baiting|베이팅]] | 출입 동행, 훔쳐보기, 폐기물·USB 활용 |\n\n## 4. 대응 방안\n- 관리적: 정기 [[security-awareness-training|보안 인식 교육]]과 모의 피싱 훈련, 정보 제공 전 본인 확인 절차, [[clean-desk-policy|클린 데스크]] 정책\n- 기술적: [[dmarc|DMARC]] 기반 도메인 인증(유사 도메인·탈취 계정은 별도 탐지), 이메일 필터링, [[multi-factor-authentication|다중인증]], [[data-loss-prevention|DLP]], [[least-privilege|최소 권한]]\n- 물리적: 출입통제·방문자 동행, 문서 파쇄, [[open-source-intelligence|OSINT]] 노출 정보 관리",
+      "sources": [
+        {
+          "title": "MITRE ATT&CK T1566",
+          "url": "https://attack.mitre.org/techniques/T1566/",
+          "scope": "표적형·비표적형 피싱, 첨부·링크·서비스·음성 채널 및 방어"
+        },
+        {
+          "title": "FBI Business Email Compromise",
+          "url": "https://www.fbi.gov/how-we-can-help-you/common-frauds-and-scams/business-email-compromise",
+          "scope": "계정 탈취뿐 아니라 사칭도 포함하는 BEC, 독립적으로 확인한 연락처를 통한 요청 검증"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 미확인 인용·침투 비율·성공률 단정 제거, 공격 분류 중첩과 콜백·딥페이크 대응 한계 교정.",
+      "unresolved": [
+        "심리 원리 표와 공격 단계는 학습용 분류이며 공식 표준 분류로 검증하지 않음. 제품별 탐지·DLP 효과와 개별 조직 통제 수준은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "1758365935bcb0931eedb18892c316aa5307e3fae7c350e4eec0fa109dd425d3",
+      "body": "## 1. 사회공학의 개요\n### 가. 정의\n- 사람의 신뢰, 권위에 대한 복종, 공포, 호의, 호기심 등 심리적 취약점을 조작하여 기밀정보 획득·시스템 접근·금전 편취 등 사람의 판단·행동을 조작해 보안 침해를 유도하는 공격 기법\n- 기술 통제·업무 절차·교육을 함께 설계해야 하는 위협이며, 특정 인물의 미확인 인용으로 기원을 단정하지 않음\n\n### 나. 등장배경 / 필요성\n- 방화벽·암호화 등 기술 통제 강화로 직접 침투 비용 증가, 사람을 속이는 우회 경로도 존재\n- [[apt|APT]] 등에서 사회공학 기반 피싱을 초기 접근 수단으로 활용; 전체 사고 비중은 별도 통계 확인\n- SNS·[[open-source-intelligence|OSINT]]로 표적 개인정보 수집이 용이해져 맞춤형 공격 정교화, [[deepfake|딥페이크]] 음성·영상으로 사칭 신뢰도 상승\n\n### 다. 핵심 개념 (악용되는 심리 원리)\n| 원리 | 내용 | 공격 예시 |\n|---|---|---|\n| 권위 | 상급자·기관 지시에 복종 | CEO·수사기관 사칭 송금 지시 |\n| 긴급성·희소성 | 시간 압박으로 검증 생략 유도 | \"계정 24시간 내 정지\" 메일 |\n| 호감·상호성 | 친밀감, 도움에 대한 보답 심리 | 선물·도움 제공 후 정보 요청 |\n| 사회적 증거·일관성 | 다수 행동 추종, 이전 약속 유지 | \"동료들도 설문 완료\" 유도 |\n| 공포·호기심 | 불안 조성, 호기심 자극 | 범칙금 고지 문자, \"급여 명세\" 첨부 |\n\n## 2. 사회공학의 구성도 및 구성요소\n### 가. 구성도 (학습용 공격 흐름 예)\n```mermaid\nflowchart TB\n  A[\"1.정보 수집: OSINT·SNS·덤스터 다이빙\"] --> B[\"2.관계 형성: 사칭·시나리오 구축\"]\n  B --> C[\"3.공격 실행: 심리 조작으로 정보·행동 유도\"]\n  C --> D[\"4.목적 달성·종료: 자격증명 탈취·송금·침투 거점\"]\n  D --> E[\"5.흔적 제거·후속 공격\"]\n  E -. 추가 정보로 재공격 .-> A\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술·수단 |\n|---|---|---|\n| 공격자 | 시나리오 설계, 심리 조작 | [[pretexting|프리텍스팅]] 시나리오, 사칭 스크립트 |\n| 정보 수집원 | 표적 맞춤 공격 재료 | OSINT, SNS, 기업 홈페이지, 폐기 문서 |\n| 전달 매체 | 접촉 채널 | 이메일, 전화, SMS, 메신저, 물리적 방문 |\n| 미끼 | 행동 유도 수단 | 위조 로그인 페이지, 악성 첨부, 가짜 QR, USB |\n| 표적 | 정보·권한 보유자 | 임직원, 고객센터, 협력사, 경영진·재무 담당 |\n\n### 다. 공격 절차 (예: 재무 담당자 송금 유도)\n1. 수집: 조직도·결재선·CEO 출장 일정을 SNS·홈페이지에서 파악\n2. 준비: CEO 이메일과 유사한 도메인 등록, 메일 서명·문체 모방\n3. 접촉: 출장 중 CEO 사칭 \"긴급 인수 건, 비공개 송금\" 메일 발송\n4. 조작: 권위·긴급성·비밀 유지 요구로 검증 절차 우회 유도\n5. 완료: 해외 계좌 송금 후 자금 세탁, 메일 삭제로 흔적 은폐\n\n## 3. 사회공학의 상세 (유형 및 기법)\n### 가. 유형별 기법\n- 설명을 위한 분류이며 매체·기술·물리 범주는 서로 중첩될 수 있음\n| 구분 | 기법 | 내용 |\n|---|---|---|\n| 기술 기반 | [[phishing|피싱]] | 금융기관·포털 사칭 메일로 위조 사이트 접속 유도, 자격증명 탈취 |\n| | [[spear-phishing|스피어 피싱]] / [[whaling|웨일링]] | 특정 개인·경영진 맞춤형 메일, APT 초기 침투 |\n| | [[smishing|스미싱]] / [[vishing|비싱]] | 택배·범칙금 문자 내 악성 링크, 수사기관 사칭 전화 |\n| | [[business-email-compromise|BEC]] | 거래처·CEO 사칭 또는 메일 계정 도용으로 송금 계좌 변경 |\n| | [[watering-hole-attack|워터링홀]] | 표적이 자주 방문하는 사이트를 악용; 사용자 기만 없이 기술적 취약점만 이용하는 경우도 있어 사회공학과 동일시하지 않음 |\n| 인간 기반 | 프리텍스팅 | IT 지원·감사인 등 그럴듯한 가짜 상황 설정 후 정보 요청 |\n| | [[quid-pro-quo|대가 제공]] | 기술 지원·사은품 제공을 미끼로 비밀번호 요구 |\n| | 역사회공학 | 문제를 유발한 뒤 해결자로 등장해 표적이 먼저 연락하게 유도 |\n| 물리 기반 | [[tailgating|테일게이팅]] | 출입카드 소지자 뒤를 따라 통제구역 진입 |\n| | [[shoulder-surfing|숄더 서핑]] | 비밀번호·화면을 어깨 너머로 관찰 |\n| | [[dumpster-diving|덤스터 다이빙]] | 폐기 문서·저장매체에서 정보 수집 |\n| | [[baiting|베이팅]] | 악성 USB를 주차장·로비에 유기, 호기심 유발 |\n\n### 나. 보안학적 특징\n| 특징 | 내용 |\n|---|---|\n| 심리·업무 절차 악용 | 보안 장비로 탐지 곤란, 정상 사용자 행위로 위장 |\n| 비용·효과의 다양성 | 단순 사칭부터 장기간 관계 형성까지 다양하며 성공률은 환경별 상이 |\n| 복합성 | 기술적 공격(악성코드·위조 사이트)과 결합하여 효과 극대화 |\n| 반복성 | 획득 정보로 신뢰도 높은 2차 공격 수행 |\n\n## 4. 사회공학 대응 방안 및 발전방향\n| 구분 | 대응 방안 |\n|---|---|\n| 관리적 | 정기 [[security-awareness-training|보안 인식 교육]], 모의 피싱 훈련과 신고 체계, 민감정보 제공 전 사전에 확인한 연락처로 콜백하는 등 본인 확인 절차, 송금 2인 승인, [[clean-desk-policy|클린 데스크]] 정책 |\n| 기술적 | [[sender-policy-framework|SPF]]·[[domainkeys-identified-mail|DKIM]]·[[dmarc|DMARC]] 발신자 인증, 이메일 보안 게이트웨이·[[sandbox|샌드박스]], [[multi-factor-authentication|다중인증]], [[data-loss-prevention|DLP]], [[least-privilege|최소 권한]] |\n| 물리적 | 출입통제·방문자 동행, 보안구역 CCTV, 문서·매체 파쇄, USB 포트 통제 |\n| 정보 노출 관리 | 임직원 SNS·홈페이지 공개 정보 최소화, OSINT 자가 점검 |\n| 발전방향 | 딥페이크 음성·영상 사칭 대비 영상만 믿지 않는 독립 채널·기존 연락처 검증 절차, AI 기반 메일 문맥 분석, 보안 문화 정착 |\n\n## 5. 결론\n- 사회공학은 기술적 통제를 우회하여 인간의 심리를 공격하므로, 기술적 대책과 함께 지속적인 인식 교육·검증 절차·보안 문화 정착으로 개인의 판단 실수가 곧 침해로 이어지지 않도록 업무 절차와 기술 통제를 함께 보완하는 것이 핵심",
+      "sources": [
+        {
+          "title": "MITRE ATT&CK T1566",
+          "url": "https://attack.mitre.org/techniques/T1566/",
+          "scope": "표적형·비표적형 피싱, 첨부·링크·서비스·음성 채널 및 방어"
+        },
+        {
+          "title": "FBI Business Email Compromise",
+          "url": "https://www.fbi.gov/how-we-can-help-you/common-frauds-and-scams/business-email-compromise",
+          "scope": "계정 탈취뿐 아니라 사칭도 포함하는 BEC, 독립적으로 확인한 연락처를 통한 요청 검증"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 미확인 인용·침투 비율·성공률 단정 제거, 공격 분류 중첩과 콜백·딥페이크 대응 한계 교정.",
+      "unresolved": [
+        "심리 원리 표와 공격 단계는 학습용 분류이며 공식 표준 분류로 검증하지 않음. 제품별 탐지·DLP 효과와 개별 조직 통제 수준은 미확인."
+      ]
+    }
+  },
+  "t-96d4962d": {
+    "short": {
+      "source_sha256": "7dc6a21bdc3007a02b8ed06880cd98f2ba74ec3a1a5f989e352baf4554b2081d",
+      "body": "## 1. 스피어 피싱의 개요\n- 정의: 불특정 다수 대상 [[phishing|피싱]]과 달리 특정 개인·조직을 표적으로 사전 수집한 정보(직책·업무·인간관계)를 활용해 신뢰할 만한 발신자로 위장한 맞춤형 메일·메시지·음성 등으로 [[malware|악성코드]] 감염·자격증명 탈취를 유도하는 [[social-engineering|사회공학]] 공격\n- 등장배경: 표적의 업무 맥락을 악용하여 [[apt|APT]] 초기 침투 벡터로 정교화\n\n## 2. 스피어 피싱의 공격 절차 및 구성요소\n```mermaid\nflowchart LR\n  A[\"표적 선정\"] --> B[\"OSINT 정보 수집\"] --> C[\"미끼 제작: 발신자 위조·유사 도메인\"] --> D[\"전달: 악성 첨부·링크\"] --> E[\"실행: 악성코드·자격증명 탈취\"] --> F[\"후속: 내부 침투·금전\"]\n```\n| 구성요소 | 내용 |\n|---|---|\n| 정보 수집 | [[open-source-intelligence|OSINT]], SNS, 조직도, 유출 DB |\n| 위장 수단 | [[email-spoofing|발신자 위조]], [[typosquatting|유사 도메인]], 탈취 계정 재사용 |\n| 페이로드 | [[macro|매크로]] 문서, LNK·ISO 첨부, 위조 로그인 페이지([[credential-harvesting|자격증명 수집]]) |\n| 심리 조작 | 권위·긴급성·업무 연관성 |\n\n## 3. 피싱 유형 비교\n| 구분 | 피싱 | 스피어 피싱 | [[whaling|웨일링]] | [[business-email-compromise|BEC]] |\n|---|---|---|---|---|\n| 표적 | 불특정 다수 | 특정 개인·부서 | 경영진 | 재무·거래 담당 |\n| 맞춤화 | 낮음 | 높음 | 매우 높음 | 거래 맥락 |\n| 목적 | 계정·카드 정보 | 침투 거점·정보 | 기밀·대규모 송금 | 송금 사기 |\n\n## 4. 대응 방안\n- 기술: [[sender-policy-framework|SPF]]·[[domainkeys-identified-mail|DKIM]]·[[dmarc|DMARC]] 발신자 인증, [[secure-email-gateway|이메일 보안 게이트웨이]]·[[sandbox|샌드박스]], 첨부 [[content-disarm-and-reconstruction|CDR]], 매크로 차단, [[multi-factor-authentication|다중인증]], [[endpoint-detection-and-response|EDR]]\n- 관리: 모의 훈련 포함 [[security-awareness-training|보안 인식 교육]], 의심 메일 신고 체계, 기존에 확인한 연락처로 송금 콜백 검증, 공개 정보 노출 최소화",
+      "sources": [
+        {
+          "title": "MITRE ATT&CK T1566",
+          "url": "https://attack.mitre.org/techniques/T1566/",
+          "scope": "표적형·비표적형 피싱, 첨부·링크·서비스·음성 채널 및 방어"
+        },
+        {
+          "title": "FBI Business Email Compromise",
+          "url": "https://www.fbi.gov/how-we-can-help-you/common-frauds-and-scams/business-email-compromise",
+          "scope": "계정 탈취뿐 아니라 사칭도 포함하는 BEC, 독립적으로 확인한 연락처를 통한 요청 검증"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        },
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        },
+        {
+          "title": "DOJ 2018 러시아 정보요원 기소장",
+          "url": "https://www.justice.gov/archives/sco/file/1080281/dl?inline=",
+          "scope": "Clinton 캠페인 의장 대상 Google 알림 사칭; 기소장 주장으로 한정"
+        },
+        {
+          "title": "NSA·한국 기관 공동 권고 안내",
+          "url": "https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3413621/us-rok-agencies-alert-dprk-cyber-actors-impersonating-targets-to-collect-intell/",
+          "scope": "2023 Kimsuky의 기관·인물 사칭 표적형 피싱 경고"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 피싱 전달 매체, BEC와 악성코드의 관계, 성공률·사례 혼동과 발신자 인증 한계 교정.",
+      "unresolved": [
+        "소니·한수원 사례의 정확한 최초 침투·자료 유출 경로는 공식 원문 미확인으로 본문에도 표시. 보안 제품별 지원 파일·CDR 효과·AI 탐지 성능은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "e32d7a2dd50c9379ab812e8ce6dd9ec5d06f53b760b777280a37781f79e00b65",
+      "body": "## 1. 스피어 피싱의 개요\n### 가. 정의\n- 특정 개인·부서·조직을 표적으로 사전에 수집한 정보(이름, 직책, 업무, 거래처, 인간관계)를 활용하여 상사·거래처·기관 등 신뢰할 만한 발신자로 위장한 맞춤형 이메일·서비스 메시지·음성 등을 사용하고, 악성 첨부·링크로 [[malware|악성코드]] 감염 또는 자격증명 탈취를 유도하는 표적형 [[phishing|피싱]] 공격\n- 작살(spear)로 특정 물고기를 겨냥하듯 그물형 대량 피싱과 구별되는 [[social-engineering|사회공학]] 기법\n\n### 나. 등장배경 / 필요성\n- 대량 발송뿐 아니라 특정 표적의 업무·관계를 악용하는 공격이 존재\n- SNS·기업 홈페이지의 [[open-source-intelligence|OSINT]]와 별도 유출 정보 등을 통해 표적 정보 수집 용이\n- [[apt|APT]] 등의 초기 접근 수단 중 하나이며, Kimsuky의 표적형 피싱은 한미 공동 권고문에서 확인됨\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 표적화 | 공격 대상·메시지·시점을 개인 단위로 설계 |\n| 신뢰 악용 | 실제 업무 맥락·관계를 모방하여 의심 차단 |\n| 다단계 | 메일 자체가 목적이 아니라 침투·확산·탈취의 진입점 ([[cyber-kill-chain|사이버 킬 체인]] 전달 단계) |\n\n## 2. 스피어 피싱의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  A[\"1.표적 선정: 접근 권한·결재권 보유자\"] --> B[\"2.정보 수집: OSINT, SNS, 조직도, 유출 자격증명, 거래 관계\"]\n  B --> C[\"3.미끼 제작: 발신자 위조·유사 도메인·탈취 계정, 업무 문맥 메일 본문\"]\n  C --> D1[\"4a.악성 첨부: 매크로 문서, LNK, ISO, HTML\"]\n  C --> D2[\"4b.악성 링크: 위조 로그인 페이지, 드라이브 바이\"]\n  D1 --> E[\"5.실행: 백도어 설치, C&C 연결\"]\n  D2 --> E2[\"5.자격증명 탈취: 계정·MFA 세션 가로채기\"]\n  E --> F[\"6.후속: 내부 확산, 정보 유출, 랜섬웨어, 송금 사기\"]\n  E2 --> F\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술·수단 |\n|---|---|---|\n| 정보 수집원 | 맞춤 메시지 재료 | OSINT, LinkedIn·SNS, 보도자료, 유출 DB, 선행 침해 메일함 |\n| 발신자 위장 | 신뢰 확보 | [[email-spoofing|발신자 주소 위조]], [[typosquatting|유사 도메인]](rn→m, 0→o), [[homograph-attack|동형 문자]], 탈취 계정 회신 스레드 |\n| 메시지 본문 | 행동 유도 | 업무 용어·서명 모방, 긴급성·권위, 실제 진행 중 거래 언급 |\n| 페이로드 | 침투·탈취 수단 | [[macro|매크로]]·OLE 문서, LNK·ISO·압축 첨부, HTML 스머글링, 위조 로그인 페이지([[credential-harvesting|자격증명 수집]]), 링크 리다이렉트 |\n| 후속 인프라 | 지속·확산 | [[command-and-control|C&C]] 서버, 백도어, 자격증명 재사용 |\n\n### 다. 공격 절차 (학습용 가상 시나리오)\n1. 표적 선정: 연구소 보안 담당자·재무 담당자 등 권한 보유자 식별\n2. 정보 수집: 학회 발표 일정, 거래처 송장 주기, 메일 서명 형식 파악\n3. 미끼 제작: 학회 사무국 사칭 \"발표 자료 검토 요청\" 메일, 발신 도메인 1자 변형\n4. 전달: 업무 시간대 발송, 첨부 문서에 매크로 또는 외부 템플릿 주입\n5. 실행: 매크로 활성화 유도 → 백도어 설치, 또는 위조 페이지에서 계정·OTP 입력\n6. 후속: 메일함 탈취 후 거래처로 2차 스피어 피싱, 송금 계좌 변경 요청, 기밀 유출\n\n## 3. 스피어 피싱의 상세\n### 가. 피싱 유형 비교\n| 구분 | 일반 피싱 | 스피어 피싱 | [[whaling|웨일링]] | [[business-email-compromise|BEC]] |\n|---|---|---|---|---|\n| 표적 | 불특정 다수 | 특정 개인·부서·조직 | 경영진·고위 임원 | 재무·구매·거래 담당자 |\n| 사전 조사 경향 | 제한적일 수 있음 | 상세 | 매우 상세 | 거래 관계·결재 흐름 |\n| 발송량 | 대량 | 소량 | 극소량 | 극소량 |\n| 수단 | 위조 사이트 링크 | 악성 첨부·링크·위조 페이지 | 법적·경영 사안 위장 | 송금 요청 사칭·계정 침해 등(악성코드가 선행될 수도 있음) |\n| 목적 | 계정·카드 정보 | 침투 거점, 정보 탈취 | 기밀·대규모 송금 | 송금 사기 |\n| 탐지 고려 | 발송·URL·첨부 신호 | 표적의 업무 맥락 | 임원 사칭 여부 | 거래 맥락·계정 이상 신호; 난도는 실제 환경에 따름 |\n\n### 나. 특징\n| 특징 | 내용 |\n|---|---|\n| 고도 맞춤화 | 실제 업무·관계 맥락 반영으로 수신자 의심 최소화 |\n| 저빈도 공격 가능 | 발송량·평판 신호만으로 탐지하기 어려울 수 있으며 성공률은 보장되지 않음 |\n| 복합 공격 | 사회공학 + 제로데이·매크로 악성코드 + 위조 인프라 결합 |\n| 장기 캠페인 | 탈취 계정으로 연쇄 공격, APT 거점 확보 |\n| 신기술 활용 | 생성형 AI로 자연스러운 문장·다국어 작성, [[deepfake|딥페이크]] 음성 후속 전화 |\n\n### 다. 주요 사례\n| 사례 | 내용 |\n|---|---|\n| 소니 픽처스 (2014) | 이 답안에서는 최초 침투 경로·임원 대상 여부의 원문 근거를 확인하지 못했으므로 해당 인과관계는 미확인 |\n| 미국 대선 캠페인 (2016) | DOJ 기소장에는 Clinton 캠페인 의장 대상 Google 보안 알림 사칭이 기재됨; DNC 네트워크 침해와 대상을 구분 |\n| 국내 공공기관 사칭 (지속) | 통일·외교·안보 분야 전문가 대상 기관·기자 사칭, 한글 문서 악성코드 |\n| 한수원 (2014) | 메일 수신 대상과 도면 유출의 직접 경로는 이 검수에서 공식 원문으로 확인하지 못함 |\n\n## 4. 스피어 피싱 대응 방안 및 발전방향\n### 가. 기술적 대응\n| 구분 | 대응 방안 |\n|---|---|\n| 발신자 인증 | [[sender-policy-framework|SPF]]·[[domainkeys-identified-mail|DKIM]]·[[dmarc|DMARC]] 정책을 정상 발신 경로 점검 후 적용(유사 도메인·탈취 계정까지 차단하지 않음), 외부 발신 표시 배너 |\n| 메일 보안 | [[secure-email-gateway|이메일 보안 게이트웨이]], 첨부 [[sandbox|샌드박스]] 분석, URL 재작성·클릭 시 검사, 유사 도메인 탐지 |\n| 콘텐츠 무해화 | [[content-disarm-and-reconstruction|CDR]]로 첨부 내 매크로·스크립트 제거, 인터넷 유입 문서 매크로 차단(Mark of the Web) |\n| 엔드포인트 | [[endpoint-detection-and-response|EDR]] 행위 탐지, 애플리케이션 제어, 패치 관리 |\n| 인증 | [[multi-factor-authentication|다중인증]], 피싱 저항 FIDO2 키, 비정상 로그인 탐지 |\n| AI 분석 | 메일 문맥·작성 패턴 분석, 발신자 관계 그래프 기반 이상 탐지 |\n\n### 나. 관리적 대응\n| 구분 | 대응 방안 |\n|---|---|\n| 교육·훈련 | 정기 [[security-awareness-training|보안 인식 교육]], 모의 스피어 피싱 훈련과 결과 피드백 |\n| 신고·대응 | 원클릭 의심 메일 신고, 보안팀 신속 분석·전사 차단 절차 |\n| 업무 프로세스 | 송금·계좌 변경 시 기존에 확인한 연락처로 콜백 검증과 2인 승인, 비밀 요구 메일 검증 문화 |\n| 정보 노출 관리 | 임직원 공개 정보 최소화, 조직도·메일 형식 비공개, OSINT 자가 진단 |\n| 발전방향 | 생성형 AI 피싱 대비 AI 기반 탐지 고도화, 제로 트러스트 메일 보안, 위협 인텔리전스 공유 |\n\n## 5. 결론\n- 스피어 피싱은 APT 등의 기술적 방어 우회에 사용하는 초기 침투 수단 중 하나로, 발신자 인증·샌드박스·CDR·다중인증 등 기술적 다층 방어와 모의 훈련·검증 절차·정보 노출 관리를 결합하여 사람과 프로세스까지 포함한 종합 대응이 필요",
+      "sources": [
+        {
+          "title": "MITRE ATT&CK T1566",
+          "url": "https://attack.mitre.org/techniques/T1566/",
+          "scope": "표적형·비표적형 피싱, 첨부·링크·서비스·음성 채널 및 방어"
+        },
+        {
+          "title": "FBI Business Email Compromise",
+          "url": "https://www.fbi.gov/how-we-can-help-you/common-frauds-and-scams/business-email-compromise",
+          "scope": "계정 탈취뿐 아니라 사칭도 포함하는 BEC, 독립적으로 확인한 연락처를 통한 요청 검증"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        },
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        },
+        {
+          "title": "DOJ 2018 러시아 정보요원 기소장",
+          "url": "https://www.justice.gov/archives/sco/file/1080281/dl?inline=",
+          "scope": "Clinton 캠페인 의장 대상 Google 알림 사칭; 기소장 주장으로 한정"
+        },
+        {
+          "title": "NSA·한국 기관 공동 권고 안내",
+          "url": "https://www.nsa.gov/Press-Room/Press-Releases-Statements/Press-Release-View/Article/3413621/us-rok-agencies-alert-dprk-cyber-actors-impersonating-targets-to-collect-intell/",
+          "scope": "2023 Kimsuky의 기관·인물 사칭 표적형 피싱 경고"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. 피싱 전달 매체, BEC와 악성코드의 관계, 성공률·사례 혼동과 발신자 인증 한계 교정.",
+      "unresolved": [
+        "소니·한수원 사례의 정확한 최초 침투·자료 유출 경로는 공식 원문 미확인으로 본문에도 표시. 보안 제품별 지원 파일·CDR 효과·AI 탐지 성능은 미확인."
+      ]
+    }
+  },
+  "t-beced2cb": {
+    "short": {
+      "source_sha256": "19913500791a72f980346ca6073ebac7ad7955bee6d47e380a000ebb84ee3de0",
+      "body": "## 1. 큐싱의 개요\n- 정의: [[qr-code|QR코드]]와 [[phishing|피싱]]의 합성어로, 위조·변조된 QR코드를 스캔하게 유도하여 피싱 사이트 접속, [[malware|악성앱]] 설치, 금융·개인정보 탈취를 노리는 [[social-engineering|사회공학]] 기반 공격\n- 등장배경: 비대면 결제·전자출입명부로 QR 스캔 일상화, URL이 시각적으로 노출되지 않는 QR 특성 악용, [[smishing|스미싱]] 문자 필터링 우회 수단\n\n## 2. 큐싱의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[공격자] -->|악성 QR 제작·부착| B[\"QR코드(전단지·주차딱지·공유킥보드)\"]\n  B -->|스캔| C[피해자 스마트폰]\n  C --> D[\"피싱 사이트 / 악성 APK\"]\n  D --> E[\"계정·카드정보 탈취, 소액결제, 원격제어\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 악성 QR코드 | 정상 QR 위에 덧붙임 또는 메일·문자에 이미지로 삽입, 악성 URL 은닉 |\n| 피싱 페이지 | 금융사·공공기관 사이트 모방, 인증정보 입력 유도 |\n| 악성앱 | 설치 후 문자 가로채기, 저장된 인증 자료 탈취(권한·구현에 따름), [[remote-access-trojan|원격제어]] |\n\n## 3. 큐싱의 특징 및 유형\n| 구분 | 내용 |\n|---|---|\n| 공격 특성 | QR 무늬만 보고 목적지 확인 곤란; 디코딩·미리보기로 확인 가능, 오프라인 매체 활용, 이미지 기반으로 보안솔루션 탐지 곤란 |\n| 주요 유형 | 가짜 결제 QR, 주차 과태료 QR, 공유 모빌리티 QR, 이메일 첨부 QR([[quishing|퀴싱]]) |\n| 스미싱과 비교 | 스미싱은 문자 내 URL, 큐싱은 QR 이미지로 URL을 담아 텍스트 중심 [[spam-filter|스팸 필터]]의 탐지를 회피하려 시도 |\n\n## 4. 대응방안\n- 사용자: QR 스캔 후 URL 미리보기·도메인 확인, 출처 불명 앱 설치 차단, 모바일 백신 사용\n- 서비스 제공자: 검증 가능한 서명·유효기간·거래 맥락을 갖춘 QR을 설계하고 신뢰된 앱에서 검사, [[url-filtering|URL 필터링]] 내장 보안 QR 리더 제공\n- 제도: [[kisa|KISA]] 118 신고, 통신사 악성앱 차단, 공공 QR 부착물 점검\n",
+      "sources": [
+        {
+          "title": "FTC QR 피싱 예방 안내",
+          "url": "https://consumer.ftc.gov/consumer-alerts/2023/12/scammers-hide-harmful-links-qr-codes-steal-your-information",
+          "scope": "2023 주차 QR 덧붙임·메일/문자 사칭 사례, 열기 전 URL 확인·공식 채널 재확인"
+        },
+        {
+          "title": "Microsoft QR 피싱 탐지 개선",
+          "url": "https://www.microsoft.com/en-us/security/blog/2024/11/04/how-microsoft-defender-for-office-365-innovated-to-address-qr-code-phishing-attacks/",
+          "scope": "2024 Defender의 QR URL 추출·이미지 분석 기능; 모든 도구가 탐지 불가능하다는 단정 교정"
+        },
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. QR 미리보기·디코딩과 탐지 지원, OTP·동적 QR의 보호 한계 교정.",
+      "unresolved": [
+        "서명된 QR 설계의 실제 구현·발급자 신뢰·재사용 방지 성능은 검증하지 않음. 국내 개별 사건·통신사 차단 범위와 기관 캠페인 실적은 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "769fa507dcc01945c41852b8a74458cd0db8b39089dceac3894178bd53946fea",
+      "body": "## 1. 큐싱의 개요\n### 가. 정의\n- [[qr-code|QR코드]](Quick Response Code)와 [[phishing|피싱]](Phishing)의 합성어로, 위조·변조된 QR코드를 스캔하도록 유도하여 피싱 사이트 접속, [[malware|악성앱]] 설치, 금융정보·개인정보 탈취, 소액결제 피해를 유발하는 [[social-engineering|사회공학]] 기반 피싱 수법\n\n### 나. 등장배경 / 필요성\n- 모바일 결제·전자출입·메뉴판 등 QR 스캔의 일상화로 사용자 경계심 저하\n- QR 무늬에서 URL을 바로 읽기 어려우며, QR 디코딩·URL 검사 기능이 없는 도구는 놓칠 수 있음\n- 통신사 [[smishing|스미싱]] 문자 필터링 강화로 공격자가 문자 내 URL을 QR 이미지로 대체\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 공격 매체 | 오프라인 부착물(전단·주차위반 스티커·공유킥보드), 이메일·메신저 첨부 이미지 |\n| 공격 목표 | 인증정보 탈취, 악성앱을 통한 [[remote-access-trojan|원격제어]], 금전 피해 |\n| 공격 범주 | 피싱의 하위 유형, 스미싱·보이스피싱과 결합한 복합 사기 |\n\n## 2. 큐싱의 공격 구성도 및 구성요소\n### 가. 공격 구성도\n```mermaid\nflowchart TB\n  A[공격자] -->|1. 악성 QR 생성| B[\"악성 QR코드(정상 QR 위 덧붙임)\"]\n  B -->|2. 스캔| C[피해자 스마트폰]\n  C -->|3. 리다이렉트| D[\"피싱 사이트(금융사·공공기관 모방)\"]\n  C -->|3'. 다운로드| E[\"악성 APK(원격제어·문자 가로채기)\"]\n  D --> F[계정·카드정보 입력]\n  E --> G[\"인증번호 탈취·소액결제·추가 악성앱 설치\"]\n  F --> H[\"공격자 C&C 서버\"]\n  G --> H\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 악성 QR코드 | 악성 URL 또는 앱 다운로드 링크 인코딩 | [[url-shortener|URL 단축]], 다단계 리다이렉트 |\n| 피싱 페이지 | 정상 사이트 모방, 인증정보 입력 유도 | 유사 도메인([[typosquatting|타이포스쿼팅]]), 반응형 모바일 UI |\n| 악성앱 | 권한 획득 후 문자·연락처·인증서 탈취 | 접근성 권한 남용, [[c2-server|C&C]] 통신 |\n| 유포 인프라 | 대량 QR 인쇄·부착, 메일 발송 | 봇 계정, 해외 호스팅 |\n\n### 다. 공격 절차\n1. 공격자가 피싱 URL을 QR로 인코딩하여 공공장소 부착물 또는 메일에 삽입\n2. 피해자가 결제·과태료 납부 등 정당한 목적으로 QR 스캔\n3. 피싱 사이트에서 카드번호·비밀번호 입력 또는 악성 APK 설치 유도\n4. 탈취 정보·인증번호로 소액결제, 계좌이체, 추가 범죄 연계\n\n## 3. 큐싱의 상세\n### 가. 주요 공격 유형\n- 수법 설명용 예시이며 국내 발생 건수·특정 사건을 단정하지 않음\n| 유형 | 수법 | 피해 |\n|---|---|---|\n| 주차 과태료 QR | 가짜 주차위반 스티커에 납부용 QR 부착 | 카드정보 탈취 |\n| 공유 모빌리티 QR | 킥보드·자전거 정상 QR 위에 악성 QR 덧붙임 | 결제정보 탈취, 악성앱 설치 |\n| 이메일 QR([[quishing|퀴싱]]) | MFA 재설정·급여명세서 사칭 메일에 QR 삽입 | 기업 계정 탈취, 메일 보안 우회 |\n| 가짜 결제 QR | 식당·매장 결제 QR 교체 | 송금 가로채기 |\n\n### 나. 유사 공격과 비교\n| 구분 | 큐싱 | 스미싱 | [[pharming|파밍]] |\n|---|---|---|---|\n| 매개체 | QR 이미지 | 문자 메시지 내 URL | 호스트 파일·DNS 변조 |\n| URL 확인 | 디코딩·미리보기 필요 | 링크 확인 가능 | DNS 변조 등으로 표시와 실제 목적지가 달라질 수 있음 |\n| 탐지 고려 | QR 디코딩·목적지 분석 | 메시지·링크 분석 | 이름 해석·연결 무결성; 고정 난도 순위 없음 |\n\n### 다. 탐지가 어려운 이유\n- 이메일 보안 게이트웨이·[[spam-filter|스팸 필터]]의 QR 디코딩·이미지 분석 지원 여부가 중요; 지원 제품은 URL 추출 가능\n- 오프라인 부착물은 통신망 기반 차단 체계 밖에 존재\n- 미리보기 없이 열거나 리다이렉트를 따르도록 유도하면 최종 목적지를 놓치기 쉬움\n\n## 4. 큐싱 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 사용자 | 스캔 후 URL 미리보기·도메인 확인, 출처 불명 앱 설치 금지, OS 업데이트·모바일 보호 도구·MFA 사용(수동 입력 [[otp|OTP]]는 피싱 저항 인증이 아님), 공공 QR 부착 상태 점검 |\n| 서비스 제공자 | 신뢰된 앱에서 발급자 서명·유효기간·거래 내용을 검증하는 QR 설계(동적 발급만으로 안전하지 않음), [[url-filtering|URL 필터링]] 내장 보안 QR 리더 배포, 결제 QR 변조 모니터링 |\n| 기업 | 이메일 내 QR 디코딩과 필요 시 주변 텍스트 [[ocr|OCR]] 분석 후 URL 평판 검사, [[multi-factor-authentication|MFA]] 피싱 저항성 강화(FIDO) |\n| 제도·기관 | [[kisa|KISA]] 118 신고체계, 통신사 악성앱 차단, 금감원·경찰 공동 예방 캠페인 |\n\n## 5. 결론\n- 큐싱은 텍스트 중심 탐지에서 놓치기 쉬운 이미지·오프라인 채널을 활용하는 공격으로, 사용자 인식 제고와 QR 자체의 신뢰성(서명·동적 발급)을 높이는 기술적·제도적 대응이 병행되어야 함\n",
+      "sources": [
+        {
+          "title": "FTC QR 피싱 예방 안내",
+          "url": "https://consumer.ftc.gov/consumer-alerts/2023/12/scammers-hide-harmful-links-qr-codes-steal-your-information",
+          "scope": "2023 주차 QR 덧붙임·메일/문자 사칭 사례, 열기 전 URL 확인·공식 채널 재확인"
+        },
+        {
+          "title": "Microsoft QR 피싱 탐지 개선",
+          "url": "https://www.microsoft.com/en-us/security/blog/2024/11/04/how-microsoft-defender-for-office-365-innovated-to-address-qr-code-phishing-attacks/",
+          "scope": "2024 Defender의 QR URL 추출·이미지 분석 기능; 모든 도구가 탐지 불가능하다는 단정 교정"
+        },
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. QR 미리보기·디코딩과 탐지 지원, OTP·동적 QR의 보호 한계 교정.",
+      "unresolved": [
+        "서명된 QR 설계의 실제 구현·발급자 신뢰·재사용 방지 성능은 검증하지 않음. 국내 개별 사건·통신사 차단 범위와 기관 캠페인 실적은 미확인."
+      ]
+    }
+  },
+  "t-6914a2ba": {
+    "short": {
+      "source_sha256": "72e79b31f601d4bee0d9d20305d9de68d6f3c800b578c50ac7728d5807971b36",
+      "body": "## 1. 액티브 피싱(Active Phishing)의 개요\n- 정의: 공격자가 피해자와 정상 사이트 사이에 실시간으로 개입하여 입력 자격증명과 [[otp|OTP]]를 중계·탈취함으로써 피싱 저항성이 없는 [[multi-factor-authentication|다중 인증(MFA)]]와 재사용 가능한 세션을 악용할 수 있는 실시간 중간자형 [[phishing|피싱]] 공격\n- 등장배경: 정적 가짜 사이트 기반 전통 피싱의 MFA 우회 한계, [[adversary-in-the-middle|AiTM]] 피싱 키트(Evilginx 등) 확산\n\n## 2. 액티브 피싱 개념도 및 구성요소\n```mermaid\nflowchart LR\n  V[\"피해자\"] --> P[\"피싱 프록시 서버(리버스 프록시)\"]\n  P --> S[\"정상 사이트\"]\n  S --> P\n  P --> V\n  P -. 자격증명·OTP·세션쿠키 탈취 .-> A[\"공격자\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 리버스 프록시 | 피해자-정상 사이트 트래픽 실시간 중계 |\n| 자격증명 가로채기 | ID·PW·[[otp|OTP]] 입력값 실시간 탈취 |\n| [[session-hijacking|세션 탈취]] | 인증 후 발급된 [[session-cookie|세션 쿠키]] 가로채 피싱 비저항 MFA·재사용 가능한 세션 악용 |\n| 미끼 채널 | [[smishing|스미싱]]·메일·[[qr-phishing|큐싱]]으로 프록시 URL 유도 |\n\n## 3. 패시브 피싱과 비교\n- 이 답안의 액티브/패시브는 설명용 구분이며 피싱 전체의 공식 이분법이 아님\n| 구분 | 액티브 피싱 | 패시브 피싱 |\n|---|---|---|\n| 방식 | 실시간 중간자 프록시 중계 | 정적 가짜 페이지에 입력 저장 |\n| MFA 우회 | 세션 쿠키 탈취로 우회 가능 | 저장한 비밀번호만으로는 MFA를 충족하지 못할 수 있으나 다른 공격과 결합 가능 |\n| 세션 | 실시간 세션 하이재킹 | 수집 후 재사용 |\n| 탐지 | 정상 도메인 응답 재현으로 탐지 곤란 | URL·콘텐츠·로그를 함께 분석; 정적 페이지도 정교하게 모방 가능 |\n\n## 4. 대응 방안\n- [[fido2|FIDO2]]·[[passkey|패스키]] 등 [[phishing-resistant-mfa|피싱 저항 인증]] 도입(검증자 이름 바인딩으로 가짜 출처의 인증 중계 방어; 복구 경로·등록 절차·단말 감염은 별도 보호)\n- [[dmarc|DMARC]]·[[dkim|DKIM]]·[[spf|SPF]] 메일 인증, URL 평판·[[anti-phishing|안티피싱]] 필터, 세션 쿠키에 디바이스 바인딩·짧은 만료\n- 이용자 인식 제고, 접속 위치·단말 이상 징후 탐지([[risk-based-authentication|위험기반 인증]])\n",
+      "sources": [
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        },
+        {
+          "title": "Microsoft AiTM 조사 원문",
+          "url": "https://www.microsoft.com/en-us/security/blog/2022/07/12/from-cookie-theft-to-bec-attackers-use-aitm-phishing-sites-as-entry-point-to-further-financial-fraud/",
+          "scope": "2022 실제 조사에서 리버스 프록시·세션 쿠키 탈취와 후속 BEC 확인; 전체 MFA가 무효라는 의미가 아님"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. MFA 방식별 피싱 저항성, 정적/실시간 분류 한계, 세션·IP 바인딩과 HTTPS 검증 조건 교정.",
+      "unresolved": [
+        "서비스별 디바이스 바인딩·세션 폐기 정책과 실제 피싱 키트 실험은 수행하지 않음. 액티브/패시브 명칭의 단일 표준 정의는 확인하지 못함."
+      ]
+    },
+    "long": {
+      "source_sha256": "4b9bbf80a657980b696056231ad349b5ea12ef934b2cd42b7d7a818cb8d6cec0",
+      "body": "## 1. 액티브 피싱(Active Phishing)의 개요\n### 가. 정의\n- 공격자가 피해자와 정상 서비스 사이에 리버스 프록시를 두고 실시간으로 트래픽을 중계하면서 입력된 자격증명·[[otp|OTP]]·[[session-cookie|세션 쿠키]]를 가로채, 피싱 저항성이 없는 [[multi-factor-authentication|다중 인증(MFA)]]와 재사용 가능한 세션을 악용할 수 있는 실시간 중간자([[adversary-in-the-middle|AiTM]])형 [[phishing|피싱]] 공격\n\n### 나. 등장배경 / 필요성\n- 정적 가짜 사이트에 자격증명을 저장하는 단순 비밀번호 수집만으로는 MFA를 충족하지 못할 수 있으나 OTP 수집·사회공학을 결합할 수 있음\n- Evilginx 등 리버스 프록시 기반 피싱 키트가 대중화되어 MFA 우회가 자동화, 금융·클라우드 계정 탈취에 악용될 수 있음\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 실시간 중계 | 피해자 입력을 즉시 정상 사이트로 전달, 응답을 그대로 재현 |\n| 세션 탈취 | 인증 완료 후 발급된 세션 쿠키 탈취로 재인증 없이 접근 |\n| 피싱 비저항 MFA·재사용 가능한 세션 악용 | OTP도 실시간 중계되어 유효 시간 내 사용, 이중 인증 우회 |\n\n## 2. 액티브 피싱의 구성도 및 동작 절차\n### 가. 구성도\n```mermaid\nflowchart TB\n  A[\"공격자\"] --> K[\"피싱 키트(리버스 프록시)\"]\n  L[\"미끼: 메일·스미싱·큐싱\"] --> V[\"피해자\"]\n  V -->|자격증명·OTP 입력| K\n  K -->|실시간 전달| S[\"정상 서비스\"]\n  S -->|정상 응답·세션 쿠키| K\n  K -->|응답 재현| V\n  K -. 세션 쿠키·자격증명 추출 .-> A\n  A -->|쿠키 재사용| S\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 리버스 프록시 | 피해자-정상 사이트 트래픽 중계 | 투명 프록시, TLS 종단 |\n| 자격증명 수집기 | ID·PW·OTP 실시간 추출 | 요청 파라미터 파싱 |\n| 세션 쿠키 탈취 | 인증 세션 쿠키 가로채기 | [[session-hijacking|세션 하이재킹]] |\n| 미끼 유포 채널 | 프록시 URL로 유인 | [[smishing|스미싱]]·메일·[[qr-phishing|큐싱]] |\n\n### 다. 동작 절차\n1. 공격자가 정상 사이트를 중계하는 피싱 프록시 구축, 유사 도메인 준비\n2. 메일·스미싱으로 프록시 URL을 피해자에게 유포\n3. 피해자가 프록시에 접속해 자격증명·OTP 입력\n4. 프록시가 입력을 정상 사이트로 실시간 전달, 서비스의 인증·세션 통제가 허용하면 인증 성공\n5. 발급된 세션 쿠키를 가로채 공격자가 재사용, 계정 장악\n\n## 3. 액티브 피싱의 상세 — 유형 및 비교\n### 가. 전통(패시브) 피싱과 비교\n- 정적 수집과 실시간 중계를 대비한 설명용 구분이며 실제 공격은 결합될 수 있음\n| 구분 | 액티브 피싱 | 패시브 피싱 |\n|---|---|---|\n| 구조 | 실시간 중간자 프록시 | 정적 가짜 페이지 |\n| 자격증명 | 실시간 중계·탈취 | 저장 후 수집 |\n| MFA | 중계 가능한 인증·세션 조건에서 우회 가능 | 비밀번호 수집만으로 부족할 수 있으나 OTP 수집·실시간 전달 등과 결합 가능 |\n| 세션 | 실시간 하이재킹 | 지연 재사용(만료 위험) |\n| 탐지 | 정상 응답 재현으로 곤란 | URL·콘텐츠·로그 함께 분석 |\n\n### 나. 연관 피싱 기법\n| 기법 | 내용 |\n|---|---|\n| [[spear-phishing|스피어 피싱]] | 특정 대상 맞춤형 미끼로 정밀 공격 |\n| [[smishing|스미싱]]·[[qr-phishing|큐싱]] | 문자·QR로 프록시 URL 전달 |\n| [[pharming|파밍]] | DNS 등 이름 해석을 변조해 잘못된 목적지로 유도; DNS 변조만으로 정상 HTTPS 인증서 검증을 통과하지는 못함 |\n| [[mfa-fatigue|MFA 피로 공격]] | 반복 승인 요청으로 피해자 승인 유도 |\n\n## 4. 액티브 피싱 대응 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 인증 | [[fido2|FIDO2]]·[[passkey|패스키]] 등 [[phishing-resistant-mfa|피싱 저항 인증]] 도입, 검증자 이름 바인딩으로 가짜 출처의 인증 중계 방어; 복구 경로·등록 절차·단말 감염은 별도 보호 |\n| 메일·채널 | [[dmarc|DMARC]]·[[dkim|DKIM]]·[[spf|SPF]] 적용, URL 평판·[[anti-phishing|안티피싱]] 필터 |\n| 세션 | 지원 서비스의 암호학적 디바이스 바인딩과 위험 기반 재검증(IP 변경 검사는 보조 신호), 짧은 만료, 이상 세션 재인증 |\n| 탐지·운영 | [[risk-based-authentication|위험기반 인증]]으로 접속 위치·단말 이상 탐지, 유사 도메인 모니터링, 이용자 인식 교육 |\n\n## 5. 결론\n- 액티브 피싱은 인증 중계·쿠키 탈취로 일부 MFA 보호를 우회할 수 있으므로 OTP 기반 MFA만으로는 한계가 있으며, FIDO2·패스키 같은 피싱 저항 인증과 세션 보호·위험기반 인증을 결합한 다층 대응이 필요\n",
+      "sources": [
+        {
+          "title": "NIST SP800-63B-4",
+          "url": "https://pages.nist.gov/800-63-4/sp800-63b.html",
+          "scope": "3.2.5 수동 입력 OTP의 피싱 비저항성과 채널·검증자 이름 바인딩"
+        },
+        {
+          "title": "Microsoft AiTM 조사 원문",
+          "url": "https://www.microsoft.com/en-us/security/blog/2022/07/12/from-cookie-theft-to-bec-attackers-use-aitm-phishing-sites-as-entry-point-to-further-financial-fraud/",
+          "scope": "2022 실제 조사에서 리버스 프록시·세션 쿠키 탈취와 후속 BEC 확인; 전체 MFA가 무효라는 의미가 아님"
+        },
+        {
+          "title": "IETF RFC7489",
+          "url": "https://datatracker.ietf.org/doc/html/rfc7489/",
+          "scope": "2.4 Anti-Phishing: 유사 도메인·표시 이름 공격은 DMARC만으로 방어되지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "short/long 전문 대조. MFA 방식별 피싱 저항성, 정적/실시간 분류 한계, 세션·IP 바인딩과 HTTPS 검증 조건 교정.",
+      "unresolved": [
+        "서비스별 디바이스 바인딩·세션 폐기 정책과 실제 피싱 키트 실험은 수행하지 않음. 액티브/패시브 명칭의 단일 표준 정의는 확인하지 못함."
+      ]
+    }
   }
 }
