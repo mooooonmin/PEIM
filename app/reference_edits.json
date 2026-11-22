@@ -18097,11 +18097,6 @@
           "title": "ETSI GR QKD 003 V2.1.1(2018)",
           "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
           "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
-        },
-        {
-          "title": "ETSI GR QKD 003 V2.1.1(2018)",
-          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
-          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
         }
       ],
       "reviewed_on": "2026-11-22",
@@ -18138,11 +18133,6 @@
           "title": "KpqC 최종 선정 발표",
           "url": "https://kpqc.or.kr/competition_02.html",
           "scope": "2025.1.16 AIMer·HAETAE, NTRU+·SMAUG-T 최종 선정"
-        },
-        {
-          "title": "ETSI GR QKD 003 V2.1.1(2018)",
-          "url": "https://www.etsi.org/deliver/etsi_gr/QKD/001_099/003/02.01.01_60/gr_qkd003v020101p.pdf",
-          "scope": "기초 구성 설명: 약한 광펄스·DPS 상대 위상·COW 시간빈 부호화; 현재 제품 인증 기준으로 사용하지 않음"
         },
         {
           "title": "ETSI GR QKD 003 V2.1.1(2018)",
@@ -18186,11 +18176,6 @@
           "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
           "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
           "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
-        },
-        {
-          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
-          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
-          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
         }
       ],
       "reviewed_on": "2026-11-22",
@@ -18222,11 +18207,6 @@
           "title": "NIST PEC",
           "url": "https://csrc.nist.gov/projects/pec",
           "scope": "FHE·MPC·ZKP 구분과 표준화 활동"
-        },
-        {
-          "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
-          "url": "https://crypto.stanford.edu/craig/easy-fhe.pdf",
-          "scope": "동형 연산의 정의·올바름과 부트스트래핑 개념"
         },
         {
           "title": "Gentry Computing Arbitrary Functions of Encrypted Data",
@@ -18275,11 +18255,6 @@
           "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
           "url": "https://eprint.iacr.org/2020/1175",
           "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
-        },
-        {
-          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
-          "url": "https://eprint.iacr.org/2020/1175",
-          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
         }
       ],
       "reviewed_on": "2026-11-22",
@@ -18316,11 +18291,6 @@
           "title": "ISO/IEC 4922-1:2023",
           "url": "https://www.iso.org/standard/80508.html",
           "scope": "정의·용어·참여자·프로세스 분류 범위"
-        },
-        {
-          "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
-          "url": "https://eprint.iacr.org/2020/1175",
-          "scope": "GMW의 회로 기반 MPC·준정직 모델·회로 깊이에 비례하는 통신 라운드; Yao 가블드 회로와 구분"
         },
         {
           "title": "Heath·Kolesnikov·Peceny MOTIF(ASIACRYPT 2020)",
