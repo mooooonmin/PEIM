@@ -1304,5 +1304,481 @@
       "review_scope": "단답·서술 전문 열람. 대표 키 운반 도식과 CMS 전체 지원 범위, 이중 암호화 오해·인증 및 키 재사용 조건 교정.",
       "unresolved": []
     }
+  },
+  "t-b7ee7d7f": {
+    "short": {
+      "source_sha256": "98ba444f260900c08060ccfa442f0ac1c44d5094a0d22a737143bc832690ea6d",
+      "body": "## 1. 전자서명의 개요\n- 정의: 개인키와 서명 알고리즘으로 메시지에 대한 서명을 만들고 공개키로 검증하는 디지털 서명. 무결성·출처 확인을 지원하며 부인방지는 신원 결합·키 관리·증거 보관 조건에 의존한다. 법률상 전자서명은 이보다 넓은 개념이다\n- 필요성: 전자문서의 위변조 방지와 서명자 신원 증명, 전자거래 신뢰 기반\n\n## 2. 전자서명의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  M[메시지] --> S[서명 알고리즘]\n  SK[개인키] --> S\n  S --> SIG[서명값]\n  M --> V[검증 알고리즘]\n  SIG --> V\n  PK[신뢰한 공개키] --> V\n  V --> RESULT[유효 또는 무효]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[hash-function|해시함수]] | 메시지 고정길이 축약 |\n| [[private-key|개인키]] | 서명 생성 |\n| [[public-key-cryptography|공개키]] | 서명 검증 |\n| [[digital-certificate|인증서]]·[[pki|PKI]] | 공개키 진위 보증 |\n\n## 3. RSA 서명 생성·검증\nRSA-PSS 등 안전한 인코딩을 포함한 스킴을 적용하며 아래 과정은 개념 요약이다.\n| 구분 | 과정 |\n|---|---|\n| 생성 | 메시지 해시 → 서명자 개인키로 서명 스킴 실행 → 서명 첨부 |\n| 검증 | 서명·메시지·공개키로 해당 서명 스킴의 검증 수행 → 성공 시 유효 |\n\n## 4. 고려사항\n- 제공 서비스: 무결성·인증·부인방지(기밀성은 별도 암호화 필요)\n- [[digital-signature-act|전자서명법]] 개정으로 공인인증서 독점 폐지, 다양한 사설인증서 허용",
+      "sources": [
+        {
+          "title": "RFC 8017 §8·9",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 서명 원시 연산과 PSS 인코딩·검증 구분"
+        },
+        {
+          "title": "FIPS 186-5",
+          "url": "https://csrc.nist.gov/pubs/fips/186-5/final",
+          "scope": "서명 생성·검증과 DSA 신규 생성 제외"
+        },
+        {
+          "title": "전자서명법 제2조",
+          "url": "https://law.go.kr/LSW/lsSideInfoP.do?docCls=jo&joBrNo=00&joNo=0002&lsiSeq=236201&urlMode=lsScJoRltInfoR",
+          "scope": "법률상 전자서명 정의는 특정 암호 알고리즘으로 한정하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 서명=해시 암호화 도식·본문 교정, RSA 원시 연산/스킴 구분, 법률상 정의와 기술적 정의 분리.",
+      "unresolved": [
+        "KCDSA 국내 규격 및 블록체인 기반 검증의 개별 적용 사례는 대조 미완료. 법적 효력은 사건별 보장을 뜻하지 않음."
+      ]
+    },
+    "long": {
+      "source_sha256": "5a5b0c7825dd5a031b7d9de5399c689f6be009048518dafb6ebdf2b2ed738395",
+      "body": "## 1. 전자서명의 개요\n### 가. 정의\n- 전자문서에 대해 서명자의 개인키와 서명 스킴으로 생성하고 공개키로 검증하는 디지털 서명. 해시 암호화·복호화라는 설명은 일반 정의가 아니며 법률상 전자서명과 공개키 디지털 서명을 구분한다\n\n### 나. 등장배경 및 필요성\n- 전자문서는 복제·변조가 쉬워 종이 서명·인감을 대체할 신뢰 수단 필요\n- 전자상거래·전자정부 확산으로 비대면 신원확인과 거래 부인방지 요구\n- 안전한 알고리즘·키 관리 아래 위조를 어렵게 하며 법적 효력은 전자서명법과 해당 법령·약정 등 적용 조건을 확인\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 해시+공개키 결합 | 메시지는 해시로 축약, 해시를 개인키로 서명 |\n| 서명·검증 | 암호화와 별도 스킴이며 개인키로 생성, 공개키로 검증 |\n| 제공 서비스 | 무결성·인증·부인방지(기밀성은 미제공) |\n\n## 2. 전자서명의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart LR\n  M[메시지] --> S[서명 알고리즘]\n  SK[개인키] --> S\n  S --> SIG[서명값]\n  M --> V[검증 알고리즘]\n  SIG --> V\n  PK[신뢰한 공개키] --> V\n  V --> RESULT[유효 또는 무효]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[hash-function|해시함수]] | 메시지를 고정길이로 축약 | SHA-256 등 |\n| 서명 생성 | 개인키와 메시지에 서명 스킴 적용 | [[rsa|RSA]], [[ecdsa|ECDSA]], [[kcdsa|KCDSA]] |\n| 서명 검증 | 공개키로 서명 스킴 검증·대조 | 공개키 연산 |\n| [[digital-certificate|인증서]]·[[pki|PKI]] | 공개키-신원 결합 보증 | [[certificate-authority|CA]], X.509 |\n\n### 다. 전자서명이 제공하는 보안 서비스\n| 서비스 | 제공 방식 |\n|---|---|\n| 무결성 | 메시지와 서명에 대한 검증으로 위변조 탐지 |\n| 인증 | 서명자 개인키로만 생성 가능해 신원 확인 |\n| 부인방지 | 키 소유·신원 확인과 서명 검증·시점·기록을 통해 부인 대응을 지원 |\n| (기밀성) | 미제공, 필요 시 [[digital-envelope|디지털 봉투]]로 별도 암호화 |\n\n## 3. 전자서명의 상세\n### 가. RSA 디지털 서명 생성 과정\n1. 서명자가 원문 메시지 M을 [[hash-function|해시함수]]로 해시값 h(M) 산출\n2. 자신의 [[private-key|개인키]](d, n)로 메시지를 PSS 등 스킴에 따라 인코딩한 EM에 RSA 서명 원시 연산 적용 → S = OS2IP(EM)^d mod n(인코딩 없는 원시 해시 서명 금지)\n3. 원문 메시지와 서명 S를 함께 수신자에게 전송\n4. 필요 시 서명자 [[digital-certificate|인증서]]를 동봉해 공개키 진위 제공\n\n### 나. RSA 디지털 서명 검증 과정\n1. 수신자가 수신한 메시지 M'을 동일 해시함수로 해시 → h(M')\n2. 수신한 서명 S를 서명자 [[public-key-cryptography|공개키]](e, n)로 RSA 공개키 연산 → EM을 복원하고 선택한 서명 스킴의 인코딩 조건 확인\n3. 메시지 M'와 EM에 대해 EMSA-PSS-VERIFY 등 해당 검증 절차 수행\n4. 일치하면 무결성·서명자 인증 확인(유효), 불일치면 위변조 또는 위조로 판정\n\n### 다. 주요 전자서명 알고리즘\n| 알고리즘 | 기반 | 특징 |\n|---|---|---|\n| [[rsa|RSA]] | 소인수분해 | 범용, 긴 키길이 |\n| [[dsa|DSA]] | 이산대수 | 역사적 서명 전용 알고리즘; FIPS 186-5 신규 생성 제외 |\n| [[ecdsa|ECDSA]] | 타원곡선 | 짧은 키로 동등 안전성 |\n| [[kcdsa|KCDSA/EC-KCDSA]] | 국내 표준 | 국내 전자서명 적용 |\n\n## 4. 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 관리 | 개인키 안전 보관([[hsm|HSM]]·스마트카드), 유출 시 폐기 |\n| 공개키 신뢰 | [[pki|PKI]]·인증서 검증, 폐지목록([[certificate-revocation-list|CRL]])·[[ocsp|OCSP]] 확인 |\n| 해시 안전성 | 충돌 취약 해시(MD5·SHA-1) 배제, SHA-256 이상 |\n| 법제도 | [[digital-signature-act|전자서명법]] 개정으로 공인인증서 독점 폐지, 다양한 사설·간편 인증 허용 |\n| 발전방향 | [[post-quantum-cryptography|양자내성 서명]](격자 기반) 전환, [[blockchain|블록체인]] 기반 서명 검증 |\n\n## 5. 결론\n- 전자서명은 해시함수와 공개키 암호를 결합해 무결성·인증·부인방지를 제공하는 전자거래 신뢰의 근간이며, 안전한 키 관리와 PKI 기반 공개키 검증, 양자내성 알고리즘 전환이 향후 과제",
+      "sources": [
+        {
+          "title": "RFC 8017 §8·9",
+          "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
+          "scope": "RSA 서명 원시 연산과 PSS 인코딩·검증 구분"
+        },
+        {
+          "title": "FIPS 186-5",
+          "url": "https://csrc.nist.gov/pubs/fips/186-5/final",
+          "scope": "서명 생성·검증과 DSA 신규 생성 제외"
+        },
+        {
+          "title": "전자서명법 제2조",
+          "url": "https://law.go.kr/LSW/lsSideInfoP.do?docCls=jo&joBrNo=00&joNo=0002&lsiSeq=236201&urlMode=lsScJoRltInfoR",
+          "scope": "법률상 전자서명 정의는 특정 암호 알고리즘으로 한정하지 않음"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 서명=해시 암호화 도식·본문 교정, RSA 원시 연산/스킴 구분, 법률상 정의와 기술적 정의 분리.",
+      "unresolved": [
+        "KCDSA 국내 규격 및 블록체인 기반 검증의 개별 적용 사례는 대조 미완료. 법적 효력은 사건별 보장을 뜻하지 않음."
+      ]
+    }
+  },
+  "t-eb563e14": {
+    "short": {
+      "source_sha256": "11287f291eb0df0976ab6a54e1780e94b7d8b5ab2f75eeaf2d0acd17154d7677",
+      "body": "## 1. 공개키 기반구조(PKI)의 개요\n- 정의: [[public-key-cryptography|공개키 암호]]의 공개키와 소유자 신원을 신뢰기관이 [[digital-certificate|인증서]]로 보증하고, 인증서의 발급·배포·폐지·검증을 수행하는 인프라(정책·기관·기술의 총체)\n- 필요성: 공개키 위변조·[[adversary-in-the-middle|중간자 공격]] 방지, 비대면 환경의 인증·[[digital-signature|전자서명]]·[[non-repudiation|부인방지]] 기반 제공\n\n## 2. PKI의 구성도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] -->|신원 확인·등록| RA[\"RA(등록기관)\"] --> CA[\"CA(인증기관)\"]\n  CA -->|인증서·CRL 게시| DIR[\"디렉터리(LDAP)\"]\n  CA -->|인증서 발급| U\n  V[검증자] -->|인증서·폐지 확인| DIR\n  V -->|폐지 상태·응답 시점 조회| OCSP[OCSP 서버]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[certificate-authority|CA]] | 인증서 발급·갱신·폐지, 자신의 개인키로 서명 |\n| [[registration-authority|RA]] | 신원 확인, 등록 요청 접수·승인 |\n| 디렉터리 | LDAP·HTTP 등으로 제공하는 인증서·CRL 저장소(LDAP 필수 아님) |\n| [[ocsp|OCSP]] 서버 | 서명된 폐지 상태 응답(응답 시점·신선도 검사 필요, 전체 유효성 판정 아님) |\n| 사용자 | 키쌍 생성·보관, 서명·암호화 수행 |\n\n## 3. PKI의 주요 기술 및 특징\n| 구분 | 내용 |\n|---|---|\n| 인증서 | [[x-509|X.509 v3]]: 버전·일련번호·발급자·유효기간·주체·공개키·확장·CA 서명 |\n| 신뢰 모델 | 계층형(Root CA→하위 CA→사용자), 네트워크형([[cross-certification|상호인증]]), 하이브리드 |\n| 보안 서비스 | 인증, 기밀성([[digital-envelope|전자봉투]]), 무결성(서명·MAC 등; 해시만으로 출처 인증 불가), 부인방지(전자서명+[[timestamp-authority|타임스탬프]]) |\n| 국내 | 전자서명법 기반 공인인증제도 폐지(2020) → 다양한 전자서명 인증사업자 평가·인정 체계 |\n\n## 4. 고려사항 및 발전방향\n- Root CA 키 보호([[hsm|HSM]]), 폐지 정보 적시 배포, 인증서 수명 단축 추세\n- 양자컴퓨터 대비 [[post-quantum-cryptography|PQC]] 인증서, [[decentralized-identity|분산 ID]]·[[fido|FIDO]]와 공존",
+      "sources": [
+        {
+          "title": "RFC 5280 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5280.html",
+          "scope": "trust anchor·경로 검증·제약"
+        },
+        {
+          "title": "RFC 6960 §2.2",
+          "url": "https://www.rfc-editor.org/rfc/rfc6960.html",
+          "scope": "OCSP good/revoked/unknown의 범위·응답 신선도"
+        },
+        {
+          "title": "RFC 3161",
+          "url": "https://www.rfc-editor.org/rfc/rfc3161.html",
+          "scope": "시점확인의 존재 증거 범위"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 경로 신뢰점·검증 범위, OCSP 상태와 전체 유효성 차이, TSA 존재 시점·LDAP 비필수·입찰 예시 범위 교정.",
+      "unresolved": [
+        "국내 인정사업자 현황·브리지 CA 구축 사례·PQC 인증서 제품 적용 상태는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "8f3132960ed29a3866e99d251ba7f7a30bc1f5a80f57fb0445517445528d67e2",
+      "body": "## 1. 공개키 기반구조(PKI)의 개요\n### 가. 정의\n- [[public-key-cryptography|공개키 암호]] 기술에서 공개키와 그 소유자의 신원을 신뢰할 수 있는 제3자(인증기관)가 [[digital-certificate|인증서]]로 보증하고, 인증서의 생성·배포·갱신·폐지·검증 전 생애주기를 관리하는 정책·기관·하드웨어·소프트웨어의 종합 체계\n\n### 나. 필요성\n| 문제 | PKI의 해결 |\n|---|---|\n| 공개키 진위 확인 불가 | CA가 서명한 인증서로 공개키-신원 결합 보증 |\n| [[adversary-in-the-middle|중간자 공격]] | 공개키 교체 시 CA 서명 검증 실패로 탐지 |\n| 비대면 거래 신뢰 | 인증·기밀성·무결성·[[non-repudiation|부인방지]] 서비스 제공 |\n| 키 관리 복잡성 | 중앙 정책(CP·CPS) 기반 키·인증서 수명 관리 |\n\n### 다. 제공 보안 서비스\n| 서비스 | 구현 기술 |\n|---|---|\n| 인증 | 인증서 기반 신원 확인, 챌린지 서명 |\n| 기밀성 | 수신자 공개키로 세션키 암호화([[digital-envelope|전자봉투]], [[hybrid-encryption|하이브리드 암호]]) |\n| 무결성 | [[hash-function|해시]] + [[digital-signature|전자서명]] |\n| 부인방지 | 송신자 개인키 서명 + [[timestamp-authority|시점확인(타임스탬프)]] |\n\n## 2. PKI의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  ROOT[\"Root CA(최상위 인증기관)\"] -->|하위 CA 인증서| CA1[\"CA(인증기관)\"]\n  CA1 -->|등록 위임| RA[\"RA(등록기관)\"]\n  U[사용자·서버] -->|신원증명 + 공개키 제출| RA\n  RA -->|승인된 요청| CA1\n  CA1 -->|인증서 발급| U\n  CA1 -->|인증서·CRL 게시| DIR[\"디렉터리 서버(LDAP)\"]\n  CA1 --> OCSP[\"OCSP 응답 서버\"]\n  V[검증자] -->|인증서 경로 검증| DIR\n  V -->|폐지 상태·응답 시점 조회| OCSP\n  TSA[\"TSA(시점확인기관)\"] -->|타임스탬프 토큰| U\n  HSM[\"HSM(키 보호)\"] --- CA1\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[certificate-authority|인증기관(CA)]] | 인증서 발급·갱신·폐지, CRL 생성, 정책(CP·CPS) 수립 | CA 개인키 서명([[rsa|RSA]]·ECDSA), [[hsm|HSM]] |\n| [[registration-authority|등록기관(RA)]] | 신청자 신원 확인, 등록·폐지 요청 접수·승인 | 대면·비대면 신원확인, 등록 프로토콜 |\n| 디렉터리 | 인증서·[[certificate-revocation-list|CRL]] 공개 저장·조회 | [[ldap|LDAP]], X.500 |\n| [[ocsp|OCSP]] 서버 | 개별 서명된 폐지 상태 응답(응답 시점·신선도 검사 필요, 전체 유효성 판정 아님) | OCSP(RFC 6960), OCSP Stapling |\n| 시점확인기관(TSA) | 전자문서 존재 시점 증명 | 타임스탬프 토큰(RFC 3161) |\n| 사용자(최종 개체) | 키쌍 생성·개인키 보관, 서명·암호화·검증 | 스마트카드·보안토큰, 브라우저 |\n\n### 다. 인증서 발급·검증 절차\n1. 사용자가 키쌍 생성 후 공개키·신원정보로 인증서 요청(CSR) 생성, RA에 제출\n2. RA가 신원 확인 후 CA에 발급 요청, CA가 개인키로 서명한 [[x-509|X.509]] 인증서 발급·디렉터리 게시\n3. 검증자는 인증서 서명을 상위 CA 공개키로 검증하며 사전에 신뢰한 trust anchor까지 [[certificate-chain|인증서 경로(체인)]] 검증\n4. 유효기간·이름·용도·정책·경로 제약과 CRL/OCSP 폐지 상태·응답 신선도를 확인한 뒤 목적에 맞게 사용\n5. 개인키 분실·유출 시 폐지 요청, CA는 CRL 갱신·OCSP 반영\n\n## 3. PKI의 적용 상세\n### 가. 전자서명을 통한 부인봉쇄 방안\n```mermaid\nsequenceDiagram\n  participant S as 송신자\n  participant T as TSA\n  participant R as 수신자\n  S->>S: 문서 해시 생성 → 개인키로 서명\n  S->>T: 서명값 해시 전송\n  T-->>S: 타임스탬프 토큰(TSA 서명)\n  S->>R: 문서 + 서명 + 인증서 + 타임스탬프\n  R->>R: CA 체인·OCSP로 인증서 검증, 공개키로 서명 검증\n  R->>R: 서명·토큰·로그 보관(분쟁 시 증거)\n```\n| 부인 유형 | 봉쇄 방안 |\n|---|---|\n| 발신 부인 | 송신자 개인키 서명: 개인키는 본인만 보유 → 신원·키 관리·시점·기록 조건 아래 서명 사실 입증 지원 |\n| 수신 부인 | 수신자가 서명한 수신 확인(Signed Receipt) 반환 |\n| 내용 부인 | 해시 기반 서명으로 내용 변경 시 검증 실패 |\n| 시점 부인 | TSA 토큰은 해당 데이터가 특정 시점 이전에 존재했음을 증명. 실제 서명 생성 순간과 동일하다는 보장은 아니며 폐지 시점·검증 자료 함께 보관 |\n| 법적 효력 | 전자서명법상 전자서명의 효력, 인증사업자 평가·인정, 장기 검증(LTV)을 위한 서명 보관 |\n\n### 나. 전자입찰시스템에서의 전자서명·암호화 적용\n아래는 설계 예시이며 모든 실제 입찰 시스템이 복수 담당자 키 분할 등 동일 구조를 사용한다는 뜻은 아니다.\n| 단계 | 적용 기술 | 효과 |\n|---|---|---|\n| 입찰자 등록 | 인증서 기반 본인 확인, 사업자 인증서 등록 | 대리·허위 입찰 방지 |\n| 입찰서 제출 | 입찰서 해시에 입찰자 전자서명 → 입찰 시점 타임스탬프 | 입찰 내용 무결성, 제출 사실 부인방지 |\n| 입찰서 암호화 | 입찰 금액을 개찰기관 공개키(또는 세션키+전자봉투)로 암호화, 개찰 시점까지 개인키 분리 보관 | 개찰 전 입찰가 비밀 유지, 담합·유출 방지 |\n| 개찰 | 복수 담당자 키 분할(비밀 분산)로 개찰, 서명 검증·시점 확인 | 내부자 단독 조작 방지, 투명성 |\n| 결과 통지·계약 | 발주기관 서명 통지, 전자계약 서명 | 결과 위변조 방지, 분쟁 증거 |\n- 효과: 종이 입찰 대비 비용·시간 절감, 담합·조작 방지, 전 과정 감사 추적성 확보\n\n### 다. 신뢰 모델 비교\n| 모델 | 구조 | 특징 |\n|---|---|---|\n| 계층형 | Root CA 아래 트리 구조 | 경로 검증 단순, Root 침해 시 전체 영향 |\n| 네트워크형 | CA 간 [[cross-certification|상호인증]] | 유연, 경로 탐색 복잡 |\n| 브리지 CA | 브리지가 도메인 간 상호인증 중계 | 조직 간 PKI 연동(국가 간·공공-민간) |\n| 웹 신뢰(브라우저) | 브라우저 Root 저장소 | CT 로그·CAA로 오발급 통제 |\n\n## 4. PKI 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 보호 | CA 개인키 HSM 보관·분할 관리, 사용자 개인키 보안토큰·TEE 저장 |\n| 폐지 관리 | CRL 크기·지연 문제 → OCSP Stapling, 인증서 수명은 용도·CA·루트 프로그램 정책에 따라 관리(모든 PKI에 90일 이하 규칙 적용 아님) |\n| 상호운용성 | 알고리즘·프로파일 표준 준수, 국가 간 브리지 CA |\n| 거버넌스 | CP·CPS 수립, 감사(WebTrust), 인증사업자 평가·인정 |\n| 양자 대비 | [[post-quantum-cryptography|PQC]] 서명(ML-DSA) 인증서, 하이브리드 인증서로 [[crypto-agility|암호 민첩성]] 확보 |\n| 발전방향 | [[decentralized-identity|분산 ID(DID)]]·[[fido|FIDO]]와의 공존, 자동화된 인증서 관리(ACME), IoT 대량 디바이스 인증서 |\n\n## 5. 결론\n- PKI는 공개키의 신뢰를 제도화하여 전자서명·암호화·부인방지를 가능케 하는 디지털 신뢰 인프라로, 키 보호·폐지 관리의 운영 완결성과 PQC 전환 준비가 지속 신뢰의 핵심",
+      "sources": [
+        {
+          "title": "RFC 5280 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5280.html",
+          "scope": "trust anchor·경로 검증·제약"
+        },
+        {
+          "title": "RFC 6960 §2.2",
+          "url": "https://www.rfc-editor.org/rfc/rfc6960.html",
+          "scope": "OCSP good/revoked/unknown의 범위·응답 신선도"
+        },
+        {
+          "title": "RFC 3161",
+          "url": "https://www.rfc-editor.org/rfc/rfc3161.html",
+          "scope": "시점확인의 존재 증거 범위"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 경로 신뢰점·검증 범위, OCSP 상태와 전체 유효성 차이, TSA 존재 시점·LDAP 비필수·입찰 예시 범위 교정.",
+      "unresolved": [
+        "국내 인정사업자 현황·브리지 CA 구축 사례·PQC 인증서 제품 적용 상태는 미확인."
+      ]
+    }
+  },
+  "t-5ab4495e": {
+    "short": {
+      "source_sha256": "8cf95e1c13a8ee8435f00aee4ffc1eff26b369aebbf9d137bdb2a3eb9c072255",
+      "body": "## 1. 인증기관(CA)의 개요\n- 정의: [[pki|PKI]]에서 가입자의 신원을 확인하고 공개키와 신원을 결합한 [[x-509|X.509 인증서]]를 발급·관리·폐지하는 신뢰받는 제3자 기관\n- 필요성: 공개키 배포 시 중간자 공격 방지, [[digital-signature|전자서명]]의 법적 효력 및 거래 당사자 간 신뢰 보장\n\n## 2. CA의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[\"가입자\"] --> RA[\"등록기관(RA)\"]\n  RA --> CA[\"인증기관(CA)\"]\n  CA --> DIR[\"저장소(Repository)\"]\n  CA --> VA[\"검증기관(CRL·OCSP)\"]\n  RP[\"이용자(검증자)\"] --> DIR\n  RP --> VA\n```\n| 구성요소 | 역할 |\n|---|---|\n| CA | 인증서 발급·갱신·폐지, CA 개인키 관리, 인증정책(CP·CPS) 수립 |\n| RA | 가입자 신원확인, 인증서 신청 접수 및 CA에 발급 요청 |\n| 저장소 | 인증서·CRL 공개(LDAP·HTTP) |\n| 검증기관 | CRL·OCSP로 서명된 폐지 상태 응답(응답 시점·신선도 검사 필요, 전체 유효성 판정 아님) |\n\n## 3. CA의 주요 기능 및 계층구조\n- 최상위 [[root-certificate-authority|Root CA]]가 하위 CA를 인증하는 계층 구조로 신뢰 체인 형성, 서로 다른 PKI 도메인 간은 [[cross-certification|상호인증]]\n| 구분 | 내용 |\n|---|---|\n| 발급 | 신원확인 후 공개키·신원·유효기간을 CA 개인키로 서명 |\n| 폐지 | 키 유출·퇴직 시 폐지하고 [[certificate-revocation-list|CRL]] 게시 또는 [[ocsp|OCSP]] 응답 |\n| 갱신·키 관리 | 유효기간 만료 전 갱신, HSM 기반 CA 키 보호 |\n| 계층 | Root CA는 오프라인 보관하는 설계 권장(모든 PKI 구조의 필수 정의 아님), 발급 CA가 가입자 인증서 발급 |\n\n## 4. 고려사항\n- 국내는 전자서명법 개정(2020.12)으로 공인인증 폐지, 전자서명인증사업자 평가·인정제로 전환\n- CA 키 침해 시 해당 CA가 신뢰되는 경로에 광범위한 영향(DigiNotar 사례; 모든 PKI 전체의 동시 붕괴를 뜻하지 않음)로 HSM·분리 보관·감사 필수\n- 인증서 투명성(CT) 로그, 짧은 유효기간·자동 갱신(ACME) 추세 반영\n",
+      "sources": [
+        {
+          "title": "RFC 5280 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5280.html",
+          "scope": "trust anchor·경로 검증·제약"
+        },
+        {
+          "title": "RFC 6960 §2.2",
+          "url": "https://www.rfc-editor.org/rfc/rfc6960.html",
+          "scope": "OCSP good/revoked/unknown의 범위·응답 신선도"
+        },
+        {
+          "title": "RFC 3161",
+          "url": "https://www.rfc-editor.org/rfc/rfc3161.html",
+          "scope": "시점확인의 존재 증거 범위"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. CA·RA·저장소 관계, 경로 검증과 OCSP 한계, 오프라인 root의 설계 전제·기관 수 일반화 교정.",
+      "unresolved": [
+        "DigiNotar 사건 원 보고서와 국내 과거 기관 수·현재 인정 목록은 추가 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "e4efc7579009a12d03c113a8f2420dcf5fa1301c3b5e290ebcd99607529dff03",
+      "body": "## 1. 인증기관(CA)의 개요\n### 가. 정의\n- [[pki|PKI]] 체계에서 가입자의 신원을 확인하고 신원과 공개키를 결합한 [[x-509|X.509 인증서]]에 자신의 개인키로 서명하여 발급하며, 인증서의 갱신·폐지·상태 정보 제공을 책임지는 신뢰받는 제3자\n\n### 나. 등장배경 / 필요성\n- [[public-key-cryptography|공개키 암호]]는 키 배포 문제를 해결하나 공개키의 소유자 진위를 보증할 수단이 없어 중간자 공격에 노출\n- [[digital-signature|전자서명]]의 부인방지와 법적 효력(전자서명법)을 위해 서명검증키의 소유자를 보증하는 기관 필요\n\n### 다. 핵심 개념\n| 개념 | 설명 |\n|---|---|\n| 인증서 | 가입자 식별정보, 공개키, 유효기간, 발급자, 용도 등을 CA가 서명한 전자문서 |\n| 신뢰 체인 | Root CA에서 가입자 인증서까지 서명 연쇄를 검증하여 신뢰 전이 |\n| CP·CPS | 인증정책(Certificate Policy)과 인증업무준칙으로 발급 기준·책임 범위 명시 |\n\n## 2. CA의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  ROOT[\"Root CA(오프라인)\"] --> SUB[\"발급 CA(중간 CA)\"]\n  SUB --> CERT[\"가입자 인증서\"]\n  USER[\"가입자\"] --> RA[\"등록기관(RA): 신원확인\"]\n  RA --> SUB\n  SUB --> REPO[\"저장소(LDAP·HTTP): 인증서·CRL 게시\"]\n  SUB --> VA[\"검증기관: OCSP 응답\"]\n  RP[\"이용자(검증자)\"] --> REPO\n  RP --> VA\n  HSM[\"HSM: CA 서명키 보호\"] --> SUB\n```\n\n### 나. 구성요소\n- CA를 중심으로 신원확인을 담당하는 [[registration-authority|등록기관]], 상태 정보를 제공하는 검증기관, 인증서를 공개하는 저장소로 구성\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| CA | 인증서 발급·갱신·폐지, 키 생성·보관, CRL 발행, CP·CPS 수립 | X.509 v3, HSM, 전자서명 |\n| RA | 대면·비대면 신원확인, 신청 접수, 발급 요청 전달 | 신원확인 절차, 등록 프로토콜 |\n| 저장소 | 인증서·CRL 공개, 디렉터리 서비스 | LDAP, HTTP |\n| 검증기관(VA) | [[certificate-revocation-list|CRL]] 배포, [[ocsp|OCSP]] 실시간 상태 응답 | OCSP 응답 서명, 스테이플링 |\n| 가입자·이용자 | 인증서 신청·사용, 서명 검증 및 신뢰 체인 확인 | 인증서 경로 검증 |\n\n### 다. 동작 절차(발급·검증)\n1. 가입자가 키 쌍 생성 후 RA에 신원증빙과 함께 인증서 신청(CSR 제출)\n2. RA 신원확인 후 CA에 발급 요청, CA가 CSR을 검토하고 개인키로 서명한 인증서 발급\n3. CA는 인증서를 저장소에 게시하고 가입자에게 전달\n4. 이용자는 수신한 인증서의 서명을 상위 CA 공개키로 검증하여 사전에 신뢰한 trust anchor까지 경로와 제약 확인\n5. 유효기간·이름·용도·경로 제약·정책·CRL/OCSP 폐지 상태와 응답 신선도를 확인 후 공개키 사용\n\n## 3. CA의 상세\n### 가. CA의 주요 기능\n| 기능 | 내용 |\n|---|---|\n| 인증서 발급 | 신원확인 결과와 공개키 결합, 서명, 일련번호 부여 |\n| 인증서 갱신 | 유효기간 만료 전 재발급, 키 갱신 또는 동일 키 갱신 |\n| 인증서 폐지 | 키 유출·정보 변경·퇴직 시 폐지 처리, CRL 반영 |\n| 상태 정보 제공 | 주기적 CRL 발행, OCSP 실시간 응답 |\n| 키 관리 | CA 서명키 HSM 보관, 키 분할 보관, 키 롤오버 |\n| 정책·감사 | CP·CPS 공표, 운영 감사, 사고 대응 |\n\n### 나. CA 계층 구조 및 신뢰 모델\n- 단일 Root가 하위 CA를 인증하는 계층 모델, 도메인 간 [[cross-certification|상호인증]] 모델, 브리지 CA 모델로 구분\n| 모델 | 특징 |\n|---|---|\n| 계층형 | [[root-certificate-authority|Root CA]]가 최상위 신뢰점, 경로 검증 단순, Root 키 유출 시 전체 영향 |\n| 상호인증형 | 두 CA가 서로 인증서 발급, 도메인 간 신뢰, 경로 복잡 |\n| 브리지 CA형 | 중앙 브리지 CA가 각 도메인 Root와 상호인증, 다수 도메인 연계에 적합 |\n\n### 다. 국내 전자서명 인증체계\n| 구분 | 내용 |\n|---|---|\n| 과거(공인인증) | 최상위 인증기관 KISA 아래 공인인증기관들이(기관 수는 시점별로 다름) 공인인증서 발급 |\n| 현재(2020.12 전자서명법 개정) | 공인인증서 독점 폐지, 전자서명인증사업자 평가·인정제 도입, 공동인증서·민간인증서(간편인증) 병행 |\n\n## 4. CA 운영 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 키 보호 | CA 개인키 HSM 보관, Root CA 오프라인 운영, 다중 관리자 통제 |\n| 신뢰 사고 대응 | DigiNotar(2011) 사례처럼 CA 침해 시 전체 인증서 불신, 침해 탐지·공표 절차 |\n| 투명성 | 인증서 투명성(CT) 로그 등록으로 오발급 탐지 |\n| 자동화 | 짧은 유효기간과 ACME 기반 자동 발급·갱신 |\n| 발전방향 | 양자내성 암호 전환 대비 알고리즘 민첩성, 분산 ID(DID)와의 연계 |\n\n## 5. 결론\n- CA는 PKI 신뢰의 근원으로 엄격한 키 관리와 정책·감사가 핵심이며, 공인인증 폐지 이후 민간 경쟁 체계에서 안전성 평가와 투명성 확보가 중요함\n",
+      "sources": [
+        {
+          "title": "RFC 5280 §6",
+          "url": "https://www.rfc-editor.org/rfc/rfc5280.html",
+          "scope": "trust anchor·경로 검증·제약"
+        },
+        {
+          "title": "RFC 6960 §2.2",
+          "url": "https://www.rfc-editor.org/rfc/rfc6960.html",
+          "scope": "OCSP good/revoked/unknown의 범위·응답 신선도"
+        },
+        {
+          "title": "RFC 3161",
+          "url": "https://www.rfc-editor.org/rfc/rfc3161.html",
+          "scope": "시점확인의 존재 증거 범위"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. CA·RA·저장소 관계, 경로 검증과 OCSP 한계, 오프라인 root의 설계 전제·기관 수 일반화 교정.",
+      "unresolved": [
+        "DigiNotar 사건 원 보고서와 국내 과거 기관 수·현재 인정 목록은 추가 대조 필요."
+      ]
+    }
+  },
+  "t-56a38fb7": {
+    "short": {
+      "source_sha256": "b5cbe59b12e6a7442efc218aac5d05f3012ee55731e08e0d396d4d9771fdd1ea",
+      "body": "## 1. FIDO의 개요\n- 정의: 패스워드 대신 [[biometric-authentication|생체인증]]·PIN 등 로컬 인증과 [[public-key-cryptography|공개키 암호]] 기반 [[challenge-response-authentication|시도-응답]]을 결합하여 RP에 사용자 인증용 공유 비밀 대신 공개키를 등록하는 온라인 인증 표준(FIDO Alliance)\n- 도입배경: 패스워드 유출·재사용·[[phishing|피싱]] 피해 증가, 생체정보 서버 집중 저장 우려 → 인증수단과 인증 프로토콜 분리\n\n## 2. FIDO의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] -->|생체·PIN 로컬 인증| A[\"인증장치(Authenticator)\"]\n  A -->|개인키 서명| C[\"FIDO 클라이언트(브라우저·앱)\"]\n  C -->|서명 응답| S[\"FIDO 서버(RP)\"]\n  S -->|챌린지 전송| C\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[authenticator|인증장치]] | 로컬 인증 후 서비스별 키쌍 생성, 개인키 보관([[trusted-execution-environment|TEE]]·[[secure-element|SE]]) |\n| FIDO 클라이언트 | 인증장치와 서버 간 프로토콜 중계 |\n| [[relying-party|RP 서버]] | 공개키 저장, 챌린지 생성, 서명 검증, [[attestation|어테스테이션]] 확인 |\n\n## 3. FIDO 표준 비교\n| 구분 | FIDO 1.0 | FIDO2 |\n|---|---|---|\n| 프로토콜 | [[universal-authentication-framework|UAF]](패스워드리스), [[universal-second-factor|U2F]](2차 인증) | [[webauthn|WebAuthn]](W3C) + [[client-to-authenticator-protocol|CTAP]] |\n| 환경 | UAF 앱 중심, U2F 웹 브라우저 지원 | 브라우저 표준 API, 플랫폼·외부 인증장치 |\n| 특징 | 서비스별 SDK 필요 | 범용성, 동기화 또는 기기 바인딩 [[passkey|패스키]] 지원 |\n\n## 4. 기대효과 및 고려사항\n- 생체정보를 RP에 전송·저장하지 않음(단말 내 저장과 구분)으로 프라이버시 보호, 피싱 내성(오리진 바인딩), 자격증명 공개키 유출만으로 개인키 서명을 위조할 수 없음; 계정 정보·세션 등 다른 피해는 가능\n- 인증장치 분실·교체 시 복구 절차, 어테스테이션 신뢰 체계(메타데이터 서비스), 단말 보안 수준 검증 필요",
+      "sources": [
+        {
+          "title": "W3C WebAuthn Level 3",
+          "url": "https://www.w3.org/TR/webauthn-3/",
+          "scope": "RP 검증·어테스테이션 정책·서명 카운터·동기화 상태"
+        },
+        {
+          "title": "FIDO Alliance Passkeys",
+          "url": "https://fidoalliance.org/passkeys/",
+          "scope": "동기화형과 기기 바인딩 패스키"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 서버 비밀·생체 저장 범위, FIDO1 UAF/U2F 구분, 패스키 유형·카운터·어테스테이션 조건 교정.",
+      "unresolved": [
+        "UAF 규격 11개 목록과 APDU 대응, 국내 금융기관별 장치 인증 등급 요구는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "c6107a66fef2e0ec437c77c744b4441df9153af307a1b4655a87beb66a07df42",
+      "body": "## 1. FIDO(Fast Identity Online)의 개요\n### 가. 정의\n- 패스워드를 대체하기 위해 사용자 단말에서 [[biometric-authentication|생체인증]]·PIN 등으로 본인 확인(로컬 인증)을 수행하고, 서버와는 [[public-key-cryptography|공개키 암호]] 기반 [[challenge-response-authentication|시도-응답]]으로 인증하는 FIDO Alliance의 개방형 인증 표준\n\n### 나. 도입배경\n| 문제점 | FIDO의 해결 |\n|---|---|\n| 패스워드 유출·재사용, 사전 공격 | RP에 사용자 인증용 공유 비밀 미저장(서버의 다른 비밀·개인정보가 없다는 뜻은 아님), 서비스별 고유 키쌍 |\n| [[phishing|피싱]]·[[adversary-in-the-middle|중간자 공격]] | 오리진(도메인)에 바인딩된 서명으로 가짜 사이트 서명 불가 |\n| 생체정보 중앙 저장 프라이버시 우려 | 생체정보는 단말 내부([[trusted-execution-environment|TEE]]·[[secure-element|SE]])에서만 비교, 외부 비전송 |\n| 인증수단별 개별 구현 | 인증수단(What)과 인증 프로토콜(How) 분리, 표준 API 제공 |\n\n### 다. 핵심 개념\n- 로컬 인증과 원격 인증의 분리, 서비스별 키쌍 생성(연결불가성), 어테스테이션에 의한 인증장치 신뢰 검증\n\n## 2. FIDO의 구성도 및 인증 절차\n### 가. 구성도\n```mermaid\nflowchart LR\n  subgraph Client[\"사용자 단말\"]\n    U[사용자] -->|지문·얼굴·PIN| AU[\"인증장치(Authenticator)\"]\n    AU <-->|ASM / CTAP| FC[\"FIDO 클라이언트(브라우저·앱)\"]\n  end\n  FC <-->|UAF 프로토콜 / WebAuthn| RP[\"RP 서버(FIDO 서버)\"]\n  RP --> MDS[\"메타데이터 서비스(인증장치 신뢰정보)\"]\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[authenticator|인증장치]] | 로컬 인증, 키쌍 생성·개인키 보관, 챌린지 서명 | 생체센서, TEE, SE, [[attestation|어테스테이션]] 키 |\n| [[authenticator-specific-module|ASM]] | 인증장치별 하드웨어 차이를 추상화하는 소프트웨어 계층 | ASM API |\n| FIDO 클라이언트 | RP 서버와 인증장치 간 메시지 중계, 오리진 확인 | 브라우저 [[webauthn|WebAuthn]] API, CTAP |\n| [[relying-party|RP 서버]] | 사용자별 공개키 등록, 챌린지 생성, 서명 검증, 정책 설정 | 서명 검증, 메타데이터 조회 |\n| 메타데이터 서비스 | 인증장치 모델별 보안 특성·인증 상태 제공 | FIDO MDS |\n\n### 다. 인증 절차\n| 단계 | 등록(Registration) | 인증(Authentication) |\n|---|---|---|\n| 1 | RP가 등록 요청·챌린지 전송 | RP가 로그인 챌린지 전송 |\n| 2 | 사용자 로컬 인증(생체·PIN) | 사용자 로컬 인증 |\n| 3 | 인증장치가 서비스 전용 키쌍 생성 | 저장된 개인키로 챌린지 서명 |\n| 4 | 공개키 + 어테스테이션 서명 전송 | 서명 응답 전송 |\n| 5 | RP가 등록 응답과 요청한 정책 검증 후 공개키 저장(어테스테이션 none도 허용) | RP가 등록 공개키로 서명 검증, 지원 시 카운터 위험 신호 확인(항상 0인 인증장치도 허용) |\n\n## 3. FIDO 표준 프로토콜 상세\n### 가. UAF와 U2F\n| 구분 | [[universal-authentication-framework|UAF]] | [[universal-second-factor|U2F]] |\n|---|---|---|\n| 목적 | 패스워드 없는(Passwordless) 인증 | 패스워드 + 2차 인증(2nd Factor) |\n| 인증수단 | 생체·PIN 등 단말 내장 인증장치 | USB·NFC·BLE 보안키 터치 |\n| 주 환경 | 모바일 앱 | 웹 브라우저 |\n| 사용자 경험 | ID 입력 없이 지문으로 로그인 | 패스워드 입력 후 키 터치 |\n\n### 나. UAF 관련 규격 예시\n아래 목록은 원문 버전별 전체 규격 수를 검증한 목록이 아니다. UAF APDU 항목의 공식 규격 대응은 미확인이다.\n| 번호 | 표준 | 내용 |\n|---|---|---|\n| 1 | UAF Architectural Overview | 전체 아키텍처·구성요소 정의 |\n| 2 | UAF Protocol Specification | 등록·인증·거래확인·해지 메시지 규격 |\n| 3 | UAF Application API and Transport Binding | 앱이 UAF를 호출하는 API, HTTPS 전송 바인딩 |\n| 4 | UAF Authenticator Commands | 클라이언트-인증장치 간 명령 집합 |\n| 5 | UAF Authenticator-Specific Module API | ASM 인터페이스 규격 |\n| 6 | UAF Authenticator Metadata Statements | 인증장치 특성 기술 형식 |\n| 7 | UAF Registry of Predefined Values | 알고리즘·속성 식별자 레지스트리 |\n| 8 | UAF APDU | 스마트카드·SE 기반 인증장치용 APDU 명령 |\n| 9 | FIDO AppID and Facet Specification | 앱·웹 오리진(Facet) 신뢰 범위 정의 |\n| 10 | FIDO Metadata Service | 인증장치 메타데이터 배포 서비스 |\n| 11 | FIDO Security Reference | 보안 목표·위협 분석·요구사항 |\n\n### 다. FIDO 1.0과 FIDO2 비교\n| 구분 | FIDO 1.0 | FIDO2 |\n|---|---|---|\n| 구성 표준 | UAF, U2F | W3C WebAuthn + [[client-to-authenticator-protocol|CTAP]](CTAP1=U2F 호환, CTAP2) |\n| 클라이언트 | UAF 앱/클라이언트, U2F 브라우저 지원 구분 | 브라우저·OS 내장 표준 API |\n| 인증장치 | UAF 내장 장치·U2F 외부 보안키 등 | 플랫폼 인증장치(Windows Hello, Touch ID) + 로밍 인증장치(보안키) |\n| 사용 범위 | UAF 앱 및 U2F 웹 | 웹·데스크톱·모바일 전 플랫폼 |\n| 확장 | 거래 확인(Transaction Confirmation) | [[passkey|패스키]](동기화형과 기기 바인딩형 구분), 하이브리드 전송(QR·BLE) |\n| 기대효과 | 모바일 생체인증 확산 | 플랫폼 독립적 패스워드리스 보편화 |\n\n## 4. FIDO 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 복구 | 인증장치 분실·교체 시 재등록 절차, 다중 인증장치 등록 권고 |\n| 신뢰 검증 | 어테스테이션으로 인증장치 보안 등급 확인, 장치 인증 등급 요구는 기관·업무별 정책 확인; 금융권 전체에 단일 L2 의무로 단정하지 않음 |\n| 단말 보안 | 루팅·탈옥 단말 탐지, 장치·자격증명 유형에 맞는 키 보호(모든 FIDO 구현에 TEE·SE 의무는 아님), 생체 위조(프레젠테이션 공격) 대응 |\n| 패스키 정책 | 동기화 패스키의 클라우드 계정 의존성 vs 기기 바인딩 패스키 선택 |\n| 발전방향 | 패스키 보편화, 국내 전자서명·[[decentralized-identity|분산 ID]] 연계, 거래 서명·[[multi-factor-authentication|MFA]] 통합 |\n\n## 5. 결론\n- FIDO는 인증수단과 프로토콜을 분리하고 공개키 기반으로 RP ID·오리진 결합으로 자격증명 피싱 위험을 줄이는 표준으로, FIDO2·패스키를 통해 패스워드 없는 인증의 사실상 표준으로 정착 중",
+      "sources": [
+        {
+          "title": "W3C WebAuthn Level 3",
+          "url": "https://www.w3.org/TR/webauthn-3/",
+          "scope": "RP 검증·어테스테이션 정책·서명 카운터·동기화 상태"
+        },
+        {
+          "title": "FIDO Alliance Passkeys",
+          "url": "https://fidoalliance.org/passkeys/",
+          "scope": "동기화형과 기기 바인딩 패스키"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. 서버 비밀·생체 저장 범위, FIDO1 UAF/U2F 구분, 패스키 유형·카운터·어테스테이션 조건 교정.",
+      "unresolved": [
+        "UAF 규격 11개 목록과 APDU 대응, 국내 금융기관별 장치 인증 등급 요구는 미확인."
+      ]
+    }
+  },
+  "t-00ff785d": {
+    "short": {
+      "source_sha256": "5aa3b0438789c1e45c9574cc42ffcfe19a9500fa650af80ad7804d25e8875c8b",
+      "body": "## 1. JWT(JSON Web Token)의 개요\n- 정의: 당사자 간 클레임(Claim)을 JSON으로 표현하고 [[digital-signature|서명]] 또는 암호화하여 URL-safe [[base64|Base64URL]] 문자열로 전달하는 자가수용(Self-contained) 토큰 표준(RFC 7519)\n- 필요성: 서버 세션 저장소 없이 [[stateless-authentication|무상태 인증]]이 필요한 [[restful-api|REST API]]·[[microservices|MSA]]·모바일 환경, [[oauth|OAuth 2.0]]/[[openid-connect|OIDC]] 토큰 포맷\n\nOAuth 2.0 Access Token은 반드시 JWT일 필요가 없고, ID Token을 API Access Token 대신 사용하지 않는다. JWT 형식 자체가 로그인·갱신·로그아웃 프로토콜을 정의하지 않는다.\n\n## 2. JWT의 구성 및 인증 메커니즘\n```mermaid\nflowchart LR\n  C[클라이언트] -->|1 ID/PW 로그인| S[인증 서버]\n  S -->|2 JWT 발급| C\n  C -->|\"3 Authorization: Bearer JWT\"| R[리소스 서버]\n  R -->|4 서명 검증 후 응답| C\n```\n| 구성요소 | 역할 |\n|---|---|\n| Header | 토큰 타입(typ)·서명 알고리즘(alg: [[hmac|HS256]], [[rsa|RS256]], ES256) |\n| Payload | 등록 클레임(iss, sub, aud, exp, iat, jti)·공개·비공개 클레임 |\n| Signature | Header.Payload를 비밀키·개인키로 서명, 무결성·발급자 검증 |\n| [[jws|JWS]] / [[jwe|JWE]] | 서명 토큰 / 암호화 토큰 형식 |\n\n## 3. JWT의 장단점\n| 구분 | 내용 |\n|---|---|\n| 장점 | 무상태·수평 확장 용이, 서버 간 공유 간편, 자가수용 검증이 가능하나 폐기·권한·키 갱신 등 상태 조회는 설계에 따라 필요, 다양한 플랫폼 지원 |\n| 단점 | JWS 페이로드는 인코딩만으로 숨겨지지 않음(JWE 암호화와 구분), 발급 후 강제 만료 어려움, 토큰 길이로 헤더 증가, 탈취 시 만료까지 악용 |\n| 활용 | API 인증, [[single-sign-on|SSO]], OIDC ID Token, 서비스 간 인증, 이메일 검증 링크 |\n\n## 4. 고려사항\n- alg:none·알고리즘 혼동 공격 방지(서버에서 알고리즘 고정), 비밀키 강도·[[key-rotation|키 교체]](JWKS kid 활용)\n- 짧은 exp + [[refresh-token|Refresh Token]], 블랙리스트(jti)로 폐기, HttpOnly·Secure 쿠키 또는 메모리 저장으로 [[xss|XSS]] 대비, 민감정보는 JWE 또는 미포함",
+      "sources": [
+        {
+          "title": "RFC 7519",
+          "url": "https://www.rfc-editor.org/rfc/rfc7519.html",
+          "scope": "JWT 클레임·JWS/JWE 표현과 검증"
+        },
+        {
+          "title": "RFC 8725",
+          "url": "https://www.rfc-editor.org/rfc/rfc8725.html",
+          "scope": "알고리즘·키·issuer/audience·토큰 용도 구분 검증"
+        },
+        {
+          "title": "OIDC Core 1.0",
+          "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+          "scope": "ID Token과 Access Token 용도 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. JWS/JWE·세션/토큰 층 구분, 외부 신뢰키·상태 조회·HttpOnly 전송 모순·재사용 가능한 access token과 일회성 jti 구별.",
+      "unresolved": [
+        "대안 토큰 PASETO/Biscuit·VC-JWT의 세부 최신 규격과 제품별 저장 정책은 대조 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "01f71b5a4d1bbc4e7411b97733169e0f12e110d24852f2e7d7dcbb5980dace9f",
+      "body": "## 1. JWT(JSON Web Token)의 개요\n### 가. 정의\n- 두 당사자 간 전달할 클레임(Claim) 집합을 JSON 객체로 표현하고, [[jws|JWS]](서명) 또는 [[jwe|JWE]](암호화) 구조로 보호하여 [[base64|Base64URL]] 인코딩된 점(.) 구분 문자열로 전달하는 컴팩트·자가수용(Self-contained) 토큰 표준(RFC 7519, IETF JOSE 워킹그룹)\n\n### 나. 등장배경 / 필요성\n- 전통 세션 인증은 서버 측 세션 저장소 의존 → 수평 확장·[[microservices|MSA]]·다중 도메인 환경에서 세션 공유 부담\n- REST API·모바일·SPA의 인증 방식은 클라이언트 신뢰와 세션·폐기 요구로 선택; JWT가 쿠키/세션보다 항상 적합한 것은 아님\n- [[oauth|OAuth 2.0]] Access Token·[[openid-connect|OIDC]] ID Token의 표준 포맷 필요\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 클레임 | 주체에 대한 주장(키-값), 등록·공개·비공개 클레임으로 구분 |\n| 자가수용 | 클레임을 포함하나 신뢰한 검증키·정책은 외부에서 확보하며 폐기·권한 조회가 필요할 수 있음 |\n| 무결성 | 서명으로 변조 탐지, 발급자 확인 |\n\nOAuth 2.0 Access Token은 반드시 JWT일 필요가 없고, ID Token을 API Access Token 대신 사용하지 않는다. JWT 형식 자체가 로그인·갱신·로그아웃 프로토콜을 정의하지 않는다.\n\n## 2. JWT의 구성과 인증 메커니즘\n### 가. 토큰 구조\n아래는 JWS Compact 예시다. JWE Compact는 5개 부분이며 JWT가 항상 미암호화 3부분인 것은 아니다.\n```mermaid\nflowchart LR\n  H[\"Header {alg, typ, kid}\"] --> E1[Base64URL]\n  P[\"Payload {iss, sub, aud, exp, iat, jti, roles}\"] --> E2[Base64URL]\n  E1 --> J[\"header.payload\"]\n  E2 --> J\n  J --> SG[\"서명 = HMAC 또는 RSA/ECDSA(header.payload, key)\"]\n  SG --> T[\"JWT = header.payload.signature\"]\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| Header | 토큰 타입(typ: JWT), 서명 알고리즘(alg), 키 식별자(kid) | JOSE 헤더 |\n| Payload | 등록 클레임(iss 발급자, sub 주체, aud 대상, exp 만료, nbf 유효시작, iat 발급시각, jti 토큰ID), 공개·비공개 클레임 | JSON |\n| Signature | HMACSHA256(base64url(header) + \".\" + base64url(payload), secret) | [[hmac|HMAC]](대칭), [[rsa|RSA]]·ECDSA(비대칭) |\n| [[jwk|JWK]]/JWKS | 서명 검증용 공개키 집합 배포 | JSON Web Key Set |\n\n### 다. 인증 메커니즘(동작 절차)\n```mermaid\nsequenceDiagram\n  participant C as 클라이언트\n  participant A as 인증 서버\n  participant R as 리소스 서버\n  C->>A: 1. 로그인(ID/PW, MFA)\n  A->>A: 2. 인증 후 클레임 구성, 서명\n  A->>C: 3. Access Token(JWT) + Refresh Token\n  C->>R: 4. Authorization: Bearer JWT\n  R->>R: 5. 서명·exp·iss·aud 검증, 클레임으로 인가\n  R->>C: 6. 자원 응답\n  C->>A: 7. 만료 시 Refresh Token으로 재발급\n```\n1. 클라이언트가 자격증명으로 인증 서버에 로그인\n2. 인증 서버가 사용자 정보·권한을 클레임으로 구성, 비밀키(HS256) 또는 개인키(RS256/ES256)로 서명하여 발급\n3. 클라이언트가 토큰을 저장(메모리·HttpOnly 쿠키 등)한다. HttpOnly 쿠키는 JavaScript로 읽어 Bearer 헤더에 넣을 수 없으며 쿠키 인증/BFF 등 별도 흐름을 사용\n4. 리소스 서버가 공유 비밀키 또는 JWKS 공개키로 서명 검증, 만료·발급자·대상 확인 후 [[authorization|인가]] 수행\n5. 만료 시 [[refresh-token|Refresh Token]]으로 재발급, 로그아웃·탈취 시 폐기 목록 처리\n\n## 3. JWT의 장단점과 활용방안\n### 가. 장단점\n| 구분 | 내용 |\n|---|---|\n| 장점 | 무상태로 서버 확장 용이, 인증 클레임의 로컬 검증 가능(폐기·키·권한 상태는 별도), 서비스 간 토큰 전달로 분산 인증 간편, URL·헤더 전달 가능한 컴팩트 포맷, 다언어 라이브러리 풍부 |\n| 단점 | JWS만 사용하면 페이로드 기밀성 없음(JWE는 암호화 제공), 발급 후 서버가 즉시 무효화하기 어려움, 클레임 증가 시 토큰 비대화, 탈취 시 만료 전까지 재사용, 알고리즘·키 관리 실수 시 치명적 |\n\n### 나. 세션 기반 인증과의 비교\n| 구분 | 세션·쿠키 | JWT |\n|---|---|---|\n| 상태 저장 | 서버 세션 저장소 | 자가수용 검증 가능, 폐기·갱신 상태는 필요할 수 있음 |\n| 확장성 | 세션 공유 필요(Sticky, Redis) | 검증용 키와 신뢰 정책 배포(비대칭 방식에서 개인 서명키는 공유하지 않음) |\n| 강제 로그아웃 | 세션 삭제로 즉시 | 블랙리스트·짧은 만료 필요 |\n| 전송 | 쿠키 자동 전송([[csrf|CSRF]] 주의) | 헤더 또는 쿠키 전송 가능; 저장·전송 방식에 따라 XSS/CSRF 대응 |\n| 적합 환경 | 단일 웹 애플리케이션 | API·MSA·모바일·SSO |\n\n### 다. 보안 위협과 대응\n| 위협 | 내용 | 대응 |\n|---|---|---|\n| alg:none 공격 | 서명 없음을 허용하는 라이브러리 악용 | 서버에서 허용 알고리즘 화이트리스트 고정 |\n| 알고리즘 혼동 | RS256 공개키를 HS256 비밀키로 사용하게 유도 | 키 타입·alg 일치 검증 |\n| 비밀키 추측 | 약한 HS256 비밀키 [[brute-force-attack|무차별 대입]] | 256비트 이상 난수 키, 비대칭 서명 선호 |\n| 토큰 탈취 | XSS·로그·URL 노출 | HttpOnly·Secure·SameSite 쿠키, URL 전달 금지, [[https|HTTPS]] |\n| [[replay-attack|재전송]] | 탈취 토큰 재사용 | 짧은 exp, 폐기 상태 확인·일회성 용도의 jti 사용 기록, Sender-Constrained(DPoP, mTLS) |\n\n### 라. 활용방안\n| 활용 | 내용 |\n|---|---|\n| API 인증 | 게이트웨이 검증 후 내부 신뢰 경계를 보호하여 클레임 전달; 서비스별 인가 검사는 유지 |\n| [[single-sign-on|SSO]] | OIDC ID Token으로 다수 서비스 로그인 |\n| 서비스 간 인증 | MSA에서 서비스 ID·권한을 JWT로 전달(Client Credentials) |\n| 일회성 링크 | 이메일 인증·비밀번호 재설정 토큰 |\n| 정보 교환 | 서명된 클레임으로 파트너 간 데이터 전달 |\n\n## 4. JWT 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 수명 | Access Token 수명은 위험·사용 목적에 따라 결정(수분~1시간은 설계 예), Refresh Token 회전(Rotation)·재사용 탐지 |\n| 폐기 | jti 블랙리스트 또는 버전 클레임으로 강제 만료, 로그아웃 처리 |\n| 키 관리 | kid 기반 [[key-rotation|키 교체]], JWKS 캐시·갱신, 비밀키 [[hsm|HSM]]·비밀관리 저장 |\n| 클레임 | 민감정보 미포함 또는 JWE, 최소 클레임, aud·iss 필수 검증 |\n| 저장 | 브라우저 localStorage 지양, 메모리 또는 HttpOnly 쿠키 |\n| 발전방향 | DPoP·mTLS 바인딩 토큰, PASETO·Biscuit 등 대안 토큰, [[verifiable-credential|검증가능 자격증명]](VC-JWT) |\n\n## 5. 결론\n- JWT는 무상태·자가수용 토큰으로 분산 환경 인증을 단순화하지만 JWS 단독 사용의 기밀성 부재와 폐기 어려움이 있으므로, 짧은 만료·키 관리·알고리즘 고정·안전한 저장을 전제로 API·MSA·SSO 인증의 표준 수단으로 활용",
+      "sources": [
+        {
+          "title": "RFC 7519",
+          "url": "https://www.rfc-editor.org/rfc/rfc7519.html",
+          "scope": "JWT 클레임·JWS/JWE 표현과 검증"
+        },
+        {
+          "title": "RFC 8725",
+          "url": "https://www.rfc-editor.org/rfc/rfc8725.html",
+          "scope": "알고리즘·키·issuer/audience·토큰 용도 구분 검증"
+        },
+        {
+          "title": "OIDC Core 1.0",
+          "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+          "scope": "ID Token과 Access Token 용도 구분"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. JWS/JWE·세션/토큰 층 구분, 외부 신뢰키·상태 조회·HttpOnly 전송 모순·재사용 가능한 access token과 일회성 jti 구별.",
+      "unresolved": [
+        "대안 토큰 PASETO/Biscuit·VC-JWT의 세부 최신 규격과 제품별 저장 정책은 대조 미완료."
+      ]
+    }
+  },
+  "t-1ee8930d": {
+    "short": {
+      "source_sha256": "0008c818536d3385bf86fe1cf11ea845ce075582e29c255722ed2e3cfebd065b",
+      "body": "## 1. 오픈ID의 개요\n- 정의: 사용자가 URL 형태의 식별자 하나로 여러 웹사이트에 로그인할 수 있도록 [[identity-provider|신원 제공자(OP)]]가 인증을 대행하고 [[relying-party|서비스 제공자(RP)]]가 그 결과를 신뢰하는 개방형 분산 [[single-sign-on|SSO]] [[authentication|인증]] 표준\n- 등장배경: 사이트마다 ID·패스워드를 별도 생성·관리하는 불편과 [[password|패스워드]] 재사용 위험, 중앙 집중 인증 사업자에 대한 종속 회피 필요(2005년 Brad Fitzpatrick 제안, 2007년 OpenID 2.0)\n\n## 2. 오픈ID의 개념도 및 구성요소\n```mermaid\nsequenceDiagram\n  participant U as 사용자\n  participant RP as 서비스 사이트 RP\n  participant OP as OpenID 제공자 OP\n  U->>RP: 1. OpenID URL 입력\n  RP->>OP: 2. 디스커버리·연합(공유키 설정)\n  RP->>U: 3. OP 로그인 페이지로 리다이렉트\n  U->>OP: 4. OP에서 인증(ID·PW)\n  OP->>RP: 5. 서명된 인증 응답 전달\n  RP->>U: 6. 로그인 완료\n```\n| 구성요소 | 역할 |\n|---|---|\n| 사용자(End User) | OpenID 식별자(URL) 소유, OP에서 1회 인증 |\n| OpenID 제공자(OP) | 식별자 관리, 사용자 인증 수행, 결과 서명 |\n| 신뢰 당사자(RP) | 인증 요청·검증, 서비스 제공 |\n| 식별자(Identifier) | 사용자 고유 URL·XRI, 디스커버리(Yadis/XRDS)로 OP 위치 확인 |\n\n## 3. 오픈ID의 특징\n| 구분 | 내용 |\n|---|---|\n| 분산·개방 | 특정 사업자 독점 없이 누구나 OP 운영, 사용자가 OP 선택 |\n| 사용자 중심 | RP는 패스워드 미보관, 사용자가 제공 정보 통제 |\n| 보안 | [[diffie-hellman|DH]] 연합으로 공유키 설정, [[hmac|HMAC]] 서명으로 응답 무결성 검증 |\n| 한계 | OP 위장 [[phishing|피싱]] 위험, URL 식별자의 낮은 사용성, OP 장애 시 해당 OP에 의존하는 새 인증 실패 가능(기존 RP 세션과 다른 OP는 별도) |\n\n## 4. 고려사항\n- 인가 프로토콜 [[oauth|OAuth]] 2.0 위에 인증 계층을 얹은 [[openid-connect|OpenID Connect]](ID 토큰 [[json-web-token|JWT]])가 사실상 후속 표준\n- RP는 OP 응답 서명·논스 검증 필수, OP는 [[multi-factor-authentication|다중요소 인증]]과 [[tls|TLS]] 적용",
+      "sources": [
+        {
+          "title": "OpenID Authentication 2.0",
+          "url": "https://openid.net/specs/openid-authentication-2_0.html",
+          "scope": "association 선택성·DH/no-encryption·발견·응답 검증"
+        },
+        {
+          "title": "OIDC Core 1.0 §5.7",
+          "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+          "scope": "iss/sub 안정성·email 비고유성·OAuth 위 인증 계층"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. OpenID2/OIDC 구별, 계정·인프라 불필요 일반화, association·OP 장애 범위·식별자 안정성 교정.",
+      "unresolved": [
+        "2005 초기 역사와 서비스별 현재 지원 상태, OAuth 2.1 발행 상태는 별도 확인 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "ad97ce5bad6af045dcde3cb44e38679217771e4b83682b36fe07a549e745fb3f",
+      "body": "## 1. 오픈ID의 개요\n### 가. 정의\n- 사용자가 자신이 선택한 [[identity-provider|신원 제공자(OpenID Provider, OP)]]에서 한 번 인증받으면 그 결과를 신뢰하는 다수의 [[relying-party|신뢰 당사자(Relying Party, RP)]] 웹사이트에 RP 정책에 따라 기존 계정 연결 또는 로컬 계정 생성 후 로그인할 수 있게 하는 개방형·분산형 [[single-sign-on|SSO]] [[authentication|인증]] 프로토콜로, 사용자 식별자로 URL(또는 XRI)을 사용\n\n### 나. 등장배경 / 필요성\n| 배경 | 내용 |\n|---|---|\n| 계정 난립 | 웹 서비스마다 별도 가입·ID·[[password|패스워드]] 관리, 동일 패스워드 재사용으로 한 곳 유출 시 연쇄 피해 |\n| 중앙집중 인증의 종속 | Microsoft Passport 등 단일 사업자 중심 인증에 대한 거부감, 개방형 대안 요구 |\n| 분산 신원 요구 | 사용자가 OP를 자유롭게 선택·이전할 수 있는 사용자 중심 신원(User-centric Identity) 개념 확산 |\n| 연혁 | 2005년 Brad Fitzpatrick(LiveJournal) OpenID 1.0 → 2007년 OpenID 2.0(OpenID Foundation) → 2014년 OAuth 2.0 기반 [[openid-connect|OpenID Connect]] |\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 식별자(Identifier) | 사용자를 나타내는 고유 URL(예: https://user.example.com) 또는 XRI(=user) |\n| 디스커버리(Discovery) | RP가 식별자에서 OP 엔드포인트를 찾는 과정, Yadis 프로토콜·XRDS 문서·HTML 링크 태그 이용 |\n| 연합(Association) | RP와 OP가 선택적 association으로 공유 비밀키를 설정하며 DH 또는 TLS로 보호되는 no-encryption 세션 등을 사용하여 이후 응답을 [[hmac|HMAC]] 서명으로 검증 |\n| 청구 식별자(Claimed Identifier) | 사용자가 소유를 주장하는 식별자, OP 로컬 식별자(OP-Local Identifier)와 구분 |\n\n## 2. 오픈ID의 구성도 및 구성요소\n### 가. 구성도(인증 흐름)\n```mermaid\nsequenceDiagram\n  participant U as 사용자 브라우저\n  participant RP as 신뢰 당사자 RP\n  participant OP as OpenID 제공자 OP\n  U->>RP: 1. OpenID 식별자(URL) 입력\n  RP->>RP: 2. 식별자 정규화·디스커버리(Yadis/XRDS)로 OP 엔드포인트 확인\n  RP->>OP: 3. 연합 요청(DH 키 교환, 공유키·핸들 수신)\n  RP->>U: 4. checkid_setup 요청과 함께 OP로 리다이렉트\n  U->>OP: 5. OP 로그인(ID·PW·추가 인증), RP 신뢰 승인\n  OP->>U: 6. 서명된 긍정 응답(return_to URL)로 리다이렉트\n  U->>RP: 7. 인증 응답 전달\n  RP->>RP: 8. 공유키로 서명·논스·return_to 검증(연합 없으면 check_authentication 직접 질의)\n  RP->>U: 9. 로그인 완료, 서비스 제공\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 사용자(End User) | OpenID 식별자 소유, OP에서 인증 수행 | 브라우저 리다이렉트 기반 |\n| OpenID 제공자(OP) | 식별자 발급·관리, 사용자 인증, 인증 결과 서명 | 인증 서버, [[multi-factor-authentication|MFA]], 세션 관리 |\n| 신뢰 당사자(RP) | 식별자 디스커버리, 인증 요청·응답 검증, 서비스 제공 | OpenID 라이브러리, 응답 검증 로직 |\n| 식별자(URL·XRI) | 사용자 고유 주소, OP 위치 정보 포함 | Yadis, XRDS 문서, HTML link rel 태그 |\n| 연합 공유키 | RP-OP 간 응답 서명 검증용 비밀키 | DH-SHA1/SHA256 키 교환, HMAC-SHA1/SHA256 |\n| 확장(Extensions) | 프로필 속성 교환, 인증 정책 요구 | SREG(Simple Registration), AX(Attribute Exchange), PAPE(인증 정책) |\n\n### 다. 동작 절차(OpenID 2.0)\n1. 사용자가 RP 로그인 폼에 OpenID 식별자 입력\n2. RP가 식별자를 정규화하고 디스커버리로 OP 엔드포인트와 프로토콜 버전 확인\n3. RP가 OP와 연합을 맺어 공유 비밀키와 연합 핸들 획득(선택, Stateful 모드)\n4. RP가 사용자를 OP의 checkid_setup(또는 즉시 모드 checkid_immediate) URL로 리다이렉트\n5. 사용자가 OP에서 인증하고 해당 RP에 신원 제공을 승인\n6. OP가 서명(HMAC)·논스·응답 필드를 포함한 긍정 응답으로 RP의 return_to로 리다이렉트\n7. RP가 공유키로 서명 검증, 논스 재사용 검사, return_to·엔드포인트 일치 확인(Stateless 모드는 check_authentication으로 OP에 직접 검증 요청)\n8. 검증 성공 시 세션 생성, 필요하면 SREG/AX로 이메일·닉네임 등 속성 수신\n\n## 3. 오픈ID의 특징 및 비교\n### 가. 특징\n| 구분 | 내용 |\n|---|---|\n| 개방·분산 | 중앙 등록기관 승인 없이 OP 운영 가능; RP 수용 정책과 식별자 위임 여부에 따라 OP 변경 가능 |\n| 사용자 중심 | 사용자가 어떤 RP에 어떤 정보를 제공할지 결정, RP는 패스워드 미보관 |\n| 단일 식별자 | 하나의 URL로 다수 사이트 로그인, 가입 절차 간소화 |\n| 경량·무료 | HTTP 리다이렉트 기반, 특수 브라우저 기능은 불필요하나 OP·RP 서버/운영 인프라는 필요 |\n| 보안 메커니즘 | DH 연합 공유키, HMAC 서명, 논스 기반 [[replay-attack|재전송 공격]] 방지, [[tls|TLS]] 권고 |\n\n### 나. 문제점 및 한계\n| 문제점 | 내용 | 대응 |\n|---|---|---|\n| OP [[phishing|피싱]] | 악성 RP가 가짜 OP 로그인 페이지로 리다이렉트하여 패스워드 탈취 | OP 북마크 로그인, 브라우저 확장, PAPE 피싱 저항 인증 요구 |\n| 사용성 | URL 식별자 입력의 생소함, 일반 사용자 이해 부족 | 이메일 형태 식별자, OP 선택 버튼(NASCAR 문제) |\n| 단일 장애점 | 해당 OP에 의존한 신규 인증 장애; 모든 서비스의 기존 세션이 즉시 종료되는 것은 아님 | 복수 OP 등록, 식별자 이전(위임) |\n| 인가 기능 부재 | OpenID 2.0은 인증용 | OIDC는 OpenID 2.0에 OAuth를 단순 결합한 것이 아니라 OAuth 2.0 기반 별도 프로토콜 |\n| 프라이버시 | OP가 사용자의 RP 이용 내역 파악 가능 | 익명·쌍별(Pairwise) 식별자 |\n| 신뢰 수준 | OP 인증 강도가 제각각, RP가 보증 수준 파악 어려움 | PAPE로 인증 정책·강도 요구 |\n\n### 다. OpenID 2.0 vs OpenID Connect vs SAML\n| 비교 항목 | OpenID 2.0 | OpenID Connect | [[saml|SAML 2.0]] |\n|---|---|---|---|\n| 기반 | 자체 프로토콜(HTTP 리다이렉트) | [[oauth|OAuth 2.0]] 인가 프레임워크 | XML 기반 SOAP·리다이렉트 |\n| 식별자 | URL·XRI | iss+sub 조합(이메일은 불변·고유 식별자 보장 없음) | NameID |\n| 토큰 형식 | 서명된 키-값 응답 | ID 토큰([[json-web-token|JWT]]) + 액세스 토큰 | XML Assertion(XML 서명) |\n| 인가 | 없음 | API 접근 권한 위임 포함 | 속성 기반, 별도 |\n| 주 용도 | 소비자 웹 SSO(사실상 종료) | 모바일·API·소셜 로그인 | 기업 간 연합 SSO |\n| 현황 | 2014년 OIDC 발표 후 후속 프로토콜로 확산(모든 구현의 일괄 종료 날짜 아님) | 현재 표준(Google·Apple·카카오 로그인) | 엔터프라이즈 유지 |\n\n## 4. 오픈ID 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| RP 검증 | 응답 서명·논스·return_to·OP 엔드포인트 검증 철저, 디스커버리 결과와 응답 일치 확인 |\n| OP 보안 | 전 구간 TLS, MFA·패스워드리스([[fido|FIDO]]) 적용, 피싱 저항 UI, 세션 고정 방지 |\n| 프라이버시 | RP별 쌍별 식별자, 최소 속성 제공, 이용 내역 로깅 최소화 |\n| 가용성 | OP 이중화, 식별자 위임으로 OP 이전 가능 설계 |\n| 발전방향 | OpenID Connect·OAuth 2.1로 전환, [[federated-identity|연합 신원]] 체계 확장, 자기주권 신원([[decentralized-identity|DID]])·검증 가능 자격증명으로 사용자 통제 강화 |\n\n## 5. 결론\n- OpenID는 사용자 중심의 개방형 분산 SSO 개념을 정립한 선구적 표준으로 피싱·사용성 한계를 안고 OpenID Connect로 계승되었으며, 도입 시 RP의 응답 검증과 OP의 강한 인증을 전제로 연합 신원·DID로의 진화 방향을 고려해야 함",
+      "sources": [
+        {
+          "title": "OpenID Authentication 2.0",
+          "url": "https://openid.net/specs/openid-authentication-2_0.html",
+          "scope": "association 선택성·DH/no-encryption·발견·응답 검증"
+        },
+        {
+          "title": "OIDC Core 1.0 §5.7",
+          "url": "https://openid.net/specs/openid-connect-core-1_0.html",
+          "scope": "iss/sub 안정성·email 비고유성·OAuth 위 인증 계층"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. OpenID2/OIDC 구별, 계정·인프라 불필요 일반화, association·OP 장애 범위·식별자 안정성 교정.",
+      "unresolved": [
+        "2005 초기 역사와 서비스별 현재 지원 상태, OAuth 2.1 발행 상태는 별도 확인 필요."
+      ]
+    }
+  },
+  "t-ffe925a4": {
+    "short": {
+      "source_sha256": "96b3cfa41a5c284e2551a6960075e39a6ff3e8fb547198e2c331f105cbdc89c6",
+      "body": "## 1. SSL의 개요\n- 정의: 전송계층과 응용계층 사이에서 동작하며 서버·클라이언트 간 인증, 데이터 기밀성·무결성을 보장하는 보안 프로토콜(현재 표준은 후속인 [[tls|TLS]])\n- 필요성: 평문 전송되는 HTTP·메일 등의 도청·위변조 방지, [[pki|PKI]] 기반 서버 신뢰 검증\n\nSSL은 폐기된 역사적 프로토콜이다. 아래 상세는 SSL/TLS 계열 비교이며 RSA 키 운반·CCS·MAC-then-encrypt는 TLS 1.3 절차로 일반화하지 않는다. 클라이언트 인증은 선택적이며 인증서와 PSK 방식도 구분한다.\n\n## 2. SSL의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  C[클라이언트] -->|\"Handshake\"| S[서버]\n  C -->|\"Record(암호화 데이터)\"| S\n  CA[\"인증기관(CA)\"] -.인증서 발급.-> S\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[ssl-handshake-protocol|Handshake 프로토콜]] | 암호스위트 협상, 인증, 키 교환 |\n| [[ssl-record-protocol|Record 프로토콜]] | 데이터 분할·암호화·[[message-authentication-code|MAC]] |\n| [[digital-certificate|인증서]]·[[pki|PKI]] | 서버 신원 증명 |\n| [[cipher-suite|암호스위트]] | 키교환·암호·해시 알고리즘 조합 |\n\n## 3. SSL 작동원리 (Handshake)\n| 단계 | 내용 |\n|---|---|\n| Hello | 버전·암호스위트·난수 교환 |\n| 인증·키교환 | RSA 키 운반 예: 서버 인증서 검증 후 프리마스터시크릿 암호화 전달. TLS 1.3은 이 방식을 사용하지 않음 |\n| 세션키 생성 | 양측이 마스터시크릿→[[session-key|세션키]] 도출 |\n| 완료 | Finished 교환 후 [[symmetric-key-cryptography|대칭키]] 암호통신 |\n\n## 4. 고려사항\n- SSL 3.0·초기 TLS는 [[poodle-attack|POODLE]] 등으로 폐기, [[tls-1-3|TLS 1.3]] 권장\n- [[forward-secrecy|순방향 비밀성]] 지원 암호스위트(ECDHE) 적용, 인증서 유효성·[[hsts|HSTS]] 설정",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. SSL 역사와 현행 TLS 분리, RSA 운반·인증서 메시지·PFS 예외 교정.",
+      "unresolved": [
+        "S-HTTP 보급·폐기 상태와 Netscape 초기 역사 원자료는 미확인."
+      ]
+    },
+    "long": {
+      "source_sha256": "715921182b7d2e548747c81dc39dcab6aae925256d0f7e0ed1b3d5fe85525d55",
+      "body": "## 1. SSL의 개요\n### 가. 정의\n- OSI 전송계층과 응용계층 사이에서 동작하며, [[public-key-cryptography|공개키 암호]]로 서버·클라이언트를 인증하고 [[symmetric-key-cryptography|대칭키 암호]]와 [[message-authentication-code|MAC]]으로 데이터의 기밀성·무결성을 보장하는 보안 프로토콜. Netscape가 개발했고 현재 표준은 후속 규격인 [[tls|TLS]]\n\n### 나. 등장배경 및 필요성\n- HTTP·SMTP·FTP 등 평문 전송 프로토콜의 도청·위변조·서버 위장 위협\n- 전자상거래 확산으로 결제·인증 정보 보호 필요, 응용 프로토콜 수정 없이 보안 적용 가능한 계층 요구\n- SSL 2.0·3.0은 취약점으로 폐기되고 TLS 1.0~1.3으로 발전, 현재 [[tls-1-3|TLS 1.3]] 권장\n\n### 다. 핵심 개념\n| 개념 | 내용 |\n|---|---|\n| 하이브리드 암호 | 키 교환은 공개키, 데이터 암호는 세션키(대칭키)로 성능·보안 균형 |\n| 서버 인증 | [[certificate-authority|CA]]가 서명한 [[digital-certificate|인증서]]로 서버 신원 검증 |\n| 무결성 보장 | 레코드마다 MAC 또는 [[authenticated-encryption|AEAD]]로 위변조 탐지 |\n\nSSL은 폐기된 역사적 프로토콜이다. 아래 상세는 SSL/TLS 계열 비교이며 RSA 키 운반·CCS·MAC-then-encrypt는 TLS 1.3 절차로 일반화하지 않는다. 클라이언트 인증은 선택적이며 인증서와 PSK 방식도 구분한다.\n\n## 2. SSL의 구성도 및 구성요소\n### 가. 구성도\n```mermaid\nflowchart TB\n  subgraph 상위프로토콜\n    HS[\"Handshake\"]\n    CCS[\"Change Cipher Spec\"]\n    AL[\"Alert\"]\n    APP[\"Application Data\"]\n  end\n  HS --> REC[\"Record 프로토콜\"]\n  CCS --> REC\n  AL --> REC\n  APP --> REC\n  REC --> TCP[\"TCP / 전송계층\"]\n  CA[\"CA / PKI\"] -.인증서.-> HS\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[ssl-handshake-protocol|Handshake 프로토콜]] | 버전·암호스위트 협상, 상호 인증, 키 교환 | [[diffie-hellman|DH]]·RSA 키교환, 인증서 검증 |\n| Change Cipher Spec | 협상된 암호방식 적용 전환 신호 | 상태 전환 |\n| Alert 프로토콜 | 오류·종료 통지 | 경고·치명 수준 구분 |\n| [[ssl-record-protocol|Record 프로토콜]] | 데이터 분할·압축·암호화·MAC 부가 | [[symmetric-key-cryptography|대칭키]], [[message-authentication-code|HMAC]], [[authenticated-encryption|AEAD]] |\n| 인증서·PKI | 서버·클라이언트 신원 보증 | X.509, [[pki|PKI]], [[ocsp|OCSP]] |\n\n### 다. 동작 절차 (Handshake)\n1. ClientHello: 지원 TLS 버전, [[cipher-suite|암호스위트]] 목록, 클라이언트 난수 전송\n2. ServerHello에는 선택 버전·암호스위트·난수. 인증서는 별도 Certificate 메시지로 전달(인증서 모드)\n3. 인증서 검증: 클라이언트가 CA 서명·유효기간·도메인·[[certificate-revocation-list|폐지 여부]] 확인\n4. 키 교환: 클라이언트가 [[pre-master-secret|프리마스터시크릿]]을 서버 공개키로 암호화 전송(RSA) 또는 [[diffie-hellman|ECDHE]]로 공유키 합의\n5. 세션키 생성: 양측 난수+프리마스터시크릿으로 마스터시크릿→[[session-key|세션키]] 도출\n6. Finished: Change Cipher Spec 후 Finished 메시지 교환, 이후 대칭키 암호통신\n\n## 3. SSL의 상세\n### 가. Record 프로토콜 데이터 처리\n| 단계 | 내용 |\n|---|---|\n| 분할 | 상위 데이터를 레코드 단위로 분할 |\n| 압축 | 선택적 압축(현재는 보안상 미사용 권장) |\n| MAC·암호화 | 무결성 MAC 부가 후 세션키로 암호화, TLS 1.3은 AEAD 일원화 |\n| 전송 | 레코드 헤더 부착 후 TCP로 전달 |\n\n### 나. SSL과 S-HTTP 비교\n| 구분 | [[tls|SSL/TLS]] | [[s-http|S-HTTP]] |\n|---|---|---|\n| 동작 계층 | 전송계층 위, 응용 독립적 | 응용계층(HTTP 메시지 단위) |\n| 보호 범위 | 세션 전체(연결 단위 암호화) | HTTP 메시지 개별 단위 |\n| 적용 대상 | HTTP·SMTP·FTP 등 다수 프로토콜 | HTTP 전용 |\n| 인증 단위 | 세션 수립 시 서버·클라이언트 인증 | 메시지별 서명·암호화 유연 |\n| 보급 | 사실상 표준(HTTPS) | 거의 사용 안 됨(폐기) |\n\n### 다. 주요 버전 및 보안 강화\n| 버전 | 특징 |\n|---|---|\n| SSL 3.0 | [[poodle-attack|POODLE]] 취약으로 폐기 |\n| TLS 1.2 | AEAD·SHA-256 지원, 널리 사용 |\n| [[tls-1-3|TLS 1.3]] | 핸드셰이크 1-RTT·0-RTT, 취약 암호 제거, [[forward-secrecy|순방향 비밀성]] 지원((EC)DHE 모드; PSK-only와 0-RTT 예외) |\n\n## 4. SSL 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 프로토콜 | SSL·초기 TLS 비활성화, TLS 1.2 이상만 허용 |\n| 암호스위트 | ECDHE 기반 [[forward-secrecy|순방향 비밀성]], 취약 알고리즘(RC4·3DES) 배제 |\n| 인증서 | 유효기간·체인·폐지상태 관리, [[certificate-transparency|인증서 투명성]], 자동 갱신 |\n| 운영 | [[hsts|HSTS]] 적용, 서버 설정 점검(SSL Labs 등) |\n| 발전방향 | TLS 1.3 전면 전환, [[post-quantum-cryptography|양자내성암호]] 기반 키교환 연구 |\n\n## 5. 결론\n- SSL은 과거 전송 보안의 기반이며 현재는 사용하지 않는다. 후속 TLS의 안전한 구성을 적용하며 안전한 암호스위트·인증서 관리가 운영의 핵심",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. SSL 역사와 현행 TLS 분리, RSA 운반·인증서 메시지·PFS 예외 교정.",
+      "unresolved": [
+        "S-HTTP 보급·폐기 상태와 Netscape 초기 역사 원자료는 미확인."
+      ]
+    }
+  },
+  "t-19c0402f": {
+    "short": {
+      "source_sha256": "deb72acd81df803d48cc058228d6ad56084200a6c745c9cdff8cd33396fc8da2",
+      "body": "## 1. TLS(Transport Layer Security)의 개요\n- 정의: TCP와 응용계층 사이에서 [[x-509|X.509 인증서]] 기반 서버 인증, 키 교환, [[symmetric-key-cryptography|대칭키 암호화]], [[message-authentication-code|MAC]]으로 기밀성·무결성·인증을 제공하는 보안 프로토콜(TLS 1.3, RFC 8446)\n- 필요성: SSL 3.0·레거시 TLS 버전·구성의 [[downgrade-attack|다운그레이드]]·[[padding-oracle-attack|패딩 오라클]] 취약점 대응, [[https|HTTPS]] 전면화\n\n## 2. TLS 프로토콜 구조 및 핸드셰이크\n```mermaid\nflowchart LR\n  C[클라이언트] -->|\"ClientHello(암호군, 키 공유값)\"| S[서버]\n  S -->|\"ServerHello + 인증서 + Finished\"| C\n  C -->|\"Finished 후 암호화 통신\"| S\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[handshake-protocol|Handshake Protocol]] | 버전·[[cipher-suite|암호군]] 협상, 서버 인증, 세션키 생성 |\n| [[record-protocol|Record Protocol]] | 상위 데이터 분할·MAC·암호화 후 TCP 전달 |\n| Alert Protocol | 오류·경고 통지(fatal 시 세션 종료) |\n| Change Cipher Spec | 1.3에서는 상태 전환 기능 제거, 호환 더미 메시지는 허용 |\n\n## 3. TLS 1.2 취약점과 TLS 1.3 개선 비교\n| 구분 | TLS 1.2 | TLS 1.3 |\n|---|---|---|\n| 키 교환 | [[rsa|RSA]] 정적 키 전송 허용 → [[forward-secrecy|전방향 안전성]] 미보장 | (EC)DHE, PSK-only, PSK+(EC)DHE 구분; PSK-only/0-RTT는 동일 PFS 보장 아님 |\n| 암호 알고리즘 | [[cipher-block-chaining|CBC]]·[[rc4|RC4]]·[[sha-1|SHA-1]]·압축 허용 → [[poodle-attack|POODLE]]·[[beast-attack|BEAST]]·CRIME | [[aead|AEAD]](AES-GCM, AES-CCM, ChaCha20-Poly1305)만 허용 |\n| 핸드셰이크 | 2-RTT, 협상 메시지 평문 노출 | 1-RTT, ServerHello 이후 정상 핸드셰이크 암호화(호환 더미 CCS 등 예외 구분), [[zero-round-trip-time|0-RTT]] 재개 |\n| 다운그레이드 | FREAK·Logjam 등 취약 암호군 강제 가능 | RFC 8446 초기 암호군 5종, ServerRandom 다운그레이드 방지 표식 |\n\n## 4. 적용 시 고려사항\n- 레거시 호환: 1.2 병행 시 취약 암호군 비활성화, 1.0/1.1 폐기(RFC 8996)\n- 0-RTT는 [[replay-attack|재전송 공격]] 가능 → 재처리가 안전한 자원만 명시적으로 허용. GET도 부작용이 있으면 허용하지 않으며 425·처리 지연 등 적용\n- 인증서 유효기간 단축·[[certificate-transparency|CT 로그]] 모니터링, [[hsts|HSTS]]로 HTTPS 강제",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TLS1.3 PSK/PFS·CCS·CertificateVerify 예외, 레코드 크기·압축·초기 암호군, 0-RTT 안전 조건 교정.",
+      "unresolved": [
+        "각 역사적 공격 원 논문·개별 장비 가시성 기능과 최신 PQC/ECH 구현 상태는 별도 대조 필요."
+      ]
+    },
+    "long": {
+      "source_sha256": "01eea12bf06c923a35a7fd91cf0bd68d87fafef7244726489c0e678c95106b36",
+      "body": "## 1. TLS(Transport Layer Security)의 개요\n### 가. 정의\n- 전송계층 위에서 인증서 기반 모드에서는 [[x-509|X.509 인증서]]와 [[pki|PKI]]로 서버(선택적으로 클라이언트)를 인증하고, 키 교환으로 생성한 세션키로 [[symmetric-key-cryptography|대칭키 암호화]]·[[message-authentication-code|MAC]]을 수행하여 기밀성·무결성·인증을 보장하는 표준 보안 프로토콜(IETF RFC 5246 TLS 1.2, RFC 8446 TLS 1.3)\n\n### 나. 등장배경 및 필요성\n- Netscape SSL 2.0/3.0을 IETF가 표준화한 TLS 1.0(1999) 이후 [[poodle-attack|POODLE]]·[[beast-attack|BEAST]]·Logjam 등 취약점 지속 발견\n- [[https|HTTPS]] 전면화, 모바일·IoT의 저지연 요구 → 보안성 강화와 핸드셰이크 지연 축소를 동시에 달성한 TLS 1.3(2018) 등장, TLS 1.0/1.1은 RFC 8996으로 폐기\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| 인증 | 서버 인증서 체인 검증, [[certificate-revocation-list|CRL]]·[[ocsp|OCSP]]로 폐지 확인 |\n| 키 교환 | [[rsa|RSA]] 키 전송, [[diffie-hellman|DH]]·[[ecdhe|ECDHE]] 임시키 교환으로 Pre-Master Secret 공유 |\n| 세션 보호 | 세션키로 레코드 암호화, [[hmac|HMAC]] 또는 [[aead|AEAD]]로 무결성 보장 |\n\n## 2. TLS 프로토콜 구조 및 핸드셰이크 과정\n### 가. 프로토콜 구조(2계층)\n```mermaid\nflowchart TB\n  subgraph U[\"상위 계층(Handshake Layer)\"]\n    H[Handshake Protocol]\n    A[Alert Protocol]\n    CCS[Change Cipher Spec]\n    AP[\"Application Data(HTTP 등)\"]\n  end\n  R[\"Record Protocol: 분할-버전별 보호-AEAD 또는 레거시 MAC/암호화\"]\n  T[TCP]\n  H --> R\n  A --> R\n  CCS --> R\n  AP --> R\n  R --> T\n```\n\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| [[handshake-protocol|Handshake Protocol]] | 버전·[[cipher-suite|암호군]] 협상, 인증, 키 합의 | 인증서 체인, ECDHE, [[digital-signature|전자서명]] |\n| [[record-protocol|Record Protocol]] | 상위 메시지를 최대 2^14 바이트 평문 조각으로 분할(항상 고정 길이 아님), MAC·암호화 후 전송 | AES-CBC+HMAC(1.2), AES-GCM·ChaCha20-Poly1305(1.3) |\n| Alert Protocol | warning·fatal 수준 경고 전달, 오류 시 세션 종료 | 알림 코드(handshake_failure 등) |\n| Change Cipher Spec | 협상된 암호 파라미터 적용 시점 통지 | 1.3에서 삭제(호환용 더미만 허용) |\n\n### 다. 핸드셰이크 절차 비교\n```mermaid\nsequenceDiagram\n  participant C as 클라이언트\n  participant S as 서버\n  Note over C,S: TLS 1.2 (2-RTT)\n  C->>S: ClientHello(버전, 암호군, Random)\n  S->>C: ServerHello, Certificate, ServerKeyExchange, ServerHelloDone\n  C->>S: ClientKeyExchange, ChangeCipherSpec, Finished\n  S->>C: ChangeCipherSpec, Finished\n  Note over C,S: TLS 1.3 (1-RTT)\n  C->>S: ClientHello + key_share + signature_algorithms\n  S->>C: ServerHello + key_share, {EncryptedExtensions, Certificate, CertificateVerify, Finished}\n  C->>S: {Finished} + 애플리케이션 데이터\n```\n1. TLS 1.2: ClientHello/ServerHello로 암호군 협상 → 서버 인증서 전달 → 클라이언트가 Pre-Master Secret 생성(RSA 암호화 또는 DH 공개값) → 양측 PRF로 Master Secret·세션키 유도 → Finished로 핸드셰이크 무결성 검증\n2. TLS 1.3: ClientHello에 ECDHE 공개값(key_share)을 선제 포함 → 서버가 자신의 key_share와 함께 응답하고 즉시 핸드셰이크 트래픽 키로 인증서·서명을 암호화 → [[hkdf|HKDF]] 기반 키 스케줄로 핸드셰이크 키·애플리케이션 키 분리 유도 → 1-RTT 후 데이터 전송, [[pre-shared-key|PSK]] 재개 시 [[zero-round-trip-time|0-RTT]] 가능\n\n## 3. TLS 1.2 보안 취약점과 TLS 1.3 개선 사항\n### 가. SSL/TLS 계열의 취약점과 적용 버전\n| 취약점 | 원인 | 영향 |\n|---|---|---|\n| BEAST·Lucky13 | BEAST는 TLS 1.0 CBC 암묵적 IV, Lucky13은 TLS CBC MAC/패딩 처리 시간차(서로 다른 조건) | [[padding-oracle-attack|패딩 오라클]]로 쿠키 등 평문 복원 |\n| POODLE | SSL 3.0 CBC 패딩 미검증 + 버전 [[downgrade-attack|다운그레이드]] 유도 | 1바이트씩 평문 복구 |\n| [[rc4|RC4]] 편향·[[sweet32-attack|Sweet32]] | RC4 키스트림 통계 편향, [[triple-des|3DES]] 64비트 블록 생일 공격 | 장기 세션 평문 노출 |\n| [[freak-attack|FREAK]]·[[logjam-attack|Logjam]] | 수출용 512비트 RSA·DH 암호군 잔존, 협상 메시지 무결성 미보장 | [[adversary-in-the-middle|중간자]]가 약한 키 강제 |\n| CRIME·BREACH | TLS 압축·HTTP 압축의 길이 누출 | 세션 토큰 추출 |\n| 재협상·Triple Handshake | 재협상 시 이전 세션과 바인딩 부재 | 평문 삽입, 클라이언트 인증 가로채기 |\n| RSA 키 전송 | 서버 개인키 유출 시 과거 트래픽 전체 복호화 | [[forward-secrecy|전방향 안전성]] 부재 |\n| [[sha-1|SHA-1]]·MD5 서명 | 충돌 공격 현실화 | 인증서·서명 위조 |\n\n### 나. TLS 1.3 개선 사항\n| 구분 | 개선 내용 | 효과 |\n|---|---|---|\n| 알고리즘 정리 | RSA 키 전송·정적 DH·CBC·RC4·3DES·MD5·SHA-1·압축·재협상 삭제 | 알려진 공격면 제거, RFC 8446 초기 암호군 5종으로 단순화(후속 등록 가능) |\n| 전방향 안전성 | (EC)DHE 또는 PSK+(EC)DHE에서 지원; PSK-only는 미제공 | 개인키 유출에도 과거 세션 보호 |\n| AEAD 의무화 | AES-GCM, AES-CCM, ChaCha20-Poly1305 | 패딩 오라클·MAC 순서 문제 근절 |\n| 핸드셰이크 암호화 | ServerHello 이후 정상 핸드셰이크 메시지 암호화, 인증서 비노출 | 메타데이터 보호, 패시브 도청 차단 |\n| 1-RTT·0-RTT | key_share 선제 전송, PSK 기반 0-RTT 재개 | 통상 전체 핸드셰이크 왕복 수 감소(전체 응답 지연이 항상 50% 감소하는 것은 아님), 모바일 체감 성능 향상 |\n| 다운그레이드 방지 | ServerRandom 하위 8바이트에 DOWNGRD 표식, 전체 핸드셰이크 전사 해시로 서명 | 버전·암호군 강제 하향 탐지 |\n| 키 유도·서명 | HKDF 키 스케줄, [[rsa-pss|RSA-PSS]]·ECDSA·EdDSA 서명, 인증서 모드에서 CertificateVerify 사용(PSK 인증 모드는 생략) | 키 분리 명확화, TLS 1.3 CertificateVerify에는 RSA-PSS 사용; v1.5 암호화와 서명 취약성을 혼동하지 않음 |\n\n## 4. TLS 1.3 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 호환성 | 구형 브라우저·임베디드 장비 대비 1.2 병행 시 CBC·RC4 암호군 비활성화, 1.0/1.1 완전 차단 |\n| 0-RTT 위험 | Early Data는 [[replay-attack|재전송 공격]] 가능 → 응용별 안전성 평가·처리 지연/거부·425 응답 등으로 완화, 서버 측 중복 검출 |\n| 가시성 | 핸드셰이크 암호화로 미들박스(IDS·DLP) 인증서 기반 검사 불가 → 종단 복호화 또는 [[server-name-indication|SNI]] 기반 정책 전환 |\n| 인증서 운영 | 유효기간 단축, [[certificate-transparency|CT]] 모니터링, [[ocsp-stapling|OCSP Stapling]], [[hsts|HSTS]] 적용 |\n| 발전방향 | [[encrypted-client-hello|ECH]]로 SNI 암호화, [[quic|QUIC]](HTTP/3) 내장 TLS 1.3, [[post-quantum-cryptography|양자내성 암호]] 하이브리드 키 교환(X25519+ML-KEM) |\n\n## 5. 결론\n- TLS 1.3은 취약 알고리즘 제거·전방향 안전성·핸드셰이크 암호화로 1.2의 구조적 약점을 해소하고 지연까지 줄인 프로토콜로, 공공·금융 시스템은 1.2 취약 암호군 비활성화와 함께 1.3 전환 및 양자내성 암호 대응 로드맵 수립 필요",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TLS1.3 PSK/PFS·CCS·CertificateVerify 예외, 레코드 크기·압축·초기 암호군, 0-RTT 안전 조건 교정.",
+      "unresolved": [
+        "각 역사적 공격 원 논문·개별 장비 가시성 기능과 최신 PQC/ECH 구현 상태는 별도 대조 필요."
+      ]
+    }
+  },
+  "t-7798153e": {
+    "short": {
+      "source_sha256": "9c7646024e60763169511fc2fb0c2691156c7b7985bd9c42ac88074eec01e61d",
+      "body": "## 1. HTTPS의 개요\n- 정의: [[http|HTTP]] 메시지를 [[tls|SSL/TLS]] 계층 위에서 암호화·인증·무결성 검증하여 전송하는 보안 웹 통신(기본 포트 443; HTTP/1.1·2는 주로 TCP/TLS, HTTP/3는 UDP 기반 QUIC)\n- 필요성: HTTP는 [[plaintext|평문]] 전송·서버 인증 부재로 [[sniffing|스니핑]]·[[adversary-in-the-middle|중간자 공격]]·[[session-hijacking|세션 하이재킹]]에 노출\n\n## 2. HTTPS의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  B[브라우저] -->|ClientHello| S[웹서버]\n  S -->|ServerHello + 인증서| B\n  B -->|키교환, Finished| S\n  B <-->|\"대칭키 암호화 HTTP\"| S\n```\n| 구성요소 | 역할 |\n|---|---|\n| TLS 핸드셰이크 | 암호스위트 협상, 서버 인증, [[session-key|세션키]] 합의 |\n| [[digital-certificate|서버 인증서]] | [[pki|PKI]] 기반 [[certificate-authority|CA]] 서명으로 서버 신원 보증 |\n| 레코드 계층 | 협상된 대칭키([[aes|AES]]-GCM 등)로 HTTP 데이터 암호화·[[message-authentication-code|MAC]] |\n| 키교환 | [[ecdhe|ECDHE]]로 [[forward-secrecy|순방향 비밀성]] 확보 |\n\n## 3. HTTP 취약점과 HTTPS 특징 비교\n| 구분 | HTTP 취약점 | HTTPS 특징 |\n|---|---|---|\n| [[confidentiality|기밀성]] | 평문 노출, 패킷 도청 | 대칭키 암호화 전송 |\n| [[integrity|무결성]] | 콘텐츠 변조·스크립트 삽입 | MAC·AEAD로 변조 탐지 |\n| 인증 | 서버 위장([[pharming|파밍]]) 가능 | 인증서 경로와 호스트명 등 검증 |\n| 세션 | 쿠키 탈취 | Secure 쿠키, [[hsts|HSTS]] |\n| 상태 | HTTP 의미론은 무상태 | HTTP 의미론은 동일; TLS 세션 재개는 별도 연결 보안 기능 |\n\nHTTPS는 전송 구간을 보호하며 XSS·요청 밀반입·서버 침해 등 응용 결함을 자동 해결하지 않는다.\n\n## 4. 고려사항\n- TLS 1.2 이상 사용, SSL 3.0·TLS 1.0/1.1 비활성화, 취약 암호스위트(RC4·3DES) 제거\n- HSTS·HTTP/2 적용, 인증서 만료 자동 갱신(ACME) 및 혼합 콘텐츠(Mixed Content) 제거",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        },
+        {
+          "title": "RFC 9114",
+          "url": "https://www.rfc-editor.org/rfc/rfc9114.html",
+          "scope": "HTTP/3의 QUIC 매핑·패킷 보호"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TCP 전용 정의·HTTP 무상태성/TLS 재개 구분, TLS1.3 압축·QUIC 레코드 차이·응용 보안 한계 교정.",
+      "unresolved": [
+        "검색 순위·브라우저별 최신 정책 및 HTTP/2 평문 배포 실태의 정량 대조는 미완료."
+      ]
+    },
+    "long": {
+      "source_sha256": "a0443d256a930fc64e8b388e6ecdc58a97b6af497333b3205c00cb38bcc9d261",
+      "body": "## 1. HTTPS의 개요\n### 가. 정의\n- [[http|HTTP]] 메시지를 [[tls|SSL/TLS]] 계층 위에서 암호화·서버 인증·무결성 검증하여 전송하는 보안 웹 통신(기본 포트 443; HTTP/3는 UDP 기반 QUIC/TLS 통합 사용)\n\n### 나. 등장배경 / 필요성\n- WWW 확산으로 로그인·결제 등 민감정보가 웹으로 이동했으나 HTTP는 [[plaintext|평문]]·무상태·무인증 설계\n- [[sniffing|스니핑]], [[adversary-in-the-middle|중간자 공격]], 콘텐츠 변조 등 전송 구간 위협에 대응하기 위해 Netscape의 SSL을 기반으로 HTTPS 등장\n\n### 다. 핵심 개념\n| 구분 | 내용 |\n|---|---|\n| [[confidentiality|기밀성]] | 협상된 [[session-key|세션키]]로 [[symmetric-key-cryptography|대칭키 암호화]] |\n| [[integrity|무결성]] | [[message-authentication-code|MAC]] 또는 AEAD(AES-GCM)로 변조 탐지 |\n| 인증 | [[pki|PKI]] 기반 [[digital-certificate|X.509 인증서]] 체인 검증으로 서버(선택적 클라이언트) 신원 확인 |\n\n## 2. HTTP의 취약점\n### 가. 취약점 구성도\n```mermaid\nflowchart LR\n  C[클라이언트] -->|\"평문 HTTP\"| N[네트워크]\n  N --> S[웹서버]\n  A[공격자] -.도청.-> N\n  A -.변조/삽입.-> N\n  A -.위장 서버.-> C\n```\n### 나. 취약점 상세\n| 취약점 | 내용 | 공격 사례 |\n|---|---|---|\n| 평문 전송 | 헤더·본문·쿠키가 암호화 없이 전송 | 스니핑으로 ID/PW·[[session-cookie|세션 쿠키]] 탈취 |\n| 서버 인증 부재 | 접속 대상 서버의 진위 확인 수단 없음 | [[pharming|파밍]], [[dns-spoofing|DNS 스푸핑]]으로 위장 사이트 유도 |\n| 무결성 미보장 | 전송 중 변조 탐지 불가 | 광고·악성 스크립트 삽입, 다운로드 파일 변조 |\n| 세션 관리 | 쿠키 등 세션 자격증명 보호가 필요하며 HTTP 무상태성 자체가 취약점은 아님 | [[session-hijacking|세션 하이재킹]], [[replay-attack|재전송 공격]] |\n| 프로토콜 특성 | 메서드·헤더 조작 용이 | HTTP 응답 분할, 요청 밀반입(Request Smuggling) |\n\n### 다. 공격 절차 (중간자 공격 예)\n1. 공격자가 [[arp-spoofing|ARP 스푸핑]]·악성 AP로 트래픽 경로 장악\n2. 평문 HTTP 요청·응답 가로채기 및 인증정보 추출\n3. 응답 변조(악성코드 삽입) 후 사용자에게 전달, 피해자는 인지 불가\n\n## 3. HTTPS의 특징 및 동작\n### 가. TLS 핸드셰이크 (TLS 1.3 기준)\n```mermaid\nsequenceDiagram\n  participant B as 브라우저\n  participant S as 웹서버\n  B->>S: ClientHello(지원 암호스위트, 키공유 값)\n  S->>B: ServerHello, 인증서, CertificateVerify, Finished\n  Note over B: CA 체인 검증, 세션키 유도\n  B->>S: Finished\n  B->>S: 암호화된 HTTP 요청\n  S->>B: 암호화된 HTTP 응답\n```\n### 나. 구성요소\n| 구성요소 | 역할 | 핵심기술 |\n|---|---|---|\n| 핸드셰이크 프로토콜 | 버전·암호스위트 협상, 인증, 키 합의 | [[ecdhe|ECDHE]], [[rsa|RSA]]/ECDSA 서명 |\n| 인증서·CA | 서버 공개키와 도메인 결합 보증 | X.509, [[certificate-authority|CA]] 체인, OCSP/CRL |\n| 레코드 프로토콜 | 응용 데이터 분할·버전별 인증 암호 처리(TLS1.3 압축 없음; QUIC은 TLS Record 대신 자체 패킷 보호) | [[aes|AES]]-GCM, ChaCha20-Poly1305 |\n| 세션 재개 | 재접속 시 전체 핸드셰이크 생략 | Session Ticket, PSK, 0-RTT |\n\n### 다. HTTP 대비 HTTPS 특징 비교\n| 구분 | HTTP | HTTPS |\n|---|---|---|\n| 포트 | 80 | 443 |\n| 기밀성 | 없음 | 대칭키 암호화 |\n| 무결성 | 없음 | AEAD·MAC |\n| 서버 인증 | 기본 평문 연결은 미제공 | 인증서 경로·호스트명·용도 등 확인 |\n| [[forward-secrecy|순방향 비밀성]] | 해당 없음 | ECDHE로 과거 세션 보호 |\n| 성능 | 빠름 | 핸드셰이크 지연, TLS 1.3·세션 재개로 완화 |\n| SEO·브라우저 | 안전하지 않음 표시 | HTTP/3는 QUIC 보안 필수; HTTP/2 규격은 평문 사용도 정의하므로 프로토콜과 브라우저 지원 정책 구분 |\n\nHTTPS는 전송 구간을 보호하며 XSS·요청 밀반입·서버 침해 등 응용 결함을 자동 해결하지 않는다.\n\n## 4. HTTPS 적용 시 고려사항 및 발전방향\n| 구분 | 고려사항 |\n|---|---|\n| 프로토콜 | TLS 1.2 이상만 허용, SSL 3.0·TLS 1.0/1.1 비활성화 |\n| 암호스위트 | RC4·3DES·CBC 제거, AEAD·ECDHE 우선, [[crypto-agility|암호 민첩성]] 확보 |\n| 인증서 | 유효기간 단축 대응 자동 갱신(ACME), 와일드카드 남용 주의, 인증서 투명성(CT) 로그 |\n| 정책 | [[hsts|HSTS]] 프리로드, Secure/HttpOnly 쿠키, 혼합 콘텐츠 제거 |\n| 운영 | TLS 종단 위치(로드밸런서) 설계, 암호화 트래픽 내 악성코드 검사(SSL 가시성) |\n| 발전방향 | HTTP/3(QUIC) 전환, [[post-quantum-cryptography|양자내성암호]] 하이브리드 키교환(X25519+ML-KEM) |\n\n## 5. 결론\n- HTTPS는 평문·무인증 HTTP의 구조적 취약점을 TLS로 보완한 웹 보안의 기본선이며, 전 구간 HTTPS(HTTPS Everywhere)와 최신 TLS 설정 유지가 기업 웹 서비스의 필수 요건",
+      "sources": [
+        {
+          "title": "RFC 8446",
+          "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+          "scope": "PSK/(EC)DHE·AEAD·CCS 호환·핸드셰이크"
+        },
+        {
+          "title": "RFC 9325",
+          "url": "https://www.rfc-editor.org/rfc/rfc9325.html",
+          "scope": "TLS 1.2/1.3 안전 구성과 레거시 알고리즘 전환"
+        },
+        {
+          "title": "RFC 8470",
+          "url": "https://www.rfc-editor.org/rfc/rfc8470.html",
+          "scope": "HTTP early data 처리·425 응답과 재전송 위험"
+        },
+        {
+          "title": "RFC 9114",
+          "url": "https://www.rfc-editor.org/rfc/rfc9114.html",
+          "scope": "HTTP/3의 QUIC 매핑·패킷 보호"
+        }
+      ],
+      "reviewed_on": "2026-11-22",
+      "review_scope": "단답·서술 전문 열람. TCP 전용 정의·HTTP 무상태성/TLS 재개 구분, TLS1.3 압축·QUIC 레코드 차이·응용 보안 한계 교정.",
+      "unresolved": [
+        "검색 순위·브라우저별 최신 정책 및 HTTP/2 평문 배포 실태의 정량 대조는 미완료."
+      ]
+    }
   }
 }
