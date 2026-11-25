@@ -12,7 +12,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 from app.db import connect, initialize
-from app.answer_format import reference_edits
+from app.answer_format import format_answer, reference_edits
 from app.main import app, MAX_FILE
 
 HEADERS = {"X-PEIM-Request": "1"}
@@ -69,8 +69,17 @@ class AppTests(unittest.TestCase):
             reference = self.client.get(f'/api/topics/{tid}/reference')
             self.assertEqual(reference.status_code, 200)
             for answer in reference.json()['answers']:
-                self.assertEqual(answer['editorial_status'], 'corrected')
-                self.assertIn('검토 근거', answer['body'])
+                if answer['variant'] in reference_edits()[tid]:
+                    self.assertEqual(answer['editorial_status'], 'corrected')
+                    self.assertIn('검토 근거', answer['body'])
+                else:
+                    self.assertEqual(answer['editorial_status'], 'format_only')
+                    with connect() as db:
+                        original = db.execute(
+                            'SELECT body FROM reference_answers WHERE topic_id=%s AND variant=%s',
+                            (tid, answer['variant']),
+                        ).fetchone()['body']
+                    self.assertEqual(answer['body'], format_answer(original))
         calculation = self.client.get('/api/questions/r139-s4-q06/writing-guide').json()
         self.assertEqual(calculation['kind'], 'example')
         self.assertIn('192.168.0.0/22', calculation['example'])
