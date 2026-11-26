@@ -1313,28 +1313,17 @@
   "t-b7ee7d7f": {
     "short": {
       "source_sha256": "98ba444f260900c08060ccfa442f0ac1c44d5094a0d22a737143bc832690ea6d",
-      "body": "## 1. 전자서명의 개요\n- 정의: 개인키와 서명 알고리즘으로 메시지에 대한 서명을 만들고 공개키로 검증하는 디지털 서명. 무결성·출처 확인을 지원하며 부인방지는 신원 결합·키 관리·증거 보관 조건에 의존한다. 법률상 전자서명은 이보다 넓은 개념이다\n- 필요성: 전자문서의 위변조 방지와 서명자 신원 증명, 전자거래 신뢰 기반\n\n## 2. 전자서명의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  M[메시지] --> S[서명 알고리즘]\n  SK[개인키] --> S\n  S --> SIG[서명값]\n  M --> V[검증 알고리즘]\n  SIG --> V\n  PK[신뢰한 공개키] --> V\n  V --> RESULT[유효 또는 무효]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[hash-function|해시함수]] | 메시지 고정길이 축약 |\n| [[private-key|개인키]] | 서명 생성 |\n| [[public-key-cryptography|공개키]] | 서명 검증 |\n| [[digital-certificate|인증서]]·[[pki|PKI]] | 공개키 진위 보증 |\n\n## 3. RSA 서명 생성·검증\nRSA-PSS 등 안전한 인코딩을 포함한 스킴을 적용하며 아래 과정은 개념 요약이다.\n| 구분 | 과정 |\n|---|---|\n| 생성 | 메시지 해시 → 서명자 개인키로 서명 스킴 실행 → 서명 첨부 |\n| 검증 | 서명·메시지·공개키로 해당 서명 스킴의 검증 수행 → 성공 시 유효 |\n\n## 4. 고려사항\n- 제공 서비스: 무결성·인증·부인방지(기밀성은 별도 암호화 필요)\n- [[digital-signature-act|전자서명법]] 개정으로 공인인증서 독점 폐지, 다양한 사설인증서 허용",
+      "body": "## 전자서명 생성과 검증\n기술적 디지털 서명은 메시지와 서명자의 [[private-key|개인키]]로 서명값을 만들고 대응 공개키로 검증하는 기법이다. 메시지 무결성과 출처 확인을 지원하며 법률상 전자서명은 이 기술보다 넓은 개념이다.\n\n| 단계 | RSA 서명 스킴의 개념적 처리 |\n|---|---|\n| 키 준비 | 서명자는 개인키 보호, 검증자는 신뢰할 공개키 확보 |\n| 생성 | 메시지 해시 → PSS 등 스킴의 인코딩 → 개인키를 사용하는 서명 연산 |\n| 전송 | 메시지와 서명값 전달, 필요시 인증서 등 키 확인 정보 제공 |\n| 검증 | 공개키로 서명 연산 결과 확인 → 스킴의 인코딩·메시지 해시 관계 검증 |\n\nRSA-PSS는 해시와 솔트·마스크 생성 등 인코딩 규칙을 포함한다. 따라서 서명을 단순히 ‘해시를 개인키로 암호화’한다고 정의하거나 모든 서명 알고리즘에 같은 연산을 적용하면 부정확하다. RSA의 원시 수학 연산과 안전한 서명 스킴을 구별한다.\n\n[[digital-certificate|인증서]]·PKI를 이용하면 공개키와 신원을 결합할 수 있으나 신뢰 경로·유효기간·폐지 상태를 확인해야 한다. [[non-repudiation|부인방지]]는 개인키 통제·신원 확인·증거 보관에도 의존하여 서명 검증 성공만으로 모든 분쟁이 해결되지는 않는다. 서명은 원문을 숨기지 않으므로 기밀성이 필요하면 별도 암호화한다.",
       "sources": [
         {
-          "title": "RFC 8017 §8·9",
+          "title": "RFC 8017 §8–9",
           "url": "https://www.rfc-editor.org/rfc/rfc8017.html",
-          "scope": "RSA 서명 원시 연산과 PSS 인코딩·검증 구분"
-        },
-        {
-          "title": "FIPS 186-5",
-          "url": "https://csrc.nist.gov/pubs/fips/186-5/final",
-          "scope": "서명 생성·검증과 DSA 신규 생성 제외"
-        },
-        {
-          "title": "전자서명법 제2조",
-          "url": "https://law.go.kr/LSW/lsSideInfoP.do?docCls=jo&joBrNo=00&joNo=0002&lsiSeq=236201&urlMode=lsScJoRltInfoR",
-          "scope": "법률상 전자서명 정의는 특정 암호 알고리즘으로 한정하지 않음"
+          "scope": "RSA 서명 스킴·PSS 인코딩·서명/검증 원시 연산 구별"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "단답·서술 전문 열람. 서명=해시 암호화 도식·본문 교정, RSA 원시 연산/스킴 구분, 법률상 정의와 기술적 정의 분리.",
+      "review_scope": "기존 서명=개인키 암호화 교정과 부인방지 조건을 보존하고 RSA 스킴 절차를 RFC에 대조. 폐지된 공인인증서 설명은 기술 요약에서 제외.",
       "unresolved": [
-        "KCDSA 국내 규격 및 블록체인 기반 검증의 개별 적용 사례는 대조 미완료. 법적 효력은 사건별 보장을 뜻하지 않음."
+        "법률상 전자서명의 현행 조문·사건별 효력, 인증서 경로·폐지 처리의 개별 규격은 이번 범위에서 재대조하지 않음."
       ]
     },
     "long": {
@@ -1898,29 +1887,16 @@
   "t-6109cf41": {
     "short": {
       "source_sha256": "29c110fe136e5c0ef1d0148e449e33aa853bcd4758899eea0b509eba0a87f709",
-      "body": "## 1. 무선 LAN 보안의 개요\n- 정의: [[wireless-lan|무선 LAN]](Wi-Fi) 환경에서 전파의 개방성으로 발생하는 도청·위장·침입 위협으로부터 인증·암호화·접근통제를 통해 데이터와 네트워크를 보호하는 기술\n- 필요성: 유선과 달리 물리적 경계 없이 전파 도달 범위 내 누구나 접근 가능, [[smart-office|스마트 오피스]]·[[fmc|FMC]] 확산으로 중요도 증가\n\n아래 RADIUS/802.1X 도식은 기업 모드 예다. Personal 모드에는 동일 인증서버가 필수인 것은 아니다. WPA3 모드와 장비 세대별 암호·PMF 요구사항을 확인한다.\n\n## 2. 무선 LAN 보안의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  STA[단말] -->|\"인증(802.1X)\"| AP[액세스포인트]\n  AP -->|\"암호화(WPA2/WPA3)\"| STA\n  AP --> AUTH[\"인증서버(RADIUS)\"]\n  WIPS[\"WIPS\"] -.모니터링.-> AP\n```\n| 구성요소 | 역할 |\n|---|---|\n| 인증 | [[ieee-802-1x|802.1X]]·[[eap|EAP]], [[radius|RADIUS]] 사용자 인증 |\n| 암호화 | [[wpa2|WPA2]]·[[wpa3|WPA3]], AES-CCMP |\n| 접근통제 | 인증·인가·망 분리 중심(MAC 필터링·SSID 숨김만으로 보안 확보 불가) |\n| [[wips|WIPS]] | [[rogue-ap|불법 AP]]·침입 탐지·차단 |\n\n## 3. 침해 유형 및 대책\n| 침해 유형 | 대책 |\n|---|---|\n| 도청·스니핑 | WPA2/WPA3 강한 암호화 |\n| [[rogue-ap|Rogue AP]]·[[evil-twin|Evil Twin]] | 서버 인증서·신뢰 CA 검증을 포함한 안전한 EAP 설정과 WIPS 탐지·대응 |\n| 인증 우회·크래킹 | 802.1X 기업모드, 강한 패스프레이즈 |\n| [[wireless-dos|무선 DoS]]·전파방해 | 모니터링, 채널 관리 |\n\n## 4. 고려사항\n- 개인(PSK)보다 기업(802.1X) 모드 적용, [[wpa3|WPA3]] 도입 검토와 함께 [[krack-attack|KRACK]] 영향을 받는 AP·단말 패치\n- 게스트망 분리, [[network-access-control|NAC]] 연계 단말 보안상태 점검",
+      "body": "## 무선 LAN 보안\n전파를 공유하는 [[wireless-lan|무선 LAN]]에서 단말·사용자를 인증하고 통신을 암호화하며 접근을 통제하는 기술과 운영 활동이다.\n\n| 위협 | 대응 |\n|---|---|\n| 도청·자격증명 공격 | WPA2/WPA3의 적절한 인증·암호 조합, 취약 장비 패치 |\n| [[rogue-ap|불법 AP]]·[[evil-twin|위장 AP]] | AP 탐지, 접속 정책, EAP 서버 인증서·신뢰 CA 검증 |\n| 비인가 단말·내부망 침투 | 기업 인증, 게스트망 분리, 최소 접근권한 |\n| 관리 프레임 악용·전파방해 | PMF 적용 조건 확인, 무선 감시·간섭 대응 |\n\n기업 모드는 단말–AP–인증서버 구조에서 [[ieee-802-1x|802.1X]]·EAP 인증을 수행하고 RADIUS로 인증 정보를 전달할 수 있다. Personal 모드는 같은 인증서버를 필수로 요구하지 않으며 WPA3-Personal은 SAE를 사용한다.\n\nWPA3라는 명칭만으로 암호·키 관리·PMF 설정이 모두 같지는 않다. 모드·주파수 대역·장비 지원 조건을 확인한다. MAC 필터링과 SSID 숨김만으로 보안을 확보할 수 없고, PMF도 모든 무선 DoS나 전파방해를 제거하지 못한다.",
       "sources": [
         {
           "title": "Cisco WPA3 Deployment Guide",
           "url": "https://www.cisco.com/c/en/us/td/docs/wireless/controller/9800/technical-reference/wpa3-dg.html",
-          "scope": "Personal/Enterprise·세대별 AKM·CCMP/GCMP 조합"
-        },
-        {
-          "title": "KRACK 원 연구자 안내",
-          "url": "https://www.krackattacks.com/",
-          "scope": "키 재설치 원인과 호환 패치 대응"
-        },
-        {
-          "title": "NIST SP 800-153",
-          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-153.pdf",
-          "scope": "WLAN 구성·모니터링·운영 관리(2012 자료, WPA3 규격 근거 아님)"
+          "scope": "2025-10-06 문서에서 Personal/Enterprise·SAE·PMF와 모드별 조건 대조. 보안 운영 표는 기출 위협을 대응 수준으로 정리."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "단답·서술 전문 열람. WPA3=GCMP·SAE 전체 적용 일반화, KRACK 패치, 기업 인증 도식 범위·약한 접근통제 한계 교정.",
-      "unresolved": [
-        "Wi-Fi Alliance 원 규격 페이지 접근 실패. 상세 규격 대조는 Cisco 공식 제품 가이드 범위이며 모든 제조사·버전의 구현 적합성을 검증한 것은 아님."
-      ]
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 2025-10-06 문서에서 Personal/Enterprise·SAE·PMF와 모드별 조건 대조. 보안 운영 표는 기출 위협을 대응 수준으로 정리.",
+      "unresolved": []
     },
     "long": {
       "source_sha256": "ca42425e44f306d0228068d7b6aaa1a67e46bbe32f13c1f4fb3a107218542a15",
@@ -3147,24 +3123,16 @@
   "t-16f227d2": {
     "short": {
       "source_sha256": "92abea1669b5e402d9292959d9e002db0c866d251712c12ca784400d13cb9c55",
-      "body": "## 1. 반정규화(Denormalization)의 개요\n- 정의: [[normalization|정규화]]된 모델을 조회 성능 향상·개발 단순화를 위해 중복·통합·분리하는 [[physical-data-model|물리 데이터 모델링]] 기법\n- 필요성: 다수 조인·대량 범위 처리·통계성 처리로 인한 응답 지연 해소\n\n## 2. 반정규화 절차\n```mermaid\nflowchart LR\n  A[\"대상 조사\"] --> B[\"다른 방법 검토\"]\n  B -->|해결 불가| C[\"반정규화 적용\"]\n  C --> D[\"무결성 확보 방안\"]\n```\n| 단계 | 내용 |\n|---|---|\n| 대상 조사 | 범위 처리 빈도, 대량 범위 처리, 통계성 프로세스, 조인 개수 |\n| 다른 방법 검토 | [[database-view|뷰]], 클러스터링, [[index|인덱스]] 조정, 응용 처리 |\n| 적용 | 테이블·컬럼·관계 반정규화 |\n\n## 3. 반정규화 유형\n| 유형 | 기법 |\n|---|---|\n| 테이블 | 병합(1:1, 1:M, 슈퍼·서브타입), 분할(수직·수평), 추가(중복·통계·이력·부분) |\n| 컬럼 | 중복·파생·이력·PK 분리 컬럼 추가 |\n| 관계 | 중복 관계 추가로 조인 경로 단축 |\n\n## 4. 고려사항\n- 조회 성능 대비 입력·수정 부하·저장공간 증가, [[database-trigger|트리거]]·배치로 정합성 유지\n- 정규화 선행 후 성능 문제 확인 시 최소 범위 적용\n- [[data-warehouse|DW]]는 조회 위주로 [[star-schema|스타 스키마]] 등 반정규화 적극 적용\n",
+      "body": "## 반정규화\n[[normalization|정규화]]된 데이터 모델에서 조회 성능 등을 위해 중복 저장이나 관계 통합을 의도적으로 허용하는 설계다. 정규화가 중복과 갱신 이상을 줄이는 데 비해 반정규화는 읽기 비용과 정합성 관리 비용을 절충한다.\n\n| 절차 | 확인할 내용 |\n|---|---|\n| 대상 조사 | 실제 조회 빈도·조인·범위 처리와 응답시간 |\n| 대안 검토 | SQL·인덱스·캐시 등으로 병목 해소 가능한지 |\n| 제한적 적용 | 중복 컬럼·집계 테이블·테이블 통합 등 선택 |\n| 검증 | 읽기 성능, 쓰기 부하, 저장량, 정합성 유지 비용 |\n\n대표 유형은 자주 조회하는 속성 중복, 계산 결과·통계의 사전 저장, 조인 경로 단축을 위한 통합이다. 수평·수직 분할은 물리 설계 기법이며 그 자체가 반드시 정규형 위반인 것은 아니다.\n\n2NF는 후보키 일부에 대한 비주요 속성의 부분 함수 종속을 제거하고, 3NF는 비자명 함수 종속 X→A에서 X가 슈퍼키이거나 A가 주요 속성이어야 한다. 반정규화에서는 중복값의 원천·갱신 시점·오류 복구를 정한다. 조회 중심 DW에서도 성능을 측정한 뒤 적용하며, 조인이 많다는 이유만으로 무조건 반정규화하지 않는다.",
       "sources": [
         {
           "title": "UC Berkeley CS186 DB Design",
           "url": "https://cs186berkeley.net/notes/note13/",
-          "scope": "정규화·FD·3NF·BCNF와 중복"
-        },
-        {
-          "title": "MongoDB Data Modeling",
-          "url": "https://www.mongodb.com/docs/manual/data-modeling/",
-          "scope": "접근 패턴에 따른 embedding·중복 설계"
+          "scope": "함수 종속·정규형·중복에 따른 이상 대조. 반정규화 유형과 측정 절차는 seed 내용의 설계 요약."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 정규화·FD·3NF·BCNF와 중복; 접근 패턴에 따른 embedding·중복 설계 대조. unresolved는 검증 완료 아님.",
-      "unresolved": [
-        "국내 분류의 PK 분리·오작동 대비 컬럼 정의 원 출처 확인 필요"
-      ]
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 함수 종속·정규형·중복에 따른 이상 대조. 반정규화 유형과 측정 절차는 seed 내용의 설계 요약.",
+      "unresolved": []
     },
     "long": {
       "source_sha256": "3f0e8504aef1867f2155f0a899e0b657182aa56978bfdddb95320b1baeb0c22a",
@@ -3191,19 +3159,16 @@
   "t-1a0c4a9a": {
     "short": {
       "source_sha256": "7c8648529dc4555436d2669e57dc06cea99f78e417b6c3b0ac3a7e8cd13639a9",
-      "body": "## 1. 비즈니스 인텔리전스(BI)의 개요\n- 정의: 기업 내외부 데이터를 수집·통합·분석하여 의사결정에 필요한 정보를 적시에 제공하는 기술·프로세스·도구의 총칭\n- 필요성: 시스템별 분산 데이터로 경영 현황 파악 지연, 데이터 기반 의사결정 요구\n\n## 2. BI 구성도\n```mermaid\nflowchart LR\n  S[\"원천: ERP·CRM·외부\"] --> E[\"ETL\"]\n  E --> W[\"DW·데이터 마트\"]\n  W --> A[\"OLAP·리포팅·대시보드\"]\n  A --> U[\"의사결정자\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[etl|ETL]] | 추출·변환·적재, 데이터 정제 |\n| [[data-warehouse|DW]]·[[data-mart|데이터 마트]] | 주제별 통합 이력 데이터 저장 |\n| [[olap|OLAP]] | 다차원 분석(Drill-down, Slice) |\n| 리포팅·[[dashboard|대시보드]] | [[key-performance-indicator|KPI]] 시각화·정형 보고 |\n\n## 3. DW와 BI 비교\n| 구분 | DW | BI |\n|---|---|---|\n| 성격 | 분석용 데이터 저장소(인프라) | 데이터 활용 의사결정 체계 |\n| 핵심 | 주제지향·통합·시계열·비휘발 | 리포팅·OLAP·대시보드·마이닝 |\n| 관계 | BI의 데이터 기반 | DW 위의 분석 계층 |\n\n## 4. 발전방향\n- 과거 현황 분석 중심에서 예측·처방 중심 [[business-analytics|비즈니스 애널리틱스]]로 확장\n- 셀프서비스 BI, [[augmented-analytics|증강 분석]]으로 현업 직접 분석 확대\n",
+      "body": "## 비즈니스 인텔리전스\nBI는 기업 내외부 데이터를 통합·분석·시각화하여 업무 의사결정에 활용하는 기술·도구·프로세스다. 데이터가 저장되어 있다는 사실과 의사결정에 활용할 수 있다는 것은 구별된다.\n\n| 구성 | 역할 |\n|---|---|\n| [[etl|ETL]]·데이터 준비 | 원천 데이터 수집·정제·통합 |\n| [[data-warehouse|DW]]·데이터 마트 | 분석용 이력·주제별 데이터 제공 |\n| [[olap|OLAP]] | 관점·차원별 집계, 상세 수준 탐색 |\n| 보고서·[[dashboard|대시보드]] | KPI와 현황을 시각화·공유 |\n\nDW는 통합 분석 데이터를 관리하는 저장 기반이고, BI는 이를 비롯한 여러 데이터 원천을 활용해 정보를 전달하는 체계다. 따라서 DW와 BI는 대체 관계가 아니며 BI가 반드시 단일 DW에만 의존하는 것도 아니다.\n\nBusiness Analytics는 통계·예측·최적화 등 분석 활동을 강조하고, BI는 보고·모니터링·의사결정 지원을 강조하는 경우가 많다. 다만 제품과 조직에 따라 용어 범위가 겹치므로 ‘BI는 과거만, BA는 미래만’으로 단정하지 않는다.\n\n동일한 지표라도 집계 기준·갱신 시점·권한이 다르면 해석이 달라진다. 데이터 품질, KPI 정의와 출처, 접근권한을 함께 관리해야 한다.",
       "sources": [
         {
           "title": "Microsoft What is Power BI",
           "url": "https://learn.microsoft.com/en-us/power-bi/fundamentals/power-bi-overview",
-          "scope": "데이터 연결·준비·모델·보고서·대시보드·분석·공유"
+          "scope": "데이터 연결·준비·분석·시각화·공유 대조. BI/BA 경계는 제품마다 겹친다는 한계를 명시."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 데이터 연결·준비·모델·보고서·대시보드·분석·공유 대조. unresolved는 검증 완료 아님.",
-      "unresolved": [
-        "Dresner·Davenport 역사적 원 출처 확인 필요"
-      ]
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 데이터 연결·준비·분석·시각화·공유 대조. BI/BA 경계는 제품마다 겹친다는 한계를 명시.",
+      "unresolved": []
     },
     "long": {
       "source_sha256": "473c57efa57e1c1d9022162ac065c3101680c9a84006a30df3a1b18ad6320b24",
@@ -3225,23 +3190,17 @@
   "t-fbd91366": {
     "short": {
       "source_sha256": "905a543780d3ffa1c91d87665218e3519095e30eca6c8ef78f3ab8c3ed13cff2",
-      "body": "## 1. 스타 스키마(Star Schema)의 개요\n- 정의: 중앙의 [[fact-table|사실 테이블]]과 비정규화된 [[dimension-table|차원 테이블]]이 차원 1 : 사실 N으로 직접 연결된 별 모양의 [[dimensional-modeling|차원 모델]]\n- 필요성: [[data-warehouse|DW]]·[[olap|OLAP]]의 대량 집계 질의를 단순 조인으로 고속 처리\n\n## 2. 스타 스키마 구조\n```mermaid\nflowchart TB\n  F[\"매출 사실: 날짜키·상품키·고객키·매장키, 매출액·수량\"]\n  D1[\"날짜 차원\"] --- F\n  D2[\"상품 차원\"] --- F\n  D3[\"고객 차원\"] --- F\n  D4[\"매장 차원\"] --- F\n```\n| 구성요소 | 역할 |\n|---|---|\n| 사실 테이블 | 측정값(매출액·수량), 그레인에 맞는 식별키와 차원 FK |\n| 차원 테이블 | 분석 관점(시간·상품·고객), 계층 속성 포함 |\n| [[surrogate-key|대리키]] | 차원 식별, 이력 관리 지원 |\n\n## 3. 스타 스키마의 특징\n| 구분 | 내용 |\n|---|---|\n| 장점 | 1단계 조인으로 질의 단순·고속, 사용자 이해 용이 |\n| 단점 | 차원 중복으로 저장공간 증가, 갱신 시 정합성 부담 |\n| 비교 | [[snowflake-schema|스노우플레이크 스키마]]는 차원 정규화로 저장 효율↑, 조인↑ |\n\n## 4. 고려사항\n- 사실 테이블 그레인(Grain) 우선 정의, [[slowly-changing-dimension|SCD]] 유형 결정\n- [[bitmap-index|비트맵 인덱스]]·스타 조인 최적화 적용, 사실 테이블의 조회·보존 패턴에 따라 날짜 등 파티션 키 검토\n- 차원 공유(적합 차원)로 데이터 마트 간 일관된 분석 보장\n",
+      "body": "## 스타 스키마의 구조와 설계\n스타 스키마는 중앙의 [[fact-table|사실 테이블]]을 분석 관점별 [[dimension-table|차원 테이블]]과 직접 연결하는 차원 모델이다. 일반적인 관계는 차원 1 : 사실 N이며, 차원의 설명 속성으로 필터·그룹화하고 사실의 측정값을 집계한다.\n\n| 요소 | 매출 분석 예시·역할 |\n|---|---|\n| 그레인 | 사실 한 행이 의미하는 단위: 주문의 상품 항목별 판매 등 |\n| 사실 테이블 | 날짜·상품·고객 차원 외래키와 수량·매출액 저장 |\n| 차원 테이블 | 상품명·분류, 고객 속성, 날짜 계층 등 분석 기준 |\n| [[surrogate-key|대리키]] | 업무 키와 분리하여 차원 행을 식별하고 이력 구분 지원 |\n\n업무 프로세스와 그레인을 먼저 정한 뒤 차원·측정값을 선택한다. 서로 다른 그레인을 한 사실 테이블에 혼합하면 중복 집계가 발생할 수 있다. 차원 속성 변경은 덮어쓰기 또는 새 행 추가 등 [[slowly-changing-dimension|SCD]] 정책으로 관리한다.\n\n스노우플레이크는 차원 계층을 여러 테이블로 정규화하여 중복을 줄이지만 조인 경로가 늘어난다. 스타 구조는 질의와 이해를 단순화하지만 항상 빠른 실행을 보장하지 않는다. 사실 식별키는 그레인에 맞춰 정하며 차원 외래키 조합을 무조건 기본키로 삼지 않는다. 인덱스·파티션은 조회와 적재 패턴에 맞게 결정한다.",
       "sources": [
         {
-          "title": "Microsoft Star Schema Guidance",
+          "title": "Microsoft Star schema guidance",
           "url": "https://learn.microsoft.com/en-us/power-bi/guidance/star-schema",
-          "scope": "차원 1:사실 N, 그레인·대리키·SCD·차원/사실 역할"
-        },
-        {
-          "title": "Kimball Four-Step Design",
-          "url": "https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/four-4-step-design-process/",
-          "scope": "프로세스·그레인·차원·사실 순서"
+          "scope": "차원·사실 역할, 일대다·그레인·대리키·SCD·스노우플레이크"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 차원 1:사실 N, 그레인·대리키·SCD·차원/사실 역할; 프로세스·그레인·차원·사실 순서 대조. unresolved는 검증 완료 아님.",
+      "review_scope": "기존 교정의 관계 방향·그레인별 식별키·조건부 파티션을 보존. 제품 안내의 일반 모델 원리를 대조했으며 DB별 실행 성능은 검증하지 않음.",
       "unresolved": [
-        "Oracle Star Transformation 실제 적용 조건·비트맵 및 SCD Type3 원문 추가 대조 필요"
+        "Oracle 스타 변환·비트맵 인덱스의 제품별 적용 조건은 이번 범위에서 대조하지 않음."
       ]
     },
     "long": {
@@ -3269,19 +3228,16 @@
   "t-d26d30c1": {
     "short": {
       "source_sha256": "c4b493543e092849029539ae6e82b0b2495f9f0209c37bbcc861f77c1b1f6456",
-      "body": "## 1. 참조 무결성(Referential Integrity)의 개요\n- 정의: [[foreign-key|외래키]] 값은 NULL이거나 참조 릴레이션의 [[primary-key|기본키]]·UNIQUE 등 허용된 유일 키 값과 반드시 일치해야 한다는 [[relational-database|관계형 DB]] 무결성 제약\n- 필요성: 존재하지 않는 부모를 참조하는 고아 레코드 방지, 관계의 일관성 보장\n\n## 2. 참조 무결성 개념도\n```mermaid\nflowchart LR\n  C[\"자식: 주문(고객번호 FK)\"] -->|참조| P[\"부모: 고객(고객번호 PK)\"]\n  P -->|삭제·수정 시| R[\"규칙: Restrict·Cascade·Set Null\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 부모 테이블 | 참조되는 기본키 보유 |\n| 자식 테이블 | 외래키로 부모 참조 |\n| 참조 규칙 | 입력·수정·삭제 시 동작 정의 |\n\n## 3. 참조 무결성 규칙\n| 구분 | 규칙 | 동작 |\n|---|---|---|\n| 입력 | Dependent | 부모 존재 시에만 자식 입력 |\n| 입력 | Automatic | 부모 없으면 부모 자동 생성 후 입력하는 응용 정책; 표준 FK 자동 기능 아님 |\n| 삭제·수정 | Restrict | 자식 존재 시 부모 삭제·수정 거부 |\n| 삭제·수정 | Cascade | 자식도 연쇄 삭제·수정 |\n| 삭제·수정 | Set Null·Default | 자식 외래키를 NULL·기본값으로 변경 |\n\n## 4. 고려사항\n- 외래키 컬럼 [[index|인덱스]] 생성으로 잠금 경합·검증 비용 감소, Cascade 연쇄 삭제 범위 검토\n- 분산·[[microservices|MSA]] 환경은 DB 제약 대신 애플리케이션·이벤트 기반 정합성 확보\n",
+      "body": "참조 무결성은 자식 테이블의 [[foreign-key|외래키]]가 참조 대상의 유효한 키를 가리키도록 하는 관계 제약이다. 참조 대상은 DBMS가 허용하는 [[primary-key|기본키]]·유일 키이며, NULL 허용 여부와 복합키의 일치 규칙은 별도로 정한다.\n\n| 부모 키 삭제·변경 규칙 | 동작 |\n|---|---|\n| RESTRICT | 참조하는 행이 있으면 작업 거부 |\n| NO ACTION | 검사 시점에 제약 위반이면 오류; 지연 가능한 제약과 결합 가능 |\n| CASCADE | 관련 자식 행 삭제 또는 외래키 값 변경 |\n| SET NULL | 자식 외래키를 NULL로 설정; NOT NULL과 충돌하지 않아야 함 |\n| SET DEFAULT | 기본값으로 설정; 그 값도 참조 제약을 만족해야 함 |\n\n예를 들어 주문의 고객번호가 고객 테이블을 참조한다면, 존재하지 않는 고객번호의 주문을 입력할 수 없다. 고객 삭제 시 주문도 삭제할지, 삭제를 막을지, 관계를 비울지는 업무 규칙에 맞춰 선택한다. 외래키 제약이 없는 부모를 자동으로 생성해 주지는 않는다.\n\n연쇄 삭제의 파급 범위와 참조 컬럼 [[index|인덱스]]를 검토한다. PostgreSQL 18에서는 외래키 선언만으로 자식 참조 컬럼의 인덱스가 자동 생성되지 않는다. DBMS별 지연 검사·NULL 처리 차이도 확인해야 한다.",
       "sources": [
         {
           "title": "PostgreSQL 18 Constraints",
           "url": "https://www.postgresql.org/docs/18/ddl-constraints.html",
-          "scope": "참조 대상 PK/유일키·NULL·참조 동작·지연 검사"
+          "scope": "외래키·참조 대상·참조 동작·자식 인덱스"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 참조 대상 PK/유일키·NULL·참조 동작·지연 검사 대조. unresolved는 검증 완료 아님.",
-      "unresolved": [
-        "정보모델링 입력 규칙 명칭의 원 출처 확인 필요"
-      ]
+      "review_scope": "기존 교정의 PK 외 유일 키 허용과 부모 자동 생성 비표준 기능 구분을 유지하고 PostgreSQL 18 공식 문서를 대조했다.",
+      "unresolved": []
     },
     "long": {
       "source_sha256": "36c86be586980606b5c229fb9fc883165e255009bdf7a9ae9ea47af6eb43aa3f",
@@ -3303,27 +3259,18 @@
   "t-1eccda14": {
     "short": {
       "source_sha256": "617da0a4d113b0235400c1521326883388103697cc91ebe347a42aded923329e",
-      "body": "## 1. 팬텀 충돌(Phantom Conflict)의 개요\n- 정의: [[transaction|트랜잭션]]이 조건(술어)으로 읽은 튜플 집합에 다른 트랜잭션이 조건을 만족하는 튜플을 삽입·삭제하거나 조건 속성을 변경하여, 존재하지 않던 유령 튜플을 둘러싸고 발생하는 충돌\n- 원인: 튜플 단위 잠금은 아직 없는 튜플을 잠글 수 없어 기존 튜플만 대상으로 한 [[two-phase-locking|2PL]]만으로 [[serializability|직렬 가능성]] 보장 불가\n\n## 2. 팬텀 충돌 발생 과정\n```mermaid\nsequenceDiagram\n  participant T1\n  participant DB\n  participant T2\n  T1->>DB: SELECT SUM(잔액) WHERE 지점='A'\n  T2->>DB: INSERT 계좌(지점='A'), COMMIT\n  T1->>DB: SELECT COUNT(*) WHERE 지점='A'\n  DB-->>T1: 신규 튜플 포함, 결과 불일치\n```\n\n## 3. 해결 기법\n| 기법 | 내용 |\n|---|---|\n| [[predicate-locking|술어 잠금]] | 검색 조건 자체를 잠금, 구현 복잡 |\n| [[next-key-locking|넥스트 키 잠금]] | 인덱스 키와 앞 간격(Gap)을 함께 잠금 |\n| 테이블 잠금 | 잠금 단위 확대, 동시성 저하 |\n| [[serializable-isolation|SERIALIZABLE]] | 격리수준 상향, 잠금 또는 SSI로 방지 |\n\n## 4. 고려사항\n- ANSI [[repeatable-read|REPEATABLE READ]]는 [[phantom-read|팬텀 읽기]] 허용, MySQL InnoDB RR은 일반 읽기에 스냅샷, 범위 잠금 읽기에 gap/next-key lock을 사용\n- 격리수준 상향 시 동시성·처리량 저하, 업무 정합성 요구에 맞게 선택\n- 범위 조건 컬럼 인덱스 확보로 잠금 범위 최소화\n",
+      "body": "팬텀 충돌은 트랜잭션이 읽은 조건에 맞는 행 집합과 다른 트랜잭션의 삽입·삭제·조건값 변경 사이에서 생기는 충돌이다. 같은 조건의 조회를 반복했을 때 행 집합이 달라지는 현상을 [[phantom-read|팬텀 읽기]]라고 한다.\n\n예를 들어 T1이 `지점='A'`의 계좌 수를 조회한 뒤 T2가 A지점 계좌를 삽입·커밋하고, T1의 재조회가 이를 포함하면 팬텀 읽기다. 기존 행 값이 바뀌는 [[non-repeatable-read|반복 불가능 읽기]]와 달리 조건에 속하는 행 집합의 변화에 초점이 있다.\n\n| 대응 | 원리·주의점 |\n|---|---|\n| [[predicate-locking|술어·범위 보호]] | 조건을 만족할 수 있는 행·키 범위를 보호하여 새 행의 개입을 통제 |\n| [[next-key-locking|넥스트 키 잠금]] | 인덱스 레코드와 간격을 함께 잠그는 구현 방식 |\n| [[snapshot-isolation|스냅샷]] | 일관된 버전으로 반복 조회; 팬텀을 안 보여도 모든 직렬화 이상을 막는 것은 아님 |\n| [[serializable-isolation|직렬 가능 격리]] | 잠금 또는 의존성 검사·재시도로 직렬 실행과 같은 결과 보장 |\n\n기존 행에만 거는 잠금으로는 아직 없는 행을 보호하지 못할 수 있다. SQL 표준의 REPEATABLE READ 허용 범위와 제품 구현을 구분한다. PostgreSQL 18의 REPEATABLE READ는 팬텀 읽기를 막지만 직렬화 이상까지 모두 막지는 않는다.",
       "sources": [
         {
           "title": "PostgreSQL 18 Transaction Isolation",
           "url": "https://www.postgresql.org/docs/18/transaction-iso.html",
-          "scope": "팬텀 정의·표준 허용과 PG SSI 구현"
-        },
-        {
-          "title": "MySQL 8.0 Isolation Levels",
-          "url": "https://dev.mysql.com/doc/refman/8.0/en/innodb-transaction-isolation-levels.html",
-          "scope": "일관된 읽기·범위 잠금 차이"
-        },
-        {
-          "title": "Oracle 19c Concurrency and Consistency",
-          "url": "https://docs.oracle.com/en/database/oracle/oracle-database/19/cncpt/data-concurrency-and-consistency.html",
-          "scope": "문장 수준과 트랜잭션 수준 스냅샷 구분"
+          "scope": "팬텀 정의·표준과 제품 차이·직렬화 이상"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 팬텀 정의·표준 허용과 PG SSI 구현; 일관된 읽기·범위 잠금 차이; 문장 수준과 트랜잭션 수준 스냅샷 구분 대조. unresolved는 검증 완료 아님.",
-      "unresolved": []
+      "review_scope": "SHORT·두 문항과 PostgreSQL 18 공식 격리수준 표를 대조했다. 팬텀 방지와 직렬가능성을 구별했다.",
+      "unresolved": [
+        "MySQL의 넥스트 키 잠금별 세부 적용·예외는 이번에 별도 대조하지 않았다."
+      ]
     },
     "long": {
       "source_sha256": "b84e7f5db77121a5257af1f002aa0dfa620aaf96c8702bb16b1e062f744d68ce",
@@ -3353,23 +3300,22 @@
   "t-aa89a5d3": {
     "short": {
       "source_sha256": "3ac056af009ed8376e23927f35b13c42b63f9a0873fc10ad488c20b99209f5da",
-      "body": "## 1. 확장성 해싱(Extendible Hashing)의 개요\n- 정의: [[hash-function|해시 함수]] 값의 상위(또는 하위) d비트로 디렉터리를 색인하고, 오버플로 시 버킷 분할·디렉터리 배가로 동적 확장하는 [[dynamic-hashing|동적 해싱]] 기법(Fagin 외, 1979)\n- 필요성: [[static-hashing|정적 해싱]]은 데이터 증가 시 [[bucket-overflow|오버플로]] 체인·전체 재구성 필요\n\n## 2. 구조 및 구성요소\n```mermaid\nflowchart LR\n  K[\"키 → h(k) 비트열\"] --> D[\"디렉터리: 전역 깊이 d=2\"]\n  D -->|00, 01| B1[\"버킷 A: 지역 깊이 1\"]\n  D -->|10| B2[\"버킷 B: 지역 깊이 2\"]\n  D -->|11| B3[\"버킷 C: 지역 깊이 2\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 디렉터리 | 2^d개 버킷 포인터 배열 |\n| 전역 깊이(d) | 디렉터리 색인에 쓰는 비트 수 |\n| 지역 깊이(d') | 버킷 레코드가 공유하는 비트 수 |\n| [[hash-bucket|버킷]] | 레코드 저장 페이지 |\n\n## 3. 오버플로 처리(충돌 회피)\n| 조건 | 처리 |\n|---|---|\n| d' < d | 버킷만 분할, d'+1, 포인터 재지정 |\n| d' = d | 디렉터리 배가(d+1) 후 버킷 분할 |\n| 동일 해시값 과다 | 오버플로 버킷 연결 |\n\n## 4. 고려사항\n- 오버플로 체인 없는 기본 모델에서 디렉터리 1회+버킷 1회=최대 2회 페이지 접근(디렉터리 메모리 상주 시 버킷 1회), 재구성 없이 점진 확장\n- 해시값 편중 시 디렉터리 급증 → 균등 해시 함수, [[linear-hashing|선형 해싱]] 검토\n",
+      "body": "확장성 해싱은 해시값의 일부 비트로 디렉터리를 찾아 [[hash-bucket|버킷]]에 접근하고, 버킷이 차면 분할하여 늘리는 [[dynamic-hashing|동적 해싱]]이다. 전체 파일을 매번 재구성하지 않고 필요한 부분을 확장한다.\n\n| 구성 | 의미 |\n|---|---|\n| 전역 깊이 d | 디렉터리 색인에 사용하는 비트 수, 엔트리 수는 2^d |\n| 지역 깊이 l | 특정 버킷을 구별하는 비트 수, l≤d |\n| 디렉터리 | 버킷 포인터 배열; 여러 엔트리가 한 버킷을 공유 가능 |\n| 버킷 | 실제 레코드를 저장하는 단위 |\n\n버킷 오버플로 시 l<d이면 버킷을 둘로 나누고 지역 깊이를 l+1로 올린 뒤 해당 포인터와 레코드를 재분배한다. l=d이면 디렉터리를 배가하여 d를 1 늘린 후 분할한다. 상위 비트 또는 하위 비트 방식 중 하나를 일관되게 사용한다.\n\n분할은 같은 버킷으로 몰린 키를 더 많은 비트로 구별하는 처리이며 [[linear-probing|선형 조사]] 같은 개방 주소법과 구별한다. 동일 해시값이 계속 겹치면 분할만으로 해결되지 않아 구현별 예외 처리가 필요하다. 기본 모델의 최대 2회 페이지 접근은 디렉터리와 버킷 접근을 뜻하며, 오버플로 체인 등 확장 구현에 무조건 적용하지 않는다. 해시 편중은 디렉터리 크기와 분할 비용을 늘릴 수 있다.",
       "sources": [
         {
           "title": "NIST Extendible Hashing",
           "url": "https://xlinux.nist.gov/dads/HTML/extendibleHashing.html",
-          "scope": "공유 버킷·분할·디렉터리 배가·축소"
+          "scope": "공유 버킷·분할·배가"
         },
         {
-          "title": "IBM Research Fagin et al. 1979",
+          "title": "Fagin et al. 1979, IBM Research",
           "url": "https://research.ibm.com/publications/extendible-hashinga-fast-access-method-for-dynamic-files",
-          "scope": "발표 서지·모델상 최대 2회 페이지 접근"
+          "scope": "모델의 최대 두 페이지 접근"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전문 및 예시를 읽고 공유 버킷·분할·디렉터리 배가·축소; 발표 서지·모델상 최대 2회 페이지 접근 대조. unresolved는 검증 완료 아님.",
+      "review_scope": "기존 SHORT의 기본 모델 한정 최대 2회 접근 교정을 유지했다. NIST 및 원저자 소속기관의 논문 초록을 대조했다.",
       "unresolved": [
-        "전체 논문의 동일 해시값 예외 처리·삭제 세부 증명 추가 대조 필요"
+        "원논문 전문의 동일 해시값 예외 처리와 삭제·축소 증명은 확인하지 않았다."
       ]
     },
     "long": {
@@ -6371,22 +6317,18 @@
   "t-91283bc5": {
     "short": {
       "source_sha256": "1a2544421aa664902f56535ad30db7255d27a5dc22a91b3bffb30b244f8432fc",
-      "body": "## 1. 모바일 운영체제의 개요\n- 정의: 스마트폰·태블릿 등 휴대 단말의 하드웨어 자원을 관리하고 앱 실행 환경·통신·사용자 인터페이스를 제공하는 운영체제\n- 필요성: 제한된 배터리·메모리 환경에서 다중 앱 실행, 상시 연결, 개인정보 보호 요구\n\n## 2. 모바일 OS의 구조\n```mermaid\nflowchart TB\n  A[\"애플리케이션·앱 스토어\"] --> F[\"애플리케이션 프레임워크\"]\n  F --> R[\"런타임·라이브러리\"]\n  R --> H[\"HAL\"]\n  H --> K[\"커널: 전력·메모리·드라이버\"]\n```\n| 주요기술 | 내용 |\n|---|---|\n| 전력 관리 | 웨이크락 제어, 대기 모드(Doze), 앱 백그라운드 제한 |\n| 메모리 관리 | Android에서는 zRAM 등 메모리 회수와 [[low-memory-killer|저메모리 킬러]]로 우선순위 낮은 앱 종료 |\n| 보안 | 앱 [[sandbox|샌드박스]], 권한 모델, [[secure-boot|시큐어부트]], [[trusted-execution-environment|TEE]] |\n| 배포·갱신 | [[app-store|앱 스토어]] 심사, [[over-the-air-update|OTA 업데이트]] |\n\n## 3. 대표 모바일 OS 비교\n| 구분 | [[android|안드로이드]] | [[ios|iOS]] |\n|---|---|---|\n| 개방성 | [[open-source-software|오픈소스]](AOSP) | 제품 OS는 비공개 중심, XNU 등 일부 구성요소는 공개 |\n| 커널 | 리눅스 | XNU |\n| 장점 | 제조사 다양성, 커스터마이징 | HW·SW 통합 최적화, 보안 |\n| 단점 | [[device-fragmentation|단말 파편화]] | 생태계 종속 |\n\n## 4. 발전전망\n- [[on-device-ai|온디바이스 AI]], 웨어러블·차량·IoT로 확장되는 멀티디바이스 연속성, 앱 마켓 개방 규제 대응\n",
+      "body": "## 모바일 운영체제\n스마트폰 등 휴대 기기의 하드웨어 자원을 관리하고 앱 실행·통신·사용자 인터페이스를 제공하는 운영체제다. 전력·메모리 제약과 앱 간 격리를 함께 다룬다.\n\n| 계층·기술 | 역할 |\n|---|---|\n| 커널·드라이버 | 프로세스·메모리·장치·전력 관리 |\n| HAL | 하드웨어별 구현을 상위 서비스와 분리 |\n| 런타임·라이브러리 | 앱 실행과 공통 기능 제공 |\n| 프레임워크·API | 앱이 시스템 서비스를 사용하도록 지원 |\n| 보안·갱신 | 앱 격리·권한 통제·OS 업데이트 |\n\n[[android|Android]]의 AOSP는 소스 공개·수정이 가능한 플랫폼이다. 다만 Google 서비스나 모든 제조사 구성요소까지 공개된다는 뜻은 아니다. [[ios|iOS]]는 제품 플랫폼이 비공개 중심이며 공개 API를 통해 앱을 개발하지만 일부 기반 구성요소의 공개 여부와 구별해야 한다.\n\n소스 공개형은 기기별 수정과 이식에 유리한 반면 구현 차이·호환성 관리가 필요하다. API 제공 중심 플랫폼은 제공자가 지원하는 범위에 개발이 제약된다. Doze·저메모리 킬러 등의 구체 구현은 OS별 사례이지 모든 모바일 OS의 공통 구조가 아니다.",
       "sources": [
         {
-          "title": "AOSP Low memory killer daemon",
-          "url": "https://source.android.com/docs/core/perf/lmkd",
-          "scope": "userspace lmkd 및 메모리 압력 대응; Android 사례를 모바일 OS 전체로 일반화하지 않음"
-        },
-        {
-          "title": "webOS OSE Introduction",
-          "url": "https://www.webosose.org/about/overview/introduction/",
-          "scope": "2018년 공개된 webOS OSE를 폐쇄형 모바일 플랫폼 목록과 구분"
+          "title": "AOSP Architecture overview",
+          "url": "https://source.android.com/docs/core/architecture",
+          "scope": "AOSP 공개 범위·계층·Android 호환성 구별 대조. iOS 세부 구현·기출 당시 모든 GPOS 분류는 미대조."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; userspace lmkd 및 메모리 압력 대응; Android 사례를 모바일 OS 전체로 일반화하지 않음 대조 및 단정·조건 생략 교정. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
-      "unresolved": []
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. AOSP 공개 범위·계층·Android 호환성 구별 대조. iOS 세부 구현·기출 당시 모든 GPOS 분류는 미대조.",
+      "unresolved": [
+        "iOS와 기출 당시 개별 GPOS의 공개 범위는 각 제품·버전 원문을 추가 대조해야 함."
+      ]
     },
     "long": {
       "source_sha256": "0e4e2385edb408c6f5376a23c68c8277af5ea3698387e5a1f028cbfde41ea02e",
@@ -6411,22 +6353,23 @@
   "t-7d65033f": {
     "short": {
       "source_sha256": "9779cba89c25d1c9e94755cf0235926c4a552e4b7ce2e8e8f1704bcbc1fac56f",
-      "body": "## 1. 안드로이드의 개요\n- 정의: [[linux|리눅스]] 커널 위에 [[hardware-abstraction-layer|HAL]]·런타임·프레임워크를 계층화한 구글 주도의 [[open-source-software|오픈소스]] 모바일 플랫폼\n- 특징: 앱별 프로세스·UID [[sandbox|샌드박스]], [[android-intent|인텐트]] 기반 컴포넌트 연계\n\n## 2. 안드로이드 시스템 구조\n```mermaid\nflowchart TB\n  A[\"시스템·사용자 앱\"] --> F[\"Java API 프레임워크\"]\n  F --> R[\"ART·네이티브 C/C++ 라이브러리\"]\n  R --> H[\"HAL\"]\n  H --> K[\"리눅스 커널·Binder 드라이버\"]\n```\n| 계층 | 구성요소 |\n|---|---|\n| 앱 | 전화·메시지·사용자 앱 |\n| 프레임워크 | Activity·Window·Package·Notification Manager |\n| 런타임·라이브러리 | [[android-runtime|ART]], [[sqlite|SQLite]], OpenGL ES·Vulkan, 미디어 |\n| 커널 | 드라이버, 전력·메모리 관리, [[binder-ipc|Binder IPC]] |\n\n## 3. 4대 컴포넌트\n| 컴포넌트 | 역할 |\n|---|---|\n| [[android-activity|액티비티]] | 사용자 화면 단위 |\n| [[android-service|서비스]] | 화면 없는 백그라운드 작업 |\n| [[broadcast-receiver|브로드캐스트 리시버]] | 시스템·앱 이벤트 수신 |\n| [[content-provider|콘텐츠 프로바이더]] | 앱 간 데이터 공유 |\n\n## 4. 고려사항\n- [[device-fragmentation|단말 파편화]] 대응 호환성 시험, 런타임 권한·백그라운드 실행 제한 준수, 보안 업데이트 적용\n",
+      "body": "## 안드로이드 구조와 앱 모델\n안드로이드는 [[linux|Linux]] 커널 위에 하드웨어 추상화·실행환경·응용 프레임워크를 제공하는 플랫폼이다. 기본적으로 앱별 UID와 프로세스로 격리하고, 필요한 컴포넌트를 시스템이 수명주기에 따라 실행한다.\n\n| 계층 | 주요 역할 |\n|---|---|\n| 앱·API 프레임워크 | 화면·알림·패키지·자원 등 앱 기능과 공통 서비스 |\n| [[android-runtime|ART]]·네이티브 라이브러리 | DEX 실행, 메모리 회수, 미디어·그래픽 등의 기반 기능 |\n| [[hardware-abstraction-layer|HAL]] | 하드웨어별 기능을 상위 계층에 표준 인터페이스로 제공 |\n| 커널 | 프로세스·메모리·전력·장치 드라이버 등 운영체제 기능 |\n\n| 앱 컴포넌트 | 역할 |\n|---|---|\n| [[android-activity|Activity]] | 사용자와 상호작용하는 진입점·화면 |\n| [[android-service|Service]] | UI 없는 작업·다른 컴포넌트에 기능 제공 |\n| [[broadcast-receiver|BroadcastReceiver]] | 시스템·앱의 브로드캐스트에 반응 |\n| [[content-provider|ContentProvider]] | URI와 접근권한을 통해 데이터 제공 |\n\nActivity·Service·Receiver는 Intent로 활성화할 수 있고 Provider는 ContentResolver를 통해 접근한다. Manifest에서 컴포넌트·권한 등을 선언한다. Service 자체가 별도 스레드를 뜻하지 않으며 백그라운드 실행은 OS·대상 API의 제한을 따른다. 과거 Dalvik 설명과 현재 ART 구조를 구별하고 기기·버전별 호환성을 확인한다.",
       "sources": [
+        {
+          "title": "Android Platform architecture",
+          "url": "https://developer.android.com/guide/platform",
+          "scope": "커널·HAL·ART·프레임워크 계층"
+        },
         {
           "title": "Android Application fundamentals",
           "url": "https://developer.android.com/guide/components/fundamentals",
-          "scope": "AAB 배포 형식/APK 설치 형식 구분, 앱 컴포넌트와 샌드박스"
-        },
-        {
-          "title": "AOSP lmkd",
-          "url": "https://source.android.com/docs/core/perf/lmkd",
-          "scope": "커널 LMK에서 사용자 공간 lmkd로 변경"
+          "scope": "앱 격리·네 컴포넌트·Intent·ContentResolver·Manifest"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; AAB 배포 형식/APK 설치 형식 구분, 앱 컴포넌트와 샌드박스 대조 및 단정·조건 생략 교정. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
-      "unresolved": []
+      "review_scope": "기존 격리·컴포넌트 설명을 유지하며 공식 문서로 구조와 활성화 경로 대조. Service=별도 스레드 오해 방지.",
+      "unresolved": [
+        "API 버전별 백그라운드 실행 예외 및 실제 기기 동작은 검증하지 않음."
+      ]
     },
     "long": {
       "source_sha256": "8ed65a6e8d5b6d51e8c14851adf273f662f57af9f86a731a92589745bae70a01",
@@ -6451,16 +6394,20 @@
   "t-3a97c2be": {
     "short": {
       "source_sha256": "4175e1d0b6bc853efbab35bd7ee043638558e98862c5b0ec1095e673bc193f85",
-      "body": "## 1. 은행가 알고리즘의 개요\n- 정의: 자원 요청을 가상으로 할당해 본 뒤 시스템이 [[safe-state|안전 상태]]를 유지할 때만 실제 할당하는 Dijkstra의 [[deadlock|교착상태]] 회피 알고리즘\n- 필요성: 예방 기법보다 유연한 자원 할당을 목표로 [[multiprogramming|다중 프로그래밍]] 환경의 교착상태 방지\n\n## 2. 은행가 알고리즘의 동작 개념도 및 자료구조\n```mermaid\nflowchart LR\n  R[\"Request_i\"] --> C1{\"Request ≤ Need?\"}\n  C1 -->|예| C2{\"Request ≤ Available?\"}\n  C2 -->|예| T[\"가상 할당\"]\n  T --> S{\"안전 상태?\"}\n  S -->|예| G[\"할당 확정\"]\n  S -->|아니오| W[\"복구 후 대기\"]\n  C2 -->|아니오| W\n```\n| 자료구조 | 의미 |\n|---|---|\n| Available[m] | 자원 유형별 가용 수 |\n| Max[n][m] | [[process|프로세스]]별 최대 요구량 |\n| Allocation[n][m] | 현재 할당량 |\n| Need[n][m] | Max - Allocation |\n\n## 3. 안전성 검사\n- Work = Available, Need_i ≤ Work인 미완료 프로세스를 골라 Work += Allocation_i 반복\n- 모든 프로세스 완료 가능하면 안전 순서열 존재 → 안전 상태, 복잡도 O(m×n²)\n\n## 4. 고려사항\n- 최대 요구량 사전 신고, 단순 설명 모델은 프로세스·자원 수 고정 가정, 검사 오버헤드로 범용 OS 적용 제한\n",
+      "body": "## 은행원 알고리즘과 안전성 검사\n은행원 알고리즘은 자원 요청을 가상 할당한 뒤 모든 프로세스가 종료할 수 있는 순서가 남아 있을 때만 실제 배정하는 [[deadlock|교착상태]] 회피 기법이다. [[safe-state|안전 상태]]는 그런 순서가 존재하는 상태이며, 불안전 상태가 곧 현재 교착상태라는 뜻은 아니다.\n\n| 자료 | 의미 |\n|---|---|\n| Available | 자원 유형별 현재 가용량 |\n| Max | 프로세스별 사전 선언한 최대 요구량 |\n| Allocation | 프로세스별 현재 할당량 |\n| Need | Max−Allocation, 추가로 필요할 수 있는 양 |\n\n요청 Rᵢ가 Needᵢ를 넘으면 잘못된 요청이다. Rᵢ≤Needᵢ이나 Available보다 크면 대기한다. 둘을 만족하면 Available−Rᵢ, Allocationᵢ+Rᵢ, Needᵢ−Rᵢ로 가상 변경하고 안전성을 검사한다. 안전하지 않으면 되돌리고 대기시킨다. 벡터 비교는 모든 자원 성분에 대해 수행한다.\n\n안전성 검사는 Work←Available로 시작한다. 미완료 프로세스 중 Needᵢ≤Work인 것을 골라 완료를 가정하고 Work←Work+Allocationᵢ로 자원을 반환한다. 모든 프로세스를 완료 표시할 수 있으면 안전하다.\n\n단순 반복 구현은 프로세스 n개·자원 종류 m개에 O(mn²)이다. 최대 요구량 사전 파악과 종료 후 자원 반환이 전제이며, 검사 비용·대기·보수적 할당 때문에 자원 이용률 향상을 무조건 보장하지 않는다.",
       "sources": [
+        {
+          "title": "Dijkstra EWD623",
+          "url": "https://www.cs.utexas.edu/~EWD/transcriptions/EWD06xx/EWD623.html",
+          "scope": "은행원 알고리즘의 안전성·순서 조건"
+        },
         {
           "title": "UIC Operating Systems: Deadlocks",
           "url": "https://www.cs.uic.edu/~jbell/CourseNotes/OperatingSystems/7_Deadlocks.html",
-          "scope": "Available/Need/Work 및 안전성 알고리즘, 최대 요구량 사전 신고"
+          "scope": "다종 자원 자료구조·요청·안전성 알고리즘"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; Available/Need/Work 및 안전성 알고리즘, 최대 요구량 사전 신고 대조 및 단정·조건 생략 교정. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
+      "review_scope": "기존 자원 이용률·고정 자원 가정 교정을 유지. 원저자 설명과 대학 강의의 다종 자원 절차를 대조.",
       "unresolved": []
     },
     "long": {
@@ -6481,18 +6428,17 @@
   "t-1d11a34d": {
     "short": {
       "source_sha256": "00128e957975bd26a3dfc7e365c837f1673960aa32167081625912ebf41cc995",
-      "body": "## 1. 임베디드 소프트웨어의 개요\n- 정의: 특정 하드웨어에 내장되어 제한된 자원에서 정해진 기능을 수행하며 용도에 따라 실시간성·고신뢰성이 요구되는 소프트웨어\n- 특징: 용도에 따른 실시간성, 메모리·전력 제약, 하드웨어 의존성, 고신뢰·[[functional-safety|기능안전]] 요구\n\n## 2. 개발환경 개념도 및 구성요소\n```mermaid\nflowchart LR\n  H[\"호스트 PC: IDE·크로스 컴파일러·디버거\"] -->|\"JTAG·ICE·시리얼\"| T[\"타깃 보드\"]\n  T --> B[\"부트로더·BSP\"]\n  B --> R[\"RTOS·임베디드 리눅스\"]\n  R --> A[\"미들웨어·응용\"]\n```\n| 구분 | 구성요소 |\n|---|---|\n| 호스트 개발환경 | IDE, [[cross-compiler|크로스 컴파일러]], [[debugger|디버거]], 시뮬레이터 |\n| 연결·디버깅 | [[jtag|JTAG]], [[in-circuit-emulator|ICE]], 시리얼·이더넷 |\n| 타깃 시스템 SW | [[bootloader|부트로더]], [[board-support-package|BSP]], [[rtos|RTOS]], [[device-driver|장치 드라이버]] |\n| 미들웨어·응용 | 통신 스택, 파일 시스템, GUI, 응용 로직 |\n\n## 3. 품질·생산성 향상 기법\n| 기법 | 내용 |\n|---|---|\n| 모델 기반 개발 | 모델 시뮬레이션·[[code-generation|코드 자동 생성]], MIL→SIL→PIL→[[hardware-in-the-loop|HIL]] |\n| 표준·정적 검증 | [[misra-c|MISRA C]], [[static-analysis|정적 분석]], [[iso-26262|ISO 26262]] |\n\n## 4. 고려사항\n- 하드웨어 확정 전 가상 플랫폼 병행 개발, [[over-the-air-update|OTA]]·보안 부트로 출시 후 유지보수 체계 확보\n",
+      "body": "## 임베디드 소프트웨어와 개발환경\n임베디드 소프트웨어는 특정 장치에 내장되어 하드웨어와 상호작용하며 정해진 기능을 수행하는 소프트웨어다. 메모리·전력·처리능력 제약과 장치 의존성이 크며, 실시간성·고신뢰성·기능안전 요구는 용도에 따라 달라진다.\n\n| 환경·계층 | 주요 구성과 역할 |\n|---|---|\n| 호스트 | IDE·[[cross-compiler|크로스 컴파일러]]·링커·디버거로 개발·빌드 |\n| 연결 수단 | JTAG·시리얼·네트워크 등으로 다운로드·상태 확인 |\n| 타깃 기반 SW | 부트로더, 보드 지원·장치 드라이버 |\n| 실행환경 | 필요에 따라 RTOS·임베디드 OS, 스케줄링·동기화 |\n| 미들웨어·응용 | 통신·저장·화면 기능과 장치의 제어 로직 |\n\n요구·제약 분석 → HW/SW 기능 분할 → 설계·구현 → 호스트 시험 → 타깃 통합·시간·자원 검증 → 출시·유지보수로 진행한다. 크로스 빌드는 개발 호스트와 다른 타깃 환경용 실행 파일을 만드는 방식이다.\n\n정적 분석·단위 시험과 모델 시뮬레이션을 조합하고, 실제 하드웨어 입력·출력과 시간 제약은 타깃 또는 HIL 환경에서 확인한다. 모든 장치에 RTOS가 필요한 것은 아니다. 보안 부트·업데이트·복구를 수명주기에 포함하고, ISO 26262 같은 산업별 표준은 적용 제품·범위를 확인한 뒤 사용한다.",
       "sources": [
         {
-          "title": "Zephyr Introduction",
+          "title": "Zephyr Project Introduction",
           "url": "https://docs.zephyrproject.org/latest/introduction/index.html",
-          "scope": "자원 제약 임베디드 커널·드라이버·스케줄링·동기화 구성의 실제 사례"
+          "scope": "자원 제약 임베디드 OS, 커널·스케줄링·동기화·드라이버 구성"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; 자원 제약 임베디드 커널·드라이버·스케줄링·동기화 구성의 실제 사례 대조 및 단정·조건 생략 교정. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
+      "review_scope": "기존 용도별 실시간성 교정을 보존. 공식 임베디드 OS 문서로 실행환경 구성의 실제 예를 대조하며 특정 OS를 모든 장치 필수로 서술하지 않음.",
       "unresolved": [
-        "안전·사이버보안 규정 및 MIL/SIL/PIL/HIL의 산업별 적용 상세는 원문 미대조."
+        "산업별 안전 표준 전문, MIL/SIL/PIL/HIL 세부 절차·도구 및 최신 산업 동향은 별도 검증하지 않음."
       ]
     },
     "long": {
@@ -6515,16 +6461,15 @@
   "t-1655cf3a": {
     "short": {
       "source_sha256": "1e561afca48f8aa5826f89a149e757f225b8f5842f0dbcd4db7ebc23402fc9dc",
-      "body": "## 1. 페이지 교체 알고리즘의 개요\n- 정의: [[page-fault|페이지 부재]] 발생 시 빈 프레임이 없을 때 주기억장치에서 내보낼 희생(Victim) 페이지를 선택하는 기법\n- 사용 이유: [[demand-paging|요구 페이징]]에서 프레임 부족 해소, 부재율 최소화로 유효 접근 시간 단축, Dirty 페이지 기록 비용 절감\n\n## 2. 페이지 교체 개념도 및 구성요소\n```mermaid\nflowchart LR\n  F[\"페이지 부재\"] --> V[\"희생 페이지 선택\"]\n  V -->|\"Dirty=1\"| O[\"디스크 기록\"]\n  V -->|\"Dirty=0\"| I[\"새 페이지 적재\"]\n  O --> I\n  I --> U[\"페이지 테이블 갱신·재실행\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 참조 비트 | 최근 사용 여부, 교체 근사 판단 |\n| 변경(Dirty) 비트 | 기록 필요 여부 |\n| 교체 정책 | 희생 페이지 선정 규칙 |\n\n## 3. 주요 알고리즘\n| 알고리즘 | 동작 | 특징 |\n|---|---|---|\n| [[optimal-page-replacement|OPT]] | 가장 오래 사용하지 않을 페이지 교체 | 최소 부재, 구현 불가(기준) |\n| [[fifo|FIFO]] | 가장 먼저 적재된 페이지 교체 | 단순, [[belady-anomaly|FIFO Anomaly]] |\n| [[lru|LRU]] | 가장 오래 참조되지 않은 페이지 교체 | 지역성 반영, 오버헤드 |\n| [[least-frequently-used|LFU]] | 참조 횟수 최소 페이지 교체 | 초기 집중 참조 문제 |\n| [[second-chance-algorithm|SCR(Clock)]] | 참조 비트 1이면 0으로 바꾸고 기회 부여 | LRU 근사, 실용적 |\n\n## 4. 고려사항\n- 지역 교체 정책과 [[working-set|워킹셋]] 기반 할당으로 [[thrashing|스래싱]] 방지, 하드웨어 참조 비트 활용 근사 기법 채택\n",
+      "body": "페이지 교체는 [[page-fault|페이지 부재]] 처리 시 사용 가능한 프레임이 부족할 때 메모리에서 내보낼 페이지를 선택하는 정책이다. 필요한 페이지를 적재하고 페이지 테이블을 갱신하며, 변경된 페이지는 필요한 경우 저장장치에 기록한다.\n\n| 알고리즘 | 희생 페이지 선택 |\n|---|---|\n| [[optimal-page-replacement|OPT]] | 미래에 가장 늦게 참조될 페이지; 실제 미래를 알 수 없어 비교 기준으로 사용 |\n| [[fifo|FIFO]] | 메모리에 가장 먼저 들어온 페이지 |\n| [[lru|LRU]] | 과거에 가장 오래 참조되지 않은 페이지 |\n| [[least-frequently-used|LFU]] | 참조 횟수가 가장 적은 페이지; 오래된 이력의 편향 주의 |\n| [[second-chance-algorithm|Second Chance]] | FIFO 후보의 참조 비트가 1이면 0으로 바꾸어 한 번 더 기회를 줌 |\n\nClock은 원형 목록과 포인터로 Second Chance를 구현하는 대표 방식이다. 포인터가 참조 비트 1을 만나면 0으로 바꾸고 전진하며, 0인 후보를 교체한다. 실제 LRU 순서를 완전히 유지하는 방식은 아니다.\n\n[[belady-anomaly|FIFO 이상 현상]]은 같은 참조열에서 프레임을 늘렸는데 페이지 부재가 증가할 수 있는 현상이다. 부재 횟수뿐 아니라 변경 페이지 기록 비용과 관리 오버헤드를 함께 고려한다. 프로세스들의 작업 집합에 비해 프레임이 부족하면 교체 정책만 바꿔도 스래싱을 해결하지 못할 수 있다.",
       "sources": [
         {
-          "title": "OSTEP 22: Page Replacement",
+          "title": "OSTEP Ch.22 Beyond Physical Memory: Policies",
           "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys-policy.pdf",
-          "scope": "교체 정책과 메모리 압력; FIFO/LRU/OPT·Belady 예제는 별도 Python 시뮬레이션으로 재계산"
+          "scope": "OPT·FIFO·LRU·Clock·메모리 부족"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; 교체 정책과 메모리 압력; FIFO/LRU/OPT·Belady 예제는 별도 Python 시뮬레이션으로 재계산 대조. 페이지 교체 예제 15/12/9회 및 Belady 9/10회는 Python으로 재계산. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
+      "review_scope": "SHORT·두 문항을 읽고 저자 공개 운영체제 교재의 교체 정책을 대조했다. Clock을 LRU의 정확 구현으로 단정하지 않았다.",
       "unresolved": []
     },
     "long": {
@@ -6545,22 +6490,28 @@
   "t-6b20c5f8": {
     "short": {
       "source_sha256": "9fd77668896d9df0da788dae19dc5cf0631d04f99a080c7c0470263695e68a78",
-      "body": "## 1. IPC의 개요\n- 정의: 독립된 주소 공간을 가진 [[process|프로세스]] 간 데이터 교환과 [[process-synchronization|동기화]]를 위해 [[kernel|커널]]이 제공하는 통신 메커니즘\n- 목적: 정보 공유, 병렬 처리로 계산 속도 향상, 기능별 프로세스 분리(모듈화)·장애 격리\n\n## 2. IPC 개념도 및 주요 기법\n```mermaid\nflowchart LR\n  A[프로세스 A] -->|write| SM[(공유 메모리)]\n  SM -->|read| B[프로세스 B]\n  A -->|send| K[커널 메시지 큐·파이프]\n  K -->|receive| B\n```\n| 기법 | 특징 |\n|---|---|\n| [[shared-memory|공유 메모리]] | 동일 물리 메모리 매핑, 매핑 후 데이터 전달 시 커널 복사를 줄일 수 있음, 동기화 직접 구현 |\n| [[message-passing|메시지 전달]] | [[message-queue|메시지 큐]] 경유 send/receive, 큐 연산·블로킹은 커널이 제공하나 응용의 실행 순서·공유 데이터 동기화는 별도 설계 |\n| [[pipe|파이프]]·[[socket|소켓]] | 파이프는 바이트 스트림, 소켓은 스트림·데이터그램 등 유형별 의미가 다름. 파이프는 단방향·로컬, 소켓은 양방향·원격 가능 |\n\n## 3. 공유 자원 동기화 기법\n| 기법 | 내용 |\n|---|---|\n| [[mutex|뮤텍스]] | 소유권 있는 lock/unlock, [[critical-section|임계구역]] 단일 진입 |\n| [[semaphore|세마포어]] | 정수 변수에 P·V 원자 연산, 계수형 자원 제어 |\n| [[monitor-synchronization|모니터]] | 공유 데이터·프로시저 캡슐화, [[condition-variable|조건 변수]] wait/signal |\n\n## 4. 고려사항\n- 대용량은 공유 메모리, 소량·비동기는 메시지 큐, 분산 환경은 소켓·[[remote-procedure-call|RPC]] 선택\n- 락 순서 고정·범위 최소화로 [[deadlock|교착상태]]·[[race-condition|경쟁 조건]] 방지",
+      "body": "IPC는 서로 다른 [[process|프로세스]]가 데이터를 주고받고 실행을 조정하는 통신 방법이다. 독립된 주소 공간 사이에서 정보를 공유하여 기능을 분리하고 협력 작업을 수행한다.\n\n| 주요 기법 | 전달 방식·주의점 |\n|---|---|\n| [[shared-memory|공유 메모리]] | 같은 메모리 영역을 각 주소 공간에 매핑; 매핑 후 복사 비용을 줄일 수 있으나 동기화 필요 |\n| [[message-queue|메시지 큐]] | 메시지 단위 송수신; 큐 용량·우선순위·블로킹 조건 확인 |\n| [[pipe|파이프]] | Linux의 단방향 바이트 스트림; 메시지 경계가 없으므로 응용에서 구분 규칙 필요 |\n\n소켓은 로컬 또는 네트워크 통신에 사용할 수 있으며 스트림·데이터그램 유형별 의미가 다르다. 운영체제의 큐 연산이 원자적이라고 해서 여러 자원을 다루는 업무 순서까지 자동으로 일관되게 되는 것은 아니다.\n\n[[mutex|뮤텍스]]는 임계구역의 배타적 접근에, [[semaphore|세마포어]]는 가용 자원 수나 실행 순서 제어에 사용한다. 조건 변수는 조건이 충족될 때까지 기다리는 수단이며, 공유 조건은 잠금과 함께 확인한다. 프로세스 간 사용을 지원하는 동기화 객체·설정을 선택해야 한다.\n\n잠금 획득 순서를 일관되게 하고 공유 상태의 갱신 범위를 정의하여 경쟁과 교착 위험을 줄인다. 성능은 데이터 크기·복사·동기화·호출 비용을 함께 측정한다.",
       "sources": [
+        {
+          "title": "Linux shm_overview(7)",
+          "url": "https://man7.org/linux/man-pages/man7/shm_overview.7.html",
+          "scope": "공유 영역 매핑·동기화 필요"
+        },
+        {
+          "title": "Linux mq_overview(7)",
+          "url": "https://man7.org/linux/man-pages/man7/mq_overview.7.html",
+          "scope": "메시지 단위 IPC"
+        },
         {
           "title": "Linux pipe(7)",
           "url": "https://man7.org/linux/man-pages/man7/pipe.7.html",
-          "scope": "익명 pipe와 이름 있는 FIFO의 관계·권한·바이트 스트림"
-        },
-        {
-          "title": "Linux socket(2)",
-          "url": "https://man7.org/linux/man-pages/man2/socket.2.html",
-          "scope": "SOCK_STREAM·SOCK_DGRAM 등 통신 의미 차이"
+          "scope": "단방향 바이트 스트림·블로킹"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; 익명 pipe와 이름 있는 FIFO의 관계·권한·바이트 스트림 및 조건 없는 비교·구현 일반화 점검. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
-      "unresolved": []
+      "review_scope": "기존 SHORT의 공유메모리 복사·메시지 큐 응용 동기화·파이프/소켓 의미 교정을 유지했다. Linux 공식 man-pages 프로젝트 문서를 대조했다.",
+      "unresolved": [
+        "동기화 객체의 프로세스 공유 설정은 운영체제·언어별로 별도 확인해야 하며 이번 요약은 개념 범위다."
+      ]
     },
     "long": {
       "source_sha256": "70544bfd755c8f58673caa06cdd7e231dea6ea90fa360750abd5a7a199e675a8",
@@ -6585,16 +6536,15 @@
   "t-1c2e4a70": {
     "short": {
       "source_sha256": "a309e936d75c031c7f5c0595385d47c356a9f0e96ff32d417c48d70cd22c56fb",
-      "body": "## 1. 프로세스 상태 전이의 개요\n- 정의: [[process|프로세스]]가 생성부터 종료까지 [[cpu-scheduling|CPU 스케줄링]] 결정과 I/O·이벤트 발생에 따라 준비·실행·대기 상태를 오가는 변화 과정\n- 필요성: 다중 프로그래밍 환경에서 CPU 이용률 극대화와 공정한 CPU 분배\n\n## 2. 상태 전이도 및 전이 요소\n```mermaid\nflowchart LR\n  N[생성] -->|Admit| R[준비 Ready]\n  R -->|a Dispatch| U[실행 Run]\n  U -->|b Timeout·Preempt| R\n  U -->|c Block| S[슬립 Sleep]\n  S -->|d Wakeup| R\n  U -->|Exit| T[종료]\n```\n| 전이 | 내용 |\n|---|---|\n| (a) [[dispatcher|디스패치]] | 단기 스케줄러가 Ready 큐의 정책에 따라 선택한 프로세스에 CPU 할당 |\n| (b) 타임아웃·선점 | [[time-quantum|타임 퀀텀]] 만료 [[timer-interrupt|타이머 인터럽트]] 또는 고우선순위 도착 시 CPU 회수 |\n| (c) 블록 | I/O 요청·자원·이벤트 대기 시 스스로 CPU 반납 |\n| (d) 웨이크업 | I/O 완료·이벤트 발생 시 Ready 큐로 복귀 |\n\n## 3. (b)·(c) 발생 이유\n| 구분 | 내용 |\n|---|---|\n| (b) 비자발적 | CPU 독점 방지, [[preemptive-scheduling|선점형]]·시분할 응답시간 개선, 우선순위 반영 |\n| (c) 자발적 | I/O 동안 CPU 유휴 방지, [[busy-waiting|바쁜 대기]] 대신 다른 프로세스 실행으로 이용률 향상 |\n\n## 4. 고려사항\n- 상태 정보는 [[process-control-block|PCB]]에 저장, 잦은 전이는 [[context-switch|문맥 교환]] 오버헤드 유발 → 적정 퀀텀 설정\n- 메모리 부족 시 [[swapping|스와핑]]으로 보류(Suspend) 상태를 추가한 7상태 모델 적용",
+      "body": "프로세스 상태 전이는 실행 중인 프로그램이 CPU 할당과 I/O·이벤트에 따라 준비·실행·대기 상태를 오가는 과정이다. 준비(Ready)는 CPU만 기다리는 상태이고, 대기(Blocked/Sleep)는 I/O 등 실행에 필요한 조건을 기다리는 상태다.\n\n| 기출 전이 | 원인·동작 |\n|---|---|\n| (a) Ready → Running | 스케줄러가 선택하고 [[dispatcher|디스패처]]가 CPU 실행으로 전환 |\n| (b) Running → Ready | 시간 할당량 만료, 우선순위 정책 등에 의한 선점; 실행 가능성은 유지 |\n| (c) Running → Blocked | 완료되지 않은 I/O·자원·이벤트를 기다려 당장 실행 불가 |\n| (d) Blocked → Ready | I/O 완료·이벤트 충족으로 다시 실행 가능 |\n\n(b)는 CPU를 다른 프로세스와 나누기 위한 정책적 전환이고, (c)는 필요한 조건이 충족되지 않아 진행하지 못하는 전환이다. 모든 I/O 요청이 반드시 블록되는 것은 아니며 비동기·비차단 방식도 있다. 이벤트 완료 후 곧바로 CPU를 얻는다고 보장하지 않고 준비 상태에서 스케줄링을 기다린다.\n\n생성·종료를 더하면 기본 5상태 모델을 구성할 수 있다. 상태와 문맥 정보는 [[process-control-block|PCB]] 등으로 관리하며, [[context-switch|문맥 교환]] 때 레지스터·프로그램 카운터 등을 저장·복원한다. 기출의 ‘대기(Ready)’는 일반적인 ‘대기(Blocked)’ 번역과 혼동하지 않아야 한다.",
       "sources": [
         {
-          "title": "OSTEP 4: Process",
+          "title": "OSTEP Ch.4 The Abstraction: The Process",
           "url": "https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-intro.pdf",
-          "scope": "Ready/Running/Blocked 상태와 I/O 완료 후 Ready 전이"
+          "scope": "Running·Ready·Blocked 및 전이"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; Ready/Running/Blocked 상태와 I/O 완료 후 Ready 전이 및 조건 없는 비교·구현 일반화 점검. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
+      "review_scope": "SHORT와 두 문항을 읽고 저자 공개 교재의 상태 모델을 대조했다. 기출 Ready의 한국어 대기 표기를 명시적으로 구별했다.",
       "unresolved": []
     },
     "long": {
@@ -6615,22 +6565,23 @@
   "t-12e24e07": {
     "short": {
       "source_sha256": "38ef08722d7b923f2cba6c0b103d0a0ccb61ce4759fed0522b600edc8a49b0d9",
-      "body": "## 1. 하이퍼바이저의 개요\n- 정의: 물리 하드웨어 위에서 다수의 [[virtual-machine|가상 머신]]을 생성·실행하고 CPU·메모리·I/O 자원을 분배·격리하는 가상 머신 모니터(VMM)\n- 등장배경: [[server-consolidation|서버 통합]]으로 자원 활용률 향상, [[cloud-computing|클라우드]] IaaS의 기반 기술\n\n## 2. 하이퍼바이저 구조 및 유형\n```mermaid\nflowchart TB\n  subgraph A[Type 1 Native]\n    A1[VM1 · VM2] --> A2[하이퍼바이저] --> A3[하드웨어]\n  end\n  subgraph B[Type 2 Hosted]\n    B1[VM1 · VM2] --> B2[하이퍼바이저] --> B3[호스트 OS] --> B4[하드웨어]\n  end\n```\n| 구분 | [[type-1-hypervisor|Type 1(Native)]] | [[type-2-hypervisor|Type 2(Hosted)]] |\n|---|---|---|\n| 구조 | 하드웨어 위 직접 설치 | 호스트 OS 위 응용으로 실행 |\n| 성능·보안 | 오버헤드 적음, 공격 표면 작음 | 호스트 OS 경유로 낮음 |\n| 제품 | [[vmware-esxi|ESXi]], [[hyper-v|Hyper-V]], [[xen|Xen]], [[kvm|KVM]] | VirtualBox, VMware Workstation |\n\n## 3. 구현 기술\n| 구분 | 내용 |\n|---|---|\n| [[monolithic-hypervisor|Monolithic]] | 디바이스 드라이버를 하이퍼바이저에 내장, I/O 성능 우수, 드라이버 결함이 전체 장애로 확산 (ESXi) |\n| [[microkernel-hypervisor|Microkernel]] | 하이퍼바이저는 CPU·메모리·인터럽트 등 핵심 가상화 관리, 드라이버는 관리 파티션(Parent·Dom0)에 위치, 안정성·호환성 우수 (Hyper-V, Xen) |\n\n## 4. 고려사항\n- [[full-virtualization|전가상화]]·[[paravirtualization|반가상화]]·[[hardware-assisted-virtualization|하드웨어 지원 가상화]](Intel VT-x·AMD-V) 기법 선택\n- VM Escape 등 하이퍼바이저 취약점 패치, [[live-migration|라이브 마이그레이션]]으로 무중단 운영",
+      "body": "하이퍼바이저(VMM)는 여러 [[virtual-machine|가상 머신]]이 물리 CPU·메모리·I/O 자원을 공유하도록 중재하고 서로의 실행 환경을 격리하는 계층이다. 각 VM은 가상 하드웨어 위에서 게스트 OS를 실행한다.\n\n| 분류 기준 | 방식·구조 |\n|---|---|\n| 설치 위치 | [[type-1-hypervisor|Type 1]]: 하드웨어 위에서 직접 실행 |\n| 설치 위치 | [[type-2-hypervisor|Type 2]]: 호스트 OS 위에서 실행하며 OS 서비스를 이용 |\n| 기능 배치 | [[monolithic-hypervisor|모놀리식]]: 드라이버 등 기능을 하이퍼바이저 쪽에 포함 |\n| 기능 배치 | [[microkernel-hypervisor|마이크로커널형]]: 핵심 가상화 기능을 줄이고 장치 처리 등을 관리 파티션 등에 분리 |\n\nType 1/2와 모놀리식/마이크로커널형은 서로 다른 분류 축이다. Hyper-V에서는 하이퍼바이저가 격리·가상 실행을 지원하고, Windows를 실행하는 루트 파티션이 관리 스택과 장치 접근을 담당한다. 화면에 호스트처럼 보이는 OS가 있다는 이유만으로 Type 2라고 판단하지 않는다.\n\n가상화 기법은 하드웨어 지원·전가상화·반가상화와 구별해서 설명한다. 성능과 보안은 유형 이름만으로 우열을 확정할 수 없으며 드라이버·관리 인터페이스·설정·패치와 작업 부하에 좌우된다. VM 격리도 취약점이 없다는 보장이 아니고 라이브 마이그레이션도 모든 장애의 무중단 처리를 보장하지 않는다.",
       "sources": [
+        {
+          "title": "NIST SP 800-125, 2011",
+          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-125.pdf",
+          "scope": "전가상화·bare metal/hosted·보안"
+        },
         {
           "title": "Microsoft Hyper-V Architecture",
           "url": "https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/architecture",
-          "scope": "루트 파티션·자식 파티션·VMBus·하이퍼바이저 역할 구분"
-        },
-        {
-          "title": "NIST SP 800-125",
-          "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-125.pdf",
-          "scope": "베어메탈·호스티드 구분"
+          "scope": "하이퍼바이저·루트/자식 파티션·장치 접근"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 읽기; 루트 파티션·자식 파티션·VMBus·하이퍼바이저 역할 구분 및 조건 없는 비교·구현 일반화 점검. 출처 범위 밖 세부 구현·제품별 주장을 포괄 검증한 것으로 해석하지 않음.",
-      "unresolved": []
+      "review_scope": "SHORT·기출을 읽고 NIST 기본 구조와 Microsoft 구현 설명을 대조했다. 유형만으로 성능·안정성 우위를 단정한 문구를 제거했다.",
+      "unresolved": [
+        "모놀리식 분류에 특정 제품의 최신 내부 구현을 일률 배정하지 않았다."
+      ]
     },
     "long": {
       "source_sha256": "568a0827bd88cb274591bb72e03cac73bf34d1134b689ed168ed4eb8f36cf264",
@@ -9365,29 +9316,22 @@
   "t-de300924": {
     "short": {
       "source_sha256": "1b3dcbea39b438c78ae59795c59bbb69a1660db2bc1317d24f8e1086404ffe62",
-      "body": "## 1. 접근제어 모델의 개요\n- 정의: 주체(Subject)가 객체(Object)에 접근하는 규칙을 [[confidentiality|기밀성]]·[[integrity|무결성]] 관점에서 수학적·형식적으로 정의한 보안 정책 모델\n- 필요성: 기업 DB·국방 시스템의 정보 유출 및 변조 방지, [[reference-monitor|참조 모니터]] 구현 기준 제공\n\n## 2. 접근제어 모델의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[주체 Subject] -->|접근 요청| RM[\"참조 모니터(보안 커널)\"]\n  RM -->|규칙 판정| O[객체 Object]\n  P[보안 정책 모델 BLP·Biba·Clark-Wilson] --> RM\n```\n| 구성요소 | 역할 |\n|---|---|\n| 주체·객체 | 접근 주체(사용자·프로세스), 접근 대상(파일·DB) |\n| [[security-label|보안 등급]] | 비밀등급(Top Secret~Unclassified)과 범주 부여 |\n| 참조 모니터 | 모든 접근을 중재, 정책 규칙 강제 |\n\n비교의 Biba 규칙은 엄격 무결성 정책 기준이다. 모든 Biba 변형에 동일 규칙이 적용되는 것은 아니다. 레이블 절차는 격자 모델 예이며 Clark-Wilson은 TP·CDI·IVP와 인증/강제 규칙으로 설명한다.\n\n## 3. 접근제어 모델의 유형 비교\n| 구분 | [[bell-lapadula-model|BLP 모델]] | [[biba-model|Biba 모델]] | [[clark-wilson-model|Clark-Wilson 모델]] |\n|---|---|---|---|\n| 목표 | 기밀성 | 무결성 | 무결성(상용) |\n| 핵심 규칙 | No Read Up, No Write Down(*-속성) | No Read Down, No Write Up | 적격 트랜잭션, [[separation-of-duty|직무 분리]] |\n| 적용 | 군·정부 [[mandatory-access-control|MAC]] | 무결성 중요 시스템 | 금융·회계 응용 |\n\n## 4. 고려사항\n- DB 접근제어는 [[discretionary-access-control|DAC]]·MAC·[[role-based-access-control|RBAC]] 조합, [[least-privilege|최소 권한]] 원칙 적용\n- BLP는 무결성 미보장, Biba는 기밀성 미보장으로 상호 보완 설계 필요",
+      "body": "## 보안 목표별 접근제어 모델\n접근제어 모델은 주체가 객체를 읽고 변경하는 조건을 보안 목표에 따라 정의한다. 정보 유출을 막는 [[confidentiality|기밀성]]과 부적절한 변경을 막는 [[integrity|무결성]]은 구별되며 하나의 모델이 두 목표를 모두 보장하지는 않는다.\n\n| 모델 | 목표 | 대표 규칙·구성 |\n|---|---|---|\n| [[bell-lapadula-model|BLP]] | 기밀성 | 상위 등급 읽기 금지, 하위 등급 쓰기 금지 |\n| [[biba-model|Biba]] | 무결성 | 엄격 무결성 정책에서 하위 등급 읽기 금지, 상위 등급 쓰기 금지 |\n| [[clark-wilson-model|Clark-Wilson]] | 상업 시스템의 무결성 | 인증된 처리 절차·직무 분리로 데이터 변경 통제 |\n\nBLP의 등급은 비밀 수준, Biba의 등급은 신뢰·무결성 수준이다. Biba의 대표 읽기·쓰기 규칙을 모든 변형 정책에 일반화하지 않는다.\n\nClark-Wilson의 CDI는 무결성을 유지할 데이터, UDI는 비제약 입력, TP는 유효한 상태 간 변환 절차, IVP는 무결성 확인 절차다. 허용된 사용자·TP·CDI 관계를 강제하고 인증·실행 역할을 분리하며 변경을 감사할 수 있어야 한다.\n\nDB의 실제 권한 정책은 소유자 중심 DAC, 보안 레이블 중심 MAC, 역할 중심 RBAC 등으로 구현할 수 있다. 형식 모델과 제품의 권한 기능을 동일시하지 말고 최소 권한·모든 접근의 중재·감사와 결합한다. 공모나 잘못된 업무 규칙까지 자동 방지하는 모델은 아니다.",
       "sources": [
         {
-          "title": "Clark·Wilson 1987 원 논문",
+          "title": "Clark·Wilson, A Comparison of Commercial and Military Computer Security Policies (1987)",
           "url": "https://theory.stanford.edu/~ninghui/courses/Fall03/papers/clark_wilson.pdf",
-          "scope": "CDI·UDI·TP·IVP와 인증/강제 규칙 및 응용별 인증 부담"
+          "scope": "적격 거래·직무 분리·CDI/UDI/TP/IVP·인증/강제 규칙"
         },
         {
           "title": "NIST RBAC FAQ",
           "url": "https://csrc.nist.gov/projects/role-based-access-control/faqs",
-          "scope": "역할·세션·계층·정적/동적 직무 분리"
-        },
-        {
-          "title": "NIST SP 800-162",
-          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
-          "scope": "ABAC 주체·객체·연산·환경"
+          "scope": "역할 기반 권한과 직무 분리"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "단답·서술 전문 열람. Clark-Wilson 구성과 한계, RBAC/ABAC 결정 요소와 모델별 적용 전제를 대조.",
+      "review_scope": "기존 엄격 Biba 조건과 Clark-Wilson 구성 구별을 보존. Clark-Wilson 원문과 NIST 역할 정책을 대조.",
       "unresolved": [
-        "Biba 원 보고서는 스캔 PDF로 본문 추출 불가. 엄격 정책 외 변형·BLP 정식 속성은 원 보고서 추가 대조 필요.",
-        "개인정보 안전성 확보조치 현행 고시의 3년 보관 조항과 SELinux/Oracle Label Security 구현 세부는 미확인."
+        "BLP·Biba 원 보고서의 형식적 속성·예외와 Biba 변형은 재대조하지 않음. 표는 대표 규칙의 학습 요약이다."
       ]
     },
     "long": {
@@ -9421,33 +9365,22 @@
   "t-3dd2be00": {
     "short": {
       "source_sha256": "cfad5c20f3b955ed9af9bbc4dd6e11cbae6834bf965f52da68c2607cac5c39ce",
-      "body": "## 1. 접근제어의 개요\n- 정의: 인가된 주체만이 허용된 방식으로 객체(자원)에 접근하도록 [[identification|식별]]·[[authentication|인증]]·[[authorization|인가]]·[[accountability|책임추적]]을 수행하는 보안 통제\n- 필요성: 암호화가 데이터 자체를 보호하는 반면 접근제어는 비인가 접근 자체를 차단, [[confidentiality|기밀성]]·[[integrity|무결성]]·[[availability|가용성]] 확보\n\n## 2. 접근제어의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  U[사용자] --> ID[식별] --> AU[인증] --> AZ[인가] --> R[자원]\n  AZ --> AC[책임추적·감사]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 정책(Policy) | 누가 무엇에 어떻게 접근 가능한지 규칙 정의 |\n| 절차(Procedure) | 식별→인증→인가→감사의 처리 흐름 |\n| 메커니즘(Mechanism) | [[access-control-list|ACL]]·[[capability-list|CL]]·보안 레이블 등 구현 수단 |\n\n## 3. 접근제어 통제정책 비교\n| 구분 | [[discretionary-access-control|DAC]] | [[mandatory-access-control|MAC]] | [[role-based-access-control|RBAC]] |\n|---|---|---|---|\n| 권한 결정 | 객체 소유자 | 시스템 보안 레이블 | 조직 역할 |\n| 구현 | ACL, GRANT | [[security-label|보안 등급]] 비교 | 역할-권한 매핑 |\n| 특징 | 유연, 유출 위험 | 엄격, 경직 | 관리 효율 |\n\n## 4. 고려사항\n- [[ldap|LDAP]] 디렉터리 기반 중앙 인증, [[multi-factor-authentication|다중 인증]]·[[least-privilege|최소 권한]] 적용\n- [[attribute-based-access-control|ABAC]]·[[zero-trust|제로 트러스트]] 기반 동적·지속적 접근제어로 발전",
+      "body": "## 접근제어의 정책·절차·메커니즘\n접근제어는 주체가 자원에 수행할 수 있는 행위를 정책에 따라 허용·거부하는 통제다. 식별한 주체의 신원을 [[authentication|인증]]하는 것과 해당 행위를 [[authorization|인가]]하는 것은 별개의 판단이다.\n\n| 정책 | 권한 판단 기준 |\n|---|---|\n| [[discretionary-access-control|DAC]] | 객체 소유자 등이 부여한 권한 |\n| [[mandatory-access-control|MAC]] | 중앙 정책의 보안 등급·범주 |\n| [[role-based-access-control|RBAC]] | 사용자에게 배정된 역할과 역할별 권한 |\n| [[attribute-based-access-control|ABAC]] | 주체·객체·요청 행위·환경 속성과 정책 |\n\n계정·권한 신청과 승인 → 식별·인증 → 요청별 정책 판정 → 허용/거부 집행 → 감사·권한 회수로 관리한다. ACL은 객체별 허용 주체·행위를, Capability는 주체가 가진 접근 권한을 표현하는 구현 수단이다. 최소 권한과 직무 분리를 적용한다.\n\nLDAP 인증은 서버 연결 → 필요시 TLS로 보호 채널 수립 → Bind 요청 → 자격 검증·응답 → 권한에 따른 검색·수정 순으로 설명한다. Simple Bind의 이름·비밀번호 인증은 보호 채널에서 사용하고 빈 비밀번호를 정상 인증 성공으로 취급하지 않는다. SASL은 별도 인증 메커니즘을 사용할 수 있다.\n\nBind 성공이 모든 디렉터리 작업의 허용을 뜻하지 않는다. 익명·비인증 Bind와 인증 Bind를 구별하고 통신 보호·세션 상태·감사 로그를 함께 관리한다.",
       "sources": [
         {
           "title": "RFC 4513",
           "url": "https://www.rfc-editor.org/rfc/rfc4513.html",
-          "scope": "LDAP Bind 종류·빈 비밀번호·보호 채널"
-        },
-        {
-          "title": "RFC 6331",
-          "url": "https://www.rfc-editor.org/rfc/rfc6331.html",
-          "scope": "DIGEST-MD5 Historic 전환"
-        },
-        {
-          "title": "NIST SP 800-63-4 인증 모델",
-          "url": "https://pages.nist.gov/800-63-4/sp800-63/model/",
-          "scope": "서로 다른 인증 요소와 동일 종류 중복의 구분"
+          "scope": "LDAP Simple/SASL Bind·익명·빈 비밀번호·보호 채널"
         },
         {
           "title": "NIST SP 800-162",
           "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-162.pdf",
-          "scope": "속성과 요청 연산에 따른 인가"
+          "scope": "주체·객체·행위·환경 속성과 인가"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "단답·서술 전문 열람. LDAP 인증 흐름과 anonymous/unauthenticated 예외, DIGEST-MD5 상태, MFA와 ABAC의 요소 대조.",
+      "review_scope": "기존 LDAP 익명/비인증 예외 교정과 ABAC 요소를 유지하고 RFC·NIST 원문에 대조. 인증과 인가를 분리.",
       "unresolved": [
-        "ACL/Capability 행렬과 BLP·Biba의 세부 형식 모델 원자료는 이 항목에서 재대조하지 않음."
+        "ACL/Capability 구현별 저장 형식, MAC 형식 모델은 이번 항목에서 재대조하지 않음."
       ]
     },
     "long": {
@@ -9485,24 +9418,23 @@
   "t-66c5acac": {
     "short": {
       "source_sha256": "ac80aec9bd942e60dc1de3ad02888ad0edf04580711fc69830c38e5b7445d620",
-      "body": "## 1. 제로 트러스트의 개요\n- 정의: 네트워크 위치에 따른 암묵적 신뢰를 제거하고 모든 접근 요청을 \"절대 신뢰하지 말고 항상 검증(Never Trust, Always Verify)\"하는 보안 모델([[nist-sp-800-207|NIST SP 800-207]])\n- 필요성: 클라우드·원격근무로 [[perimeter-security|경계 기반 보안]] 붕괴, 내부자·[[lateral-movement|측면 이동]] 공격 증가\n\n## 2. 제로 트러스트의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[주체·단말] --> PEP[\"PEP(정책 시행점)\"] --> R[기업 자원]\n  PEP <--> PDP[\"PDP(정책 결정점): 정책 엔진 + 정책 관리자\"]\n  D[ID·단말·위협 정보·로그] --> PDP\n```\n| 구성요소 | 역할 |\n|---|---|\n| [[policy-decision-point|PDP]] | 기준 충족 또는 점수 기반 평가로 접근 결정(숫자 점수 필수 아님) |\n| [[policy-enforcement-point|PEP]] | 세션 단위 연결 허용·차단·종료 |\n| 데이터 소스 | [[identity-and-access-management|IAM]], [[endpoint-detection-and-response|EDR]], [[siem|SIEM]], 위협 인텔리전스 |\n\n경계 기반 열은 위치만으로 과도하게 신뢰하는 단순 모델 예다. 기존 방화벽·VPN도 세밀한 권한·분할 정책을 적용할 수 있으며 제로 트러스트와 공존할 수 있다.\n\n## 3. 경계 기반 보안과 비교\n| 구분 | 경계 기반 보안 | 제로 트러스트 |\n|---|---|---|\n| 신뢰 기준 | 네트워크 위치(내부=신뢰) | ID·단말·컨텍스트 지속 검증 |\n| 통제 단위 | 네트워크 경계([[firewall|방화벽]]·[[vpn|VPN]]) | 자원·세션 단위 [[micro-segmentation|마이크로 세그멘테이션]] |\n| 권한 | 광범위·정적 | [[least-privilege|최소 권한]]·동적 |\n| 성숙도 | 단일 통제 | [[zero-trust-maturity-model|CISA ZTMM 2.0]] 5개 기둥·4단계 |\n\n## 4. 고려사항\n- 자산·ID 식별 선행, 단계적 도입(핵심 자원 우선), [[multi-factor-authentication|MFA]]·[[continuous-authentication|지속 인증]] 기반\n- 과기정통부 제로트러스트 가이드라인 2.0 성숙도 기준 자체 진단 후 로드맵 수립",
+      "body": "제로 트러스트는 네트워크 내부 위치나 자산 소유만으로 신뢰하지 않고, 주체·단말·자원·상황에 근거하여 접근을 결정하는 보안 접근법이다. [[nist-sp-800-207|NIST SP 800-207]]은 자원 세션을 설정하기 전에 인증과 인가를 수행하도록 설명한다.\n\n| 구성 | 역할 |\n|---|---|\n| [[policy-decision-point|정책 결정점]] | 정책 엔진이 허용 여부를 판단하고 정책 관리자가 연결 설정·종료를 지시 |\n| [[policy-enforcement-point|정책 시행점]] | 결정에 따라 자원 접근을 허용·감시·차단 |\n| 판단 정보 | 신원, 단말 보안 상태, 접근 요청·위협·활동 기록 |\n\n경계 중심 통제와 비교하면 보호 초점이 네트워크 구역에서 개별 자원과 세션으로 이동한다. [[least-privilege|최소 권한]]을 적용하고 상황 변화에 따라 접근을 재평가하되, 숫자 점수나 사용자에게 매번 재로그인을 요구하는 방식이 필수인 것은 아니다. 기존 방화벽·VPN도 세밀한 권한 정책과 함께 공존할 수 있다.\n\nCISA 성숙도모델 2.0의 학습 틀은 신원·기기·네트워크·애플리케이션/워크로드·데이터의 5개 기둥과 전통·초기·고급·최적의 4단계다. 도입은 자산·계정·의존관계를 파악하고 핵심 자원부터 점진적으로 적용하며, 인증·정책 서비스 장애 시 업무 영향도 함께 검토한다.",
       "sources": [
         {
-          "title": "NIST SP 800-207",
-          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf",
-          "scope": "세션별 자원 인가·PE/PA/PEP·기준/점수 기반 알고리즘·최근 인증 재사용"
+          "title": "NIST SP 800-207, 2020",
+          "url": "https://csrc.nist.gov/pubs/sp/800/207/final",
+          "scope": "위치·소유 기반 암묵적 신뢰 배제와 자원 보호"
         },
         {
-          "title": "CISA 공식 발표",
+          "title": "CISA Zero Trust Maturity Model v2 release, 2023-04-11",
           "url": "https://content.govdelivery.com/accounts/USDHSCISA/bulletins/3543f28",
-          "scope": "ZTMM v2의 2023-04 발표와 Traditional/Initial/Advanced/Optimal 4단계"
+          "scope": "2.0의 Initial 단계 추가와 네 단계"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "단답·서술 전문 열람. 신뢰 점수의 필수성·매 요청 로그인 오해·경계 보안 비교의 적용 범위·성숙도 4단계 대조.",
+      "review_scope": "기존 교정의 숫자 점수 비필수·경계 통제 공존을 유지했다. NIST 정의와 CISA 공식 배포 공지의 2.0 네 단계를 대조했다.",
       "unresolved": [
-        "CISA 성숙도 PDF 접근 403으로 기둥별 최적 단계 상세 원문은 미확인.",
-        "국내 가이드라인·N2SF 적용 조건과 미국 행정명령의 현행 법적 의무 범위는 미확인."
+        "CISA ZTMM 2.0 PDF는 403으로 접근하지 못해 기둥별 세부 요건은 재검증하지 못했다.",
+        "국내 제로트러스트 가이드라인 2.0과 CISA 모델의 차이는 확인하지 않았다."
       ]
     },
     "long": {
@@ -10684,16 +10616,15 @@
   "t-993e0c47": {
     "short": {
       "source_sha256": "2027ae9cfac8beb02e237127c100a6db1a4b92091fef09c99117e660ddd2e81c",
-      "body": "## 1. 모바일 RFID의 개요\nWIPI·908.5~914MHz 등은 국내 초기 모바일 RFID 추진 당시의 구성이다. 현행 스마트폰 기본 기능·현재 허용 주파수로 일반화하지 않는다.\n- 정의: 휴대폰에 [[rfid-reader|RFID 리더]] 칩을 내장해 사물의 [[rfid-tag|RFID 태그]]를 판독하고 이동통신망으로 관련 정보·서비스를 제공받는 B2C 중심 [[rfid|RFID]] 응용 기술\n- 등장배경: 기존 RFID의 고정 리더·B2B 물류 중심 한계, 이동통신 보급 확산을 활용한 개인 서비스 창출\n\n## 2. 모바일 RFID 구성 및 기술\n```mermaid\nflowchart LR\n  T[\"RFID 태그: mCode·EPC\"] -->|\"UHF 판독\"| P[\"리더 내장 휴대폰\"]\n  P -->|\"코드 질의\"| O[\"코드 해석 서버 ODS\"]\n  O -->|\"정보 서버 주소\"| P\n  P --> I[\"정보·콘텐츠 서버 OIS\"]\n```\n| 기술 | 내용 |\n|---|---|\n| 무선 접속 | UHF 908.5~914MHz, [[iso-iec-18000|ISO/IEC 18000-6C]]·[[iso-iec-29143|ISO/IEC 29143]] |\n| 코드 체계 | mCode(국내 TTA), [[electronic-product-code|EPC]] |\n| 코드 해석 | DNS 기반 ODS([[object-name-service|ONS]] 유사) |\n| 단말 플랫폼 | WIPI 브라우저·API |\n\n## 3. 응용분야\n| 분야 | 서비스 예 |\n|---|---|\n| 정보 조회 | 영화 포스터 → 예고편·예매, 도서·상품 정보 |\n| 진품·이력 | 주류·의약품 진품 확인, 농산물 이력 |\n| 안내·위치 | 관광지·박물관 안내, 버스 도착 정보 |\n| 커머스·광고 | 모바일 쿠폰, 즉시 구매([[mobile-commerce|m-커머스]]) |\n\n## 4. 고려사항\n- 프라이버시: 무단 판독·추적 → Kill 명령, 판독 동의, [[privacy-enhancing-technologies|프라이버시 강화기술]]\n- 전망: B2C 대안에는 [[near-field-communication|NFC]]·[[qr-code|QR코드]]가 있음, UHF는 물류·IoT 연계",
+      "body": "## 모바일 RFID\n휴대 단말의 [[rfid-reader|RFID 리더]]로 사물의 태그를 읽고 통신망을 통해 관련 정보·서비스를 이용하는 기술이다. 고정 리더 중심의 물류 처리와 달리 사용자가 현장에서 직접 정보를 조회하는 서비스에 초점을 둔다.\n\n| 구성 | 역할 |\n|---|---|\n| [[rfid-tag|태그]] | 제품·사물의 식별 코드 보유 |\n| 리더 장착 휴대 단말 | 태그 판독, 코드 질의, 서비스 표시 |\n| ODS | 식별 코드에 대응하는 정보 서버 위치 검색 |\n| OIS·OTS | 제품 정보 제공·이력 추적 지원 |\n| 이동통신망 | 단말과 서비스 서버 연결 |\n\n처리는 태그 판독 → ODS에 코드 질의 → 정보 서버 주소 획득 → OIS 조회 순서다. 응용 예로 상품 태그를 읽어 제품 정보를 확인하거나, 전시물 태그를 읽어 안내 콘텐츠를 받는 서비스를 구성할 수 있다.\n\n태그의 무단 판독·사용자 추적, 위조 리더·서버, 통신 구간 정보 노출에 대응해 인증·접근권한·데이터 보호를 설계한다. WIPI나 초기 국내 UHF 주파수 사례는 당시 추진 구조이며 현행 스마트폰의 기본 기능이나 현재 허용 주파수로 일반화하지 않는다.",
       "sources": [
         {
-          "title": "TTA 모바일RFID 시험인증",
-          "url": "https://www.tta.or.kr/data/androReport/ttaJnal/6-4.pdf",
-          "scope": "당시 908.5~914MHz·ISO18000-6 Type C 필수/Type B 선택과 휴대 단말 모델 대조. 역사적 구성/현행 운용 구분."
+          "title": "ETRI 모바일 RFID 보안기술 표준화 동향(2008)",
+          "url": "https://ettrends.etri.re.kr/ettrends/110/0905001358/23-2_142_152.pdf",
+          "scope": "2008년 당시 휴대 리더·ODS/OIS/OTS와 인증·프라이버시 요구 대조. 현재 보급 현황·주파수는 다루지 않음."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. 당시 908.5~914MHz·ISO18000-6 Type C 필수/Type B 선택과 휴대 단말 모델 대조. 역사적 구성/현행 운용 구분.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 2008년 당시 휴대 리더·ODS/OIS/OTS와 인증·프라이버시 요구 대조. 현재 보급 현황·주파수는 다루지 않음.",
       "unresolved": []
     },
     "long": {
@@ -10714,27 +10645,18 @@
   "t-80f73d35": {
     "short": {
       "source_sha256": "67f5e6c2b86f017ea3b8c05e73a73706f3b7739fff8bfa70eac6ed27e548dc04",
-      "body": "## 1. 바코드의 개요\n- 정의: 폭이 다른 바(Bar)와 공백(Space) 또는 2차원 셀 패턴으로 데이터를 부호화해 광학 스캐너로 자동 판독하는 자동인식 부호 체계\n- 필요성: 수작업 입력 대비 빠르고 정확한 데이터 수집, 유통·물류 자동화\n\n## 2. 1차원 바코드의 심볼과 심볼로지\n```mermaid\nflowchart LR\n  Q1[\"Quiet Zone\"] --> ST[\"Start 문자\"] --> D[\"Data 문자\"] --> CD[\"Check Digit\"] --> SP[\"Stop 문자\"] --> Q2[\"Quiet Zone\"]\n```\n| 구분 | 내용 |\n|---|---|\n| 심볼(Symbol) | 실제 인쇄된 패턴 = [[quiet-zone|Quiet Zone]] + 시작·데이터·[[check-digit|체크 디지트]]·정지 문자 |\n| [[symbology|심볼로지]] | 문자와 바·공백 패턴 간 인코딩 규칙: [[ean-13|EAN-13]], UPC-A, [[code-39|Code 39]], [[code-128|Code 128]], ITF |\n\n## 3. 2D 바코드 종류 및 특징\n| 종류 | 특징 |\n|---|---|\n| [[pdf417|PDF417]](적층형) | 1D 행 적층, 최대 약 1,850자, 신분증·탑승권 |\n| [[qr-code|QR코드]](매트릭스형) | 3개 [[finder-pattern|파인더 패턴]], 버전40·L 최대 숫자 7,089자, 오류 복원 L·M·Q·H(전체 코드워드 기준 약 7~30%; 면적 보장 아님) |\n| [[data-matrix|Data Matrix]] | 소형 부품 직접 마킹, ECC200 |\n| [[maxicode|MaxiCode]]·[[aztec-code|Aztec]] | 택배 고속 분류(UPS) / 여백 불필요, 모바일 승차권 |\n\n## 4. 고려사항\n- 인쇄 품질 등급(ISO/IEC 15416·15415), [[reed-solomon-code|리드-솔로몬]] 오류 정정 수준 선택\n- [[qr-phishing|큐싱]] 대응, [[gs1|GS1]] 표준 코드 체계 준수",
+      "body": "## 바코드의 심볼과 심볼로지\n바코드는 바·공백 또는 2차원 셀 패턴으로 데이터를 표현해 광학적으로 읽는 자동인식 부호다. 심볼은 실제 인쇄·표시된 패턴이고, [[symbology|심볼로지]]는 문자와 패턴의 대응 및 판독 규칙이다.\n\n| 구분 | 구조·예 |\n|---|---|\n| 1차원 | 한 방향의 바·공백 폭으로 표현: EAN-13, Code 128 |\n| 적층형 2차원 | 여러 행의 부호를 쌓는 형태: [[pdf417|PDF417]] |\n| 매트릭스형 2차원 | 가로·세로 셀 배치: QR, Data Matrix |\n| 심볼 구성 | 여백, 시작·종료 또는 위치 패턴, 데이터·검사 정보 등; 종류마다 상이 |\n\n[[qr-code|QR코드]]는 버전·문자 종류·오류정정 수준에 따라 용량이 달라진다. L·M·Q·H 오류정정은 손상된 코드워드 복원을 위한 선택이며, 복원율을 인쇄 면적의 손상 허용률로 해석해서는 안 된다. 오류정정 수준을 높이면 동일 버전에서 담을 수 있는 데이터가 줄어든다.\n\n사용 환경에 맞춰 심볼 크기·여백·인쇄 대비·읽기 장치를 정하고 실제 판독을 확인한다. 체크 디지트와 오류정정은 입력 오류나 손상 대응 수단이며, 악성 URL을 담은 코드의 안전성까지 보증하지는 않는다.",
       "sources": [
         {
-          "title": "DENSO WAVE QR versions",
-          "url": "https://www.qrcode.com/en/about/version.html",
-          "scope": "용량은 버전·문자모드·오류정정 수준에 의존"
-        },
-        {
-          "title": "DENSO WAVE error correction",
+          "title": "DENSO WAVE QR error correction",
           "url": "https://www.qrcode.com/en/about/error_correction.html",
-          "scope": "복원율은 전체 코드워드 기준"
-        },
-        {
-          "title": "GS1 prefix origin FAQ",
-          "url": "https://support.gs1.org/support/solutions/articles/43000734188",
-          "scope": "GS1 접두부는 제조 원산지 아님"
+          "scope": "QR 오류정정 기준은 전체 코드워드임을 대조. 버전별 용량 문서도 열람; 1D·PDF417·Data Matrix는 기존 학습 범위 정리."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. QR 용량·복원율 조건과 GS1 접두부 의미 대조. 1D 용량·구성·여백 일률 적용 교정.",
-      "unresolved": []
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. QR 오류정정 기준은 전체 코드워드임을 대조. 버전별 용량 문서도 열람; 1D·PDF417·Data Matrix는 기존 학습 범위 정리.",
+      "unresolved": [
+        "PDF417·Data Matrix의 규격 원문은 이번 대조 범위에 포함하지 않음."
+      ]
     },
     "long": {
       "source_sha256": "f5240c8ab0bb2cb7e9874525f86d0e2705f39ac1d469bf2b715eebe94d7d8bbd",
@@ -10764,16 +10686,15 @@
   "t-bd2ecb8c": {
     "short": {
       "source_sha256": "1d2639bab391f4daefc14e752ea02700de719f8cd3478c7e559149e115c8c443",
-      "body": "## 1. 사물지능통신(M2M)의 개요\n- 정의: 사람의 개입 없이 기기(사물) 간 통신망을 통해 정보를 자동으로 수집·교환·제어하는 지능형 통신 서비스(Machine to Machine)\n- 필요성: 원격 감시·제어 자동화로 비용 절감, 통신사 신규 수익원, [[iot|IoT]]의 기반\n\n## 2. M2M 구성도 및 구성요소\n```mermaid\nflowchart LR\n  D[\"M2M 디바이스: 센서·모듈\"] --> G[\"M2M 게이트웨이\"]\n  G -->|\"이동통신·LPWA\"| N[\"네트워크 도메인: 코어망·플랫폼\"]\n  N --> A[\"응용 도메인: 검침·관제 앱\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 디바이스·게이트웨이 | 센서·통신 모듈, 근거리망([[zigbee|ZigBee]]·[[bluetooth-low-energy|BLE]]) 집선 |\n| 네트워크 | 광역 접속([[lte-m|LTE-M]]·[[nb-iot|NB-IoT]]·[[lorawan|LoRaWAN]]), 서비스 플랫폼 |\n| 응용 | 데이터 분석·원격 제어, [[onem2m|oneM2M]] 공통 서비스 |\n\n## 3. 관련기술 및 응용 서비스\n| 구분 | 내용 |\n|---|---|\n| 관련기술 | 3GPP [[machine-type-communication|MTC]](과부하 제어·PSM), [[low-power-wide-area-network|LPWA]], [[lwm2m|LwM2M]] 장치관리, [[embedded-universal-integrated-circuit-card|eSIM]] |\n| 응용 서비스 | [[telematics|텔레매틱스]]·차량 관제, 원격검침([[advanced-metering-infrastructure|AMI]]), [[smart-grid|스마트 그리드]], 원격 의료, 보안 관제, 물류 추적 |\n\n## 4. 고려사항\n- 대량 단말 동시 접속 시 신호 폭주 → 접속 분산·과부하 제어\n- 무인 단말 보안: 기기 인증·펌웨어 무결성, 저전력 장기 운용",
+      "body": "## 사물지능통신\nM2M은 기기 사이에서 사람의 직접 조작을 최소화하여 데이터를 자동 수집·교환하고 원격 감시·제어하는 통신 및 서비스다. 센싱 값 전달부터 관리 플랫폼의 제어 명령까지 포함한다.\n\n| 구성 | 역할·기술 예 |\n|---|---|\n| 기기 | 센서·제어기·통신 모듈로 정보 생성 |\n| 게이트웨이 | 여러 기기 연결, 프로토콜 변환·집선 |\n| 통신망 | 근거리 연결과 이동통신·LPWA 등 광역 전달 |\n| 서비스 플랫폼 | 등록·인증·데이터 관리·알림·기기 관리 |\n| 응용 | 원격검침, 차량 관제, 설비 감시, 물류 추적 |\n\n기기는 게이트웨이를 거치거나 직접 통신망으로 접속할 수 있다. [[onem2m|oneM2M]]은 응용마다 반복 구현하던 공통 서비스 기능을 수평 계층으로 제공하여 이기종 서비스의 상호운용을 지원한다. HTTP·CoAP·MQTT 등 바인딩은 응용·전송 조건에 따라 구분된다.\n\nM2M과 IoT는 겹치는 범위가 있으므로 M2M을 무조건 폐쇄망이나 단일 통신 기술로 한정하지 않는다. 대량 단말의 동시 접속·재접속은 신호 부하를 유발할 수 있어 접속 분산을 고려하고, 배터리 수명과 전달 지연을 절충한다. 무인 단말의 인증·펌웨어 무결성·갱신 관리도 필요하다.",
       "sources": [
         {
           "title": "oneM2M 10-year paper",
           "url": "https://www.onem2m.org/images/files/anniversary/oneM2M-10-Years-Short-Paper.pdf",
-          "scope": "2012년 7개 SDO 창립·공통서비스 수평 계층·HTTP/CoAP/MQTT 바인딩"
+          "scope": "수평 공통 서비스 계층·상호운용·HTTP/CoAP/MQTT 바인딩 대조. 개별 무선 기술의 세부 규격은 범위 밖."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. oneM2M 창립과 공통서비스 구조 대조. M2M=전용프로토콜/1:1로 단정한 비교를 전형적 사일로 구현 예로 교정.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 수평 공통 서비스 계층·상호운용·HTTP/CoAP/MQTT 바인딩 대조. 개별 무선 기술의 세부 규격은 범위 밖.",
       "unresolved": []
     },
     "long": {
@@ -10794,21 +10715,15 @@
   "t-859200fd": {
     "short": {
       "source_sha256": "5b1426e078be99e42a83d108ed76c8cf144ffa7417b1d8c8f310fb2a601d379c",
-      "body": "## 1. 소켓 통신의 개요\n- 정의: 네트워크상 두 프로세스 간 양방향 통신을 위해 [[ip-address|IP 주소]]·[[port|포트]]·프로토콜로 식별되는 통신 종단점 및 이를 다루는 API(BSD 소켓)\n- 특징: TCP 스트림·UDP 데이터그램 등 소켓 유형에 따라 연결·신뢰성 특성이 달라짐\n\n## 2. TCP 소켓 흐름 및 유형\n```mermaid\nsequenceDiagram\n  participant S as 서버\n  participant C as 클라이언트\n  S->>S: socket, bind, listen\n  C->>S: connect(3-way handshake)\n  S->>S: accept\n  C->>S: send/recv\n  S->>C: send/recv\n  C->>S: close(정상 종료의 FIN/ACK 절차)\n```\n| 유형 | 특징 |\n|---|---|\n| 스트림 소켓 | [[tcp|TCP]], 연결형·신뢰성·순서 보장 |\n| 데이터그램 소켓 | [[udp|UDP]], 비연결·경량 |\n| [[raw-socket|Raw 소켓]] | IP 계층 직접 접근, 패킷 생성·분석 |\n\n## 3. TCP 소켓과 웹소켓 비교\n| 구분 | TCP 소켓 | [[websocket|웹소켓]] |\n|---|---|---|\n| 계층·표준 | OS 통신 API의 TCP 사용(프로토콜 계층 자체와 구분) | L7 응용 프로토콜(RFC 6455) |\n| 연결 수립 | 3-way handshake | RFC 6455의 HTTP/1.1 Upgrade 예(다른 HTTP 버전의 확장은 별도) |\n| 데이터 단위 | 바이트 스트림(경계 없음) | 메시지 프레임(텍스트·바이너리) |\n| 환경 | 네이티브 앱·서버 간 | 브라우저 실시간 통신(ws·wss) |\n\n## 4. 고려사항\n- 대량 연결 처리: [[io-multiplexing|I/O 멀티플렉싱]]([[epoll|epoll]])·비동기 I/O\n- 보안·운영: [[tls|TLS]](wss), Origin 검증, Ping/Pong 하트비트",
+      "body": "## 소켓 통신\n소켓은 프로세스가 통신에 사용하는 종단점과 이를 다루는 OS API다. 인터넷 소켓은 주소·포트·전송 프로토콜을 사용하며 TCP 스트림과 UDP 데이터그램 등 유형에 따라 통신 특성이 달라진다.\n\n| 구분 | TCP 소켓 | WebSocket |\n|---|---|---|\n| 성격 | TCP를 사용하는 통신 API | TCP 위의 응용 프로토콜 |\n| 수립 | 서버 listen·accept, 클라이언트 connect | RFC 6455에서는 HTTP/1.1 Upgrade 핸드셰이크 |\n| 데이터 | 경계 없는 바이트 스트림 | 텍스트·바이너리 메시지를 프레임으로 전달 |\n| 활용 | 네이티브 앱·서버 통신 | 브라우저 등의 양방향 실시간 통신 |\n\nTCP 서버는 socket → bind → listen → accept 후 송수신하며, 클라이언트는 socket → connect 후 송수신한다. 한 번의 send가 한 번의 recv와 대응하지 않으므로 길이·구분자 등 응용 메시지 경계를 정의한다.\n\nHTTP는 요청·응답 의미를 규정하는 응용 프로토콜이므로 소켓과 같은 추상화 수준의 대안은 아니다. WebSocket은 연결 후 양방향 메시지를 전달한다. TLS를 사용하는 wss, Origin·인증·인가, 연결 종료·타임아웃을 관리하며 HTTP 버전별 WebSocket 연결 확장은 별도 확인한다.",
       "sources": [
         {
-          "title": "RFC 6455",
-          "url": "https://datatracker.ietf.org/doc/html/rfc6455",
-          "scope": "WebSocket 프레임·마스킹·길이 필드"
-        },
-        {
-          "title": "RFC 9110",
-          "url": "https://www.rfc-editor.org/rfc/rfc9110.txt",
-          "scope": "HTTP 응용 의미와 전송 연결을 구분"
+          "title": "RFC 6455 WebSocket Protocol",
+          "url": "https://www.rfc-editor.org/rfc/rfc6455",
+          "scope": "HTTP/1.1 핸드셰이크·프레임·양방향 메시지 대조. TCP 소켓 API와 응용 프로토콜을 구별한 기존 교정 유지."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. 소켓 API·TCP 연결·WebSocket 응용 계층 구분. HTTP 무상태를 매 요청 종료로 오인한 비교 교정.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. HTTP/1.1 핸드셰이크·프레임·양방향 메시지 대조. TCP 소켓 API와 응용 프로토콜을 구별한 기존 교정 유지.",
       "unresolved": []
     },
     "long": {
@@ -10834,16 +10749,15 @@
   "t-1cac1ff3": {
     "short": {
       "source_sha256": "92b41999a28080813c0468462b684e880f438d6e26d63bec4a7fb4cc3ec0c3a3",
-      "body": "## 1. SDN의 개요\n- 정의: 네트워크 장비의 [[control-plane|제어 평면]]과 [[data-plane|데이터 평면]]을 분리하고 논리적으로 중앙화된 [[sdn-controller|SDN 컨트롤러]]가 소프트웨어로 네트워크 전체를 프로그래밍·제어하는 구조(ONF)\n- 등장배경: 벤더 종속 폐쇄형 장비, 수동 설정의 경직성, 클라우드·가상화의 동적 네트워크 요구\n\n## 2. SDN 구조 및 구성요소\n```mermaid\nflowchart TB\n  A[\"응용 계층: 부하분산·보안·TE\"] -->|\"Northbound API: REST\"| C[\"제어 계층: SDN 컨트롤러\"]\n  C -->|\"Southbound API: OpenFlow\"| D[\"인프라 계층: OpenFlow 스위치\"]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 응용 계층 | 네트워크 서비스 로직, [[northbound-api|Northbound API]] 호출 |\n| 제어 계층 | 전역 토폴로지 관리·경로 계산·플로 규칙 생성(ONOS, OpenDaylight) |\n| 인프라 계층 | [[flow-table|플로 테이블]] 기반 패킷 전달 |\n| [[southbound-api|Southbound API]] | [[openflow|OpenFlow]], [[netconf|NETCONF]], P4Runtime |\n\n## 3. OpenFlow 프로토콜\n| 구분 | 내용 |\n|---|---|\n| 플로 엔트리 | Match Field(포트·MAC·VLAN·IP·L4 포트), Priority, Counter, Instruction, Timeout |\n| 메시지 | Controller-to-Switch(Flow-Mod·Packet-Out), 비동기(Packet-In·Flow-Removed), 대칭(Hello·Echo) |\n| 동작 | Table-miss 규칙이 컨트롤러 전송으로 설정된 경우 Packet-In → 경로 계산 → Flow-Mod 설치(TCP 6653) |\n\n## 4. 고려사항\n- 컨트롤러 단일 장애점 → 분산 클러스터([[raft|Raft]])\n- 제어 채널 TLS·API 인증, [[network-function-virtualization|NFV]] 연계",
+      "body": "## 소프트웨어 정의 네트워크\nSDN은 [[control-plane|제어 평면]]과 [[data-plane|데이터 평면]]을 분리하고 소프트웨어로 네트워크 동작을 제어하는 구조다. 논리적 중앙 제어가 반드시 물리적 단일 컨트롤러를 뜻하지는 않는다.\n\n| 계층 | 역할 |\n|---|---|\n| 응용 | 경로·보안·부하분산 등 정책 요구 |\n| 제어 | 토폴로지·상태 파악, 경로 계산·규칙 생성 |\n| 전달 | 설치된 규칙에 따라 패킷 처리 |\n\n[[openflow|OpenFlow]]는 컨트롤러와 스위치 사이에서 플로 테이블을 제어하는 프로토콜의 하나다. 1.3.0의 엔트리는 매치·우선순위·카운터·명령·타임아웃 등을 가지며, 컨트롤러는 Flow-Mod로 규칙을 변경하고 Packet-Out으로 패킷 처리를 지시한다. 스위치는 설정된 조건에 따라 Packet-In 등을 보낸다.\n\n매치 실패가 항상 컨트롤러 전송을 의미하지 않는다. table-miss 엔트리에 따라 컨트롤러 전송·다음 테이블 이동·드롭 등이 가능하고, 해당 엔트리가 없으면 기본적으로 드롭한다. 컨트롤러 가용성·제어채널 보호·정책 충돌을 관리한다. OpenFlow·REST·특정 합의 알고리즘을 모든 SDN의 필수 기술로 단정하지 않는다.",
       "sources": [
         {
-          "title": "ONF OpenFlow Switch Specification 1.3.0",
+          "title": "ONF OpenFlow Switch Specification 1.3.0(2012)",
           "url": "https://opennetworking.org/wp-content/uploads/2014/10/openflow-spec-v1.3.0.pdf",
-          "scope": "5.4절 table-miss는 설정에 따라 컨트롤러 전송/드롭/다음 테이블, 기본 미설정은 드롭"
+          "scope": "플로 엔트리·메시지·5.4절 table-miss 동작 및 미설정 드롭 대조. 특정 규격 버전으로 한정."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. Table-miss 무조건 Packet-In 오류를 공식 PDF 13쪽 텍스트로 대조. SDN 논리적 중앙화와 구현 예를 구분.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 플로 엔트리·메시지·5.4절 table-miss 동작 및 미설정 드롭 대조. 특정 규격 버전으로 한정.",
       "unresolved": []
     },
     "long": {
@@ -10864,21 +10778,15 @@
   "t-d807fdcc": {
     "short": {
       "source_sha256": "8712e2f5a32bafb1661cc709ae9fa1e549cb177a05b2d8d67f624e80097187f9",
-      "body": "## 1. CRC(순환 중복 검사)의 개요\n- 정의: 데이터를 송수신 간 약속된 [[generator-polynomial|생성다항식]] G(x)로 [[modulo-2-arithmetic|모듈로-2 나눗셈]]한 나머지를 [[frame-check-sequence|FCS]]로 부가하여 전송 오류를 판별하는 [[error-detection|오류 검출]] 기법\n- 필요성: 채널 잡음에 의한 [[burst-error|버스트 오류]]를 [[parity|패리티]]·[[checksum|체크섬]]보다 높은 확률로 검출\n\n## 2. CRC의 개념도 및 구성요소\n아래는 초기값·최종 XOR·비트 반전 없는 단순 모델이다. 실제 규격의 검증 잔여값과 오류 후 처리 절차는 별도로 확인한다.\n```mermaid\nflowchart LR\n  A[데이터 M] --> B[n비트 0 추가]\n  B --> C[G로 모듈로-2 나눗셈]\n  C --> D[나머지 R을 FCS로 부가]\n  D --> E[수신측 G로 나눗셈]\n  E --> F{나머지 0}\n  F -->|예| G1[오류 미검출·수용]\n  F -->|아니오| H[폐기 후 재전송 요청]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 생성다항식 G(x) | 송수신 공통 n차 제수, 최고·최저 차수 계수 1 |\n| 모듈로-2 연산 | 자리올림·빌림 없는 [[xor|XOR]] 나눗셈 |\n| FCS | n비트 나머지, 프레임 꼬리에 부가 |\n| [[lfsr|LFSR]] | 시프트 레지스터와 XOR로 하드웨어 고속 계산 |\n\n## 3. CRC의 특징 및 표준 다항식\n| 구분 | 내용 |\n|---|---|\n| 검출 능력 | 단일 비트, (x+1) 인수 포함 시 홀수 개 비트, 길이 n 이하 버스트 오류 전부 검출 |\n| 미검출 확률 | 오류 패턴 분포 등의 가정하에 약 2^-n으로 근사하기도 하나 모든 버스트에 대한 고정 확률은 아님 |\n| 표준 | CRC-8(ATM HEC, x⁸+x²+x+1), CRC-16-CCITT(HDLC), CRC-32([[ethernet|이더넷]]) |\n\n## 4. 고려사항\n- 검출만 가능 → [[automatic-repeat-request|ARQ]] 재전송 또는 [[forward-error-correction|FEC]] 결합\n- 선형 연산이라 의도적 변조 탐지 불가 → 무결성 보호는 [[message-authentication-code|MAC]] 병행",
+      "body": "## 순환 중복 검사\nCRC는 데이터를 [[generator-polynomial|생성다항식]]으로 모듈로-2 나눗셈하여 얻은 나머지를 붙이는 [[error-detection|오류 검출]] 기법이다. 덧셈·뺄셈은 자리올림 없는 XOR이며, 차수 r인 생성다항식이면 r비트 검사값을 만든다.\n\n초기값·반사·최종 XOR가 없는 단순 모델에서 송신자는 M 뒤에 r개의 0을 붙여 나누고, 그 나머지 R을 M 뒤에 붙인다. 수신자는 코드워드를 같은 다항식으로 나눠 나머지를 확인한다.\n\n| 기출 조건 | 계산 결과·검산 |\n|---|---|\n| M=01101011, G=x⁸+x²+x+1=100000111 | 0110101100000000을 G로 XOR 나눗셈 → R=00010110, 코드워드=0110101100010110 → 재나눔 나머지 0 |\n| M=1011010, G=1101 | 1011010000을 G로 XOR 나눗셈 → R=100, 코드워드=1011010100 → 재나눔 나머지 0 |\n\n나머지 0은 오류가 없다는 보증이 아니라 해당 검사에서 오류를 검출하지 않았다는 뜻이다. 실제 CRC 규격은 초기값·비트 순서·최종 보수와 수신 잔여값을 함께 확인한다. 검출 성능은 다항식과 오류 패턴에 의존하며 의도적 변조에 대한 암호학적 무결성 보호를 대신하지 않는다.",
       "sources": [
         {
-          "title": "RFC 1662",
-          "url": "https://datatracker.ietf.org/doc/html/rfc1662",
-          "scope": "CRC/FCS 검증 잔여값은 구현 파라미터에 의존하며 초기화·보수 있는 PPP는 good FCS 사용. 단순 GF(2) 예제 2개를 Python XOR 나눗셈으로 재계산: 0x6b/0x107→0x16, 1011010/1101→100, 두 코드워드 나머지 0."
-        },
-        {
-          "title": "Philip Koopman Data Integrity",
-          "url": "https://users.ece.cmu.edu/~koopman/lectures/ece642/34_DataIntegrity.pdf",
-          "scope": "GF(2) 다항식 나눗셈·CRC 다항식별 검출 성능 차이"
+          "title": "RFC 1662 PPP FCS",
+          "url": "https://www.rfc-editor.org/rfc/rfc1662",
+          "scope": "실제 FCS 초기화·보수·good FCS 조건 대조. 기출 두 계산은 독립 XOR 나눗셈으로 R=00010110/100과 코드워드 재나눔0 확인."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. CRC/FCS 검증 잔여값은 구현 파라미터에 의존하며 초기화·보수 있는 PPP는 good FCS 사용. 단순 GF(2) 예제 2개를 Python XOR 나눗셈으로 재계산: 0x6b/0x107→0x16, 1011010/1101→100, 두 코드워드 나머지 0.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 실제 FCS 초기화·보수·good FCS 조건 대조. 기출 두 계산은 독립 XOR 나눗셈으로 R=00010110/100과 코드워드 재나눔0 확인.",
       "unresolved": []
     },
     "long": {
@@ -10904,22 +10812,18 @@
   "t-c87884dd": {
     "short": {
       "source_sha256": "ca8dbfb8b81cda8e0c58823a039204b7a73f82e29716ebe18243ab8f32939b80",
-      "body": "## 1. 스마트 더스트(Smart Dust)의 개요\n- 정의: 센서·프로세서·통신·전원의 mm³ 수준 집적을 지향하는 초소형 [[sensor-node|센서 노드]](Mote)를 공간에 대량 산포하여 환경 정보를 감지·전송하는 [[mems|MEMS]] 기반 초소형 무선 센싱 기술\n- 등장배경: 1990년대 후반 UC 버클리(Kris Pister)의 DARPA 지원 연구로 발전, [[ubiquitous-sensor-network|USN]]·[[iot|IoT]] 확산에 따른 초소형·초저전력 센싱 수요\n\n## 2. 스마트 더스트의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  D1[Mote 1] --> D2[Mote 2]\n  D3[Mote 3] --> D2\n  D2 --> BS[기지국 송수신기]\n  BS --> GW[홈 게이트웨이]\n  GW --> SV[홈 서버 및 앱]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 센서부 | 온도·습도·조도·진동·가스 감지 |\n| 처리부 | 초저전력 제어회로·MCU(센티미터급 연구 Mote의 TinyOS 사례와 mm³ 목표는 구분) |\n| 통신부 | [[corner-cube-retroreflector|CCR]] 수동 광통신, 레이저·RF 통신 |\n| 전원부 | 박막 전지, 태양전지, [[energy-harvesting|에너지 하베스팅]] |\n\n## 3. 특징 및 홈네트워킹 활용\n| 구분 | 내용 |\n|---|---|\n| 특징 | 초소형, 초저전력, 대량 산포, 자율 [[mesh-network|메시]] 구성 |\n| 홈 보안 | 창문·출입구 진동·침입 감지 |\n| 환경·안전 | 실내 공기질, 가스 누출·화재 조기 감지 |\n| 에너지·헬스케어 | 재실 기반 냉난방·조명 제어, 고령자 활동 모니터링 |\n\n## 4. 고려사항\n- 전력·통신 거리 제약 → 저전력 [[multi-hop|멀티홉]] 라우팅, 하베스팅 고도화\n- 무분별한 산포에 따른 감시·사생활 침해 → [[privacy-by-design|프라이버시 중심 설계]], 회수·환경오염 대책",
+      "body": "## 스마트 더스트\n센서·처리·통신·전원 기능의 극소형 집적을 지향하는 [[sensor-node|센서 노드]] 연구 개념이다. Berkeley 연구의 mm³급 목표와 TinyOS를 사용한 더 큰 상용 부품 기반 Mote 실험은 구별해야 한다.\n\n| 구성 | 역할·연구 접근 |\n|---|---|\n| 센서 | 빛·온도·진동 등 물리 정보 감지 |\n| 처리·제어 | 측정·저장·통신 동작 관리 |\n| 통신 | 수동 광통신의 CCR, 능동 광통신·RF 등 설계별 선택 |\n| 전원 | 소형 전지·태양전지·에너지 수집과 저전력 운용 |\n\n홈네트워킹 응용을 구성한다면 센서 노드 → 수집 장치 → [[home-gateway|홈 게이트웨이]] → 홈 서버·앱으로 연결할 수 있다. 출입구 진동 감지나 실내 환경 측정 결과로 알림·설비 제어를 지원하는 것은 응용 설계 예이며 모든 mm³ 노드에서 상용화된 기능이라는 뜻은 아니다.\n\n크기·전력·통신 거리·감지 성능을 함께 절충해야 한다. 메시·멀티홉·TinyOS가 모든 스마트 더스트의 필수 구성도 아니다. 배치 위치·장애·전원 수명과 수집 데이터의 사생활 영향을 고려하고, 센서의 회수·폐기 가능성까지 설계한다.",
       "sources": [
         {
-          "title": "UC Berkeley Smart Dust project",
-          "url": "https://www-bsac.eecs.berkeley.edu/~pister/SmartDust/",
-          "scope": "1mm³는 원래 연구 목표; 별도 COTS Mote/TinyOS 실험과 분리. 홈네트워크 응용은 개념 예로 명시."
-        },
-        {
-          "title": "Pister Smart Dust progress 2001",
+          "title": "Berkeley Pister Smart Dust progress",
           "url": "https://people.eecs.berkeley.edu/~pister/SmartDust/tmp/progress.html",
-          "scope": "1인치 Mote의 TinyOS와 cubic millimeter 연구 목표 구분"
+          "scope": "cubic millimeter 목표와 1인치 Mote/TinyOS 연구 구별 확인. 홈네트워크는 개념적 설계 예로 한정."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. 1mm³는 원래 연구 목표; 별도 COTS Mote/TinyOS 실험과 분리. 홈네트워크 응용은 개념 예로 명시.",
-      "unresolved": []
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. cubic millimeter 목표와 1인치 Mote/TinyOS 연구 구별 확인. 홈네트워크는 개념적 설계 예로 한정.",
+      "unresolved": [
+        "개별 mm³ 장치의 상용 성능·통신 거리·실내 안전 감지 인증은 확인하지 않음."
+      ]
     },
     "long": {
       "source_sha256": "2adc1db6b1d36d5f24c2dbe4faf23971e0bf867c11ce5dda6a1da405d219d624",
@@ -10944,17 +10848,18 @@
   "t-2ab97af1": {
     "short": {
       "source_sha256": "3ca0ff87114f838b68550c968ee2071b22f917f34657d855c6f734ad9fc2f47e",
-      "body": "## 1. 실내 측위(IPS)의 개요\n- 정의: [[gps|GPS]] 신호가 닿지 않는 실내에서 Wi-Fi·BLE·UWB 신호와 관성 센서를 이용해 단말·사물의 위치를 추정하는 측위 시스템\n- 필요성: 생활시간 대부분이 실내, 실내 내비게이션·긴급구조·자산 추적 수요 증가\n\n## 2. IPS의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[AP 비콘 UWB 앵커] -->|RSSI ToF AoA| B[단말 태그]\n  C[관성 센서] --> B\n  B --> D[측위 엔진]\n  E[(라디오맵 실내지도)] --> D\n  D --> F[위치기반 서비스]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 신호 인프라 | [[wireless-lan|무선 LAN]] AP, [[ble-beacon|BLE 비콘]], [[ultra-wideband|UWB]] 앵커 |\n| 단말·태그 | 신호 측정, [[inertial-measurement-unit|IMU]] 센싱 |\n| 측위 엔진 | 거리·각도·패턴 기반 위치 계산, [[sensor-fusion|센서 융합]] |\n\n## 3. 측위 기술\n정확도는 장비·배치·차폐·보정 방식에 따라 달라지는 예시 범위이며 보장값이 아니다.\n| 기술 | 원리·정확도 |\n|---|---|\n| [[trilateration|삼변측량]] | [[received-signal-strength-indicator|RSSI]]·[[round-trip-time|RTT]] 거리 3개 이상을 이용한 2차원 추정(앵커 배치·오차 고려), Wi-Fi RTT 1~2m |\n| [[location-fingerprinting|핑거프린팅]] | 기준점별 신호 패턴 DB 매칭, 2~5m |\n| [[angle-of-arrival|AoA]] | 배열 안테나 도래각 교차(BLE 5.1), 1m 내외 |\n| UWB [[time-difference-of-arrival|TDoA]] | 나노초 펄스 도달 시간차, 10~30cm |\n| [[pedestrian-dead-reckoning|PDR]] | 걸음 수·방향 누적, 타 기술로 오차 보정 |\n\n## 4. 활용 서비스 및 고려사항\n- 활용: 공항·쇼핑몰 길안내, 긴급구조, 스마트팩토리 [[real-time-locating-system|RTLS]], 근접 마케팅\n- 고려: [[multipath-propagation|다중경로]]·인체 차폐 오차 → 하이브리드 측위, [[location-information-act|위치정보법]] 등 적용 법령에 따른 처리 근거·보호 의무 확인",
+      "body": "## 실내 측위의 원리와 선택\n실내 측위는 위성 신호 사용이 어려운 실내에서 무선 신호와 관성 센서 등을 이용해 단말·자산의 위치를 추정하는 기술이다. AP·비콘·앵커, 측정 단말, 위치 추정 엔진과 실내 지도가 주요 구성이다.\n\n| 방식 | 측정·추정 원리 | 주의점 |\n|---|---|---|\n| 거리 기반 | RSSI 경로손실 또는 [[round-trip-time|RTT]]로 거리를 추정하고 다변측량 | 차폐·다중경로·앵커 배치 영향 |\n| [[location-fingerprinting|핑거프린팅]] | 기준점 신호 패턴을 수집한 라디오맵과 현재 측정값 비교 | 공간·장비 변화 시 재보정 |\n| [[angle-of-arrival|AoA]] | 배열 안테나의 도래각으로 방향 추정 | 안테나 구조·반사 영향 |\n| [[time-difference-of-arrival|TDoA]] | 기준국 간 신호 도착 시간차 활용 | 시간 동기화 필요 |\n| [[pedestrian-dead-reckoning|PDR]] | 걸음·방향 변화 누적으로 상대 위치 계산 | 누적 오차를 외부 기준으로 보정 |\n\nAndroid Wi-Fi RTT 안내는 지원 AP 3개 이상의 거리와 위치를 이용한 추정에서 통상 1–2m 정확도를 예시한다. 이는 모든 Wi-Fi·배치 환경의 보장값이 아니다. 지원 하드웨어·권한·AP 위치 정보도 필요하다.\n\n실내 길안내, 근접 정보 제공, 자산 추적에 활용하되 목표 정확도·지연·설치비를 기준으로 선택한다. 위치 오차는 환경별로 측정하고, 개인과 연결되는 위치정보는 처리 근거·접근권한·보유기간을 함께 검토한다.",
       "sources": [
         {
           "title": "Android Wi-Fi RTT",
           "url": "https://developer.android.com/develop/connectivity/wifi/wifi-rtt",
-          "scope": "RTT 지원 AP 3개 이상 위치 추정과 통상 1~2m 예, FTM 및 기기 지원 조건 대조. 환경 수치·정확도는 보장값으로 표현하지 않음."
+          "scope": "RTT 거리 측정·3개 이상 AP·통상 정확도 및 지원 조건"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. RTT 지원 AP 3개 이상 위치 추정과 통상 1~2m 예, FTM 및 기기 지원 조건 대조. 환경 수치·정확도는 보장값으로 표현하지 않음.",
-      "unresolved": []
+      "review_scope": "기존 정확도 비보장 교정을 유지하고 미대조 기술별 고정 수치를 제거. RTT 주요 주장은 공식 개발 문서와 대조.",
+      "unresolved": [
+        "AoA·TDoA·PDR·핑거프린팅의 개별 표준·알고리즘 및 국내 위치정보법 현행 적용 조문은 추가 대조 필요."
+      ]
     },
     "long": {
       "source_sha256": "f48085f0d5159249068f2a1dc816b398b346290c0f553526e759e83b1ce5621e",
@@ -10974,17 +10879,23 @@
   "t-6d4ba9a2": {
     "short": {
       "source_sha256": "ed424e3c41793ec385bd58276bd82832608db46380a3d7588cef65f2a5588682",
-      "body": "## 1. 애드혹 네트워크(Ad hoc Network)의 개요\n- 정의: AP·기지국 등 고정 인프라 없이 무선 단말이 스스로 망을 구성하고, 각 노드가 라우터로서 패킷을 [[multi-hop|멀티홉]] 중계하는 자율 무선 네트워크\n- 필요성: 인프라 구축이 불가하거나 파괴된 전장·재난·차량 환경에서 신속한 통신망 구성\n\n## 2. 애드혹 네트워크의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[출발 노드] --- A[중계 노드 A]\n  A --- B[중계 노드 B]\n  B --- D[목적 노드]\n  S --- C[중계 노드 C]\n  C --- D\n```\n| 구성요소 | 역할 |\n|---|---|\n| 이동 노드 | 호스트 겸 라우터, 패킷 중계 |\n| 라우팅 프로토콜 | 동적 토폴로지에서 경로 탐색·유지 |\n| MAC | [[csma-ca|CSMA/CA]] 기반 채널 접근 |\n\n## 3. 라우팅 프로토콜 유형\n| 구분 | 프로액티브 | 리액티브 |\n|---|---|---|\n| 경로 설정 | 주기적 테이블 갱신 | 요구 시 경로 탐색 |\n| 대표 | [[destination-sequenced-distance-vector|DSDV]], [[optimized-link-state-routing|OLSR]] | [[ad-hoc-on-demand-distance-vector|AODV]], [[dynamic-source-routing|DSR]] |\n| 지연·오버헤드 | 지연 낮음, 제어 트래픽 상시 | 탐색 지연, 이동성 비례 오버헤드 |\n\n- 하이브리드: [[zone-routing-protocol|ZRP]](영역 내 프로액티브, 영역 간 리액티브)\n\n## 4. 고려사항\n- 이동성에 따른 잦은 경로 단절, 배터리 제약 → 에너지 인지 라우팅\n- 중앙 인증 부재로 [[black-hole-attack|블랙홀]]·[[wormhole-attack|웜홀]] 공격 취약 → 보안 라우팅·신뢰 평가",
+      "body": "## 애드혹 네트워크와 경로 제어\n애드혹 네트워크는 고정 통신 인프라에 의존하지 않고 노드가 자율적으로 연결·중계하는 망이다. 이동 노드를 포함한 [[mobile-ad-hoc-network|MANET]]에서는 토폴로지가 변하므로 경로 탐색·유지와 [[multi-hop|멀티홉]] 전달이 중요하다.\n\n| 구분 | 프로액티브 | 리액티브 |\n|---|---|---|\n| 경로 관리 | 통신 요구 전에도 경로 정보를 유지 | 전달할 데이터가 있을 때 탐색 |\n| 대표 | DSDV, [[optimized-link-state-routing|OLSR]] | [[ad-hoc-on-demand-distance-vector|AODV]], DSR |\n| 장점 | 이미 알려진 경로로 빠르게 전송 시작 | 사용하지 않는 경로의 관리 부담 절감 |\n| 부담 | 주기·변화 통지에 제어 트래픽 발생 | 최초 탐색 지연과 단절 시 재탐색 |\n\nAODV는 RREQ로 경로를 요청하고 목적지 또는 충분히 최신 경로를 가진 중간 노드가 RREP로 응답한다. 단절은 RERR로 알리며 순서번호로 경로 신선도와 루프 방지를 지원한다. 이 절차가 모든 애드혹 프로토콜에 공통인 것은 아니다.\n\n[[wireless-sensor-network|WSN]]은 센싱 데이터의 수집·집계와 에너지 제약에 중점을 두는 경우가 많고, MANET은 이동 단말 간 연결 유지에 중점을 둔다. 둘은 배타적인 분류가 아니며 센서망에도 이동성과 애드혹 구성이 가능하다. 라우팅 선택은 이동성·통신량·배터리·전달 지연을 함께 평가하고 악의적인 중계·경로 광고도 고려한다.",
       "sources": [
         {
-          "title": "RFC 3561 AODV",
-          "url": "https://datatracker.ietf.org/doc/html/rfc3561",
-          "scope": "RREQ·RREP·RERR, 목적지 또는 충분히 최신 경로를 가진 중간노드 응답 대조. AODV 예를 모든 MANET 공통 절차로 일반화한 표현 한정."
+          "title": "RFC 2501",
+          "url": "https://www.rfc-editor.org/rfc/rfc2501.html",
+          "scope": "MANET 특성·이동성·대역폭·에너지·보안 제약"
+        },
+        {
+          "title": "RFC 3561",
+          "url": "https://www.rfc-editor.org/rfc/rfc3561.html",
+          "scope": "AODV RREQ·RREP·RERR와 목적지 순서번호"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. RREQ·RREP·RERR, 목적지 또는 충분히 최신 경로를 가진 중간노드 응답 대조. AODV 예를 모든 MANET 공통 절차로 일반화한 표현 한정.",
-      "unresolved": []
+      "review_scope": "기존 AODV의 응답 주체 조건을 보존. MANET 특성과 AODV 절차를 대조했으며 WSN 비교는 일반적 용도 차이로 한정.",
+      "unresolved": [
+        "OLSR·DSDV·DSR의 개별 패킷과 상태 전이는 재대조하지 않음."
+      ]
     },
     "long": {
       "source_sha256": "1b8676ff1951fd060a6eb6eea4d5fd2482cee457875105d48c475ba2c18bba3c",
@@ -11004,16 +10915,15 @@
   "t-fcb70300": {
     "short": {
       "source_sha256": "e0c64d12455878d487af25001403d67181c55302cd287f8cfa3e86e7ea905b6d",
-      "body": "## 1. 전송 에러 제어의 개요\n- 정의: 전송 중 발생한 비트 오류·손실을 [[error-detection|오류 검출]] 후 재전송 또는 자체 정정으로 복구하여 신뢰성 있는 전송을 보장하는 데이터 링크·전송 계층 기능\n- 필요성: 잡음·간섭·혼잡에 의한 손상·손실·중복 패킷 발생\n\n## 2. 에러 제어의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  A[에러 제어] --> B[오류 검출]\n  A --> C[후진 오류 정정 ARQ]\n  A --> D[전진 오류 정정 FEC]\n  B --> B1[패리티 체크섬 CRC]\n  C --> C1[Stop-and-Wait GBN SR]\n  D --> D1[해밍 RS LDPC]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 검출 코드 | [[parity|패리티]], [[checksum|체크섬]], [[cyclic-redundancy-check|CRC]] |\n| 순서번호·타이머 | 중복 식별, 손실 시 타임아웃 재전송 |\n| ACK·NAK | 수신 성공·실패 통보 |\n\n## 3. 에러 유형별 대응방안\n| 에러 유형 | 대응방안 |\n|---|---|\n| 손상(비트·[[burst-error|버스트 오류]]) | CRC 검출 후 [[automatic-repeat-request|ARQ]] 재전송, [[forward-error-correction|FEC]] 정정 |\n| 손실(혼잡·단절) | 타이머 기반 재전송, [[congestion-control|혼잡 제어]] |\n| 중복·순서 뒤바뀜 | 순서번호로 중복 폐기·재정렬 |\n\n## 4. 고려사항\n- 위성 등 지연 큰 링크는 [[go-back-n-arq|Go-Back-N]]·[[selective-repeat-arq|Selective Repeat]], 무선은 [[hybrid-arq|HARQ]] 적용\n- 실시간 음성·영상은 재전송 대신 FEC 중심 설계",
+      "body": "## 오류 검출·정정과 ARQ\n오류 제어는 전송 중 손상·손실·중복 등을 감지하고 재전송 또는 부호 복원으로 신뢰성을 높이는 기능이다. 오류 검출은 CRC·체크섬 등으로 손상 여부를 판단하고, [[forward-error-correction|FEC]]는 추가 중복 정보로 정정 가능한 범위의 오류를 수신 측에서 복원한다.\n\n| 구분 | [[stop-and-wait-arq|정지·대기 ARQ]] | [[go-back-n-arq|Go-Back-N ARQ]] |\n|---|---|---|\n| 전송 | 프레임 하나 전송 후 ACK 대기 | 송신 창 범위에서 여러 프레임 연속 전송 |\n| 확인 | 순서번호로 ACK·중복 구분 | 정상 순서 수신에 대한 누적 ACK |\n| 복구 | 타임아웃이면 해당 프레임 재전송 | 타임아웃 시 가장 오래된 미확인 프레임부터 뒤의 미확인 프레임 재전송 |\n| 특징 | 단순하지만 왕복 지연 동안 대기 | 링크 활용 향상, 오류 시 정상 프레임도 재전송 가능 |\n\n전형적인 GBN 수신자는 순서가 어긋난 프레임을 버리고 기대한 프레임을 기다린다. 선택적 재전송은 수신 버퍼와 개별 확인으로 필요한 프레임만 재전송한다.\n\n손상은 검출·정정 코드, 손실은 확인·타이머, 중복·순서 뒤바뀜은 순서번호·중복 폐기·재정렬로 대응한다. ACK 자체의 손실도 고려해야 한다. 재전송·FEC의 선택은 오류율·지연 예산·대역폭에 따라 달라지며, 실시간 서비스에서도 기한 내 재전송과 FEC를 조합할 수 있다.",
       "sources": [
         {
           "title": "SFU CMPT371 Data Link lecture",
           "url": "https://www2.cs.sfu.ca/CourseCentral/371/tront/lectureNotes/371s3.991.4up.pdf",
-          "scope": "GBN 송수신 창·재전송 및 무오류/처리지연 무시 효율식 조건 대조."
+          "scope": "정지·대기·GBN·선택적 재전송과 순서번호·수신 창·오류 복구"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short·long 전체 열람. GBN 송수신 창·재전송 및 무오류/처리지연 무시 효율식 조건 대조.",
+      "review_scope": "기존 오류 유형 설명을 유지하고 138회 요구의 정지·대기/GBN 비교를 추가. 강의 자료로 재전송 범위·수신 동작 대조. 실시간=FEC 일률 선택 단정 제거.",
       "unresolved": []
     },
     "long": {
@@ -11082,18 +10992,17 @@
   "t-8ccfb6e9": {
     "short": {
       "source_sha256": "3adb6ea7f48a846a9e9baf025107e2b68d5f07850ed4d8dfc9d2e012045786f8",
-      "body": "## 1. WSN Itinerary Routing의 개요\n- 정의: 무선 센서 네트워크에서 [[sink-node|싱크]]가 보낸 [[mobile-agent|이동 에이전트]]가 계획된 경로(Itinerary)를 따라 [[sensor-node|센서 노드]]를 순회하며 데이터를 수집·집계해 귀환하는 라우팅 방식\n- 필요성: 클라이언트·서버 방식의 원시 데이터 대량 전송에 따른 에너지·대역폭 소모, 싱크 주변 노드 에너지 고갈(Hotspot)\n\n## 2. 개념도 및 구성요소\n```mermaid\nflowchart LR\n  S[\"싱크\"] -->|\"에이전트 발송\"| N1[\"노드 1\"] --> N2[\"노드 2\"] --> N3[\"노드 3\"] --> N4[\"노드 4\"]\n  N4 -->|\"집계 결과 귀환\"| S\n```\n| 구성요소 | 역할 |\n|---|---|\n| 싱크 노드 | 에이전트 생성·여정 계획·결과 수신 |\n| 이동 에이전트 | 처리 코드·누적 결과 운반, 노드별 [[in-network-aggregation|망 내 집계]] |\n| 여정(Itinerary) | 방문 노드 순서, 정적·동적 결정 |\n\n## 3. 유형 및 특징\n| 구분 | 내용 |\n|---|---|\n| 정적 여정 | 싱크가 전역 정보로 사전 계산(LCF·GCF·MST 기반), 오버헤드 낮으나 노드 장애에 취약 |\n| 동적 여정 | 에이전트가 잔여 에너지·거리·정보 이득으로 다음 노드 선택, 적응적이나 연산 부담 |\n| 다중 에이전트 | 대규모 망을 영역 분할해 병렬 순회, 지연 단축 |\n\n## 4. 고려사항\n- 여정 길이 증가 시 에이전트 크기·지연 증가 → 다중 에이전트·데이터 압축\n- 에이전트 위·변조 방지 인증, 노드 장애 시 우회 여정 재계획",
+      "body": "## WSN과 Itinerary Routing\n무선 센서 네트워크(WSN)는 센서 노드가 관측한 정보를 무선으로 전달하고 [[sink-node|싱크]]에서 수집하는 망이다. Itinerary Routing은 [[mobile-agent|이동 에이전트]]가 정해진 방문 경로를 따라 노드를 순회하며 데이터를 수집·집계하는 방식이다.\n\n| 요소 | 역할·선택 기준 |\n|---|---|\n| 싱크 | 수집 요구·방문 대상 지정, 결과 수신 |\n| 이동 에이전트 | 처리 코드와 누적 결과를 운반하며 현지 처리 |\n| 정적 여정 | 방문 순서를 미리 계산, 이동 중 계산 부담 감소 |\n| 동적 여정 | 상태 변화에 맞게 다음 방문 노드·경로 조정 |\n| 다중 에이전트 | 영역을 나누어 수집, 병렬성 및 이동 비용 절충 |\n\n싱크가 에이전트를 발송하면 각 노드에서 센싱 결과를 [[in-network-aggregation|망 내 집계]]하고 다음 노드로 이동한 뒤 결과를 반환한다. 모든 원시 데이터를 각각 싱크로 보내는 방식과 비교해 전송량 절감을 노릴 수 있다.\n\n절감 효과는 여정 길이·노드 밀도·집계율·에이전트 크기에 달려 있다. 누적 데이터 증가와 순차 방문 지연을 함께 평가하며, 노드 장애 시 우회 경로와 에이전트 인증·무결성 보호가 필요하다.",
       "sources": [
         {
           "title": "Mercadal et al., separate itineraries in WSN",
           "url": "https://www.ucc.ie/en/media/research/misl/2013publications/Improvingthedynamismofmobileagentapplicationsinwirelesssensornetworksthroughseparateitineraries.pdf",
-          "scope": "에이전트 코드와 이동 경로 자료구조 분리, 동적 이동 경로 개념"
+          "scope": "논문 서론의 이동 에이전트 및 정적·동적·혼합 여정 분류를 직접 대조."
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "짧은·긴 답안 전체 문장·표·도식 독해. 이동 에이전트 경로 개념과 자료구조 확인. 에너지 수치의 실험 조건 누락, 탐욕적 경로의 최적 보장 표현 수정.",
+      "review_scope": "연결 기출·기존 short를 읽고 재구성. 논문 서론의 이동 에이전트 및 정적·동적·혼합 여정 분류를 원문 대조.",
       "unresolved": [
-        "LEACH·HEED·PEGASIS 각각의 원 논문 세부 절차와 에너지 등가 수치는 추가 대조 필요; 이것은 확인할 수 없습니다."
+        "논문의 성능 실험 수치·개별 알고리즘 구현 세부는 미검토."
       ]
     },
     "long": {
@@ -15867,38 +15776,27 @@
   "t-204974a8": {
     "short": {
       "source_sha256": "3d206ff660508b9e53a721533018631f86a2c4a85cfb516d1e8738c7cf7da674",
-      "body": "## 1. 소프트웨어 개발보안의 개요\n- 정의: 소프트웨어 개발 수명주기([[software-development-lifecycle|SDLC]]) 전 단계에 걸쳐 보안약점을 줄이는 설계·구현·검증·취약점 대응을 포함한 보안 내재화 활동\n- 필요성: 운영단계 사후 대응은 비용 과다, 개발단계 제거가 효율적([[shift-left|Shift-Left]])\n\n## 2. 개발보안의 개념도 및 단계별 보안\n```mermaid\nflowchart LR\n  R[요구분석] --> D[설계] --> C[구현] --> T[시험] --> O[운영]\n  R -.보안요구.-> R\n  D -.위협모델링.-> D\n  C -.시큐어코딩·SAST.-> C\n  T -.DAST·모의해킹.-> T\n```\n| 단계 | 보안 기술 |\n|---|---|\n| 요구분석 | 보안요구사항 도출, 법규 식별 |\n| 설계 | [[threat-modeling|위협 모델링]], [[secure-by-design|보안 설계]] |\n| 구현 | [[secure-coding|시큐어코딩]], [[static-application-security-testing|SAST]] |\n| 시험 | [[dynamic-application-security-testing|DAST]], 모의해킹 |\n\n## 3. 보안약점 유형 및 웹 공격 방지\n| 유형 | 방지 방법 |\n|---|---|\n| 입력데이터 검증 | [[input-validation|입력 검증]], [[sql-injection|SQLi]]·[[xss|XSS]] 방어 |\n| 보안기능 | [[access-control|접근통제]]·인증·암호화 |\n| 시간·상태 | [[race-condition|경쟁조건]] 통제 |\n| 에러처리 | 오류메시지 노출 방지 |\n| 캡슐화·API | 안전한 라이브러리 사용 |\n\n## 4. 고려사항\n- 행정안전부 [[secure-coding-guide|SW 개발보안 가이드]]와 [[owasp-top-10|OWASP Top 10]] 참고; Top 10만으로 전체 요구사항 충족을 판단하지 않음\n- [[devsecops|DevSecOps]]로 CI/CD 내 보안 자동화, SBOM 연계 공급망 보안",
+      "body": "## 소프트웨어 개발보안\n요구분석부터 운영·변경까지 [[software-development-lifecycle|SDLC]] 전반에서 보안약점을 줄이는 활동이다. 시큐어코딩은 구현 단계의 중요한 수단이지만 개발보안 전체를 대신하지 않는다.\n\n| 단계 | 보안 활동 |\n|---|---|\n| 요구·설계 | 보호 대상·보안 요구 식별, 위협 모델링·권한 경계 설계 |\n| 구현 | 안전한 API·코딩 규칙, 코드 리뷰·정적 분석 |\n| 시험 | 동적 분석·보안 기능 시험·공격 시나리오 검증 |\n| 운영·변경 | 취약점 대응·패치·변경 영향 및 재검증 |\n\n보안약점은 입력 처리, 인증·인가 등 보안기능, 시간·상태, 오류 처리, 코드 오류, 캡슐화, API 오용 등의 관점에서 점검할 수 있다. 웹 공격 대응에서는 [[sql-injection|SQL 삽입]]에 매개변수화 쿼리를 사용하고, [[xss|XSS]]에 출력 위치별 인코딩과 필요한 HTML 정제를 적용한다. 입력 검증만으로 두 공격을 모두 방어한다고 보지 않는다.\n\n권한은 서버에서 요청마다 검증하고, 오류 응답에 내부 정보·비밀값을 노출하지 않는다. 자동 분석 도구의 결과는 오탐·미탐을 검토하며, 보안 요구와 수정·재시험 기록을 연결한다. 특정 가이드의 적용 의무와 버전은 사업 조건에 따라 확인한다.",
       "sources": [
         {
-          "title": "행정안전부 SW 개발보안 가이드 2021",
-          "url": "https://www.mois.go.kr/frt/bbs/type001/commonSelectBoardArticle.do?bbsId=BBSMSTR_000000000015&nttId=88956",
-          "scope": "첨부 PDF 목차·대상/범위·방법론·비용 예시, 본문 8~28쪽; 현행 법령 전체 대조와 구분"
-        },
-        {
-          "title": "NIST SSDF 1.1",
-          "url": "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-218.pdf",
-          "scope": "전체 생명주기·네 실천 그룹·권고와 적용 예시의 비강제성"
+          "title": "NIST SP 800-218 SSDF v1.1(2022)",
+          "url": "https://csrc.nist.gov/pubs/sp/800/218/final",
+          "scope": "생명주기 전반의 보안 활동 대조. OWASP SQLi·XSS 예방 문서에서 매개변수화·출력 문맥별 인코딩 확인."
         },
         {
           "title": "OWASP SQL Injection Prevention",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html",
-          "scope": "값 바인딩·식별자 허용 목록·프로시저 내부 동적 SQL 및 최소 권한"
+          "scope": "매개변수화 쿼리 중심 방어"
         },
         {
           "title": "OWASP XSS Prevention",
           "url": "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html",
-          "scope": "출력 문맥·일반 요소의 textContent·정화 후 변경·Trusted Types 정책의 역할"
-        },
-        {
-          "title": "Microsoft SDL Practices",
-          "url": "https://www.microsoft.com/en-us/securityengineering/sdl/practices/",
-          "scope": "현재 10개 실천 항목과 전 단계 적용"
+          "scope": "출력 문맥별 인코딩·HTML 정제"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 검토. 개발보안과 구현 코딩의 범위·단계별 활동·2021 가이드 분류·웹 방어 한계 대조.",
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 생명주기 전반의 보안 활동 대조. OWASP SQLi·XSS 예방 문서에서 매개변수화·출력 문맥별 인코딩 확인.",
       "unresolved": [
-        "개별 사업의 현행 법적 적용과 SAST/DAST/IAST 제품별 탐지율은 미확인. MS SDL·SAMM·BSIMM의 상세 평가는 별도 주제 검수 범위."
+        "국내 개발보안 가이드의 판본별 분류·의무 대상은 이번에 전부 대조하지 않음."
       ]
     },
     "long": {
@@ -16330,18 +16228,17 @@
   "t-9a0b0824": {
     "short": {
       "source_sha256": "1b3a97b235b0e75731975bc9970b37a0ceb401fb425ba9a5079e9e59eefab80e",
-      "body": "## 1. 워터마킹의 개요\n- 정의: 디지털·아날로그 콘텐츠에 저작권 정보 등을 가시적 또는 비가시적으로 삽입해 소유권 주장 입증 보조와 불법복제 추적에 활용하는 [[information-hiding|정보은닉]] 기술\n- 필요성: [[digital-rights-management|DRM]]과 함께 [[copyright-protection|저작권 보호]], 복제·유통 추적\n\n## 2. 워터마킹의 개념도 및 구성요소\n```mermaid\nflowchart LR\n  C[원본 콘텐츠] --> EMB[\"삽입(워터마크+키)\"] --> WM[워터마크 삽입 콘텐츠]\n  WM --> EXT[\"추출·검출(키)\"] --> V[삽입 정보 확인]\n```\n| 구성요소 | 역할 |\n|---|---|\n| 삽입 알고리즘 | 워터마크를 콘텐츠에 은닉 |\n| 추출·검출 | 워터마크 확인 |\n| 비밀키 | 삽입·추출 제어 |\n| 워터마크 | 저작권·식별 정보 |\n\n## 3. 요구 특성 및 활용\n| 특성 | 내용 |\n|---|---|\n| [[imperceptibility|비인지성]] | 허용 가능한 지각적 왜곡 내 삽입(비가시형) |\n| [[robustness|강인성]] | 강인형은 지정 압축·변형에 대한 유지 성능 평가 |\n| [[watermark-capacity|용량]] | 삽입 정보량 |\n| [[watermark-security|보안성]] | 무단 제거 곤란 |\n\n## 4. 고려사항\n- 비인지성·강인성·용량 간 [[tradeoff|상충관계]] 조정, 공격(제거·위조) 대응\n- [[fingerprinting|핑거프린팅]]과 결합해 유출 경로 추적 보조(계정·기기와 실제 행위자 구분), [[forensic-watermarking|포렌식 워터마킹]] 활용",
+      "body": "## 워터마킹과 추적 표식\n워터마킹은 콘텐츠에 식별 정보를 삽입하여 이후 검출·추출하는 기술이다. 가시형과 비가시형이 있으며 출처 표시, 권리 주장 입증 보조, 변조 탐지와 유출 경로 추적에 활용한다. 검출만으로 법적 소유권이 자동 확정되지는 않는다.\n\n| 구분 | 핵심 특성·용도 |\n|---|---|\n| 가시형·비가시형 | 보이는 표식 또는 허용 가능한 지각적 왜곡 내 삽입 |\n| 강인형 | 압축·크기 변경 등 정한 변환에도 표식 유지 |\n| 취약형 | 콘텐츠 변경 시 표식이 손상되도록 하여 변조 탐지 |\n| 구매자별 [[fingerprinting|핑거프린팅]] | 배포본마다 다른 표식을 넣어 유출된 사본의 경로 식별 |\n\n원본·표식·키 → 삽입 → 배포·변환 → 검출/추출 → 기준 정보와 비교하는 흐름이다. 모든 방식이 원본이나 비밀키를 반드시 필요로 하는 것은 아니며 검출 방식에 따라 조건이 달라진다.\n\n비가시형은 [[imperceptibility|비인지성]], [[robustness|강인성]], 삽입 용량, 제거·위조 저항 사이의 상충관계를 조정한다. 검출의 오탐·미탐과 다수 사본을 합치는 공모 공격도 고려한다. 계정별 표식은 해당 배포 경로를 가리킬 뿐 실제 유출 행위자를 단독으로 증명하지 않는다. 콘텐츠 특징을 추출해 동일성을 비교하는 지문 기술은 구매자 표식 삽입과 구별한다.",
       "sources": [
         {
-          "title": "NIST AI 100-4",
+          "title": "NIST AI 100-4 (2024)",
           "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-4.pdf",
-          "scope": "5~7쪽 가시·비가시/공개·비공개/블라인드 분류와 검출 오류, 17~18쪽 특징 지문·출처 메타데이터의 한계"
+          "scope": "가시·비가시 워터마크, 강인성·검출 오류·지문·출처 정보 한계"
         }
       ],
-      "reviewed_on": "2026-11-22",
-      "review_scope": "short/long 전문 검토. 가시·비가시, 강인·취약, 검출 오류와 권리 입증의 한계 및 구매자 표식/특징 추출 용어 구분.",
+      "review_scope": "기존 가시/비가시·강인형 조건·행위자와 계정 구분 교정을 보존. NIST의 표식 분류와 한계에 대조.",
       "unresolved": [
-        "DCT·DWT·LSB 구현별 강인성·오탐률은 실험하지 않음. 개별 분쟁에서의 증거능력·소유권은 표식 검출만으로 확인할 수 없음."
+        "DCT·DWT·LSB 구현 성능은 실험하지 않음. 구매자별 공모 저항 코드의 원전과 개별 분쟁의 증거능력은 미확인."
       ]
     },
     "long": {
@@ -21332,6 +21229,1224 @@
       "unresolved": [
         "전통 MAS의 협상·경쟁 알고리즘과 FIPA/A2A/MCP 세부 규약은 이 SHORT에서 검증하지 않음."
       ]
+    }
+  },
+  "t-f8a825e3": {
+    "short": {
+      "source_sha256": "69fdd25d17bc4b058280c34322cf881192c673d7c1e2da659cf3ef465ad6a68e",
+      "body": "## 모델링과 모델옵스\n기계학습 모델링은 데이터를 준비하고 학습·평가하여 예측 모델을 만드는 과정이다. 모델옵스(ModelOps)는 개발된 모델의 등록·검증·배포·감시·갱신을 조직의 운영 및 거버넌스와 연결하는 생명주기 관리 체계다.\n\n| 구분 | 모델링 | 모델옵스 |\n|---|---|---|\n| 중심 목표 | 문제에 맞는 모델과 성능 확보 | 운영 환경에서 지속적으로 성능·가치 유지 |\n| 주요 활동 | 데이터 준비, 학습, 평가 | 승인, 배포, 모니터링, 재학습·교체 |\n| 관리 대상 | 데이터·특성·학습 알고리즘 | 모델 버전·실행 환경·운영 책임·이력 |\n\n운영 흐름은 학습·평가 → [[model-registry|모델 레지스트리]] 등록 → 검증·승인 → 배포 → 모니터링 → 갱신이다. 모델·데이터·평가 결과를 연결해 재현성을 확보하고, 성능 저하나 [[data-drift|데이터 드리프트]]를 감지하면 재학습 필요성을 판단한다.\n\n모니터링 경보가 곧 자동 재배포 승인은 아니다. 갱신 모델을 다시 평가하고 승인·롤백 절차를 거친다. 모델링 팀과 운영 팀의 인계 기준 및 성능·업무 지표를 함께 정해야 운영 결과가 다음 모델링으로 환류된다.",
+      "sources": [
+        {
+          "title": "SAS ModelOps lifecycle",
+          "url": "https://www.sas.com/en_us/insights/articles/analytics/modelops.html",
+          "scope": "개발·시험·배포·모니터링의 순환과 조직 협업 대조. Gartner 최초 정의·모든 모델 유형의 포괄 여부는 본문에서 단정하지 않음."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 개발·시험·배포·모니터링의 순환과 조직 협업 대조. Gartner 최초 정의·모든 모델 유형의 포괄 여부는 본문에서 단정하지 않음.",
+      "unresolved": []
+    }
+  },
+  "t-c3fac4ee": {
+    "short": {
+      "source_sha256": "523d1fa65fe78abcae32be669cf22b77e60af63ddc05c9fcb4737386a11bf8d0",
+      "body": "## 반복점진적 개발\n[[iteration|반복]]은 분석·설계·구현·시험을 되풀이하며 제품을 개선하는 것이고, 점진은 기능을 증분으로 추가하는 것이다. 두 방식을 결합하면 실행 가능한 부분 제품을 평가하면서 요구사항과 위험을 구체화한다.\n\n| 구분 | 폭포수형 | 반복점진형 |\n|---|---|---|\n| 진행 | 단계별 완료·인계 중심 | 여러 활동을 반복 주기 안에서 수행 |\n| 피드백 | 후속 단계 결과로 변경 관리 | 매 반복 결과로 다음 계획 조정 |\n| 위험 대응 | 사전 분석·단계 검토 | 고위험 항목을 이른 반복에서 검증 |\n\n반복 계획서의 주요 목차는 ① 목표·대상 기능 ② 해결할 위험·이슈 ③ 작업·담당자 ④ 일정·마일스톤 ⑤ 평가 기준이다. 반복 평가서는 ① 구현·시험 결과 ② 기준 대비 달성도 ③ 이해관계자 피드백 ④ 잔여 위험·미완료 항목 ⑤ 다음 반복의 개선 사항을 담는다.\n\n계획 → 개발·통합·시험 → 시연·평가 → 재계획으로 환류한다. 매 반복이 반드시 외부 고객 대상 배포일 필요는 없으며 실행 가능한 증분과 평가 근거가 중요하다. 반복 기간만 짧게 나누고 검증·피드백을 생략하면 반복점진 개발의 효과를 얻기 어렵다.",
+      "sources": [
+        {
+          "title": "Eclipse OpenUP Iteration Plan",
+          "url": "https://archive.eclipse.org/epf/downloads/OpenUP/published/openup_published_1.5.1.5_20121212/openup/practice.mgmt.iterative_dev.base/workproducts/iteration_plan_B46FED39.html",
+          "scope": "반복 목표·작업배정·평가기준·결과·마일스톤 대조. 계획서/평가서 목차는 학습용 정리이며 단일 의무 서식 아님."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 반복 목표·작업배정·평가기준·결과·마일스톤 대조. 계획서/평가서 목차는 학습용 정리이며 단일 의무 서식 아님.",
+      "unresolved": []
+    }
+  },
+  "t-fc873338": {
+    "short": {
+      "source_sha256": "333e611b606bb4ba8abe4cb35a70488592cfd035e5699d87b74e96d14a55202d",
+      "body": "## 방법론 테일러링\n조직의 표준 [[software-development-methodology|개발 방법론]]을 프로젝트 규모·위험·기술·계약 조건에 맞게 조정하는 활동이다. 단계·활동·역할·산출물·기법을 선택·추가·변경하고 그 근거를 남긴다.\n\n| 단계 | 활동·산출물 |\n|---|---|\n| 특성 파악 | 규모·일정·기술 불확실성·품질·계약 제약 분석 |\n| 기준 선택 | 조직 표준 및 예측형·적응형·혼합형 접근 선택 |\n| 조정 | 단계·활동 통합, 산출물 수준·담당·검토 시점 결정 |\n| 합의·기록 | 변경 근거·영향·승인 주체를 결과서에 기록 |\n| 적용·개선 | 수행 결과와 회고를 반영해 다시 조정 |\n\n[[pilot-development|선도개발]]에서는 아키텍처·공통모듈·개발 표준 등 불확실한 부분을 먼저 검증하고, 확인된 작업·산출물 수준을 본개발에 환류한다. 불필요한 문서를 줄이는 것뿐 아니라 누락된 검증 활동을 추가하는 것도 테일러링이다.\n\n법령·계약·조직 규정이 요구하는 활동을 임의로 삭제하지 않는다. 필수·선택 항목을 구별하고 변경 권한을 확인하며, 경량화로 위험 통제나 추적성이 약화되지 않았는지 점검한다. 착수 시 한 번 정한 결과를 고정하기보다 프로젝트 변화에 맞춰 관리한다.",
+      "sources": [
+        {
+          "title": "PMI Tailoring Process, PMBOK 7th Edition(2021)",
+          "url": "https://www.pmi.org/-/media/pmi/documents/public/pdf/pmbok-standards/pmi-tailoring.pdf",
+          "scope": "접근 선택→조직 조정→프로젝트 조정→지속 개선 및 거버넌스·품질·정책 고려 대조. 선도개발 적용은 기출 맥락의 설명."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 접근 선택→조직 조정→프로젝트 조정→지속 개선 및 거버넌스·품질·정책 고려 대조. 선도개발 적용은 기출 맥락의 설명.",
+      "unresolved": []
+    }
+  },
+  "t-b0e954fc": {
+    "short": {
+      "source_sha256": "17a8767b4d90f1c60bf8af806c0ba9acf09bdfce64c0fb73c09f85e32e714514",
+      "body": "## 베지어 곡선\nn+1개의 [[control-point|제어점]] P₀,…,Pₙ을 번스타인 기저로 가중 결합한 [[parametric-curve|매개변수 곡선]]이다. 0≤t≤1에서 B(t)=Σᵢ₌₀ⁿ C(n,i)(1−t)ⁿ⁻ⁱtⁱPᵢ로 표현한다.\n\n3차 곡선은 B(t)=(1−t)³P₀+3(1−t)²tP₁+3(1−t)t²P₂+t³P₃이다. [[de-casteljau-algorithm|드 카스텔조 알고리즘]]은 인접 점마다 (1−t)Pᵢ+tPᵢ₊₁을 계산하고, 생성된 점에 같은 보간을 반복하여 마지막 한 점 B(t)를 얻는다.\n\n| 특성 | 내용 |\n|---|---|\n| 끝점 | B(0)=P₀, B(1)=Pₙ |\n| 접선 | 끝점의 인접 제어점 방향; 퇴화 시 별도 판단 |\n| 볼록 껍질 | 비음수 가중치의 합이 1이므로 제어점 볼록 껍질 안에 존재 |\n| 변환·편집 | 아핀 변환과 양립, 제어점 변경이 구간 전체에 영향 |\n\n고차 곡선 하나로 복잡한 형상을 표현하면 편집 영향이 넓어지므로 여러 저차 곡선을 연결할 수 있다. 연결점 일치와 접선 방향 일치는 서로 다른 조건이며, C1 연속은 같은 매개변수화에서 도함수까지 같아야 한다.",
+      "sources": [
+        {
+          "title": "Michigan Tech Construction of Bézier Curves",
+          "url": "https://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/spline/Bezier/bezier-construct.html",
+          "scope": "제어점·번스타인 기저·끝점·볼록 껍질 특성 대조. SVG 2의 2차·3차 곡선 정의도 열람."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 제어점·번스타인 기저·끝점·볼록 껍질 특성 대조. SVG 2의 2차·3차 곡선 정의도 열람.",
+      "unresolved": []
+    }
+  },
+  "t-7299dd8d": {
+    "short": {
+      "source_sha256": "d411f9be82e9633160a341c89f72e1f3ced033ac8cc9c99851ab2e7dcf8e5bf9",
+      "body": "## 분산 식별자와 신원증명\nDID는 중앙 식별자 발급기관과 분리하여 사용할 수 있도록 설계된 식별자다. [[w3c-did|W3C DID]] Core의 DID는 Decentralized Identifier이며, 분산 신원 서비스 전체나 [[self-sovereign-identity|자기주권 신원]]과 동일한 개념은 아니다.\n\n| 구성 | 역할 |\n|---|---|\n| [[did-identifier|DID 식별자]] | 메소드와 메소드별 식별 문자열로 대상 참조 |\n| [[did-document|DID 문서]] | 검증 방법·인증 관계·서비스 정보 등 표현 |\n| DID 메소드 | 생성·조회·갱신·비활성화 방식 규정 |\n| [[verifiable-credential|VC]] | 발급자의 자격·속성 주장을 검증 가능한 형태로 표현 |\n\nVC 연계에서는 발급자가 증명을 발급하고 보유자가 검증자에게 제시한다. 검증자는 증명의 무결성·발급자·상태 및 자기 정책에 따른 신뢰를 확인한다. DID가 있다고 주장의 사실성까지 자동 보증되는 것은 아니다.\n\n중앙형 계정, 연합형 SSO, 사용자 중심·자기주권 접근은 통제 주체를 비교하는 관점이며 모든 서비스가 반드시 거치는 발전 순서는 아니다. 블록체인은 가능한 구현 중 하나로 필수는 아니며, 선택적 공개·영지식증명도 DID 자체가 보장하지 않는다. 키 복구·회전과 메소드별 상호운용성을 고려한다.",
+      "sources": [
+        {
+          "title": "W3C DID Core v1.0(2022)",
+          "url": "https://www.w3.org/TR/did-core/",
+          "scope": "DID 정의·문서·메소드와 블록체인 비필수성 대조. VC Data Model 2.0(2025-05-15)의 발급자·보유자·검증자 모델도 열람."
+        },
+        {
+          "title": "W3C Verifiable Credentials Data Model v2.0",
+          "url": "https://www.w3.org/TR/vc-data-model-2.0/",
+          "scope": "VC 주체·검증과 신뢰 판단의 구별"
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. DID 정의·문서·메소드와 블록체인 비필수성 대조. VC Data Model 2.0(2025-05-15)의 발급자·보유자·검증자 모델도 열람.",
+      "unresolved": []
+    }
+  },
+  "t-cbf11683": {
+    "short": {
+      "source_sha256": "63c794effdc5af9769c83078154f5865b9a165190170cc40e80b0c6e72b47f7c",
+      "body": "## 불편 추정량\n표본으로 계산하는 [[estimator|추정량]] θ̂의 기댓값이 모수 θ와 같으면 불편 추정량이다. 편향 Bias(θ̂)=E(θ̂)−θ이므로 불편성은 편향이 0이라는 뜻이다. 한 번 얻은 추정값이 반드시 참값과 같다는 의미는 아니다.\n\n| 모수 | 대표 불편 추정량 | 조건 |\n|---|---|---|\n| 모평균 μ | 표본평균 X̄=ΣXᵢ/n | 각 관측값의 기댓값 μ |\n| 모분산 σ² | S²=Σ(Xᵢ−X̄)²/(n−1) | 독립·동일분포, 유한 분산, n>1 |\n| 모비율 p | p̂=성공 횟수/n | 동일 성공확률의 베르누이 표본 |\n\n표본분산은 Σ(Xᵢ−X̄)²=Σ(Xᵢ−μ)²−n(X̄−μ)²이고, 독립 표본에서 양변의 기댓값은 nσ²−n(σ²/n)=(n−1)σ²이다. 따라서 n−1로 나누면 E(S²)=σ²가 된다. n으로 나눈 분산의 기댓값은 (n−1)σ²/n이다.\n\n불편성만으로 좋은 추정량을 결정하지 않는다. [[mean-squared-error|평균제곱오차]]는 분산+편향²이므로 분산이 지나치게 큰 불편 추정량보다 작은 편향을 허용한 추정량이 유리할 수 있다. 표본의 대표성과 추출 가정도 확인해야 한다.",
+      "sources": [
+        {
+          "title": "UC Berkeley Stat135 Sampling distributions",
+          "url": "https://stat135.berkeley.edu/fall-2026/Modules/06-SamplingDist.html",
+          "scope": "표본평균·표본분산 기대값과 n−1 보정 대조. 독립·동일분포/유한분산 가정 및 계산식 명시."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 표본평균·표본분산 기대값과 n−1 보정 대조. 독립·동일분포/유한분산 가정 및 계산식 명시.",
+      "unresolved": []
+    }
+  },
+  "t-1e345470": {
+    "short": {
+      "source_sha256": "630847a3214e4edf2e77cb01a2d31200e5d96fc53e0b49d8379a62b64e2df803",
+      "body": "## 비즈니스 프로세스 관리\nBPM은 반복되는 업무의 흐름을 발견·모델링·실행·측정·개선하는 관리 체계다. [[business-process-management-system|BPMS]]는 이를 지원하는 도구이며 BPM 자체를 단순 워크플로 소프트웨어로 한정하지 않는다.\n\n| 단계 | 주요 활동 |\n|---|---|\n| 발견·매핑 | 업무 범위·시작/종료·참여자·입출력 파악 |\n| 모델링 | 활동 순서·분기·예외·역할을 프로세스 모델로 표현 |\n| 실행 | 사람의 승인 업무와 시스템 연계를 구현 |\n| 측정·분석 | 처리시간·대기·오류·KPI로 병목 파악 |\n| 개선 | 변경안을 적용하고 결과를 다시 측정 |\n\n프로세스 매핑은 부서별로 다른 업무 이해를 공통 흐름으로 맞추고 중복·누락·인계 지점을 드러낸다. 인터뷰·업무 자료로 현행 흐름을 정리하고, 역할별 스윔레인이나 [[bpmn|BPMN]] 등으로 표현하여 담당자와 검토한 뒤 목표 흐름을 정의한다.\n\nPI는 업무 혁신·재설계의 목적과 변화에 초점을 두고 BPM은 실행 이후의 지속적 관리까지 다룬다. PI가 반드시 일회성이거나 BPM이 오직 점진적 개선만 한다고 구분하지 않는다. 프로세스 오너와 측정 기준을 정하고 자동화 이전에 업무 자체의 필요성을 검토한다.",
+      "sources": [
+        {
+          "title": "IBM Business Process Management",
+          "url": "https://www.ibm.com/think/topics/business-process-management",
+          "scope": "반복 프로세스 범위와 설계·모델링·실행·감시·최적화 생명주기 대조. 매핑 절차는 기출 요구에 맞춘 학습용 정리."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 반복 프로세스 범위와 설계·모델링·실행·감시·최적화 생명주기 대조. 매핑 절차는 기출 요구에 맞춘 학습용 정리.",
+      "unresolved": []
+    }
+  },
+  "t-ba6ada7f": {
+    "short": {
+      "source_sha256": "8783fe5e736fff484f5886fabdc956d95c2052ba6cae368113c3b805a76b7fde",
+      "body": "## 빅데이터 분석\n규모·속도·다양성 등으로 처리 부담이 큰 데이터에서 통계·기계학습으로 의미 있는 패턴을 찾아 업무 판단에 활용하는 과정이다. 대량 데이터라는 이유만으로 전수조사나 인과관계 증명이 보장되지는 않는다.\n\n| 단계 | 처리 내용 |\n|---|---|\n| 기획 | 업무 문제·분석 목표·성과 지표 설정 |\n| 준비 | 데이터 수집·정제, 품질·편향·사용 조건 점검 |\n| 분석 | 탐색, 특성 구성, 모델 학습·평가 |\n| 적용·평가 | 운영 연계 후 업무 성과·성능 변화 확인 |\n\n[[clustering|클러스터링]]은 유사한 대상을 묶는 비지도학습으로 K-평균·DBSCAN 등이 있다. 필터링은 목적에 맞게 정보를 선별하는 것으로, 추천에서는 사용자 상호작용을 이용한 협업 필터링과 항목 특성을 이용한 콘텐츠 기반 필터링을 구별한다. 이상치 탐지는 정상 패턴에서 벗어난 관측값을 찾는 것으로 IQR 규칙·Isolation Forest 등이 사용된다.\n\n이상치는 오류일 수도 유의미한 사건일 수도 있으므로 자동 삭제하지 않는다. 군집 수·거리 척도·이상치 임계값과 업무 비용을 함께 검토하고, 평가 데이터 누수와 개인정보 과잉 수집을 방지한다. 분석 결과와 실제 사업 성과도 구분해 재평가한다.",
+      "sources": [
+        {
+          "title": "scikit-learn Clustering and Outlier Detection",
+          "url": "https://scikit-learn.org/stable/modules/clustering.html",
+          "scope": "군집 개념·알고리즘 대조. 이상치 탐지 문서와 Google 협업 필터링 자료도 열람; 수행 절차는 특정 방법론 의무 단계로 제시하지 않음."
+        },
+        {
+          "title": "scikit-learn Outlier Detection",
+          "url": "https://scikit-learn.org/stable/modules/outlier_detection.html",
+          "scope": "이상치와 novelty detection·Isolation Forest 구별"
+        },
+        {
+          "title": "Google Collaborative filtering",
+          "url": "https://developers.google.com/machine-learning/recommendation/collaborative/basics",
+          "scope": "사용자 상호작용 기반 추천"
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 군집 개념·알고리즘 대조. 이상치 탐지 문서와 Google 협업 필터링 자료도 열람; 수행 절차는 특정 방법론 의무 단계로 제시하지 않음.",
+      "unresolved": []
+    }
+  },
+  "t-accefc09": {
+    "short": {
+      "source_sha256": "f301d1068f06dcc763f853c9b496bd1d644fff03c83ba18c7308f64f78c9d061",
+      "body": "## 사물인터넷\nIoT는 식별 가능한 물리·가상 사물을 정보통신 기술로 연결하여 데이터를 교환하고 서비스를 제공하는 기반이다. 모든 사물이 직접 인터넷에 접속하거나 자율 AI를 탑재해야 하는 것은 아니다.\n\n| 계층 | 구성·핵심 역할 |\n|---|---|\n| 기기 | 센서의 환경 감지, 액추에이터 제어, 식별 |\n| 네트워크 | 유무선 전송, 게이트웨이 집선·프로토콜 연결 |\n| 지원·플랫폼 | 기기 관리, 데이터 수집·저장, 공통 서비스 기능 |\n| 응용 | 분석·시각화·원격 제어 등 업무 서비스 |\n\n이기종 기기와 네트워크의 상호운용, 이동·접속 상태의 변화, 다수 기기의 관리가 주요 특성이다. 센싱 → 전달 → 저장·분석 → 제어의 흐름에서 [[edge-computing|엣지]] 처리와 클라우드 처리를 지연·대역폭·전력 조건에 맞춰 나눌 수 있다.\n\n응용 예는 원격검침, 설비 상태 감시, 물류 추적 등이다. 서비스별 요구에 따라 MQTT·CoAP 같은 프로토콜과 저전력 통신을 선택하며 하나의 기술을 모든 환경에 강제하지 않는다. 기기 인증·접근통제·업데이트와 수집 데이터의 개인정보 보호를 설계해야 한다. 기출의 국내외 개발현황은 해당 출제 시점 자료와 별도로 대조할 대상이다.",
+      "sources": [
+        {
+          "title": "ITU-T Y.2060(2012), 현 Y.4000",
+          "url": "https://www.itu.int/rec/dologin_pub.asp?id=T-REC-Y.2060-201206-I!!PDF-E&lang=e&type=items",
+          "scope": "IoT 정의·특성·기기/네트워크/지원/응용 계층 대조. 2012 권고이며 2016 Y.4000으로 번호 변경."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. IoT 정의·특성·기기/네트워크/지원/응용 계층 대조. 2012 권고이며 2016 Y.4000으로 번호 변경.",
+      "unresolved": [
+        "출제 시점별 국내외 서비스 개발현황·시장 통계는 조사하지 않음."
+      ]
+    }
+  },
+  "t-63d57404": {
+    "short": {
+      "source_sha256": "991b058279edc9609f5d3c57f483ea37a4c387c6a2af7e5980a4663df056eff4",
+      "body": "## 서버리스 컴퓨팅\n개발자가 서버의 할당·패치·확장을 직접 관리하는 부담을 줄이고 제공자의 관리형 실행 환경·서비스를 이용하는 모델이다. 물리 서버가 사라진다는 뜻은 아니며 애플리케이션의 권한·코드·데이터 책임은 남는다.\n\n| 구분 | [[function-as-a-service|FaaS]] | [[backend-as-a-service|BaaS]] |\n|---|---|---|\n| 제공 대상 | 사용자가 작성한 함수의 실행 환경 | 인증·DB·스토리지 등 백엔드 기능 |\n| 개발 활동 | 이벤트 처리 로직 작성 | SDK·API로 제공 기능 조합 |\n| 호출 예 | HTTP·큐·파일 변경 이벤트 | 로그인·데이터 조회·파일 저장 |\n| 상태 관리 | 지속 상태는 외부 저장소 등에 보관 | 서비스가 해당 데이터 상태 관리 |\n\n일반적인 이벤트 처리 구성은 이벤트 소스 → 트리거·API 게이트웨이 → 함수 → 관리형 저장소다. 제공자는 실행 자원 할당과 확장을 담당하지만 최대 동시 실행·할당량·실행 제한은 서비스마다 다르다.\n\n[[cold-start|콜드 스타트]]와 외부 호출 지연을 측정하고 재시도에 따른 중복 처리를 방지한다. 사용량 기반 과금이 흔하지만 항상 최저 비용을 보장하지 않으며 호출·실행·저장·전송 비용을 함께 계산한다. 특정 서비스 API 의존도와 관측·디버깅 방법도 검토한다.",
+      "sources": [
+        {
+          "title": "AWS Lambda developer guide",
+          "url": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html",
+          "scope": "제공자의 서버 관리와 이벤트 기반 함수 실행 역할 대조. Firebase Build 문서에서 인증·데이터·스토리지 기능 확인; 서비스별 가격·한도 수치 미제시."
+        },
+        {
+          "title": "Firebase Build documentation",
+          "url": "https://firebase.google.com/docs/build",
+          "scope": "BaaS의 인증·DB·스토리지 기능 예"
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 제공자의 서버 관리와 이벤트 기반 함수 실행 역할 대조. Firebase Build 문서에서 인증·데이터·스토리지 기능 확인; 서비스별 가격·한도 수치 미제시.",
+      "unresolved": []
+    }
+  },
+  "t-c15d01b7": {
+    "short": {
+      "source_sha256": "20e91cb1b77f0fca7abebf6daac6a023cdd25ed84fa81645651c0dec2dca50b4",
+      "body": "## 서비스 지향 아키텍처\nSOA는 업무 능력을 명시된 서비스 인터페이스·계약으로 제공하고, 소비자가 이를 조합해 업무를 수행하도록 구성하는 아키텍처다. 구현 내부를 숨기고 [[loose-coupling|느슨한 결합]]과 재사용을 지향한다.\n\n| 요소 | 역할 |\n|---|---|\n| 제공자·소비자 | 서비스를 제공하거나 사용 |\n| 서비스 설명·계약 | 기능, 인터페이스, 정책, 이용 조건 표현 |\n| 검색·접근 | 사용할 서비스를 찾고 상호작용 가능하게 함 |\n| 조합·중재 | 여러 서비스 연결, 메시지 변환·라우팅 |\n\nSOAP·WSDL·UDDI·[[enterprise-service-bus|ESB]]는 전통적인 구현 예이며 SOA의 필수 기술 목록은 아니다. 레지스트리 검색 후 바인딩·호출하는 구조도 한 가지 구성 방식이다. 서비스의 책임·입도·버전·오류 처리·이용 정책을 정해야 소비자와 제공자가 독립적으로 변경할 수 있다.\n\n[[web-2-0|Web 2.0]]은 참여·공유·개방형 웹 서비스의 경향을 가리키고 SOA는 서비스 중심의 시스템 구조를 가리킨다. Web 2.0의 매시업이 SOA 방식의 서비스를 이용할 수 있어 둘은 배타적 대안이 아니다. 서비스 호출 증가에 따른 지연·장애 전파와 중앙 중재 구성의 병목을 평가한다.",
+      "sources": [
+        {
+          "title": "OASIS SOA Reference Model 1.0(2006)",
+          "url": "https://docs.oasis-open.org/soa-rm/v1.0/soa-rm.pdf",
+          "scope": "서비스 설명·가시성·상호작용 및 특정 기술 비종속성 대조."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 서비스 설명·가시성·상호작용 및 특정 기술 비종속성 대조.",
+      "unresolved": [
+        "Web 2.0 역사적 용어의 원 제안 자료는 이번 대조 범위 밖이며 일반 비교 수준으로 한정."
+      ]
+    }
+  },
+  "t-b6df137a": {
+    "short": {
+      "source_sha256": "ec917165decd573c9197d5e307a613a6454ff49dabae80ec326f45f3716f0b5c",
+      "body": "## 서포트 벡터 머신\nSVM은 학습 데이터의 클래스 사이에 [[margin|마진]]이 큰 결정 경계를 찾는 지도학습 모델이다. 선형 이진 분류에서는 y∈{−1,+1}, 결정 함수 f(x)=w·x+b이며 부호로 분류한다.\n\n| 구분 | 하드 마진 | 소프트 마진 |\n|---|---|---|\n| 전제·목표 | 선형 분리 가능한 자료를 완전 분리 | 마진 침범·오분류를 벌점으로 허용 |\n| 목적식 | min ½‖w‖² | min ½‖w‖²+CΣξᵢ |\n| 제약 | yᵢ(w·xᵢ+b)≥1 | yᵢ(w·xᵢ+b)≥1−ξᵢ, ξᵢ≥0 |\n\n정규화된 두 지지 초평면 사이 거리는 2/‖w‖이므로 노름을 줄이면 마진이 넓어진다. C가 크면 위반 벌점을 더 강조하고 작으면 넓은 마진을 위해 위반을 더 허용한다. [[support-vector|서포트 벡터]]는 경계 결정에 관여하는 표본이며 소프트 마진에서는 마진 내부·오분류 표본도 포함될 수 있다.\n\n커널은 비선형 경계를 구성하기 위한 내적 계산을 지원한다. 특성 스케일과 C·커널 파라미터를 교차검증으로 선택하고 대규모 데이터의 학습 비용을 고려한다. SVM이라는 이유만으로 과적합 방지나 일반화 성능이 보장되지는 않는다.",
+      "sources": [
+        {
+          "title": "scikit-learn SVM mathematical formulation",
+          "url": "https://scikit-learn.org/stable/modules/svm.html",
+          "scope": "SVC 목적식·슬랙·C·서포트 벡터와 커널 대조. 하드/소프트 마진 비교 및 일반화 보장 표현 교정."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. SVC 목적식·슬랙·C·서포트 벡터와 커널 대조. 하드/소프트 마진 비교 및 일반화 보장 표현 교정.",
+      "unresolved": []
+    }
+  },
+  "t-7a7bf880": {
+    "short": {
+      "source_sha256": "2ef8ca1a56b9cb661ec91740d6d15049901e70e5572f7a939aa682129f1b2d9b",
+      "body": "## 소프트웨어 규모산정\n개발할 SW의 크기를 기능·코드 등 정해진 단위로 측정·추정하는 활동이다. 규모 자체는 공수·비용이 아니며 생산성 이력과 작업 조건을 연결해야 일정·대가 산정에 사용할 수 있다.\n\n| 방식 | 측정 관점·특징 |\n|---|---|\n| [[lines-of-code|LOC]] | 코드 행 수; 언어·코딩 규칙에 영향, 초기 추정 불확실 |\n| [[function-point|기능점수]] | 사용자 기능을 데이터·트랜잭션 관점으로 측정, 기술 독립 지향 |\n| [[cosmic-function-point|COSMIC]] | Entry·Exit·Read·Write 데이터 이동을 기능 크기로 측정 |\n| [[use-case-point|UCP]] | 액터·유스케이스의 규모·복잡성 반영 |\n| [[story-point|스토리 점수]] | 팀 내부의 상대 추정; 팀 간 단순 비교·비용 환산에 부적합 |\n\n요구사항 범위·측정 경계를 정하고 기능 목록 작성 → 기준에 따른 측정 → 누락·중복 검토 → 생산성 이력과 연결 순으로 진행한다. 예를 들어 생산성이 FP/인월 단위이면 공수는 규모(FP)/생산성(FP/인월)로 추정할 수 있다.\n\n공공 사업의 개선 방향은 요구사항 구체화, 변경 이력·측정 근거 유지, 실제 실적을 이용한 보정이다. 비기능 작업·신기술 위험을 기능 크기에 무리하게 포함하지 않고 별도 산정 근거를 둔다. 적용 가이드 판본과 계약 조건을 확인한다.",
+      "sources": [
+        {
+          "title": "COSMIC Method Introduction",
+          "url": "https://cosmic-sizing.org/cosmic-sizing/intro/",
+          "scope": "기술 독립적 기능 크기와 Entry/Exit/Read/Write 대조. 다른 방식 비교는 seed 범위의 학습용 정리."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 기술 독립적 기능 크기와 Entry/Exit/Read/Write 대조. 다른 방식 비교는 seed 범위의 학습용 정리.",
+      "unresolved": [
+        "IFPUG·UCP 원 측정 매뉴얼 및 현행 공공사업 의무 방식의 세부 규정은 미대조."
+      ]
+    }
+  },
+  "t-f6244706": {
+    "short": {
+      "source_sha256": "bcd9f0fa045bdb619393b5469c31843f1eea2e4ecae8c0d7945574f02fd2e73a",
+      "body": "## 소프트웨어 분리발주\n정보시스템 구축에 필요한 상용SW를 통합 구축 계약과 분리하여 발주기관이 직접 구매·계약하는 방식이다. 공급 대가와 제품 책임을 드러낼 수 있지만 계약 간 연계·통합 관리가 필요하다.\n\n| 발주 단계 | 발주자 고려사항 |\n|---|---|\n| 계획 | 대상 제품·예산·구매 조건 및 제외 사유 검토 |\n| 요구·입찰 | 기능·성능·호환성·연동 범위와 일정 명시 |\n| 계약 | SI와 SW 공급자의 통합·설치·하자 책임 구분 |\n| 수행·검수 | 설치·연동·성능시험, 계약별 결과 및 인수 기준 확인 |\n| 운영 | 라이선스·유지관리 범위·장애 협조 체계 관리 |\n\n기대효과는 상용SW 거래 조건의 투명화와 제품 중심 경쟁 촉진이다. 반면 제품 간 호환 문제나 장애 원인 다툼이 생길 수 있으므로 제안요청서·계약에서 통합 책임과 협력 절차를 정한다. 여러 계약의 납기와 시험 환경도 맞춰야 한다.\n\n2023-10-19 시행 소프트웨어 진흥법 제54조 제2항은 고시 기준에 따른 직접구매를 규정한다. 과거 ‘분리발주’ 기출의 금액·인증·예외 조건을 현재 의무로 그대로 적용하지 않으며 실제 발주에는 해당 시점 고시의 대상·예외·절차를 확인한다.",
+      "sources": [
+        {
+          "title": "소프트웨어 진흥법(시행 2023-10-19) 제54조",
+          "url": "https://www.law.go.kr/LSW/lsPdfPrint.do?ancYnChk=0&bylChaChk=N&efGubun=Y&efYd=20231019&joAllCheck=Y&joEfOutPutYn=on&lsiSeq=249973&mokChaChk=N",
+          "scope": "직접구매의 법적 근거를 지정한 역사적 시행본에서 확인. 발주 단계 표는 학습용 관리 사항이며 법정 절차의 완전 목록 아님."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 직접구매의 법적 근거를 지정한 역사적 시행본에서 확인. 발주 단계 표는 학습용 관리 사항이며 법정 절차의 완전 목록 아님.",
+      "unresolved": [
+        "2026-11-26 현행 고시의 금액·인증·직접구매 예외 세부 조건은 확인하지 못해 수치를 제시하지 않음."
+      ]
+    }
+  },
+  "t-0dff33d5": {
+    "short": {
+      "source_sha256": "d74791c92b957bade9ec1c09031b334ecf0beaa8a6edb2f15a3032700346e118",
+      "body": "## SW사업 대가산정\n기획·개발·운영 등 SW사업의 예산수립·발주·계약에 필요한 적정 비용을 산정하는 활동이다. 적용 가이드의 판본·과업·산정 방식과 근거를 먼저 정한다.\n\n| 구분 | 산정 관점 |\n|---|---|\n| 기능 규모 기반 | 기능점수·단가·해당 보정과 경비 등을 적용 |\n| 투입공수 기반 | 작업별 공수·직무별 임금 및 해당 경비 산정 |\n| 응용SW 유지관리 | 적용 판본의 기준 개발비·요율·직접경비 검토 |\n| 고정비·변동비 | 지속 운영 업무와 기능 변경 업무를 구별 |\n\n2025년 개정판의 AI 서비스 도입 사업비는 **서비스 총이용료+커스터마이징 작업비용+구축·개발비용**이다. 커스터마이징은 기본형·데이터형·모델형으로 세분하며 요구분석·설계·데이터 구축·모델 구현 및 학습·검증 및 안정화 등 실제 작업 범위를 반영한다. 이용 범위 확정 → 작업·개발 범위 구분 → 각 비용 산정 → 중복·누락 검토로 계산 근거를 구성한다.\n\n2023년판 운영비 기출과 2025년판 AI 기출은 적용 기준이 다르다. 유지관리와 운영을 혼동하거나 과거 요율·단가를 현재의 고정 의무값으로 사용하지 않는다. 특히 서비스 이용료에 포함된 작업을 개발비에 중복 계상하지 않도록 확인한다.",
+      "sources": [
+        {
+          "title": "KOSA 2025년 개정판 공식 보도자료(2025-08-11)",
+          "url": "https://www.sw.or.kr/site/kipa/ex/board/View.do?bcIdx=63625&cbIdx=379&gubun=G",
+          "scope": "공식 발표에서 AI 3항 산식·기본형/데이터형/모델형과 작업 범위 확인. 가이드 공표 페이지도 열람."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 공식 발표에서 AI 3항 산식·기본형/데이터형/모델형과 작업 범위 확인. 가이드 공표 페이지도 열람.",
+      "unresolved": [
+        "2023년판 운영비 세부 산식·요율과 2025년판 전체 가이드의 공식 단계별 표는 원문 미열람으로 확인할 수 없습니다. 본문 순서는 산정 원칙의 요약이며 공식 목차가 아님."
+      ]
+    }
+  },
+  "t-d5d11b1c": {
+    "short": {
+      "source_sha256": "c432c6cd80a9c0b5e5d5ca05ddac703418c7b075412ea808dc16cdb7759071bd",
+      "body": "## 소프트웨어 안전성\nSW 오동작이나 안전기능의 미비가 인명·재산·환경 피해로 이어지지 않도록 위험을 식별·통제하는 속성이다. 외부 공격 대응 중심의 보안과 구별되지만 공격이 위험한 동작을 유발할 수 있어 함께 분석한다.\n\n| 활동 | 주요 내용 |\n|---|---|\n| 위험 분석 | [[hazard|위험원]]·사고 시나리오·원인과 영향 식별 |\n| 안전 요구 | 위험 통제 기능과 허용 조건·검증 기준 정의 |\n| 설계·구현 | 안전 상태·오류 처리·진단 기능을 구현 |\n| 검증 | 요구 추적, 정적 분석·시험, 실패·예외 상황 확인 |\n| 보증·운영 | 근거 문서화, 변경 영향 분석과 재검증 |\n\nFMEA는 구성 요소의 고장 형태와 영향을, FTA는 상위 사고를 일으키는 원인 조합을 분석하는 관점이다. 시험 통과만으로 모든 위험이 제거되었다고 할 수 없으므로 분석·설계·시험 결과를 안전 주장과 연결한다.\n\nIEC 61508은 기능안전, ISO 26262는 자동차, IEC 62304는 의료기기 SW 생명주기 등 적용 분야가 다르다. 등급 이름과 요구 기법을 서로 대체해서는 안 된다. 국내 소프트웨어 안전진단 가이드의 ‘기능동작 정확성’은 지정 가이드의 절차로 별도 대조해야 하며 위 일반 생명주기를 그 공식 절차로 간주하지 않는다.",
+      "sources": [
+        {
+          "title": "소프트웨어 진흥법(시행 2023-10-19) 제2조·제30조",
+          "url": "https://www.law.go.kr/LSW/lsPdfPrint.do?ancYnChk=0&bylChaChk=N&efGubun=Y&efYd=20231019&joAllCheck=Y&joEfOutPutYn=on&lsiSeq=249973&mokChaChk=N",
+          "scope": "안전 정의와 위험 분석·설계구현·검증·운영 지침 범위 대조. 표는 일반 생명주기 요약."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 안전 정의와 위험 분석·설계구현·검증·운영 지침 범위 대조. 표는 일반 생명주기 요약.",
+      "unresolved": [
+        "소프트웨어 안전진단 가이드 공통분야의 기능동작 정확성 단계별 원문은 확인할 수 없습니다. 국제표준의 전문·판본별 등급 요구사항도 미대조."
+      ]
+    }
+  },
+  "t-9570a838": {
+    "short": {
+      "source_sha256": "0fd1d79bafef52552b49d682fa17b3849b61890509982658e10b367afd1c2268",
+      "body": "## 소프트웨어 유지보수\n기존 SW의 결함 수정·환경 대응·개선을 위해 제품을 변경하는 활동이다. 단순 백업·복구·시스템 운영과 구별하며 변경 후에도 필요한 기능과 품질을 유지해야 한다.\n\n| 유형 | 목적·예 |\n|---|---|\n| [[corrective-maintenance|수정]] | 발견된 결함 수정, 잘못된 계산·출력 해결 |\n| [[adaptive-maintenance|적응]] | OS·장치·외부 인터페이스 등 환경 변화 대응 |\n| [[perfective-maintenance|완전]] | 기능·성능·사용성·유지관리성 개선 |\n| [[preventive-maintenance|예방]] | 잠재 결함이 장애가 되기 전에 제거 |\n\n신규 개발도 제약을 받지만 유지보수는 기존 코드·데이터·호환성과 운영 영향을 이해하는 일이 출발점이다. 변경 요청 → 영향 분석 → 승인 → 수정 → [[regression-testing|회귀 시험]] → 배포·문서 갱신으로 관리한다.\n\n작성자·의도가 불명확한 Alien Code는 먼저 빌드·실행 환경과 의존성을 확보하고 현재 동작을 시험으로 기록한다. 호출·데이터 흐름과 변경 영향을 파악한 뒤 작은 단위로 수정하며, 소스·문서·배포 버전을 연결해 되돌릴 수 있게 한다. 유지보수 비용·유형별 비중은 조직과 자료마다 달라 고정 비율로 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "ISO/IEC/IEEE 14764:2022 공개 개요",
+          "url": "https://www.iso.org/standard/80710.html",
+          "scope": "유지보수 범위와 백업·복구·운영 기능 제외를 공개 개요에서 확인. 4유형은 기출의 고전적 분류로 정리."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 유지보수 범위와 백업·복구·운영 기능 제외를 공개 개요에서 확인. 4유형은 기출의 고전적 분류로 정리.",
+      "unresolved": [
+        "유료 표준 전문의 판본별 모든 유지보수 유형·정의는 미열람. Alien Code 절차는 학습용 실무 정리이며 표준 의무 절차로 대조하지 않음."
+      ]
+    }
+  },
+  "t-de4b0d66": {
+    "short": {
+      "source_sha256": "d3e311141ff76c7db4466553918d30718b397fc46df19b92db1ff29d83cb28ac",
+      "body": "## 소프트웨어 품질 특성\n기능이 시스템이 수행할 일을 나타낸다면 품질 특성은 그 기능과 시스템이 충족해야 할 수준·성질을 나타낸다. 측정 가능한 요구로 구체화하여 아키텍처 선택과 검증의 기준으로 삼는다.\n\n| 속성 예 | 확인 관점 |\n|---|---|\n| [[availability|가용성]] | 장애 중 서비스 지속·복구 시간 |\n| [[performance|성능]] | 부하 조건별 응답시간·처리량 |\n| [[software-security|보안성]] | 권한 통제, 정보 유출·변조 방지 |\n| [[usability|사용성]] | 사용자 작업 성공·학습·오류 복구 |\n| [[modifiability|변경용이성]] | 변경에 필요한 비용·범위·시간 |\n| [[testability|시험용이성]] | 입력·상태 제어와 결과 관측의 용이성 |\n\n성능·가용성 등은 실행 중의 반응으로 평가하고, 변경용이성·시험용이성 등은 구조 검토와 실제 변경·시험 작업을 통해 평가한다. 이는 검증 관점의 구별이지 후자를 전혀 측정할 수 없다는 뜻은 아니다.\n\n[[quality-attribute-scenario|품질속성 시나리오]]는 자극원·자극·환경·대상·응답·응답 측정값을 구체화한다. ‘빠르다’ 대신 어떤 부하에서 어느 응답시간을 요구하는지 정한다. 속성 간 절충을 평가하며 위 여섯 예를 특정 ISO 판본의 전체 품질모델과 동일시하지 않는다.",
+      "sources": [
+        {
+          "title": "SEI Reasoning About Software Quality Attributes",
+          "url": "https://www.sei.cmu.edu/library/reasoning-about-software-quality-attributes/",
+          "scope": "품질 요구의 아키텍처 영향 및 시나리오 기반 평가 대조. 품질 6개는 기출 비교용 예시로 한정."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 품질 요구의 아키텍처 영향 및 시나리오 기반 평가 대조. 품질 6개는 기출 비교용 예시로 한정.",
+      "unresolved": []
+    }
+  },
+  "t-063e89c2": {
+    "short": {
+      "source_sha256": "21e5681b4097b291046e8096d07e1f2adaa8c34524222c0bee8ced05594359db",
+      "body": "## 소프트웨어 진흥법\n소프트웨어 진흥과 산업 기반·사업 환경을 다루는 법률이다. 과거 소프트웨어산업진흥법 명칭의 기출과 구별하며, 아래는 132회 문항이 지정한 **2023-10-19 시행본**의 요약이다.\n\n| 조문 | 주요 내용 |\n|---|---|\n| 제5조 제2항 | 기본방향·부문별 육성·기반 조성·교육 및 인력·연구개발 및 보급·이용 및 유통·창업·국제협력 및 해외진출·자산관리·융합·지역산업 및 융합·안전관리·그 밖의 진흥 사항 |\n| 제30조 제2항 | 안전 위험 분석, 안전 설계·구현, 검증, 운영단계 안전, 그 밖의 필요한 사항 |\n| 제51조 | 공공 SW사업 하도급 비율 제한·재하도급 제한·사전 승인 및 감독 |\n\n하도급 제한의 50%는 해당 시행본에서 **물품 구매금액을 제외한 SW사업금액**을 기준으로 한다. 법정 예외가 있고 재하도급도 원칙적 금지와 예외를 구별해야 하므로 ‘모든 사업에서 무조건 50%’로 요약하지 않는다.\n\n제도 효과는 승인·계약뿐 아니라 실제 수행 구조와 대가 지급의 관리에 좌우된다. 개발자 부족이나 위장 하도급의 발생 원인은 법 조문만으로 입증할 수 없다. 현재 사업에 적용할 때는 현행 법·시행령·고시와 경과조치를 다시 확인한다.",
+      "sources": [
+        {
+          "title": "소프트웨어 진흥법(시행 2023-10-19) 제5·30·51조",
+          "url": "https://www.law.go.kr/LSW/lsPdfPrint.do?ancYnChk=0&bylChaChk=N&efGubun=Y&efYd=20231019&joAllCheck=Y&joEfOutPutYn=on&lsiSeq=249973&mokChaChk=N",
+          "scope": "지정 시행본 제5조 13항목·제30조 5항목·제51조 산정 기준과 예외를 실제 대조. 근거 없는 기본계획 3년 주기 단정 제거."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 지정 시행본 제5조 13항목·제30조 5항목·제51조 산정 기준과 예외를 실제 대조. 근거 없는 기본계획 3년 주기 단정 제거.",
+      "unresolved": [
+        "2026-11-26 현행법 전체와 기출의 개발자 부족 원인에 대한 실증 자료는 미대조."
+      ]
+    }
+  },
+  "t-2f45dc87": {
+    "short": {
+      "source_sha256": "9d13b981f440c01401d9ac050ecc8e1ff3fa36daa4f27eff457dcd4c633c14c2",
+      "body": "## 스마트 컨트랙트\n블록체인에 배포된 코드와 상태로서 트랜잭션 등의 호출에 따라 정해진 로직을 실행하는 프로그램이다. 외부 조건이 충족됐다는 이유만으로 스스로 실행을 시작하는 것은 아니며 외부 정보에는 오라클 등이 필요하다.\n\n| 요소 | 이더리움에서의 역할 |\n|---|---|\n| [[solidity|Solidity]] | 계약 작성 언어, 컴파일하여 바이트코드 생성 |\n| [[ethereum-virtual-machine|EVM]] | 코드 실행과 상태 전이 수행 |\n| [[gas|가스]] | 실행 자원 사용량 측정·제한; 가격과 구별 |\n| [[decentralized-application|DApp]] | 프런트엔드와 컨트랙트를 결합한 응용 |\n\n감사는 요구·권한·자산 흐름 검토 → 코드 리뷰·정적 분석 → 동적 시험·퍼징 → 취약점 수정·재검증으로 구성할 수 있다. 재진입, 접근통제, 오라클 의존, 연산·외부 호출의 실패를 점검한다. 정형 검증도 명세와 가정의 범위 안에서만 근거를 제공한다.\n\n배포 코드의 변경 제약과 업그레이드 프록시의 관리자 권한을 구별한다. 공개 체인에서 실행이 검증된다고 소스 코드가 반드시 공개되거나 계약의 법적 효력이 자동 성립하지는 않는다. Solidity의 산술 동작은 컴파일러 버전과 unchecked 사용 여부 등에 따라 달라지므로 오버플로 취약성을 일괄 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "Ethereum smart contracts introduction",
+          "url": "https://ethereum.org/en/developers/docs/smart-contracts/",
+          "scope": "컨트랙트 코드·상태·호출과 오라클 한계 대조. Solidity 보안 고려 문서의 재진입·산술·외부 호출 위험도 열람."
+        },
+        {
+          "title": "Solidity Security Considerations",
+          "url": "https://docs.soliditylang.org/en/latest/security-considerations.html",
+          "scope": "재진입·외부 호출·산술 동작의 버전/조건 의존성; latest 문서의 개념 설명만 사용"
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed·기존 short 교정을 읽고 단답형으로 재구성. 컨트랙트 코드·상태·호출과 오라클 한계 대조. Solidity 보안 고려 문서의 재진입·산술·외부 호출 위험도 열람.",
+      "unresolved": []
+    }
+  },
+  "t-e6b0c6c3": {
+    "short": {
+      "source_sha256": "cfd5e0bf62932fa617b6cb5d71a204c9544c63301a9719205cfa96b8624cb39e",
+      "body": "## 스마트그리드\n전력망에 정보통신·계측·제어를 결합하여 발전·송배전·소비 영역의 정보를 교환하고 운영을 지능화하는 전력 시스템이다. 분산전원과 소비자의 참여가 늘어날수록 상호운용성과 상태 파악이 중요해진다.\n\n| 핵심기술 | 역할 |\n|---|---|\n| [[advanced-metering-infrastructure|AMI]] | 스마트미터·통신·계량 데이터 관리로 사용 정보 수집 |\n| [[demand-response|수요반응]] | 가격·인센티브 등의 신호에 따라 부하 조정 |\n| 분산전원·ESS | 재생에너지·저장장치를 계통 운영과 연계 |\n| 배전 감시·제어 | 전압·설비 상태 관측과 운전 조정 |\n| 통신·데이터 기반 | 장치 간 정보 전달, 시간·의미·인터페이스 정합성 확보 |\n\nIT 인프라는 현장 데이터를 수집·저장·분석하고 운영센터의 판단·제어를 현장과 연결한다. 실시간성이 필요한 제어와 계량·분석의 전송 주기·신뢰성 요구는 다르므로 같은 통신 방식만으로 설계하지 않는다. 마이크로그리드나 전기차 연계도 운영 경계·보호 체계에 맞춰 구성한다.\n\n장치 간 연결뿐 아니라 데이터 의미와 업무 절차의 상호운용성을 확인한다. 제어 명령의 인증·접근권한·가용성과 계량 정보의 개인정보 보호를 관리하며, 특정 통신·IEC 규격을 모든 구성요소의 공통 의무로 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "NIST Smart Grid Interoperability Framework Release 4.0",
+          "url": "https://www.nist.gov/publications/nist-framework-and-roadmap-smart-grid-interoperability-standards-release-40",
+          "scope": "2021년 NIST Release 4.0 공개 초록의 개념모델·통신 시나리오·상호운용·보안 범위 확인. 세부 기술 표는 seed를 요약했으며 보고서 전문 대조 아님."
+        }
+      ],
+      "review_scope": "연결 기출 2문항과 seed를 읽고 단답형으로 재구성. NIST 공개 초록의 상호운용·보안 범위 대조. 전체 PDF는 도구 크기 제한으로 미열람.",
+      "unresolved": [
+        "NIST 보고서 전문은 도구 크기 제한으로 열지 못해 AMI·수요반응·분산전원 등 세부 절을 이번에 대조하지 않음."
+      ]
+    }
+  },
+  "t-3395fbfd": {
+    "short": {
+      "source_sha256": "72658def2e7d3252e2274cae6e3a21119d3d0e1b55f6943f56bf9aca39f77e16",
+      "body": "## 스크럼의 팀과 개발 흐름\n스크럼은 복잡한 문제에 대해 짧은 주기로 가치를 만들고 투명성·검사·적응으로 개선하는 경량 프레임워크다. Scrum Guide 2020 기준 팀은 교차기능적·자기관리적이며, 제품 책임자와 스크럼 마스터를 포함하여 통상 10명 이하로 구성한다.\n\n| 책임 | 핵심 활동 |\n|---|---|\n| [[product-owner|제품 책임자]] | 제품 가치 극대화, 제품 목표와 백로그 순서 관리 |\n| [[scrum-master|스크럼 마스터]] | 스크럼 이해·실행 지원, 팀 효과성 향상과 장애 제거 지원 |\n| 개발자 | 스프린트 계획 수립·조정, 완료 정의 준수, 사용 가능한 증분 생성 |\n\n제품 백로그 → 스프린트 계획 → 개발·일일 스크럼 → 리뷰 → 회고를 반복한다. [[sprint|스프린트]]는 1개월 이하이며, 일일 스크럼은 개발자의 15분 행사다. 1개월 스프린트 기준 계획·리뷰·회고의 최대 시간은 각각 8·4·3시간이다.\n\n제품 백로그에는 제품 목표, 스프린트 백로그에는 스프린트 목표, 증분에는 [[definition-of-done|완료 정의]]가 대응한다. 스프린트 목표를 위태롭게 하는 변경은 피하되, 학습한 내용에 따라 제품 책임자와 범위를 협의·조정할 수 있다. 리뷰는 출시 승인 관문이 아니며 사용 가능한 증분은 스프린트 도중에도 전달할 수 있다.",
+      "sources": [
+        {
+          "title": "Scrum Guide 2020",
+          "url": "https://scrumguides.org/scrum-guide.html",
+          "scope": "팀 규모·책임·행사 시간·산출물 약속·스프린트 범위 조정"
+        }
+      ],
+      "review_scope": "연결 두 문항과 seed를 읽고 2020 Guide의 팀·행사·산출물 정의를 대조. 개발자만 10명 이하, 범위 변경 금지라는 표현을 교정.",
+      "unresolved": []
+    }
+  },
+  "t-b924c4a6": {
+    "short": {
+      "source_sha256": "4a321fb55d9c5e448a5f1803204686795d9593849e1ba145e8534c92b377ba0b",
+      "body": "## 스택의 정의와 경계 처리\n스택은 한쪽 끝인 Top에서 삽입·삭제하며 가장 나중에 넣은 원소를 먼저 꺼내는 [[lifo|후입선출]] 추상 자료형이다. Push는 삽입, Pop은 제거 후 반환, Peek는 제거 없는 조회다. 함수 호출·재귀 복귀·수식 평가처럼 최근 상태를 역순으로 처리할 때 사용한다.\n\n다음은 크기 K, 저장 영역 S[1..K], 빈 상태 Top=0인 고정 배열 구현이다. Top은 현재 최상위 원소의 위치다.\n\n| 연산 | 처리 순서 |\n|---|---|\n| Push(Item) | Top=K이면 Overflow로 종료 → Top←Top+1 → S[Top]←Item |\n| Pop() | Top=0이면 Underflow로 종료 → Item←S[Top] → Top←Top−1 → Item 반환 |\n| Peek() | Top=0을 검사한 뒤 S[Top] 조회 |\n\n122회 문제처럼 먼저 Top을 증가시키는 순서를 사용하면, 초과 시 Top을 되돌리거나 별도 실패 상태로 처리하여 유효 범위 0≤Top≤K를 유지해야 한다. 오류 후 다음 연산이 잘못된 위치를 참조하면 안 된다.\n\n고정 배열의 Push·Pop은 각각 O(1), 저장 공간은 O(K)다. 0부터 시작하는 배열에서 Top을 원소 수로 정의하면 삽입은 S[Top] 저장 후 증가, 삭제는 감소 후 조회로 달라진다. 두 인덱스 규약을 섞지 않으며 동적 배열 확장 비용은 별도로 계산한다.",
+      "sources": [
+        {
+          "title": "Python tutorial: Using Lists as Stacks",
+          "url": "https://docs.python.org/3/tutorial/datastructures.html",
+          "scope": "LIFO, 끝 삽입·삭제, 빈 리스트 pop 오류"
+        }
+      ],
+      "review_scope": "두 기출의 Top 규약을 읽고 1기반 배열 의사코드와 실패 시 상태 보존을 직접 점검. 외부 출처는 LIFO 연산 정의를 대조.",
+      "unresolved": [
+        "102회 원본 C 코드의 포인터 선언·할당 문법은 시험지 원문과 재대조하지 않았으며 C 함수 완성 답안은 포함하지 않음."
+      ]
+    }
+  },
+  "t-d99763a3": {
+    "short": {
+      "source_sha256": "a6301f0b685fe332649b4f05800d2d3c64ad10bfb028c4c5acf40eea1d1ecd14",
+      "body": "## 스팸 메일과 다층 대응\n스팸 메일은 수신자가 원하지 않는 대량 전자우편을 가리킨다. 광고뿐 아니라 [[phishing|피싱]]·악성코드 유포에 악용되어 저장·전송 자원 낭비, 업무 방해, 계정 탈취를 유발할 수 있다. 발신 도메인 인증과 내용 검사를 함께 적용한다.\n\n| 대응 영역 | 주요 수단 |\n|---|---|\n| 발신 확인 | [[spf|SPF]]로 발송 서버 권한 확인, [[dkim|DKIM]]으로 서명 검증 |\n| 도메인 정책 | [[dmarc|DMARC]]로 표시 발신 도메인과 인증 도메인의 정렬 확인, 처리 정책·보고 활용 |\n| 기술적 차단 | 내용·URL·첨부 검사, 평판·차단 목록, 스팸 분류와 격리 |\n| 운용 | 발송량 이상 탐지, 신고 접수, 오탐 메일 복구, 계정·메일서버 보안 관리 |\n| 사회적 대응 | 발송 동의·수신거부 절차 준수, 이용자 교육, 신고·국제 공조 |\n\n메일 수신 → 발신 인증·평판 검사 → 내용 검사 → 전달·격리·거절 → 신고·오탐 피드백으로 운용한다. DMARC 통과는 도메인 사용의 인증 결과이며, 내용의 안전성이나 수신 동의를 보증하지 않는다. 공격자가 보유한 정상 인증 도메인도 악용될 수 있다.\n\n정상 메일의 손실을 줄이도록 격리·복구 절차와 정책 적용 결과를 함께 점검한다. 국내 광고성 정보 규제는 매체와 예외 조건에 따라 적용되므로 전자우편에도 야간 발송 금지가 일률 적용된다고 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "RFC 7489",
+          "url": "https://www.rfc-editor.org/rfc/rfc7489.html",
+          "scope": "DMARC 정렬·처리·보고와 인증메일의 전달 우대 비보장"
+        }
+      ],
+      "review_scope": "스팸 대응을 기술·운용·사회 측면으로 재구성하고 RFC 7489의 도메인 인증 범위 대조. 야간 제한 일괄 적용 단정을 제거.",
+      "unresolved": [
+        "정보통신망법·시행령의 2026-11-26 현행 광고성 전자우편 규제와 예외 조문은 이번 작업에서 원문 대조하지 않음."
+      ]
+    }
+  },
+  "t-e1bc4b80": {
+    "short": {
+      "source_sha256": "89ee7c6a0f58134048558c5741341f850421a30c6f06a3dfb987bbf4623d3370",
+      "body": "## 시계열 모형과 정상성\n시계열 분석은 시간 순서의 관측값에서 추세·계절성·[[autocorrelation|자기상관]]을 모형화하는 분석이다. 약한 [[stationarity|정상성]]은 평균과 유한 분산이 일정하고 공분산이 관측 시점이 아닌 시차에만 의존한다는 조건이다.\n\n| 모형 | 수식과 의미 |\n|---|---|\n| [[autoregressive-model|AR(p)]] | Yₜ=c+Σᵢ₌₁ᵖφᵢYₜ₋ᵢ+εₜ: 과거 관측값을 설명변수로 사용 |\n| [[moving-average-model|MA(q)]] | Yₜ=μ+εₜ+Σⱼ₌₁ᑫθⱼεₜ₋ⱼ: 현재·과거 충격을 결합 |\n| [[arima|ARIMA(p,d,q)]] | d회 차분한 계열에 AR(p)와 MA(q)를 결합 |\n\nεₜ는 평균 0·일정 분산의 서로 무상관인 백색잡음이다. 정상 AR(p)는 이론 PACF가 p 이후 절단되고 ACF는 감쇠한다. MA(q)는 ACF가 q 이후 절단되며, 가역 MA에서는 PACF가 감쇠한다. 표본 상관은 정확히 0이 아니므로 도표만으로 차수를 확정하지 않는다.\n\n시간도 확인 → 필요시 변환·차분 → 후보 차수 추정 → AIC 등 비교 → 잔차·예측오차 진단 순으로 적용한다. MA 모형은 관측값을 평활하는 이동평균과 다르다. 과도한 차분을 피하고 평가 자료를 시간 순서로 분리한다. 비선형 패턴에는 LSTM 등을 검토할 수 있으나 통계 모형보다 항상 우수한 것은 아니다.",
+      "sources": [
+        {
+          "title": "Hyndman·Athanasopoulos, FPP3 ARIMA models",
+          "url": "https://otexts.com/fpp3/arima.html",
+          "scope": "정상성·차분·AR·MA·ARIMA·ACF/PACF·모형 선택"
+        }
+      ],
+      "review_scope": "AR/MA 수식·정상/가역 조건과 모형 선택을 저자 공개 교재에 대조. 회귀 사용 불가라는 단정 제거.",
+      "unresolved": [
+        "114회 심층신경망의 구체 구조·학습 절차는 이 단답 요약에 포함하지 않음."
+      ]
+    }
+  },
+  "t-3458dd6d": {
+    "short": {
+      "source_sha256": "ddcbdfd3a3df1d68305078a37310a15a6f32a277bd06581cf18ae507c47402f1",
+      "body": "## 시스템 다이내믹스와 입소문 확산\n시스템 다이내믹스는 변수 간 피드백, 저량의 축적, 시간 지연이 시스템의 시간적 행동에 미치는 영향을 모델링하는 방법이다. [[causal-loop-diagram|인과 루프 다이어그램]]은 원인과 결과를 연결하여 구조를 정성적으로 설명한다.\n\n| 표기·구조 | 의미 |\n|---|---|\n| 양(+)의 링크 | 다른 조건이 같을 때 원인 증가가 결과를 증가 방향으로 변화시킴 |\n| 음(−)의 링크 | 원인 증가가 결과를 감소 방향으로 변화시킴 |\n| 강화 루프 R | 변화가 되먹임되어 같은 방향으로 확대 |\n| 균형 루프 B | 변화를 상쇄하는 방향으로 되먹임 |\n| 지연 | 원인 변화가 결과에 나타나기까지 시간차 |\n\n입소문 사례에서 R은 ‘누적 구매자 증가 → 입소문 접촉 증가 → 신규 구매율 증가 → 누적 구매자 증가’다. B는 ‘신규 구매율 증가 → 잠재 구매자 감소 → 신규 구매율 감소’로 시장 포화를 표현한다. 양·음은 좋음·나쁨이 아니라 인과 변화의 방향이다.\n\n유한한 시장에서 초기 강화 효과가 우세하다가 포화 효과가 커지면 누적 구매자가 S자 형태를 보일 수 있다. 기간별 매출과 누적 구매자 수는 구별해야 한다. CLD만으로 성장률·전환 시점을 계산할 수 없으므로 [[stock-and-flow-diagram|저량·유량]]과 수식, 초기값·모수를 정의하고 관측자료로 검증한다.",
+      "sources": [
+        {
+          "title": "TU Delft System Dynamics modelling and simulation",
+          "url": "https://ocw.tudelft.nl/course-lectures/web-lecture-system-dynamics-modelling-and-simulation-part-1/",
+          "scope": "강화·균형 피드백 정의와 양·음의 의미"
+        }
+      ],
+      "review_scope": "두 연결 문항의 입소문 사례를 원자료에서 읽고 루프 정의를 대학 공개 강의에 대조. 입소문 구조는 조건을 명시한 설명 예이며 정량 검증 결과가 아님.",
+      "unresolved": [
+        "Bass 원 논문의 모수·확산식 및 실제 제품 매출자료와의 적합도는 대조하지 않음."
+      ]
+    }
+  },
+  "t-64641fde": {
+    "short": {
+      "source_sha256": "3d72496fd3096a3c7641aeb7df1d47c50ee76da3e52d57f6301e8a537fe6b46e",
+      "body": "## 아키텍처 뷰와 표현 목적\n아키텍처 뷰는 특정 이해관계자의 관심사를 설명하도록 시스템 요소와 관계를 선택하여 표현한 것이다. 뷰를 구성·해석하는 규약인 관점(Viewpoint)과, 그 규약으로 작성한 실제 뷰를 구별한다.\n\n| 4+1 뷰 | 주요 관심사 | 표현 예 |\n|---|---|---|\n| 논리 | 기능과 객체의 책임·관계 | 클래스·객체 구조 |\n| 프로세스 | 동시성·통신·동기화·성능 | 실행 프로세스와 상호작용 |\n| 개발 | 소스·모듈의 정적 조직 | 패키지·모듈 의존성 |\n| 물리 | 소프트웨어의 하드웨어 배치 | 노드·네트워크·배치 관계 |\n| 시나리오(+1) | 다른 뷰의 설계 도출·검증 | 주요 유스케이스 실행 흐름 |\n\nSEI 분류의 [[module-view|모듈 뷰]]는 구현 단위의 분해·사용 관계, [[component-and-connector-view|C&C 뷰]]는 실행 중 컴포넌트와 통신, 할당 뷰는 소프트웨어와 하드웨어·팀 등의 대응을 다룬다. 서로 다른 뷰 분류를 일대일 동의어로 취급하지 않는다.\n\n문자 대소문자 변환의 C&C 예는 입력 → 문자 판별·변환 → 출력의 [[pipe-and-filter-architecture|파이프·필터]] 구조다. 필터는 처리 컴포넌트, 파이프는 문자 스트림 전달 커넥터다. 같은 기능의 모듈 뷰는 입력·변환·출력 모듈과 호출 의존성으로 표현한다. 실제 배치와 실행 구조가 모듈 분해와 같다고 가정하지 않는다.",
+      "sources": [
+        {
+          "title": "Garlan·Shaw, Introduction to Software Architecture",
+          "url": "https://www.cs.cmu.edu/afs/cs/project/vit/ftp/pdf/intro_softarch.pdf",
+          "scope": "파이프·필터 구조와 아키텍처 스타일"
+        },
+        {
+          "title": "Kruchten, Architectural Blueprints—The 4+1 View Model (1995)",
+          "url": "https://ics.uci.edu/~michele/Teaching/INF117-S08/Krutchten%204%2B1View%20SWArch.pdf",
+          "scope": "원 논문 1–3쪽의 논리·프로세스·개발·물리·시나리오 뷰와 관심사"
+        }
+      ],
+      "review_scope": "기출의 문자 변환 요구와 뷰 비교를 읽고 파이프·필터는 Garlan·Shaw 원 논문, 4+1은 Kruchten 원 논문의 뷰 정의·관심사·표현에 대조. 서로 다른 뷰 분류의 일대일 대응을 피함.",
+      "unresolved": [
+        "ISO 42010 안내 페이지 접근 실패. SEI SACAM PDF 최초 열람은 성공했으나 관련 절 재열람은 시간 초과여서 SEI 뷰 타입 세부 원문 대조는 미완료."
+      ]
+    }
+  },
+  "t-8df3e0a4": {
+    "short": {
+      "source_sha256": "67ccdcb83229662da1a1a4de3c58fe764bfda09af43708433d0f64fb18ec4586",
+      "body": "## 아키텍처 스타일의 비교\n아키텍처 스타일은 시스템을 구성하는 요소와 연결의 종류, 조합 규칙·제약을 정한 구조적 어휘다. 반복되는 시스템 구조를 설명하지만 특정 스타일을 선택했다고 품질이 자동으로 확보되지는 않는다.\n\n| 스타일 | 구조와 특성 | 설계 시 유의점 |\n|---|---|---|\n| [[data-centered-architecture|데이터 중심]] | 여러 컴포넌트가 공유 저장소를 통해 협력 | 공통 데이터 모델, 저장소의 병목·장애 영향 |\n| [[client-server-architecture|클라이언트·서버]] | 요청자와 서비스 제공자 분리 | 네트워크 지연, 서버 부하·가용성 |\n| [[layered-architecture|계층]] | 추상화 수준별 계층과 서비스 인터페이스 | 계층 우회 허용 여부, 경유 비용 |\n| [[model-view-controller|MVC]] | 모델의 상태·업무 규칙, 뷰의 표현, 컨트롤러의 입력 처리 분리 | 구현별 갱신 흐름·의존성 차이 |\n\n계층 구조의 엄격한 형태는 인접 하위 계층만 사용하며, 완화된 형태는 일부 계층을 건너뛸 수 있다. 공유 저장소형과 블랙보드형은 데이터 공유를 활용하지만 제어 방식까지 동일한 것은 아니다.\n\n아키텍처 스타일은 시스템 수준의 구성·상호작용을, GoF 디자인 패턴은 주로 클래스·객체의 협력 문제를 다룬다. 다만 모든 패턴과 스타일의 경계가 절대적인 것은 아니다. 성능·변경 용이성·가용성 요구를 기준으로 스타일을 조합하고, MVC의 책임 분리를 물리적 3계층 배치와 혼동하지 않는다.",
+      "sources": [
+        {
+          "title": "Garlan·Shaw, Introduction to Software Architecture",
+          "url": "https://www.cs.cmu.edu/afs/cs/project/vit/ftp/pdf/intro_softarch.pdf",
+          "scope": "스타일의 요소·커넥터·제약, 계층·저장소·파이프·필터 비교"
+        }
+      ],
+      "review_scope": "원 논문의 스타일 정의·계층·저장소를 대조. 모든 계층 구조의 엄격 인접 호출 및 MSA로의 필연적 발전 단정을 제거.",
+      "unresolved": [
+        "MVC 변형별 제어 흐름 및 GoF 원전의 전체 패턴 분류는 별도 대조하지 않음."
+      ]
+    }
+  },
+  "t-70ab4fd8": {
+    "short": {
+      "source_sha256": "b71cbf580dfc97189473678bd2a3a07476f36a0518853fa2561d0e6661b6575e",
+      "body": "## 시간·공간 복잡도와 점근 표기\n알고리즘 복잡도는 입력 크기 n에 따른 자원 사용량의 증가를 나타낸다. [[time-complexity|시간 복잡도]]는 정한 연산 모델에서 기본 연산 횟수로, [[space-complexity|공간 복잡도]]는 필요한 메모리로 분석한다. 전체 공간과 입력을 제외한 보조 공간을 구분하고 재귀 호출 스택도 포함한다.\n\n| 표기 | 의미 |\n|---|---|\n| [[big-o-notation|O(g(n))]] | 충분히 큰 n에서 상수배 g(n) 이하인 점근 상한 |\n| [[big-omega-notation|Ω(g(n))]] | 충분히 큰 n에서 상수배 g(n) 이상인 점근 하한 |\n| [[big-theta-notation|Θ(g(n))]] | 상한과 하한이 모두 g(n)의 상수배인 긴밀한 한계 |\n\n최선·평균·최악은 입력 상황의 구분이며 O·Ω·Θ와 같은 뜻이 아니다. 평균 분석에는 입력 분포 가정이 필요하다.\n\n대표 증가 순서는 1 < log n < n < n log n < n² < 2ⁿ < n!이다. n=1,024에서 log₂n=10, n log₂n=10,240, n²=1,048,576이다. 이는 성장 함수의 값이지 실측 연산 횟수나 실행시간은 아니다.\n\n배열 인덱스 접근은 O(1), 이진 탐색은 O(log n), 순차 탐색의 최악은 O(n)이다. 퀵 정렬의 평균 O(n log n)과 최악 O(n²)를 구별한다. 점근 표기는 상수·메모리 접근·구현 차이를 숨기므로 작은 입력의 성능은 실제 측정과 함께 판단한다.",
+      "sources": [
+        {
+          "title": "Cornell CS312 Complexity and analysis",
+          "url": "https://www.cs.cornell.edu/courses/cs312/2002fa/lectures/lec13.htm",
+          "scope": "점근 복잡도·최악/평균·상수와 입력 크기의 영향"
+        }
+      ],
+      "review_scope": "시간·공간 및 상한/경우 구분을 강의 원문과 대조. n=1024의 수식은 직접 계산한 성장함수 예시이며 실행 측정값 아님.",
+      "unresolved": []
+    }
+  },
+  "t-81f648a9": {
+    "short": {
+      "source_sha256": "1e8b6349f2322af18ae5c7439b89f02efd9bcbb93e3eb02d89d81b4538234719",
+      "body": "## BPR의 의미와 정량 평가\nBPR은 고객 가치와 비용·품질·처리시간의 개선을 위해 부서별 업무가 아닌 전체 프로세스를 근본적으로 재설계하는 경영혁신 활동이다. 기존 절차를 그대로 전산화하는 것과 구별하며 조직·권한·정보 흐름을 함께 바꾼다.\n\n| 단계 | 활동·산출물 |\n|---|---|\n| 목표 설정 | 고객 요구·문제와 개선 범위, 성과 지표 정의 |\n| As-Is 분석 | 업무 흐름·처리시간·대기·자원·예외의 현황 모델 |\n| To-Be 설계 | 중복·불필요한 대조 제거, 통합 데이터와 역할 재설계 |\n| 대안 평가 | 시뮬레이션으로 인력·설비 배치와 처리 규칙 비교 |\n| 적용·정착 | 시범 운영, 교육·변화관리, 실제 성과 측정 |\n\n구매 사례에서는 발주·입고·송장을 부서별로 재입력·대조하는 대신 공통 정보로 연결하고 불일치 건을 예외 처리할 수 있다. 승인·검수·지급의 통제까지 무조건 없애는 것은 아니다.\n\n[[discrete-event-simulation|이산사건 시뮬레이션]]은 도착·처리·자원 제약을 모형화하여 처리시간, 대기시간, 처리량, 자원 이용률을 비교한다. 현행 모형을 실적과 대조한 뒤 미래 대안에 같은 평가 기준을 적용한다. 입력 분포·가정에 따라 결과가 달라지므로 민감도와 반복실험을 확인하며, 예측 효과를 실제 달성 성과로 표현하지 않는다.",
+      "sources": [
+        {
+          "title": "GAO BPR Assessment Guide Version 3 (1997)",
+          "url": "https://www.gao.gov/assets/aimd-10.1.15.pdf",
+          "scope": "고객 요구·성과 문제·새 프로세스 평가·조직 변화와 시행"
+        }
+      ],
+      "review_scope": "연결 문항의 구매 사례와 시뮬레이션 요구를 읽고 GAO의 BPR 평가·실행 원칙에 대조. 구매 개선은 조건부 설계 예이며 실제 기업의 효과 수치는 제시하지 않음.",
+      "unresolved": [
+        "시뮬레이션의 구체 입력 분포·실험 횟수 및 정량 KPI 값은 데이터가 없어 산출하지 않음."
+      ]
+    }
+  },
+  "t-8a37e4ed": {
+    "short": {
+      "source_sha256": "817f6382450ce90a76a81944a525b49c514415ea3ffbabb2765db24af5654468",
+      "body": "## 정보화사업 예비타당성조사\n예비타당성조사는 대규모 신규 재정사업의 추진 필요성과 타당성을 예산 편성 전에 조사하여 재정 투자의 우선순위와 의사결정을 지원하는 제도다. 정보화사업은 시스템 구축비뿐 아니라 운영·유지비, 편익과 기술적 실현 가능성을 함께 검토한다.\n\n| 검토 축 | 정보화사업의 주요 내용 |\n|---|---|\n| 사업계획 | 서비스 대상·범위, 기존 시스템과 중복·연계, 추진 대안 |\n| 경제성 | 분석기간의 비용·편익을 할인하여 비교, B/C·NPV 등 활용 |\n| 정책성 | 정책 목표와의 정합성, 추진 준비·협력, 위험요인 |\n| 기술성 | 적용 기술·아키텍처 적정성, 구현·연계 가능성 |\n| 종합평가 | 각 분석의 결과를 종합하여 추진 타당성 판단 |\n\n사업계획 수립·조사 요구 → 대상 선정 → 전문 조사 → 종합평가 → 예산 의사결정에 활용하는 흐름이다. B/C는 편익 현재가치 합계를 비용 현재가치 합계로 나눈 값이며, 경제성 지표 하나가 전체 타당성을 자동 결정하지 않는다.\n\n과거 기출의 금액·주관기관·평가 기준은 당시 제도와 구별해야 한다. 확인한 운용지침은 2026년 5월 29일 시행 기획예산처훈령 제62호다. 사업 유형·면제·국고지원 조건을 확인한 뒤 대상 여부를 판정한다. 무형 편익은 중복 산정을 피하고 수요·비용 가정의 변화가 평가에 미치는 영향을 점검한다.",
+      "sources": [
+        {
+          "title": "예비타당성조사 운용지침, 2026.5.29 시행",
+          "url": "https://www.law.go.kr/admRulLsInfoP.do?admRulSeq=2100000280098&chrClsCd=010202",
+          "scope": "제목·시행일·발령기관 확인; 조문 본문은 도구에서 추출되지 않음"
+        },
+        {
+          "title": "KDI 정보화부문 표준지침 연구 목록",
+          "url": "https://pimac.kdi.re.kr/guide/rguide_list.jsp?pageNo=1&showListSize=20",
+          "scope": "정보화부문 사업의 표준지침·경제성 등 연구 구성"
+        }
+      ],
+      "review_scope": "과거 기획재정부 명칭과 500억/300억·AHP 0.5의 무조건 현행 적용을 제거. 공식 지침의 버전 메타데이터와 KDI 안내를 열람했으나 현행 조문 전체 대조는 미완료.",
+      "unresolved": [
+        "2026-11-26 기준 대상 금액·면제·담당 주체별 권한·AHP 적용 수치의 현행 조문은 확인할 수 없습니다. 법령 페이지에서 본문이 추출되지 않아 숫자 기준을 단답에서 확정하지 않음."
+      ]
+    }
+  },
+  "t-8e19a517": {
+    "short": {
+      "source_sha256": "24804b97dcc02eaaa6e06b513ae245e2f35afafffc13f43d91411c5fce5514d3",
+      "body": "## 오토 스케일링의 방식과 제어\n오토 스케일링은 부하 지표·정책·예약 시각에 따라 컴퓨팅 자원의 수나 용량을 자동 조절하는 기능이다. 지표 수집 → 정책 판단 → 자원 조정 → 준비 상태 확인·트래픽 연결 → 효과 관측의 제어 고리를 구성한다.\n\n| 구분 | 방식 | 주의점 |\n|---|---|---|\n| [[scale-up|수직 확장]] | 한 인스턴스의 CPU·메모리 등 증설 | 상한과 변경 중 중단 여부 확인 |\n| [[scale-out|수평 확장]] | 인스턴스·복제본 수 증가 | 부하 분산·공유 상태·분산 처리 설계 |\n| [[scheduled-scaling|스케줄 기반]] | 예상한 시간대에 용량을 사전 변경 | 예상과 다른 수요는 별도 정책 필요 |\n| [[dynamic-scaling|부하 기반]] | CPU·요청량 등 관측값으로 조정 | 측정·기동 지연과 반복 증감 가능 |\n\nKubernetes HPA의 기본 계산은 희망 복제본=⌈현재 복제본×현재 지표/목표 지표⌉다. 예를 들어 3개, 평균 사용률 80%, 목표 60%이면 ⌈3×80/60⌉=4개다. 실제 결정에는 허용 오차, 지표 누락, 준비 상태, 최소·최대 수와 안정화 정책이 추가된다.\n\n수평 확장이 항상 무중단인 것은 아니며 DB·외부 서비스의 병목은 서버 수만 늘려 해결되지 않는다. 세션·상태 관리, 축소 시 연결 종료, 워밍업과 안정화 시간을 설계한다. 비용과 응답시간을 함께 관찰하여 과도한 확장·축소를 막는다.",
+      "sources": [
+        {
+          "title": "Kubernetes Horizontal Pod Autoscaling",
+          "url": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+          "scope": "HPA 비율 계산식·지표/준비 상태·안정화·최소최대 제약"
+        }
+      ],
+      "review_scope": "수평 확장 무중단 단정을 제거. HPA 식·보정 조건을 공식 문서와 대조하고 예시 3×80/60=4를 직접 계산. 구현 기본값·신기능의 특정 릴리스 적용은 주장하지 않음.",
+      "unresolved": []
+    }
+  },
+  "t-514df6a5": {
+    "short": {
+      "source_sha256": "76cc15259553dc734d85dd98dd53386ef1d3846e263caad6169ecfc96d5edf2b",
+      "body": "## 요구공학의 활동과 산출물\n요구공학은 이해관계자의 필요·제약을 도출하고 분석·명세·검증·관리하여 개발과 인수의 기준으로 만드는 활동이다. 처음에 한 번 수행하는 단계가 아니라 요구와 설계의 이해가 깊어지는 동안 반복한다.\n\n| 활동 | 핵심 내용·산출물 |\n|---|---|\n| [[requirements-elicitation|도출]] | 사용자·운영자·문서 등 원천에서 요구 발견, 출처 기록 |\n| [[requirements-analysis|분석]] | 범위·실현 가능성·우선순위·충돌 검토, 모델·합의안 |\n| 명세 | 기능·품질·인터페이스·제약을 식별 가능한 문장으로 기술 |\n| [[requirements-validation|검증]] | 실제 필요에 부합하는지와 명확성·일관성·검증 가능성 검토 |\n| [[requirements-management|관리]] | 기준선·변경 이력·영향·양방향 추적 관리 |\n\n[[software-requirements-specification|요구사항 명세서]]에는 목적·범위·용어, 사용 환경·가정, 상세 요구와 수용 기준을 담는다. 요구마다 고유 ID·출처·우선순위·확인 방법을 연결하면 설계·시험·변경의 영향을 추적할 수 있다.\n\n좋은 요구는 필요하고 실현 가능하며 한 가지로 해석되어야 한다. ‘빠르게 응답’처럼 모호한 표현은 측정 조건과 기준으로 구체화한다. 검토·프로토타입·시험 시나리오로 누락을 확인하고 승인된 요구는 기준선으로 관리한다. 개발 방식에 따라 문서·백로그 형태는 달라도 요구의 근거와 수용 기준은 유지한다.",
+      "sources": [
+        {
+          "title": "NASA Systems Engineering Handbook §4",
+          "url": "https://www.nasa.gov/reference/4-0-system-design-processes/",
+          "scope": "이해관계자 기대·요구 정의·반복·검증·기준선·추적성"
+        }
+      ],
+      "review_scope": "두 문항과 원문을 읽고 요구의 반복 정의·검증·추적을 NASA 공개 원문에 대조. 근거 없는 후반 수정비용 수십·백 배 주장을 제거.",
+      "unresolved": [
+        "ISO/IEC/IEEE 29148 전문의 조항별 요구는 대조하지 않았으며 제시한 구성은 범용 요약이다."
+      ]
+    }
+  },
+  "t-389476c8": {
+    "short": {
+      "source_sha256": "336751259bd64c03ad8c29793d06d00f22ea85fb1daa9aebba527398b9db79db",
+      "body": "## 요구사항 도출의 원천과 기법\n요구사항 도출은 이해관계자, 업무 문서, 기존 시스템과 사용 환경에서 필요한 기능·품질·제약을 발견하고 구체화하는 활동이다. 말로 표현된 요청만 수집하면 암묵적 업무나 예외가 누락될 수 있어 여러 원천을 교차 확인한다.\n\n| 기법 | 적합한 상황 | 한계·유의점 |\n|---|---|---|\n| [[interview|인터뷰]] | 핵심 담당자의 목적·문제를 심층 파악 | 유도 질문과 개인 관점 편향 방지 |\n| [[questionnaire|설문]] | 넓게 분산된 다수 사용자 의견 수집 | 질문 해석·응답자 대표성 확인 |\n| 합동 워크숍 | 부서 간 요구 공유·충돌 조정 | 발언 독점 방지, 결정·보류 구분 |\n| [[ethnography|현장 관찰]] | 실제 업무와 암묵지·우회 절차 발견 | 관찰 효과와 특수 상황 구별 |\n| [[prototyping|프로토타입]] | 화면·상호작용 등 불명확 요구 구체화 | 시제품을 완성 제품으로 오인하지 않게 범위 표시 |\n\n원천·이해관계자 식별 → 도출 목표·기법 선정 → 수행·기록 → 분류·중복 제거 → 당사자 확인 → 추가 도출 순으로 반복한다. 산출물에는 요구 후보와 근거·출처, 가정, 미해결 질문을 남긴다.\n\n고객뿐 아니라 운영·지원·보안 등 영향을 받는 역할도 참여시킨다. 요구와 제안된 해결책을 구별하고 기능 외 성능·장애·접근성 같은 조건도 확인한다. 상충하는 요구는 숨기지 않고 우선순위와 합의 근거를 남겨 후속 분석·명세로 연결한다.",
+      "sources": [
+        {
+          "title": "IREB Requirements Elicitation Handbook v2.1.0 (2024), GASQ 보관본",
+          "url": "https://media.gasq.org/public/legacy/files/content/gasq/downloads/certification/IREB/advanced_level_elicitation_handbook_en_v2.1.pdf",
+          "scope": "인터뷰·설문·관찰·프로토타이핑의 목표·적용·기록·편향과 한계"
+        }
+      ],
+      "review_scope": "두 기출의 기법·유의사항 요구를 읽고 다섯 기법으로 재구성. IREB 자체 호스트는 로그인으로 전환되어 읽지 못했으나 GASQ 보관의 IREB 원문을 열람하여 인터뷰·설문·관찰·프로토타입 절에 대조.",
+      "unresolved": [
+        "워크숍의 세부 진행·갈등 조정 기법은 원전 절별 대조를 하지 않음."
+      ]
+    }
+  },
+  "t-abb867fd": {
+    "short": {
+      "source_sha256": "34a9b747ec81100b3cd01be81d15bc8e4440c688e4576c5294d786d1ad22bb7b",
+      "body": "## 요구사항 명세서의 항목과 조건\n요구사항 명세는 분석된 요구를 설계·구현·검증·인수에서 공통 기준으로 사용할 수 있도록 기록하는 활동이다. 명세서의 목차는 사업에 맞게 조정하되 요구가 무엇인지와 충족 여부를 어떻게 판단하는지가 분명해야 한다.\n\n| 항목 | 기술 내용 |\n|---|---|\n| 목적·범위 | 시스템의 목표·경계, 용어와 참조 문서 |\n| 전체 설명 | 사용자·운영 환경, 외부 시스템, 가정·의존성·제약 |\n| [[functional-requirement|기능 요구]] | 입력·처리·출력, 업무 규칙과 오류 처리 |\n| [[non-functional-requirement|비기능 요구]] | 성능·보안·가용성 등 측정 가능한 품질 조건 |\n| [[interface-requirement|인터페이스 요구]] | UI·HW·SW·통신 접점의 형식·절차·오류 계약 |\n| 관리 정보 | 요구 ID·출처·우선순위·검증 방법·추적 관계 |\n\n각 요구는 필요성·실현 가능성·단일 해석·검증 가능성을 갖추고, 요구 집합에는 누락·모순이 없어야 한다. 예를 들어 ‘응답 2초’만 적기보다 대상 요청, 부하 조건, 측정 구간과 허용 비율을 함께 정해야 시험할 수 있다.\n\n고유 ID로 설계·시험과 연결하고 변경 시 영향 분석 후 [[requirements-baseline|기준선]]을 갱신한다. 구현 방법은 필요한 제약일 때만 명시한다. 과거 IEEE 830의 문서 예와 ISO/IEC/IEEE 29148을 같은 현행 규격으로 취급하거나 특정 목차를 모든 사업의 의무로 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "NASA Systems Engineering Handbook Appendix",
+          "url": "https://www.nasa.gov/reference/system-engineering-handbook-appendix/",
+          "scope": "요구 작성·검증 가능성·고유 식별자·출처·검증 매트릭스"
+        }
+      ],
+      "review_scope": "명세 항목과 요구 품질을 NASA 요구 작성·검증 안내에 대조. 응답시간은 설명용 예시이며 제품 성능 기준을 주장하지 않음.",
+      "unresolved": [
+        "ISO/IEC/IEEE 29148 전문의 필수 항목·IEEE 830 상태에 대한 표준 원문 대조는 미완료. 122회 프로젝트 관리 영역 전체는 요약 범위 밖."
+      ]
+    }
+  },
+  "t-a24617a4": {
+    "short": {
+      "source_sha256": "90cb7280e0adf2b000015f8bc01fc88a543599e7fc44cebd466d90640e4c7ca2",
+      "body": "## 원격교육 시스템의 구성과 구축\n원격교육 시스템은 통신망을 통해 콘텐츠 제공, 상호작용, 평가와 학습 관리를 지원하는 체계다. 비동기 학습은 시간을 달리할 수 있지만 실시간 수업에는 동시 참여가 필요하므로 ‘항상 시간 제약이 없다’고 보지는 않는다.\n\n| 구성 | 주요 역할 |\n|---|---|\n| [[learning-management-system|LMS]] | 수강·진도·과제·평가·이수 관리 |\n| [[learning-content-management-system|LCMS]] | 학습 콘텐츠 저작·저장·재사용 |\n| 전달·상호작용 | VOD·스트리밍·CDN, 실시간 강의·토론 |\n| 학습 기록 | xAPI 등으로 경험을 기록하고 LRS에서 저장·조회 |\n| 연동 | [[learning-tools-interoperability|LTI]]로 외부 학습 도구와 플랫폼 연결 |\n\n학습자·교육 목표 분석 → 교수설계·콘텐츠 구성 → 플랫폼·연동 설계 → 구축 → 시범 수업·평가 → 개선 순으로 추진한다. 콘텐츠 포장·실행·진도 교환을 다루는 SCORM, 경험 기록을 다루는 xAPI, 도구 연동을 다루는 LTI의 목적은 서로 다르다.\n\n동시접속·대역폭·복구뿐 아니라 모바일 이용, 자막·키보드 접근, 튜터 지원과 학습 동기를 함께 설계한다. 개인정보·학습 기록의 접근 범위와 콘텐츠 사용권도 관리한다. 산업 육성 방안으로는 상호운용성 시험, 양질의 콘텐츠·교수설계 역량과 교육 취약계층의 접근 지원을 검토할 수 있다.",
+      "sources": [
+        {
+          "title": "1EdTech LTI",
+          "url": "https://www.1edtech.org/standards/lti",
+          "scope": "LMS와 원격 도구·콘텐츠의 표준 연동"
+        },
+        {
+          "title": "ADL xAPI Specification",
+          "url": "https://github.com/adlnet/xAPI-Spec",
+          "scope": "학습 경험 교환과 LRS 관련 규격"
+        }
+      ],
+      "review_scope": "연결 문항의 시스템 구성·구축·육성 논점을 읽고 LTI/xAPI 공식 자료로 연동 목적을 대조. 육성 내용은 정책 시행 사실이 아닌 검토 방안으로 구분.",
+      "unresolved": [
+        "SCORM 공식 안내 페이지 접근 실패. 국내 이러닝법의 현행 지원·인증 조항과 산업 정책은 확인하지 않아 법정 지원으로 단정하지 않음."
+      ]
+    }
+  },
+  "t-da1deb59": {
+    "short": {
+      "source_sha256": "e5d465897d10980ad91cec6ca4c02b507ae199f1fb7ca77f56fc5b5eb79da272",
+      "body": "## 웹 2.0의 개념과 플랫폼 기술\n웹 2.0은 웹을 서비스 플랫폼으로 보고 사용자의 참여·콘텐츠 생산·공유와 데이터의 활용을 강조한 패러다임이다. Tim O’Reilly의 2005년 논의로 정리되었으며 특정 통신 규격의 버전이나 단일 제품을 뜻하지 않는다.\n\n| 비교 관점 | 웹 1.0의 대표 경향 | 웹 2.0의 대표 경향 |\n|---|---|---|\n| 사용자 | 게시된 정보의 열람 | 생산·편집·평가에 참여 |\n| 콘텐츠·분류 | 제공자 중심 편집·분류 | [[user-generated-content|사용자 콘텐츠]]·태그·집단적 편집 |\n| 제공 방식 | 페이지·완성품 배포 중심 | 지속 운영·개선하는 서비스 중심 |\n\n주요 기술·서비스 수단의 예는 다음과 같다. 다섯 가지가 국제표준으로 고정된 목록은 아니다.\n\n| 수단 | 역할 |\n|---|---|\n| [[ajax|AJAX]] | 비동기 요청으로 화면 일부 갱신 |\n| RSS·Atom | 변경 콘텐츠의 구독·배포 |\n| [[open-api|Open API]]·매시업 | 서비스 기능·데이터의 개방과 결합 |\n| 태그·폭소노미 | 사용자 참여에 의한 분류 |\n| 위키·블로그 | 협업 편집·게시·상호 연결 |\n\n개발은 작은 기능 제공 → 사용 피드백·관측 → 개선의 반복으로 설명할 수 있다. UI·업무·데이터를 분리하고 외부 API의 권한·오류를 관리한다. 웹 1.0에도 참여 기능이 있었으므로 이 비교는 절대적 경계가 아니다. 참여 확대에 따른 저작권·개인정보·콘텐츠 신뢰와 입력값 보안을 함께 고려한다.",
+      "sources": [
+        {
+          "title": "Tim O’Reilly, What Is Web 2.0 (2005)",
+          "url": "https://www.oreilly.com/pub/a/web2/archive/what-is-web-20.html",
+          "scope": "플랫폼·사용자 참여·웹1.0/2.0 사례"
+        },
+        {
+          "title": "What Is Web 2.0, pages 3–5",
+          "url": "https://www.oreilly.com/pub/a/web2/archive/what-is-web-20.html?page=4",
+          "scope": "지속적 서비스 개선·경량 프로그래밍·사용자 경험"
+        }
+      ],
+      "review_scope": "원문 1–5쪽을 열람하여 플랫폼·참여·서비스 개선을 대조. 다섯 기술을 고정된 표준 목록으로 단정하지 않도록 교정.",
+      "unresolved": [
+        "83회 특정 개발 프레임워크의 구현·적용 사례는 이 요약에서 검증하지 않음."
+      ]
+    }
+  },
+  "t-c55acb83": {
+    "short": {
+      "source_sha256": "edbfa0760ce31397069dfbf88a0bcc2f3e6be3eac490f6796d61dc44b791f007",
+      "body": "## 유한 오토마타와 정규 표현식\n유한 오토마타는 유한한 상태 집합과 입력에 따른 전이로 문자열의 수락 여부를 결정하는 추상 기계다. M=(Q,Σ,δ,q₀,F)에서 Q는 상태, Σ는 입력 알파벳, δ는 전이 함수, q₀는 시작 상태, F는 수락 상태 집합이다.\n\n| 구분 | 전이·수락 조건 |\n|---|---|\n| [[deterministic-finite-automaton|DFA]] | δ:Q×Σ→Q, 상태와 입력 기호마다 다음 상태가 하나 |\n| [[nondeterministic-finite-automaton|NFA]] | 다음 상태를 집합으로 표현, 수락 상태에 도달하는 경로가 하나라도 있으면 수락 |\n| ε-NFA | 입력을 소비하지 않는 ε-전이를 추가 허용 |\n\n입력을 모두 읽은 뒤 수락 조건을 평가한다. NFA·ε-NFA는 [[subset-construction|부분집합 구성]]으로 동등한 DFA로 변환할 수 있으며, 정규 표현식과 유한 오토마타는 같은 [[regular-language|정규 언어]]를 표현한다. 실무 정규식 엔진의 역참조 같은 확장 기능은 이 이론적 정규 표현식과 구별한다.\n\n예를 들어 (a∣b)*abb는 a·b로 된 문자열 중 abb로 끝나는 것을 나타낸다. 정규 표현식 → NFA → DFA → 최소화된 DFA의 흐름은 어휘 분석기 구성에 쓰인다.\n\n유한 상태만으로 임의 길이의 개수를 저장할 수 없어 {aⁿbⁿ ∣ n≥0}는 인식할 수 없다. DFA는 전이 조회가 상수 시간일 때 길이 n 입력을 O(n)에 처리하지만, NFA 변환 과정에서는 상태 수가 크게 늘 수 있다.",
+      "sources": [
+        {
+          "title": "Aho, Columbia COMS W4115 Lecture 5",
+          "url": "https://www.cs.columbia.edu/~aho/cs4115/Lectures/15-02-04.html",
+          "scope": "DFA·NFA·ε 전이·부분집합 구성·정규 표현식 동치·펌핑 보조정리"
+        }
+      ],
+      "review_scope": "두 기출과 seed를 읽고 계산이론·컴파일러 강의 원문에 핵심 정의와 변환을 대조. NFA와 ε-NFA 표기 구별 및 실행 O(n)의 조건 명시.",
+      "unresolved": []
+    }
+  },
+  "t-1aa46ca7": {
+    "short": {
+      "source_sha256": "f5873d5946ac2dd9f61e192d26306484dd1e15c4f91bd918f3cfe5451d84b5bd",
+      "body": "## 응집도·결합도와 호출 지표\n응집도는 모듈 내부 요소가 하나의 목적을 위해 관련되는 정도이고, 결합도는 다른 모듈에 의존하는 정도다. 일반적으로 높은 응집도와 낮은 결합도를 지향하여 변경 영향과 시험 범위를 줄인다.\n\n| 결합 유형 | 의존 관계 |\n|---|---|\n| [[data-coupling|자료]] | 필요한 단순 데이터를 인자로 전달 |\n| 스탬프 | 구조화된 자료를 전달하여 그 구조에 의존 |\n| 제어 | 플래그 등으로 상대 모듈의 처리 방식을 선택 |\n| 외부 | 외부 형식·프로토콜·장치 인터페이스에 함께 의존 |\n| [[common-coupling|공통]] | 전역·공유 데이터를 함께 참조 |\n| [[content-coupling|내용]] | 다른 모듈의 내부 데이터·제어에 직접 개입 |\n\n전통적 응집 분류는 기능적, 순차적, 교환적, 절차적, 시간적, 논리적, 우연적 응집이다. 단일 기능 수행은 기능적, 앞 처리의 출력이 다음 입력이면 순차적, 같은 입출력 자료를 사용하면 교환적 응집으로 구별한다.\n\n[[fan-in-fan-out|Fan-in]]은 해당 모듈을 호출하는 모듈 수, Fan-out은 해당 모듈이 호출하는 모듈 수다. 호출 횟수가 아니라 구별된 호출 관계를 센다. 높은 Fan-in은 재사용을 뜻할 수도 있지만 변경의 영향 범위도 키운다. Fan-out에 보편적인 ‘7 이하’ 의무 기준은 없다. 수치만으로 품질을 판정하지 말고 책임의 일관성, 인터페이스 안정성과 변경 전파를 함께 살핀다.",
+      "sources": [
+        {
+          "title": "UMBC Component Coupling",
+          "url": "https://courses.cs.umbc.edu/undergraduate/201/current/lectures/couplingandcohesion/coupling.shtml",
+          "scope": "내용·공통·제어·스탬프·자료 결합의 정의와 변경 영향"
+        }
+      ],
+      "review_scope": "결합 유형을 대학 강의에 대조하고 fan-out 7의 근거 없는 권장 수치·높은 fan-in의 무조건 긍정 해석을 제거.",
+      "unresolved": [
+        "응집도 일곱 유형의 원전과 fan-in/out 계측 도구별 정의는 이번 작업에서 별도 대조하지 않음."
+      ]
+    }
+  },
+  "t-0b51ec48": {
+    "short": {
+      "source_sha256": "8a73446b4831ba65e5f97ab1ab1ccef8d8e1a56f8e96a9f6152bd640ffe8103a",
+      "body": "## 의존성 주입의 원리와 방식\n의존성 주입(DI)은 객체가 필요한 협력 객체를 내부에서 직접 만들거나 조회하는 대신 외부에서 전달받도록 구성하는 기법이다. 객체의 생성·연결과 사용을 분리하며, [[ioc-container|IoC 컨테이너]] 없이 수동으로 조립해도 DI가 된다.\n\n| 방식 | 전달 경로 | 특징 |\n|---|---|---|\n| [[constructor-injection|생성자 주입]] | 생성자 인자로 필수 의존 전달 | 생성 시 준비 조건을 드러내고 재할당 제한 가능 |\n| [[setter-injection|Setter 주입]] | 생성 후 설정 메서드 호출 | 선택적 설정·교체에 유연하나 미설정 상태 주의 |\n| [[interface-injection|인터페이스 주입]] | 주입 메서드를 정의한 인터페이스 구현 | 주입 계약이 명시되지만 그 계약에 의존 |\n\n예를 들어 OrderService가 PaymentGateway를 받아 사용하면, 조립 지점에서 실제 결제 구현 또는 시험용 대역을 선택할 수 있다. 클라이언트가 컨테이너에 직접 서비스를 요청하는 Service Locator 방식과는 구별한다.\n\nDI는 [[inversion-of-control|제어의 역전]]을 구현하는 한 방법이며, 상위 정책·하위 구현이 추상화에 의존하도록 하는 [[dependency-inversion-principle|DIP]]와 동일한 개념은 아니다. 주입만으로 DIP·OCP가 자동 충족되지는 않는다. 의존 계약이 안정적일 때 구현 교체·독립 시험·재사용이 쉬워진다. 순환 의존, 수명주기 불일치와 과도한 인터페이스 분리를 점검한다.",
+      "sources": [
+        {
+          "title": "Martin Fowler, Inversion of Control Containers and DI",
+          "url": "https://martinfowler.com/articles/injection.html",
+          "scope": "DI 세 방식, 조립/사용 분리, Service Locator와 비교"
+        }
+      ],
+      "review_scope": "원저자 글의 생성자·Setter·인터페이스 주입과 로케이터 구별을 대조. 컨테이너 필수 및 DI만으로 설계원칙 보장 단정 제거.",
+      "unresolved": [
+        "121회 구현 예시의 추가 조건이 제공된 문항 텍스트에 없어 조건별 완성 코드는 작성하지 않음."
+      ]
+    }
+  },
+  "t-3e4efe07": {
+    "short": {
+      "source_sha256": "843f98f0983c194a3b7501a74e4ca4a5a30e3ba136e2e45f1f9aee84944e5090",
+      "body": "## 선형·비선형 자료구조\n자료구조는 데이터를 저장하고 관계를 표현하여 접근·탐색·삽입·삭제 등의 연산을 지원하는 방식이다. 논리적인 데이터 관계와 실제 메모리 배치는 구별하며, 추상 자료형의 연산을 배열·연결 구조 등으로 구현한다.\n\n| 분류 | 유형 | 관계·연산 특성 |\n|---|---|---|\n| 선형 | [[array|배열]] | 순차 원소를 인덱스로 접근, 중간 삽입·삭제 시 이동 가능 |\n| 선형 | [[linked-list|연결 리스트]] | 노드를 링크로 연결, 위치 탐색과 링크 변경을 구별 |\n| 선형 | [[stack|스택]]·[[queue|큐]]·덱 | LIFO·FIFO·양끝 연산이라는 접근 규칙 |\n| 비선형 | [[tree|트리]] | 사이클 없는 연결 구조, 루트를 정하면 부모·자식 계층 |\n| 비선형 | [[graph|그래프]] | 정점·간선으로 일반 관계 표현, 방향·가중치 부여 가능 |\n\n선형 구조는 원소의 순서를 중심으로, 비선형 구조는 분기·계층·망형 관계를 중심으로 설명한다. 트리·그래프는 DFS·BFS 등으로 순회하며 그래프는 방문 표시로 반복 방문을 제어한다. 트리의 노드가 n≥1개이면 간선은 n−1개다.\n\n배열 임의 접근은 O(1)이지만 연결 리스트의 임의 위치 탐색은 O(n)이다. 연결 리스트의 O(1) 삽입·삭제는 필요한 노드·선행 링크를 이미 알고 있을 때의 비용이다. 삽입이 잦다는 이유만으로 무조건 유리하지 않으며 탐색 비용·메모리 오버헤드·지역성까지 비교한다.",
+      "sources": [
+        {
+          "title": "Cornell CS2110 Linked Data",
+          "url": "https://courses.cis.cornell.edu/courses/cs2110/2026sp/lectures/lec13/",
+          "scope": "선형 ADT와 배열·연결 노드, 인덱스 접근·삽입 비용 조건"
+        }
+      ],
+      "review_scope": "두 분류 문항을 읽고 배열/리스트의 연산 비용·조건을 강의에 대조. 연결 리스트 삽입·삭제의 탐색 비용 생략을 교정.",
+      "unresolved": [
+        "트리·그래프의 일반 정의·간선 수는 기초 수학 성질로 정리했으며 개별 구현별 순회 복잡도는 포함하지 않음."
+      ]
+    }
+  },
+  "t-e7a02f3b": {
+    "short": {
+      "source_sha256": "29e7c511eb001b9a71646c21dc5cf56b5207bb72ffa094dd4ac67f1d3b1be8df",
+      "body": "## 적대적 공격의 구분과 방어\n적대적 공격은 머신러닝의 데이터·모델·입출력을 악용하여 잘못된 판단, 정보 유출, 모델 복제 등을 유도하는 공격이다. 공격 단계, 목표, 공격자의 지식과 조작 권한을 구분해야 하며 모든 공격이 학습 중에만 발생하는 것은 아니다.\n\n| 유형 | 공격 시점·목표 | 대응 방향 |\n|---|---|---|\n| [[data-poisoning|데이터 중독]] | 학습 데이터·라벨을 오염시켜 성능·판단 왜곡 | 데이터 출처·변경 검증, 이상 탐지 |\n| [[evasion-attack|회피]] | 추론 입력을 조작하여 오분류 유도 | 적대적 학습, 위협 조건별 강건성 평가 |\n| [[model-extraction|모델 추출]] | 질의 응답 등으로 모델 기능·정보 복제 | 접근·질의 관리, 이상 질의 관측 |\n| 프라이버시 공격 | 멤버십 여부 추론 또는 학습 정보 추정 | 데이터 최소화, 적절한 차분 프라이버시·출력 통제 |\n\n백도어는 특정 트리거에 공격자 의도대로 반응하도록 만드는 공격이며 학습 공급망도 공격 경로가 된다. 화이트박스는 내부 정보 접근을, 블랙박스는 제한된 정보·질의 또는 전이 공격 조건을 가정한다.\n\n적대적 예제가 항상 사람이 구별 못 하는 미세 잡음인 것은 아니다. 모델 역전은 입력 특성 추정, 멤버십 추론은 특정 자료의 학습 포함 여부 추정으로 구별한다. 방어 효과는 공격 지식·교란 한도·데이터 분포에 의존하므로 단일 기법으로 안전을 보장하지 말고 정확도·프라이버시·강건성을 함께 평가한다.",
+      "sources": [
+        {
+          "title": "NIST AI 100-2e2025",
+          "url": "https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-2e2025.pdf",
+          "scope": "중독·회피·프라이버시·모델 추출, 공격자 지식·완화책 한계"
+        }
+      ],
+      "review_scope": "NIST 2025 분류와 공격 단계·지식·방어 한계를 대조. 학습 중 네 공격이라는 일괄 분류 및 미세 잡음만의 정의를 교정.",
+      "unresolved": []
+    }
+  },
+  "t-c8408374": {
+    "short": {
+      "source_sha256": "68d1c66e6e11cc68be7048a3be49939e4923ae37ae1e6af32056b3598a05f1c6",
+      "body": "## 전략적 기업경영과 운영 시스템\n전략적 기업경영(SEM)은 내외부 경영정보를 계획·성과 측정·시뮬레이션과 연결하여 전략 실행과 경영 의사결정을 지원하는 체계다. 거래 처리의 정확성·통합에 중점을 두는 ERP와 연계하여 전략 목표와 실제 실적을 비교한다.\n\n| 기능 영역 | 역할 |\n|---|---|\n| 계획·시뮬레이션 | 목표·예산·자원 계획과 대안별 결과 비교 |\n| 연결 | 조직·계열사의 재무정보 통합과 내부거래 조정 |\n| 성과 모니터링 | [[balanced-scorecard|BSC]]·[[key-performance-indicator|KPI]]로 전략과 실적 추적 |\n| 정보 수집 | 내부 거래·외부 경영정보 수집·정제 |\n| 이해관계자 관리 | 주주·투자자 등과 경영정보 소통 |\n\n이 다섯 영역의 BPS·BCS·CPM·BIC·SRM 명칭은 SAP SEM의 구성 예에서 사용되며 모든 SEM의 필수 표준 모듈은 아니다. ERP는 상세 업무·거래 처리가 중심이고 SEM은 요약 실적·외부 정보·미래 계획의 분석이 중심이지만 제품 기능은 겹칠 수 있다.\n\n전략·핵심 성공요인 정의 → 지표·산식·책임자 확정 → 원천 데이터·품질 확인 → 계획·분석 화면 구축 → 시범 평가·확대 순으로 접근한다. 마스터·지표 정의를 통일하고 실적의 출처를 추적해야 한다. ERP·DW의 기존 자산은 활용할 수 있으나 모든 기업에서 이들의 선행 구축을 절대 조건으로 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "SAP SEM Components, ERP 6.06.34",
+          "url": "https://help.sap.com/docs/SAP_ERP_SPV/b216b6bc6d8843e9acd99baa92b65ea9/a69fcf535b804808e10000000a174cb4.html?locale=en-US&state=PRODUCTION&version=6.06.34",
+          "scope": "공식 검색 결과의 BPS·CPM·BCS·BIC 목록 확인; 본문 추출 실패"
+        }
+      ],
+      "review_scope": "원문 기출·seed 전체를 읽고 SAP 고유 명칭을 보편 필수 규격으로 제시한 점과 ERP/DW 선행 필수 단정을 수정. 공식 검색 요약은 확인했으나 페이지 본문 접근 결과가 비어 있어 전체 외부 검증으로 주장하지 않음.",
+      "unresolved": [
+        "SAP 공식 본문은 도구에서 추출되지 않았고 보관 PDF도 403 오류. SRM 포함 다섯 구성의 상세와 제품 릴리스별 차이는 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-b2b6b354": {
+    "short": {
+      "source_sha256": "4ce3d045239229e88736d7c865db5d842a1fe639a4ae8d7ea5288db5b68bf933",
+      "body": "정규분포는 평균 μ와 분산 σ²(σ>0)로 정해지는 연속 [[probability-distribution|확률분포]]이다. X ∼ N(μ,σ²)이며 밀도는 f(x)=exp(−(x−μ)²/(2σ²))/(σ√(2π))이다.\n\n| 특징 | 의미 |\n|---|---|\n| 대칭성 | 평균=중앙값=최빈값=μ, 곡선 아래 전체 면적은 1 |\n| 산포 | [[standard-deviation|표준편차]] σ가 클수록 넓고 낮은 곡선 |\n| 표준화 | Z=(X−μ)/σ ∼ N(0,1), 누적확률 Φ로 구간 확률 계산 |\n| 활용 | 오차 모형, [[confidence-interval|신뢰구간]]·[[hypothesis-testing|가설검정]]; 적용 전 정규성 가정 점검 |\n\n이사 가구 예에서 각 가구가 독립이고 확률이 0.27로 같다면 X ∼ B(100,0.27), μ=27, σ=√(100×0.27×0.73)≈4.44이다. 20≤X≤30으로 해석하고 [[continuity-correction|연속성 보정]]을 하면 경계는 19.5와 30.5, Z는 약 −1.69와 0.79이다. 따라서 주어진 표로 확률≈0.7852−(1−0.9545)=0.7397이다. 이는 이항확률의 정규근사이며, 경계 포함 여부가 달라지면 계산도 달라진다.",
+      "sources": [
+        {
+          "title": "NIST Normal Distribution",
+          "url": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda3661.htm",
+          "scope": "밀도·모수·표준정규분포·통계적 활용"
+        }
+      ],
+      "review_scope": "SHORT와 연결 문항을 읽고 NIST의 분포 정의를 대조했다. 계산은 주어진 누적확률과 경계 포함 가정으로 직접 재계산했다.",
+      "unresolved": [
+        "83회 원본 그림 및 경계 포함 의도는 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-78abee5f": {
+    "short": {
+      "source_sha256": "bc9e6dd8d93ba1c2a2be1900204e3daec81f9c7e9e13f1e0a3480a0c675ef8fd",
+      "body": "정량적 위험분석은 [[risk|위험]]과 불확실성이 일정·원가 목표에 미치는 영향을 확률, 금액, 기간으로 모형화하는 활동이다. 정성 분석의 우선순위를 넘어 목표 달성 확률과 대응 여력을 판단한다.\n\n| 기법 | 원리와 예 |\n|---|---|\n| [[expected-monetary-value|금전적 기대값]] | EMV=Σ(확률×금전 결과). 손실 1억 원이 확률 0.2로 발생하고 나머지 손실이 0이면 기대손실=0.2×1억=2천만 원 |\n| [[decision-tree-analysis|의사결정나무]] | 자체 개발·구매 등 선택과 후속 사건을 분기로 나타내고 말단에서 기대값을 역산하여 대안 비교 |\n| [[monte-carlo-simulation|몬테카를로]] | 비용·기간의 입력 분포를 반복 표본추출하여 총비용·완료일의 결과 분포와 분위수 산출 |\n| [[sensitivity-analysis|민감도 분석]] | 입력을 변화시켜 결과에 큰 영향을 주는 변수를 식별; 토네이도 도표로 비교 |\n\n분석은 위험 식별 → 입력 분포·상관관계 설정 → 모형 실행 → 목표 달성 확률·[[contingency-reserve|예비비]] 검토 순으로 수행한다. 기대값은 실제 발생액이나 보장 예산이 아니며, 예비비는 조직의 위험 수용 수준과 결과 분포를 함께 고려한다. 입력 근거가 약하거나 상관관계를 누락하면 결과의 정밀한 숫자도 신뢰하기 어렵다.",
+      "sources": [
+        {
+          "title": "GAO Cost Estimating Guide, 2020",
+          "url": "https://www.gao.gov/assets/gao-20-195g.pdf",
+          "scope": "민감도·확률적 위험분석·상관관계·예비비"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 GAO 2020 비용 추정 지침의 분석 개념을 대조했다. EMV 예는 본문 조건의 산술 계산이다.",
+      "unresolved": [
+        "의사결정나무의 개별 수주 대안 수치는 기출에 없어 제시하지 않았다."
+      ]
+    }
+  },
+  "t-fa22cf3e": {
+    "short": {
+      "source_sha256": "7dfa18e3ad15edddc07bea399c9508d01eea4906e0d02d574b398fbc6002fb2c",
+      "body": "정렬은 키의 대소 등 정해진 순서 관계에 따라 원소를 재배치하는 알고리즘이다. 비교 횟수뿐 아니라 이동 비용, 추가 공간, 같은 키의 상대 순서를 보존하는 [[stable-sort|안정성]]을 함께 평가한다.\n\n| 방법 | 처리 원리 | 평균 / 최악 시간 |\n|---|---|---|\n| [[bubble-sort|버블]] | 인접 원소를 비교·교환하는 순회를 반복 | O(n²) / O(n²) |\n| [[insertion-sort|삽입]] | 앞의 정렬된 구간에 다음 원소를 삽입 | O(n²) / O(n²) |\n| [[quick-sort|퀵]] | 피벗으로 나눈 부분 배열을 재귀 정렬 | O(n log n) / O(n²) |\n\n일반적인 버블·삽입 구현은 안정적이고 제자리이며, 삽입 정렬은 이미 정렬된 입력에서 O(n)이다. 일반적인 퀵 정렬은 불안정하고 재귀 스택 공간을 사용한다.\n\n[[comparison-sort|비교 정렬]]의 최악 하한은 서로 다른 n개 키를 가정한 [[decision-tree-model|결정 트리]]로 설명한다. 가능한 n!개 순열을 구별하려면 이진 트리의 잎이 n!개 이상이어야 하므로 높이 h≥⌈log₂(n!)⌉=Ω(n log n)이다. 이 하한은 키의 자릿수·범위 정보를 이용하는 기수·계수 정렬에 그대로 적용되지 않는다.",
+      "sources": [
+        {
+          "title": "NIST Bubble Sort",
+          "url": "https://xlinux.nist.gov/dads/HTML/bubblesort.html",
+          "scope": "인접 교환·안정 제자리 정렬"
+        },
+        {
+          "title": "NIST Quicksort",
+          "url": "https://xlinux.nist.gov/dads/HTML/quicksort.html",
+          "scope": "분할·재귀·피벗 변형"
+        },
+        {
+          "title": "NIST Insertion Sort",
+          "url": "https://xlinux.nist.gov/dads/HTML/insertionSort.html",
+          "scope": "삽입 순서·이동 비용 O(n²)"
+        },
+        {
+          "title": "Mehlhorn & Sanders, Algorithms and Data Structures — Sorting and Selection",
+          "url": "https://people.mpi-inf.mpg.de/~mehlhorn/ftp/Toolbox/SortingAndSelection.pdf",
+          "scope": "비교 정렬 결정 트리 하한"
+        }
+      ],
+      "review_scope": "SHORT와 두 문항을 읽고 NIST의 버블·삽입·퀵 설명과 저자 공개 교재의 비교 정렬 하한을 대조했다.",
+      "unresolved": []
+    }
+  },
+  "t-2f498639": {
+    "short": {
+      "source_sha256": "5e7b2f1c28b519f4e355360e2ac4437953f33a6e2fc6672800feb3c2f6a93110",
+      "body": "정보시스템 운영 성과평가는 운영 비용과 업무 기여를 측정하여 유지·개선·폐기 등 정비 판단에 활용하는 활동이다. 공공 부문은 [[electronic-government-act|전자정부법]]과 적용 시점의 「전자정부 성과관리 지침」·측정 매뉴얼을 구분하여 확인한다.\n\n| 측정 관점 | 지침상 고려 요소 |\n|---|---|\n| 비용 | 운영의 적정성, 유지의 용이성, 비용의 효율성 |\n| 업무 | 기능활용도, 업무성과 달성도 |\n| 증거 | 비용 자료, 기능 이용 기록, 성과 실적 등 산식에 맞는 기초 데이터 |\n\n2026년 10월 19일 시행 지침의 절차는 대상 확인 → 연간 성과측정 계획 → 매뉴얼 산식에 따른 측정 → 평가 결과 통보 → 정비 계획·결과 관리로 정리한다. 측정에 사용한 기초 데이터와 증빙은 지침에서 정한 기간에 맞게 관리한다. 가용률·장애시간 같은 운영 품질 자료를 공식 성과지표 전체와 동일시하지 않는다.\n\n과거 기출의 ‘1차·2차 측정’은 당시 매뉴얼의 측정·정비 판단 체계를 묻는 표현이다. 이를 현재 지침의 절차 명칭으로 단정하지 않으며, 당시 대상 연한·판정 점수와 현행 기준을 섞지 않는다. 측정 대상의 예외와 모바일 앱의 별도 적용 규정도 구별한다.",
+      "sources": [
+        {
+          "title": "전자정부 성과관리 지침, 2026-63호",
+          "url": "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000287088&chrClsCd=010201",
+          "scope": "2026-10-19 시행 제23–26조 대상·측정·평가"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 국가법령정보센터 현행 지침의 버전과 검색 제공 조문을 대조했다. 본문 뷰어 전체 조문은 추출되지 않아 연한·판정 수치의 단정을 피했다.",
+      "unresolved": [
+        "110·121회 출제 당시 매뉴얼 원문과 1차·2차 측정의 상세 산식은 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-964cb019": {
+    "short": {
+      "source_sha256": "4107b5e81c6fa810e1e430cf32b8d19e11ba1529183f8a45738bfe8e20254341",
+      "body": "정보통신 윤리는 정보를 생산·유통·이용하는 과정에서 타인의 권리와 공동체의 이익을 존중하도록 판단과 행동을 이끄는 규범이다. 법적 처벌 대상인지 여부만으로 윤리성을 판단하지 않는다.\n\n| 기본 원리 | 적용 |\n|---|---|\n| 존중 | 타인의 인격·사생활·[[intellectual-property|지식재산]] 존중, 개인정보의 목적에 맞는 이용 |\n| 책임 | 게시·공유한 정보의 정확성과 영향 확인, 잘못된 정보의 정정 |\n| 정의 | 정보 접근 기회의 공정성, [[digital-divide|정보격차]]와 차별 완화 |\n| 해악 금지 | 무단 접근·악성코드 유포·괴롭힘 등 피해 방지 |\n\n[[cyber-crime|사이버 범죄]]에는 해킹, 악성코드 유포, 피싱 등 정보시스템을 대상으로 하거나 이용하는 범죄가 있다. 온라인의 빠른 전파와 국경을 넘는 활동 때문에 피해 확산 방지, 접근 통제, 보안 교육, 증거 보존과 신고가 함께 필요하다.\n\n게임·SNS 등 디지털 이용의 과의존은 일상생활·학업·업무 및 관계에 어려움을 줄 수 있다. 이용 시간만으로 모든 이용자를 ‘중독’이라 단정하지 않고 통제의 어려움과 생활상 피해를 구분한다. 예방 교육·이용 습관 점검과 적절한 지원을 연결하며, 범죄 대응과 이용자 지원을 같은 문제로 취급하지 않는다.",
+      "sources": [
+        {
+          "title": "ACM Code of Ethics and Professional Conduct",
+          "url": "https://acm.org/binaries/content/assets/about/acm-code-of-ethics-and-professional-conduct.pdf",
+          "scope": "검색 제공 원문의 해악 방지 원칙"
+        }
+      ],
+      "review_scope": "SHORT와 두 문항을 읽고 존중·책임·정의·해악 금지의 학습 구조를 정리했다. ACM 원문 검색 발췌의 해악 방지 취지를 확인했으나 PDF 직접 접근은 403이었다.",
+      "unresolved": [
+        "ACM 윤리강령 전문과 국내 4원리의 최초 출처는 확인할 수 없습니다.",
+        "과의존 유형별 임상 진단 기준과 국내 법령별 처벌 요건은 대조하지 않았다."
+      ]
+    }
+  },
+  "t-1013c3fb": {
+    "short": {
+      "source_sha256": "ed6cf2b1061ad823162a88acc72b9704706c2752316ea60732c53a5b8be75875",
+      "body": "제로 레이팅은 특정 조건에 해당하는 데이터 사용량을 이용자의 데이터 한도에서 차감하지 않거나 별도 과금하지 않는 요금 정책이다. [[internet-service-provider|통신사]]와 콘텐츠 제공자의 계약에 따라 비용 부담과 적용 범위가 달라진다.\n\n| 형태 | 구조 |\n|---|---|\n| [[sponsored-data|스폰서 데이터]] | 콘텐츠 제공자가 비용을 부담하여 이용자의 해당 데이터 사용료를 면제 |\n| 자사·제휴 서비스형 | 통신사 자사 또는 계약한 앱·콘텐츠에 혜택 제공 |\n| 애플리케이션 비차별형 | 특정 앱을 구별하지 않고 시간 등 조건에 따라 모든 트래픽에 혜택 제공 |\n\n[[ott|OTT]]별로 혜택을 다르게 주면 이용자는 유료 데이터가 소모되는 경쟁 서비스보다 제휴 서비스를 선택할 유인이 생긴다. 자금력이 부족한 신규 사업자의 진입과 이용자 선택을 제약할 가능성이 있어 [[net-neutrality|망 중립성]]·경쟁 문제가 된다. 이용자 비용 절감 효과와 이러한 차별 효과를 함께 평가해야 한다.\n\n제로 레이팅은 과금 정책이며 패킷을 빠르게 전달하는 유료 우선처리와는 구별한다. EU의 2022년 BEREC 의견은 애플리케이션 차별 여부를 중요한 기준으로 다룬다. 이 지역·시점의 규제 해석을 한국의 모든 요금제에 대한 일률적 허용·금지 판정으로 확대하지 않는다.",
+      "sources": [
+        {
+          "title": "BEREC BoR (22) 163",
+          "url": "https://www.berec.europa.eu/system/files/2022-12/BoR%20%2822%29%20163%20BEREC%20Opinion%20for%20the%20evaluation%20of%20the%20application%20of%20Regulation%20%28EU%29%202015-2120_0.pdf",
+          "scope": "EU 제로 레이팅·애플리케이션 비차별 제안"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항과 2022 BEREC 의견의 제로 레이팅 논점을 대조했다. 국내 현행 적법성을 판정하는 답안은 아니다.",
+      "unresolved": [
+        "한국의 개별 요금제 계약·현행 규제 적용과 사업자별 효과 수치는 확인하지 않았다."
+      ]
+    }
+  },
+  "t-b61748f2": {
+    "short": {
+      "source_sha256": "6704c19ae0acbc893774ae7632cd5c8fb61de5c8b59e1bc20fc7c7c2393ead8b",
+      "body": "제안서는 [[request-for-proposal|제안요청서(RFP)]]와 입찰공고에 대응하여 수행 방법·역량·일정·비용을 제시하는 문서다. 제안 평가는 공개된 기준으로 수행 가능성과 제안의 적합성을 판단하는 절차이며, 모든 사업이 협상계약인 것은 아니다.\n\n| 단계 | 수주자 활동·산출물 |\n|---|---|\n| 접수·분석 | 제출 형식·기한, 요구사항, 평가기준과 질의 사항 확인 |\n| 전략·구성 | 고객 문제와 해결책 연결, 업무별 책임·일정·자원 산정 |\n| 작성·검토 | [[requirement-traceability-matrix|요구사항 추적표]]로 누락 점검, 본문·요약본·가격의 일관성 검토 |\n| 제출·설명 | 지정 방식 제출, 핵심 제안과 이행 근거 발표, 질의에 근거를 들어 답변 |\n\n발주자의 평가서는 평가항목·배점·판정 기준과 근거 기록란을 갖추어야 한다. 항목은 수행실적·경영상태 등 역량, 전략·기술·기능·성능·품질, 사업관리·지원 및 가격으로 나누어 사업 특성에 맞게 구성한다.\n\n[[negotiated-contract|협상에 의한 계약]]에서는 적용 예규와 공고가 정한 기술·가격 평가, 적격 기준 및 협상 순서를 따른다. 특정 기술·가격 비율을 모든 SI 사업의 고정 규칙으로 쓰지 않는다. 발표의 설득력은 미사여구보다 요구 충족 근거·실현 가능한 일정·위험 대응의 일관성에 둔다.",
+      "sources": [
+        {
+          "title": "협상에 의한 계약체결기준, 2026-01-02 시행",
+          "url": "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000272436",
+          "scope": "제안서 정의·공고 평가기준·제안 평가의 적용 범위"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 계약예규의 정의와 공고 기준을 대조했다. 작성 단계는 기출 요구에 맞춘 실무 정리이며 법정 단일 절차로 단정하지 않는다.",
+      "unresolved": [
+        "사업별 기술 평가 배점표와 제안설명회 세부 운영 조건은 공고가 없어 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-1871f9a7": {
+    "short": {
+      "source_sha256": "f5e666cdd519808b7528375f54960e18284235597c0cad0d68675ac371aff26c",
+      "body": "지능형 에이전트는 환경을 지각하고 내부 규칙·모델·목표 등에 따라 행동을 선택하는 시스템이다. 센서는 입력을 받고 액추에이터는 선택한 행동을 환경에 반영한다. 합리적 행동은 확보한 정보와 계산 능력의 한계 안에서 평가한다.\n\n| 설계 유형 | 행동 선택 근거 |\n|---|---|\n| [[simple-reflex-agent|단순 반사형]] | 현재 지각에 조건–행동 규칙 적용; 관측에 없는 과거 정보는 사용하지 못함 |\n| [[model-based-reflex-agent|모델 기반 반사형]] | 이전 상태·행동과 새 지각으로 내부 상태를 갱신하여 부분 관측에 대응 |\n| [[goal-based-agent|목표 기반]] | 목표 달성에 필요한 행동을 탐색·계획 |\n| [[utility-based-agent|효용 기반]] | [[utility-function|효용함수]]로 대안의 선호와 불확실한 결과를 비교 |\n\n[[reactive-agent|반응형 구조]]는 지각과 행동의 가까운 연결로 빠른 응답에 중점을 두며, [[deliberative-agent|숙고형 구조]]는 명시적인 세계 모델과 추론·계획을 사용한다. 후자는 복잡한 목표를 다룰 수 있으나 계산 시간과 모델 정확성의 제약을 받는다.\n\n설계 시 환경의 관측 가능성·변화 속도·행동 결과의 불확실성을 고려한다. 모든 에이전트가 학습 기능을 갖는 것은 아니며, 반응형과 숙고형을 결합하는 구조도 가능하다. 자율성의 수준과 사람의 개입 범위는 과업에 맞게 정한다.",
+      "sources": [
+        {
+          "title": "Poole & Mackworth, Artificial Intelligence 3e §1.1",
+          "url": "https://artint.info/3e/html/ArtInt3e.Ch1.S1.html",
+          "scope": "지능형 에이전트·환경·목표·계산 한계"
+        }
+      ],
+      "review_scope": "SHORT와 두 문항을 읽고 저자 공개 교재의 에이전트 정의·한계를 대조했다. 완전 관측 환경만 가능·반응형은 계획 불가라는 과도한 단정을 완화했다.",
+      "unresolved": [
+        "4유형과 반응형·숙고형의 원전 상세 도식은 별도 대조하지 않았다."
+      ]
+    }
+  },
+  "t-023b83c1": {
+    "short": {
+      "source_sha256": "4695c32c3ad20be960837135932e5357d53bb222de2f260e5570a9d517c7d55b",
+      "body": "지식 표현은 사실·개념·관계를 컴퓨터가 저장하고 추론할 수 있는 형식으로 기술하는 방법이다. [[knowledge-base|지식베이스]]에 저장한 표현과 [[inference-engine|추론 엔진]]의 규칙을 함께 정해야 질의에 일관된 답을 도출할 수 있다.\n\n| 방법 | 표현 형태 | 장점·한계 |\n|---|---|---|\n| [[production-rule|생성 규칙]] | IF 조건 THEN 결론·행동 | 개별 규칙의 이해·추가가 쉬우나 규칙 간 충돌과 실행 순서 관리 필요 |\n| [[semantic-network|의미망]] | 개념 노드와 관계 링크 | 관계와 상속을 보기 쉬우나 링크의 정확한 의미·추론 규칙을 명시해야 함 |\n| [[frame|프레임]] | 대상별 슬롯·값·기본값 | 구조화된 대상 표현에 적합하나 예외·기본값 재정의 정책 필요 |\n| [[predicate-logic|술어논리]] | 대상·관계를 논리식으로 기술 | 의미와 추론을 엄밀히 다루지만 표현 범위에 따라 추론 비용 증가 |\n\n규칙 기반 방식에서는 사실에서 결론으로 진행하는 [[forward-chaining|전향 추론]]과 목표를 만족할 전제를 찾는 [[backward-chaining|후향 추론]]을 구별한다. 관계 중심 자료와 절차적 규칙은 결합할 수 있다.\n\n표현 형식만 바꾸어도 지식의 참·거짓이 보장되는 것은 아니다. 도메인 용어, 모순·예외 처리, 지식의 출처와 갱신 책임을 명확히 하고 표현력과 추론 효율의 균형을 고려한다.",
+      "sources": [
+        {
+          "title": "Poole & Mackworth, AI 3e Chapter 5",
+          "url": "https://artint.info/3e/html/ArtInt3e.Ch5.html",
+          "scope": "명제·사실·추론의 의미론"
+        },
+        {
+          "title": "McCarthy, Programs with Common Sense",
+          "url": "https://www-formal.stanford.edu/jmc/mcc59.pdf",
+          "scope": "형식화한 지식과 추론 접근"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 논리적 지식 표현의 기본 취지를 저자 공개 자료와 대조했다.",
+      "unresolved": [
+        "의미망·프레임의 원전 전문과 비교표의 세부 장단점은 이번에 원문 대조하지 못했다."
+      ]
+    }
+  },
+  "t-7b7f0ddd": {
+    "short": {
+      "source_sha256": "2692f5d928fe734631091863e3fdb4e6a107a3e811a53d6b68dd299e675322b9",
+      "body": "차원 축소는 많은 특성으로 표현된 자료를 더 적은 변수나 좌표로 표현하는 방법이다. 원 변수의 일부를 고르는 [[feature-selection|특성 선택]]과 새 변수를 만드는 [[feature-extraction|특성 추출]]을 구별한다.\n\n| 방법 | 입력·처리 | 해석 |\n|---|---|---|\n| 회귀의 변수 선택 | 목표변수를 설명할 예측변수 부분집합 선택 | 회귀분석 자체가 항상 차원 축소인 것은 아님 |\n| [[principal-component-analysis|PCA]] | 중심화한 자료의 분산을 크게 보존하는 직교 축 구성 | 상위 성분으로 투영하여 특성 차원 축소 |\n| [[multidimensional-scaling|MDS]] | 개체 간 거리·비유사도를 저차원 좌표의 거리로 근사 | 개체 수를 줄이는 것이 아니라 개체를 나타내는 좌표 차원을 줄임 |\n\nPCA는 중심화 → 공분산 또는 SVD 분석 → 성분 선택 → 투영 순으로 설명할 수 있다. 성분 수는 누적 설명분산, 재구성 오차와 후속 과업 성능을 함께 보고 정한다. 변수의 단위·척도가 다르면 표준화 필요성을 검토하되 무조건 같은 전처리를 적용하지 않는다.\n\n차원 축소는 계산 비용·시각화에 도움이 되지만 정보 손실이 있다. 높은 분산이 예측에 중요한 정보와 항상 같은 것은 아니며, 검증 자료의 정보가 학습 과정에 섞이지 않도록 변환을 학습 자료에서 적합한다.",
+      "sources": [
+        {
+          "title": "scikit-learn PCA",
+          "url": "https://scikit-learn.org/stable/modules/decomposition.html",
+          "scope": "PCA·중심화·스케일링"
+        },
+        {
+          "title": "scikit-learn MDS",
+          "url": "https://scikit-learn.org/stable/modules/manifold.html",
+          "scope": "저차원 거리 표현"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 공식 구현 문서의 PCA·MDS 정의를 대조했다. MDS의 케이스 수 축소 오해와 표준화 필수 단정을 교정했다.",
+      "unresolved": []
+    }
+  },
+  "t-dbc4d57d": {
+    "short": {
+      "source_sha256": "ad4ef8baccd5b6f144d7c24aeec533119ffef11e2b490b339760eef4f2a4690f",
+      "body": "최단 경로 알고리즘은 가중치 [[graph|그래프]]에서 간선 비용의 합이 최소인 경로를 구한다. 적용 범위는 단일 출발점·지정 목적지·모든 정점 쌍으로 구분하며 음수 간선의 존재를 먼저 확인한다.\n\n| 알고리즘 | 원리·적용 조건 |\n|---|---|\n| [[dijkstra-algorithm|다익스트라]] | 잠정 거리가 가장 작은 정점을 확정하고 간선 완화; 비음수 간선에서 사용 |\n| [[bellman-ford-algorithm|벨만–포드]] | 전체 간선을 V−1회 완화; 음수 간선 허용, 출발점에서 도달 가능한 음수 사이클 검출; O(VE) |\n| [[floyd-warshall-algorithm|플로이드–워셜]] | 경유 정점을 늘리며 모든 쌍 거리 갱신; O(V³) |\n| [[a-star-algorithm|A*]] | f(n)=g(n)+h(n)으로 실제 누적비용과 목표까지의 추정비용을 함께 사용 |\n\n간선 완화는 d(v)>d(u)+w(u,v)이면 d(v)를 더 작은 값으로 바꾸는 연산이다. 다익스트라는 g를 기준으로, A*는 g+h를 기준으로 다음 후보를 고른다. A*의 허용적 휴리스틱은 실제 남은 비용을 과대평가하지 않는다. 방문 정점을 재개방하지 않는 그래프 탐색에서는 일관성 등 구현 조건도 확인해야 한다.\n\n음수 사이클을 거쳐 비용을 계속 줄일 수 있는 목적지에는 유한한 최단 거리가 없다. 특정 그래프의 계산 결과는 간선 방향·가중치·시작점이 주어져야 확정할 수 있다.",
+      "sources": [
+        {
+          "title": "NIST Dijkstra",
+          "url": "https://xlinux.nist.gov/dads/HTML/dijkstraalgo.html",
+          "scope": "비음수 조건"
+        },
+        {
+          "title": "NIST Bellman–Ford",
+          "url": "https://xlinux.nist.gov/dads/HTML/bellmanford.html",
+          "scope": "완화·음수 사이클·복잡도"
+        },
+        {
+          "title": "Poole & Mackworth AI 3e §3.6",
+          "url": "https://artint.info/3e/html/ArtInt3e.Ch3.S6.html",
+          "scope": "휴리스틱 탐색·A*"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 다익스트라·벨만–포드 및 A*의 조건을 대조했다.",
+      "unresolved": [
+        "123회 그래프 원본의 간선·가중치가 제공되지 않아 문항별 경로·비용은 확인할 수 없습니다.",
+        "플로이드–워셜 상세 원문은 이번 검토에서 별도 대조하지 않았다."
+      ]
+    }
+  },
+  "t-52605cba": {
+    "short": {
+      "source_sha256": "442a641488950907b021b78a730e06e011f477eb305e31625b9af338c78b65f9",
+      "body": "캡슐화는 객체의 상태와 이를 다루는 연산을 한 단위로 묶고, 외부가 정해진 [[interface|인터페이스]]를 통해 상호작용하게 하는 [[object-oriented-programming|객체지향]] 원리다. 객체가 자신의 유효한 상태를 유지하도록 변경 경로를 통제한다.\n\n| 비교 | 캡슐화 | [[information-hiding|정보은닉]] |\n|---|---|---|\n| 초점 | 데이터와 연산을 경계 안에 결합 | 외부가 알 필요 없는 구현 결정 감춤 |\n| 수단·예 | 클래스와 공개 메서드 | private 상태, 내부 자료구조 비공개 |\n| 효과 | 관련 책임을 모아 응집도 향상 | 구현 변경이 외부로 퍼지는 의존성 감소 |\n\n예를 들어 잔액 필드를 직접 수정하게 하기보다 입금·출금 연산이 금액과 잔액 조건을 검사하도록 한다. 내부 저장 방식을 바꾸더라도 공개 연산의 계약이 유지되면 이용 코드는 영향을 덜 받는다.\n\n[[access-modifier|접근 제어자]]는 지원 수단이며 모든 필드를 private으로 만드는 것만으로 설계가 완성되지는 않는다. 무조건적인 setter 공개나 변경 가능한 내부 컬렉션의 직접 반환은 상태 통제를 약화시킨다. 조회가 필요한 정보와 수행해야 할 행위를 구분하고, 인터페이스가 내부 표현에 과도하게 의존하지 않도록 설계한다.",
+      "sources": [
+        {
+          "title": "Oracle Java Tutorials — What Is an Object?",
+          "url": "https://docs.oracle.com/javase/tutorial/java/concepts/object.html",
+          "scope": "상태·행동 결합과 데이터 캡슐화·정보은닉"
+        }
+      ],
+      "review_scope": "SHORT와 두 문항을 읽고 Oracle의 객체 개념 설명을 대조했다. 문서는 JDK 8 대상이며 특정 최신 문법이 아닌 객체 개념에만 사용했다.",
+      "unresolved": []
+    }
+  },
+  "t-c19ab8fd": {
+    "short": {
+      "source_sha256": "5bd9b43a2de4179fc73a9f8cfd28b4aaf5f13e4c952fe4cfdec93eb15066f412",
+      "body": "쿠버네티스는 컨테이너화된 애플리케이션의 배포·확장·복구를 관리하는 오픈소스 [[container-orchestration|오케스트레이션]] 플랫폼이다. 선언한 희망 상태와 실제 상태를 컨트롤러가 지속적으로 조정한다.\n\n| 영역 | 주요 구성요소·역할 |\n|---|---|\n| 제어면 | [[kube-apiserver|API 서버]]가 API 제공, [[etcd|etcd]]가 상태 데이터 저장 |\n| 배치·조정 | [[kube-scheduler|스케줄러]]가 미배치 파드의 노드 선택, 컨트롤러 매니저가 상태 조정 |\n| 노드 | [[kubelet|kubelet]]이 파드 실행 상태 관리, 런타임이 컨테이너 실행 |\n| 통신 | Service로 파드 접근 추상화; kube-proxy 또는 대체 네트워크 구현이 처리 |\n\n[[horizontal-pod-autoscaler|HPA]]는 CPU·메모리·사용자 정의 메트릭 등을 목표값과 비교하여 대상의 복제본 수를 조절한다. 기본식은 원하는 수=⌈현재 수×현재 메트릭/목표 메트릭⌉이다. 예를 들어 3개 파드, 평균 사용률 80%, 목표 60%라면 기본 계산은 ⌈3×80/60⌉=4개다.\n\n실제 확장은 최소·최대 수, 안정화·허용오차, 준비 상태·메트릭 누락의 영향을 받는다. CPU 사용률 기준에는 자원 요청량 설정이 필요하며, HPA가 노드 자체를 늘려 주는 것은 아니다. 자가 복구도 애플리케이션의 데이터 복구까지 자동 보장하지 않는다.",
+      "sources": [
+        {
+          "title": "Kubernetes Components",
+          "url": "https://kubernetes.io/docs/concepts/overview/components/",
+          "scope": "제어면·노드·선택적 kube-proxy"
+        },
+        {
+          "title": "Horizontal Pod Autoscaling",
+          "url": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+          "scope": "HPA 계산·메트릭·안정화"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 공식 구성요소와 HPA 문서를 대조했다. 4개 산출은 설명용 기본식 계산이며 실제 운영 결과를 주장하지 않는다.",
+      "unresolved": []
+    }
+  },
+  "t-78913e09": {
+    "short": {
+      "source_sha256": "62b83ceb6e72cb5010934b1054a0bc29c13191cdccce3ba93f94a632c65c2765",
+      "body": "퀵 정렬은 피벗으로 배열을 분할하고 각 부분을 재귀적으로 정렬하는 [[divide-and-conquer|분할 정복]] 기반 [[comparison-sort|비교 정렬]]이다. 핵심은 분할 후 각 부분의 값 범위가 피벗 기준을 만족하도록 유지하는 것이다.\n\n1. 피벗을 고르고 배열을 작은 값·큰 값의 구간으로 분할한다.\n2. 분할 방식에 맞는 경계를 반환하고 각 구간을 재귀 정렬한다.\n3. 구간 크기가 0 또는 1이면 종료한다.\n\n| 항목 | 특성 |\n|---|---|\n| 균형 분할 | T(n)=2T(n/2)+O(n), O(n log n) |\n| 편향 분할 | T(n)=T(n−1)+O(n), 최악 O(n²) |\n| 공간 | 일반 재귀 구현의 스택은 평균 O(log n), 최악 O(n) |\n| 안정성 | 일반적인 제자리 교환 구현은 불안정 |\n\n30을 피벗으로 한 기출 배열의 값 집합은 {15,16,24,17,29}, {30}, {38,33,32}로 나뉘며 최종 결과는 15,16,17,24,29,30,32,33,38이다. 중간 배열 순서는 분할 구현에 따라 다르다.\n\nHoare 분할은 반환 경계가 피벗의 최종 위치라는 보장이 없으므로 Lomuto 방식의 재귀 경계를 그대로 쓰면 안 된다. 랜덤 피벗은 편향 가능성을 낮추지만 최악 시간 자체를 없애지는 않는다. 중복 키가 많으면 3방향 분할을 검토한다.",
+      "sources": [
+        {
+          "title": "NIST Quicksort",
+          "url": "https://xlinux.nist.gov/dads/HTML/quicksort.html",
+          "scope": "피벗·분할·재귀·변형"
+        }
+      ],
+      "review_scope": "SHORT·두 문항을 읽고 NIST 정의와 분할 변형을 대조했다. 배열 값과 최종 순서는 직접 확인했다. 추가 공간 없음·랜덤이면 최악 회피 단정을 교정했다.",
+      "unresolved": [
+        "105회 C 코드의 원문 타입·문자열 종료 조건을 포함한 완성 코드는 이 요약에서 검증하지 않았다."
+      ]
+    }
+  },
+  "t-3281532f": {
+    "short": {
+      "source_sha256": "c98ea81baff96239f43837eaeb7914efb9b3a2cd028e670c935430cc5745a8fb",
+      "body": "탐욕 알고리즘은 각 단계에서 가장 유리한 후보를 선택하고, 일반적으로 이전 선택을 되돌리지 않으며 해를 구성하는 기법이다. 지역 최선의 누적이 전역 최적이라는 보장은 문제의 [[greedy-choice-property|탐욕 선택 속성]]과 [[optimal-substructure|최적 부분 구조]]를 통해 입증해야 한다.\n\n절차는 후보 선택 → 제약 만족 여부 검사 → 해에 반영 → 완성 여부 확인을 반복하는 것이다.\n\n| 사례 | 결과·조건 |\n|---|---|\n| 동전 500·100·50·10원, 770원 | 500×1+100×2+50×1+10×2=770원, 총 6개 |\n| 동전 1·3·4원, 6원 | 탐욕은 4+1+1의 3개, 최적은 3+3의 2개로 실패 |\n| [[fractional-knapsack-problem|분할 배낭]] | 무게당 이익 순으로 선택; 물건을 나눌 수 있다는 조건 필요 |\n| [[minimum-spanning-tree|최소 신장 트리]] | 크루스칼·프림은 조건을 만족하는 간선을 선택 |\n\n배낭 용량 20, 이익 (25,24,15), 무게 (18,15,10)에서 0/1 선택이면 두 물건의 합이 모두 20을 넘는다. 실행 가능 선택은 공집합과 각 단일 물건이며 최적 이익은 25다. 분할 가능하면 비율 24/15=1.6, 15/10=1.5, 25/18≈1.389 순으로 골라 두 번째 전부와 세 번째 절반으로 24+7.5=31.5를 얻는다.",
+      "sources": [
+        {
+          "title": "NIST Greedy Algorithm",
+          "url": "https://xlinux.nist.gov/dads/HTML/greedyalgo.html",
+          "scope": "탐욕 선택·전역 최적 보장의 제한"
+        }
+      ],
+      "review_scope": "SHORT·기출을 읽고 NIST 정의를 대조했다. 동전 및 배낭은 제공 수치를 직접 계산하여 0/1과 분할 가정을 구분했다.",
+      "unresolved": [
+        "배낭 기출 원본의 분할 허용 조건이 제공문에 없어 출제 의도는 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-7d88dabd": {
+    "short": {
+      "source_sha256": "bb7ca111511b5b5aa4edecbf82fabf40fa8b8cf5054cd3ec891f5bbb4d5838d1",
+      "body": "테스트 자동화는 도구와 [[test-script|스크립트]]로 테스트 실행·결과 비교·보고 등 반복 활동을 수행하는 것이다. 사람은 여전히 대상 선정, 케이스 설계, 기대 결과 판단과 유지보수를 담당한다.\n\n| 방법 | 특성 |\n|---|---|\n| [[capture-replay|기록·재생]] | 사용자 조작을 기록하여 재실행; 초기 작성이 쉽지만 UI 변화에 취약 |\n| [[data-driven-testing|데이터 주도]] | 실행 로직과 입력·기대값을 분리하여 여러 데이터로 반복 |\n| [[keyword-driven-testing|키워드 주도]] | 업무 동작을 키워드로 구성하고 하위 실행 코드와 분리 |\n| 코드 기반 | 테스트 프레임워크에서 조건·검증·준비·정리 절차를 직접 구현 |\n\n자동화 흐름은 대상 선정 → 케이스·데이터 설계 → 스크립트 구현 → 실행 → [[test-oracle|오라클]]과 결과 비교 → 보고·보수다. 실행 엔진, 환경을 준비하는 하네스, 테스트 데이터, 기대 결과와 로그가 함께 필요하다. 반복 빈도가 높은 회귀 테스트를 CI에 연계하면 변경 후 빠르게 결과를 확인할 수 있다.\n\n실행 성공만으로 요구 충족이 보장되지는 않는다. 독립된 테스트와 재현 가능한 데이터·환경을 확보하고, 비동기 작업은 적절한 대기 조건으로 다룬다. 자동화 비용은 작성뿐 아니라 변경 대응·불안정 테스트 분석까지 포함한다. 탐색적 테스트와 사람이 판단해야 하는 영역은 함께 운영한다.",
+      "sources": [
+        {
+          "title": "Selenium Encouraged Behaviors",
+          "url": "https://www.selenium.dev/documentation/test_practices/encouraged/",
+          "scope": "자동화 테스트 설계·독립성과 상태 관리"
+        },
+        {
+          "title": "ISTQB CTFL v4.0.1",
+          "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf",
+          "scope": "테스트 도구·자동화 위험·명세/구조 기반 테스트"
+        }
+      ],
+      "review_scope": "SHORT와 두 문항을 읽고 Selenium 공식 권장 사항을 참고하여 완전 무인·수작업 오류 제거 단정을 수정했다.",
+      "unresolved": [
+        "기록·데이터·키워드 주도 분류의 표준 원문은 이번에 별도 대조하지 않았다."
+      ]
+    }
+  },
+  "t-c23e9636": {
+    "short": {
+      "source_sha256": "3f57626c433249ee31292060586c9ae2e4d20437e35f158c1edf0cca66d92c5c",
+      "body": "테스트 커버리지는 정한 커버리지 항목 중 테스트가 실제로 다룬 항목의 비율이다. 계산식은 수행된 항목 수/전체 대상 항목 수×100%이며, 요구사항·분기·조건 등 무엇을 세었는지 분모를 명확히 해야 한다. [[code-coverage|코드 커버리지]]는 그중 코드 구조의 실행 범위를 측정한다.\n\n| 기준 | 측정 대상 |\n|---|---|\n| 요구사항 | 테스트로 확인한 요구사항/대상 요구사항 |\n| [[statement-coverage|구문]] | 실행한 문장/실행 가능한 대상 문장 |\n| [[branch-coverage|분기]] | 수행한 제어 흐름 분기/전체 대상 분기 |\n| [[condition-coverage|조건]] | 개별 논리 조건의 참·거짓 평가 결과 |\n| [[mcdc-coverage|MC/DC]] | 각 조건이 다른 조건과 구별되어 결정 결과에 독립적으로 영향을 줌을 확인 |\n\n예를 들어 `if x: y=10`에서 x가 참인 경우만 실행하면 해당 대입문은 실행되지만 거짓 분기는 빠진다. 따라서 구문 100%라도 분기 100%는 아닐 수 있다. 요구사항 커버리지와 단순 테스트 케이스 실행률도 서로 다른 지표다.\n\n블랙박스는 동등 분할·경곗값·상태 전이 등 명세 기반 항목을, 화이트박스는 코드 구조를 기준으로 삼는다. 100%는 정의한 항목의 실행을 뜻하며 정확한 오라클, 누락 요구사항, 결함 부재를 보장하지 않는다. 도구별 제외·도달 불가 처리도 결과와 함께 기록한다.",
+      "sources": [
+        {
+          "title": "Coverage.py Branch Coverage",
+          "url": "https://coverage.readthedocs.io/en/latest/branch.html",
+          "scope": "구문과 분기의 차이·미실행 분기 예"
+        },
+        {
+          "title": "ISTQB CTFL v4.0.1",
+          "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf",
+          "scope": "테스트 도구·자동화 위험·명세/구조 기반 테스트"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 도구 저자의 공식 분기 커버리지 문서로 구문·분기 차이를 대조했다. 테스트 커버리지=케이스 실행률이라는 정의를 교정했다.",
+      "unresolved": [
+        "MC/DC 규격별 세부 요건과 항공 등급별 의무는 원문 대조하지 않아 일반 요약에 한정했다."
+      ]
+    }
+  },
+  "t-d6283883": {
+    "short": {
+      "source_sha256": "c9ce3a3a6583fd065768d3f9b9b63a3bbfe94cbfbf911cb7011d6b39d1c774d5",
+      "body": "텔레매틱스는 통신과 정보처리를 결합하여 차량의 위치·상태 정보를 전달하고 운전자·운영자에게 연결 서비스를 제공하는 기술이다. 차량 단말, 통신망, 서비스 센터와 응용 서비스가 연계된다.\n\n| 구성 | 역할 |\n|---|---|\n| 차량 단말 | [[telematics-control-unit|TCU]]가 차량 상태·위치 정보를 수집하고 외부 통신 수행 |\n| 측위·통신 | [[gnss|GNSS]]로 위치 파악, 이동통신 등으로 차량과 서버 연결 |\n| 서비스 센터 | 수신 데이터 저장·분석, 관제·서비스 중계 |\n| 응용 | 경로 안내, 원격 진단·제어, 긴급 지원, 운행 관리 |\n\n융합 수요는 소비자에게는 안전·편의와 정보 이용, 산업에는 자동차·통신·정비·보험의 연계, 정책에는 교통안전·교통관리, 기술에는 측위·무선통신·임베디드·데이터 처리의 발전이라는 관점에서 설명할 수 있다. 모든 서비스에 V2X나 5G가 필수인 것은 아니며 필요한 지연·가용성·전송량에 맞게 구성한다.\n\n위치와 주행 이력은 사생활에 영향을 주므로 수집 목적·접근 권한·보관 기간을 정해야 한다. 원격 기능은 인증과 통신 보호, 장애·통신 단절 시 안전한 동작이 중요하다. 차량별 연동 방식과 국가별 법령·안전 요구를 확인하며 특정 보안 규격을 모든 차량의 법적 의무로 단정하지 않는다.",
+      "sources": [
+        {
+          "title": "Bosch Vehicle Connectivity Services",
+          "url": "https://www.bosch-mobility.com/en/solutions/connectivity/vehicle-connectivity-services-cv/",
+          "scope": "차량 하드웨어와 클라우드 연결 서비스 구조"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 Bosch 공식 서비스 본문의 차량 하드웨어·클라우드 연결과 응용 구조를 대조했다. 산업·정책 효과는 수치 효과가 아닌 요구 관점이다.",
+      "unresolved": [
+        "국내 위치정보법 적용 요건·ISO/SAE 21434의 조항별 의무는 확인하지 않았다."
+      ]
+    }
+  },
+  "t-7b6a7f14": {
+    "short": {
+      "source_sha256": "1a2155cad2d1389055069b1a4236b59e433a4bd93875c54d534098c5bcc875f6",
+      "body": "퍼지 집합은 전체집합 X의 각 원소에 [[membership-function|소속도]] μA(x)∈[0,1]를 부여하여 모호한 개념에 속하는 정도를 표현한다. 고전 집합의 소속값은 0 또는 1이지만 퍼지 집합은 그 사이 값도 허용한다. 소속도는 사건의 발생 확률과 구별한다.\n\n| 연산 | 유한한 비어 있지 않은 X에서의 정의 |\n|---|---|\n| [[cardinality|농도]] | 소속도의 합 ΣμA(x) |\n| [[relative-cardinality|상대농도]] | 소속도의 합을 X의 원소 수로 나눈 값 |\n| [[support-set|지지집합]] | Supp(A)={x∈X : μA(x)>0} |\n| [[alpha-cut|α-컷]] | μA(x)≥α인 원소로 구성한 고전 집합 |\n\n제공된 예 A={1.0/1,0.2/2,0.5/3,0/4,0.2/5}에서 `/`는 나눗셈이 아니라 소속도/원소 표기다. 소속도가 0인 4를 제외하므로 Supp(A)={1,2,3,5}이다. X={1,2,3,4,5}로 두면 농도=1.0+0.2+0.5+0+0.2=1.9, 상대농도=1.9/5=0.38이다.\n\n상대농도의 분모에는 소속도가 0인 원소도 포함한 전체집합 크기를 쓴다. 소속값이 누락된 기출 수식은 임의의 숫자로 복원하지 않는다. 소속함수의 형태와 기준은 적용 분야의 의미에 맞게 정해야 한다.",
+      "sources": [
+        {
+          "title": "MathWorks Foundations of Fuzzy Logic",
+          "url": "https://www.mathworks.com/help/fuzzy/foundations-of-fuzzy-logic.html",
+          "scope": "소속함수·전체집합·부분 소속"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 MathWorks 공식 문서로 소속함수 정의를 대조했다. 지지집합·농도 계산은 제공된 복원 예와 명시한 X에서 직접 계산했다.",
+      "unresolved": [
+        "농도 문항 두 개의 원래 소속도 수식이 손상되어 해당 기출의 수치 답은 확인할 수 없습니다.",
+        "지지집합 문항도 복원 전 원본 수식은 대조하지 않았다."
+      ]
+    }
+  },
+  "t-c265533b": {
+    "short": {
+      "source_sha256": "3cec3675f9c70d49e2f1a975d0b46b0a02a5b4027b2a266805c9a0197890e2dc",
+      "body": "프로세스 마이닝은 [[process-event-log|이벤트 로그]]를 이용하여 실제 업무 흐름을 발견하고, 모델과 비교하거나 개선하는 분석 기법이다. 설계된 절차와 실제 실행의 차이를 데이터로 살피되, 로그에 남지 않은 업무까지 자동으로 알아내는 것은 아니다.\n\n| 분야 | 입력·산출 |\n|---|---|\n| 발견 | 로그에서 활동 순서와 분기·반복을 추출하여 프로세스 모델 구성 |\n| [[conformance-checking|적합성 검사]] | 로그와 기준 모델을 비교하여 누락·순서 위반 등 편차 식별 |\n| 개선 | 모델에 시간·자원 등 실행 정보를 반영하여 성능 분석·모델 보완 |\n\n전통적 사례 중심 로그는 사건이 어느 사례에 속하는지 나타내는 Case ID, 수행 활동, 실행 순서를 식별할 정보가 기본이다. 타임스탬프는 대기·처리시간 분석에 필요하고 자원·비용 속성은 추가 관점을 제공한다. 순서가 이미 기록된 모든 로그에서 시간값이 필수라고 일반화하지 않는다.\n\n구매–지급 절차의 우회·반복, 진료 경로의 대기 구간, 자동화 후보 업무 등을 분석할 수 있다. 발견된 변형은 기록된 범위 안의 변형이며 ‘실제 업무 전수’와 같지 않다. 사례 연결 오류, 누락·중복 사건, 시간대 불일치와 개인정보를 점검하고 현업 설명을 함께 사용하여 해석한다.",
+      "sources": [
+        {
+          "title": "IEEE Task Force, Process Mining Manifesto",
+          "url": "https://www.tf-pm.org/upload/1580737614108.pdf",
+          "scope": "발견·적합성·개선·이벤트 로그 품질"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 IEEE 태스크포스 원문을 열어 기본 유형·로그 활용을 대조했다. 타임스탬프 무조건 필수·변형 전수 보장 단정을 교정했다.",
+      "unresolved": []
+    }
+  },
+  "t-ac38182e": {
+    "short": {
+      "source_sha256": "c9427410092c688ae7335c922b3c5442fec48c7bd70055c2b1c26ebc0327ca80",
+      "body": "프로젝트 관리자(PM)는 프로젝트 목표를 달성하도록 업무·자원·이해관계자를 조정하고 진행과 위험을 관리하는 책임자다. 모든 의사결정 권한을 독점하는 역할은 아니며 조직이 부여한 권한과 승인 체계 안에서 일한다.\n\n| 관리 기능 | 주요 역할 |\n|---|---|\n| 계획·통합 | 목표·범위·산출물 합의, [[work-breakdown-structure|WBS]]와 일정·예산 계획 연결 |\n| 실행 조정 | 팀 역할과 책임 설정, 부서·공급자·고객 간 의사소통 |\n| 통제 | 진도·원가·품질 편차 확인, 위험 대응과 변경 영향 평가 |\n| 종료·인계 | 인수 기준 확인, 운영 인계와 교훈 정리 |\n\n대기업 통합 시스템에서는 부서별 요구의 충돌과 시스템 간 인터페이스·데이터·전환 의존관계를 조정하는 일이 중요하다. 변경 요청은 일정·비용·품질 영향을 분석하여 정해진 승인 절차에 따르고, 의사결정과 합의 근거를 남긴다.\n\n필요 역량은 계획·통제와 계약·예산 이해, 개발·통합 기술에 대한 판단력, 업무 도메인 이해, [[leadership|리더십]]·협상·갈등 해결 능력이다. ‘자격요건’은 이러한 수행 역량과 발주 문서에서 정한 경력·자격 조건을 나누어 설명한다. PMP 같은 인증을 모든 프로젝트 PM의 법정 필수 자격으로 단정하지 않으며, 후원자·PMO·전문가와 책임을 분담한다.",
+      "sources": [
+        {
+          "title": "PMI What Is a Project Manager?",
+          "url": "https://www.pmi.org/about/what-is-a-project-manager",
+          "scope": "PM 역할과 요구 역량"
+        }
+      ],
+      "review_scope": "SHORT·두 문항을 읽고 PMI 공식 역할 안내 페이지를 열었다. 조직·사업별 자격과 보편적 관리 역량을 구별한 요약이다.",
+      "unresolved": [
+        "PMI 페이지의 세부 본문 재조회가 시간 초과되어 항목별 문구 대조는 제한적이다.",
+        "개별 공공 사업의 PM 필수 자격·경력 기준은 공고가 없어 확인할 수 없습니다."
+      ]
+    }
+  },
+  "t-0aab1108": {
+    "short": {
+      "source_sha256": "8631e8661f0720b5849bd575d5517e6de4ccca51ac4eb7a138fed92fff6e43ff",
+      "body": "협상에 의한 계약체결은 다수 공급자의 제안을 평가하여 협상적격자와 순서를 정하고, 협상을 거쳐 계약 상대자를 결정하는 방식이다. 국가계약에서는 [[state-contract-act|국가계약법]] 시행령 제43조와 적용 시점의 계약예규가 근거가 된다.\n\n절차는 입찰공고·[[request-for-proposal|RFP]] 제공 → 제안서·가격 제출 → 기술·가격 평가 → 적격자·협상순위 결정 → 협상 → 성립 시 계약이다. 전문성·기술성 등을 단순 최저가격 외 요소와 함께 판단한다.\n\n| 평가·비교 관점 | 내용 |\n|---|---|\n| 기술능력 | 수행실적, 경영상태, 기술·기능, 성능·품질, 사업관리·지원 등 사업별 평가표 적용 |\n| 가격 | 예규의 구간별 산식과 공고상 배점 적용; 단순 최저가 비율 하나로 모든 경우 계산하지 않음 |\n| 협상 방식 | 평가 순위에 따라 제안 내용·이행 방법·가격 등을 협상 |\n| 품질 등에 따른 낙찰 | 적용되는 종합 평가기준에 따라 낙찰자 결정; 협상계약의 순차 협상과 구별 |\n\n2026년 1월 2일 시행 계약예규와 과거 기출 당시 규정을 혼용하지 않는다. SW 사업, 국가·지방·공공기관 및 조달청 평가의 적용 근거와 세부 기준을 구별해야 한다. 기술·가격 비율과 적격 점수를 모든 정보시스템 사업의 고정 규칙으로 외우기보다 해당 공고·예규에서 확인한다.",
+      "sources": [
+        {
+          "title": "국가계약법 시행령 제43조",
+          "url": "https://www.law.go.kr/LSW/lsLawLinkInfo.do?chrClsCd=010202&lsJoLnkSeq=1000048455",
+          "scope": "협상계약 적용·평가 요소"
+        },
+        {
+          "title": "협상에 의한 계약체결기준, 2026-01-02 시행",
+          "url": "https://www.law.go.kr/LSW/admRulInfoP.do?admRulSeq=2100000272436",
+          "scope": "제안서·적격자 정의와 공고·평가 절차"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 국가법령정보센터 제공 조문과 예규 버전을 대조했다. 상세 배점·가격 구간의 과거/현행 혼용을 피했다.",
+      "unresolved": [
+        "84회 업체별 입찰가격 표와 당시 예규 별표가 없어 가격점수는 확인할 수 없습니다.",
+        "현행 별표의 사업별 배점 예외·모든 가격 구간 산식은 이번 요약에서 대조하지 않았다."
+      ]
+    }
+  },
+  "t-30b5c1aa": {
+    "short": {
+      "source_sha256": "4b59263979c495b023e9f1baccb090b4b139d3db83b02c65a78fe745a9fcb084",
+      "body": "회귀 테스트는 결함 수정·기능 추가·환경 변경이 기존 동작에 부정적 영향을 주었는지 확인하는 테스트다. 변경한 컴포넌트 자체뿐 아니라 다른 컴포넌트·연결 시스템·실행 환경에도 영향이 있을 수 있다.\n\n| 구분 | 확인할 질문 |\n|---|---|\n| [[confirmation-testing|확인 테스트]] | 원래 발견했던 결함이 수정되었는가? |\n| 회귀 테스트 | 그 변경으로 다른 실패나 부작용이 생겼는가? |\n| 전체 재실행 | 기존 테스트 집합 전체를 실행할 시간·자원이 있는가? |\n| 선택·우선순위 | 변경 영향·위험·빈도에 따라 무엇을 먼저 또는 선별 실행할 것인가? |\n\n수행은 변경 내역 파악 → [[impact-analysis|영향 분석]] → 대상 [[test-suite|스위트]] 선택·보완 → 환경·데이터 준비 → 실행·기대 결과 비교 → 실패 분석과 자산 갱신 순으로 정리한다. 이전 출력과 같다는 사실만으로 올바르다고 판단하지 않고 요구사항과 승인된 기대 결과를 기준으로 삼는다.\n\n반복 실행이 많아 [[test-automation|자동화]]에 적합하고 CI에 포함할 수 있지만 자동화가 정의상 필수는 아니다. 테스트·코드·데이터·환경의 버전을 관리하고 의도한 동작 변경에는 기대값도 근거 있게 갱신한다. 선택적 실행은 비용을 줄이지만 영향 분석 누락 위험이 있으며, 모든 테스트가 통과해도 결함 부재를 보장하지 않는다.",
+      "sources": [
+        {
+          "title": "ISTQB CTFL v4.0.1 §2.2.3",
+          "url": "https://istqb.org/wp-content/uploads/2024/11/ISTQB_CTFL_Syllabus_v4.0.1.pdf",
+          "scope": "확인·회귀 구별·영향 범위·자동화 적합성"
+        }
+      ],
+      "review_scope": "SHORT·두 문항을 읽고 ISTQB 2024-09-15판 §2.2.3을 대조했다. 자동화 필수와 회귀는 수정 외 영역만이라는 제한을 교정했다.",
+      "unresolved": []
+    }
+  },
+  "t-ad6c7a3c": {
+    "short": {
+      "source_sha256": "4d4ec5b91155df291758692b0f85842a32e956600b2a2973b3337eff0adca49e",
+      "body": "회귀분석은 설명변수와 반응변수의 관계를 모형화하여 추정·예측하는 통계 방법이다. 다중 선형회귀는 Y=β₀+ΣβⱼXⱼ+ε로 표현하며, [[least-squares-method|최소제곱법]]은 잔차제곱합을 최소화해 계수를 추정한다. 관계를 추정했다는 사실만으로 인과관계가 입증되지는 않는다.\n\n| 항목 | 의미·진단 |\n|---|---|\n| [[homoscedasticity|등분산성]] | 주어진 X에서 오차의 분산이 일정; 잔차의 퍼짐을 살피며 이분산이면 표준오차·검정에 주의 |\n| [[multicollinearity|다중공선성]] | 설명변수들의 강한 선형 의존; 계수 분산과 추정 불안정성 증가, VIF 등으로 점검 |\n| 오차와 [[residual|잔차]] | ε는 모집단 모형의 오차, 잔차 eᵢ=yᵢ−ŷᵢ는 적합 후 계산한 값 |\n\n통계 척도는 명목(분류), 서열(순서), 등간(간격 의미), 비율(절대 영점)로 구별한다. 다중 선형회귀는 보통 연속형 Y의 조건부 평균을, 이항 [[logistic-regression|로지스틱 회귀]]는 두 범주 중 한 범주의 확률을 모형화한다. 로지스틱은 log(p/(1−p))를 선형식으로 연결하고 일반적으로 최대우도로 추정한다.\n\n이분산은 가중최소제곱·강건 표준오차, 공선성은 변수 재구성·릿지 등을 상황에 맞게 검토한다. VIF 임계값 하나로 기계적으로 변수를 제거하지 않으며 가정 진단과 예측 검증을 함께 수행한다.",
+      "sources": [
+        {
+          "title": "NIST Linear Least Squares Regression",
+          "url": "https://www.itl.nist.gov/div898/handbook/pmd/section1/pmd141.htm",
+          "scope": "선형 모형·최소제곱"
+        },
+        {
+          "title": "scikit-learn Linear Models",
+          "url": "https://scikit-learn.org/stable/modules/linear_model.html",
+          "scope": "공선성·릿지·로지스틱"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 NIST·scikit-learn 문서를 대조했다. 회귀=인과·ε=잔차·VIF 고정 기준을 교정하고 두 기출 관점을 요약했다.",
+      "unresolved": [
+        "척도별 통계적 허용 변환과 강건 표준오차의 세부 가정은 이번 원문 대조 범위 밖이다."
+      ]
+    }
+  },
+  "t-cc0a591e": {
+    "short": {
+      "source_sha256": "430f1dba1fa8805325cde19bd128ee0d101b2eb2cf267acb51f1c7d1b6cb347b",
+      "body": "이진 힙은 [[complete-binary-tree|완전 이진 트리]] 형태와 부모–자식 사이의 힙 순서 조건을 만족하는 자료구조다. 마지막 층을 왼쪽부터 채우며 형제나 서로 다른 부분 트리 사이의 전체 정렬 순서는 보장하지 않는다.\n\n| 비교 | [[max-heap|최대 힙]] | [[min-heap|최소 힙]] |\n|---|---|---|\n| 부모·자식 | 부모 키≥자식 키 | 부모 키≤자식 키 |\n| 루트 | 전체 최댓값 | 전체 최솟값 |\n| 반복 추출 | 큰 값부터 나옴 | 작은 값부터 나옴 |\n\n0부터 시작하는 [[array|배열]]에서 i번 노드의 자식은 2i+1, 2i+2, 부모는 i>0일 때 ⌊(i−1)/2⌋이다. 삽입은 마지막 자리에 넣어 부모 방향으로 올리고, 루트 삭제는 마지막 원소를 루트로 옮겨 적절한 자식 방향으로 내려 힙 조건을 복원한다.\n\n루트 조회는 O(1), 삽입·루트 삭제는 O(log n), 임의 키 탐색은 최악 O(n)이다. 전체 배열을 아래쪽 내부 노드부터 조정하는 [[heapify|힙 구성]]은 O(n)이며 반복 삽입 O(n log n)과 구별한다.\n\n[[priority-queue|우선순위 큐]]·힙 정렬 등에 활용한다. 최대 힙의 최댓값을 배열 끝으로 보내는 일반적인 제자리 힙 정렬은 오름차순 결과를 만든다. 따라서 ‘최대 힙은 항상 내림차순 정렬’이라고 표현하면 추출 순서와 배열의 최종 배치를 혼동하게 된다.",
+      "sources": [
+        {
+          "title": "Python heapq documentation",
+          "url": "https://docs.python.org/3/library/heapq.html",
+          "scope": "힙 불변식·배열 인덱스·선형시간 heapify"
+        }
+      ],
+      "review_scope": "SHORT·연결 문항을 읽고 Python 공식 구현 문서를 대조했다. 부모 인덱스의 내림과 최대 힙 제자리 정렬 방향을 교정했다.",
+      "unresolved": []
     }
   }
 }
